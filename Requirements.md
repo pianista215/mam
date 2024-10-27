@@ -3,3 +3,6 @@ Requirements:
 - php-curl
 - php-xml
 - php-gd
+
+Pending:
+- Steps to deploy in prod/docker
