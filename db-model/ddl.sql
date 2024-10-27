@@ -51,6 +51,39 @@ CREATE TABLE `countries` (
   UNIQUE KEY `countries_unique` (`iso2_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `flight_report` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `aircraft_name` varchar(100) NOT NULL,
+  `pilot_id` int(10) unsigned NOT NULL,
+  `departure_icao` char(4) NOT NULL,
+  `arrival_icao` char(4) NOT NULL,
+  `alt1_icao` char(4) NOT NULL,
+  `alt2_icao` char(4) DEFAULT NULL,
+  `distance_nm` smallint(5) unsigned NOT NULL,
+  `duration_min` char(4) NOT NULL,
+  `flight_rules` char(1) NOT NULL,
+  `flight_type` char(1) NOT NULL,
+  `cruise_speed` varchar(5) NOT NULL,
+  `flight_level` varchar(5) NOT NULL,
+  `route` varchar(400) NOT NULL,
+  `estimated_time` char(4) NOT NULL,
+  `other_information` varchar(400) NOT NULL,
+  `endurance_time` char(4) NOT NULL,
+  `aircraft_type_icao` char(4) NOT NULL,
+  `flight_date` datetime NOT NULL,
+  `aircraft_registration` varchar(10) NOT NULL,
+  `pilot_comments` varchar(400) DEFAULT NULL,
+  `validator_comments` varchar(400) DEFAULT NULL,
+  `zfw` int(10) unsigned NOT NULL,
+  `block_fuel` int(10) unsigned NOT NULL,
+  `initial_fuel` int(10) unsigned NOT NULL,
+  `consumed_fuel` int(10) unsigned NOT NULL,
+  `network` varchar(15) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `flight_report_pilots_FK` (`pilot_id`),
+  CONSTRAINT `flight_report_pilots_FK` FOREIGN KEY (`pilot_id`) REFERENCES `pilots` (`id`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `pilots` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `license` varchar(8) NOT NULL,
@@ -105,29 +138,4 @@ CREATE TABLE `submitted_flightplans` (
   CONSTRAINT `submitted_flightplans_aircraft_reserved_FK` FOREIGN KEY (`aircraft_id`) REFERENCES `aircrafts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `submitted_flightplans_pilots_FK` FOREIGN KEY (`pilot_id`) REFERENCES `pilots` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `submitted_flightplans_routes_FK` FOREIGN KEY (`route_id`) REFERENCES `routes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE `flight_report` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `aircraft_name` varchar(100) NOT NULL,
-  `pilot_id` int(10) unsigned NOT NULL,
-  `departure_icao` char(4) NOT NULL,
-  `arrival_icao` char(4) NOT NULL,
-  `alt1_icao` char(4) NOT NULL,
-  `alt2_icao` char(4) DEFAULT NULL,
-  `distance_nm` smallint(5) unsigned NOT NULL,
-  `duration_min` char(4) NOT NULL,
-  `flight_rules` char(1) NOT NULL,
-  `flight_type` char(1) NOT NULL,
-  `cruise_speed` varchar(5) NOT NULL,
-  `flight_level` varchar(5) NOT NULL,
-  `route` varchar(400) NOT NULL,
-  `estimated_time` char(4) NOT NULL,
-  `other_information` varchar(400) NOT NULL,
-  `endurance_time` char(4) NOT NULL,
-  `aircraft_type_icao` char(4) NOT NULL,
-  `flight_date` datetime NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `flight_report_pilots_FK` (`pilot_id`),
-  CONSTRAINT `flight_report_pilots_FK` FOREIGN KEY (`pilot_id`) REFERENCES `pilots` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
