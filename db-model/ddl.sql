@@ -1,16 +1,5 @@
 CREATE DATABASE `mam` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
 
-CREATE TABLE `aircraft_type` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `icao_type_code` char(4) NOT NULL,
-  `name` varchar(60) NOT NULL,
-  `max_nm_range` int(10) unsigned NOT NULL,
-  `pax_capacity` smallint(5) unsigned NOT NULL,
-  `cargo_capacity` int(10) unsigned NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `aircraft_types_unique` (`icao_type_code`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 CREATE TABLE `aircraft` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `aircraft_type_id` int(10) unsigned NOT NULL,
@@ -27,9 +16,19 @@ CREATE TABLE `aircraft` (
   CONSTRAINT `aircrafts_airports_FK` FOREIGN KEY (`location`) REFERENCES `airport` (`icao_code`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `aircraft_type` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `icao_type_code` char(4) NOT NULL,
+  `name` varchar(60) NOT NULL,
+  `max_nm_range` int(10) unsigned NOT NULL,
+  `pax_capacity` smallint(5) unsigned NOT NULL,
+  `cargo_capacity` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `aircraft_types_unique` (`icao_type_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `airport` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `iata_code` char(3) NOT NULL,
   `icao_code` char(4) NOT NULL,
   `name` varchar(100) NOT NULL,
   `latitude` double NOT NULL,
@@ -38,7 +37,6 @@ CREATE TABLE `airport` (
   `country_id` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `airports_unique_icao` (`icao_code`),
-  UNIQUE KEY `airports_unique_iata` (`iata_code`),
   KEY `airports_countries_FK` (`country_id`),
   CONSTRAINT `airports_countries_FK` FOREIGN KEY (`country_id`) REFERENCES `country` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -94,8 +92,6 @@ CREATE TABLE `pilot` (
   `registration_date` date NOT NULL,
   `city` varchar(40) NOT NULL,
   `country_id` int(10) unsigned NOT NULL,
-  `is_admin` tinyint(1) NOT NULL DEFAULT 0,
-  `is_validator` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `pilots_unique_license` (`license`),
   KEY `pilots_countries_FK` (`country_id`),
