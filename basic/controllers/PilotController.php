@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\Country;
 use app\models\Pilot;
 use app\models\PilotSearch;
 use yii\web\Controller;
@@ -57,6 +58,30 @@ class PilotController extends Controller
     {
         return $this->render('view', [
             'model' => $this->findModel($id),
+        ]);
+    }
+
+    /**
+     * Register a new Pilot in the system
+     * This pilot won't have permissions until an administrator activate it
+     * If the creation is successful, the broser will be redirected to the 'welcome' page.
+     * @return string|\yii\web\Response
+     */
+    public function actionRegister()
+    {
+        $model = new Pilot();
+
+        if($this->request->isPost){
+            // TODO
+        } else {
+            $model->loadDefaultValues();
+        }
+
+        $countries = Country::find()->select(['name'])->indexBy('id')->column();
+
+        return $this->render('register', [
+            'model' => $model,
+            'countries' => $countries,
         ]);
     }
 
