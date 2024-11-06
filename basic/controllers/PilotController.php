@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\Country;
 use app\models\Pilot;
 use app\models\PilotSearch;
 use yii\web\Controller;

@@ -27,6 +27,13 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'city')->textInput(['maxlength' => true]) ?>
 
+    <?= $form->field($model, 'date_of_birth')->textInput() ?>
+
+    <?= $form->field($model, 'vatsim_id')->textInput(['maxlength' => true]) ?>
+
+    <?= $form->field($model, 'ivao_id')->textInput(['maxlength' => true]) ?>
+
+
     TODO: CAPTCHA TO PREVENT A LOT OF REQUESTS
 
     <div class="form-group">
