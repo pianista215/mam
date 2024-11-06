@@ -10,6 +10,9 @@ use yii\widgets\ActiveForm;
 
 <div class="pilot-form">
 
+    <!-- TODO: REMOVE FROM PAGE-->
+    <?= print_r($model->errors); ?>
+
     <?php $form = ActiveForm::begin(); ?>
 
     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
@@ -27,7 +30,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'city')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'date_of_birth')->textInput() ?>
+    <?= $form->field($model, 'date_of_birth')->input('date') ?>
 
     <?= $form->field($model, 'vatsim_id')->textInput(['maxlength' => true]) ?>
 

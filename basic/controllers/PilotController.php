@@ -14,6 +14,7 @@ use yii\filters\VerbFilter;
  */
 class PilotController extends Controller
 {
+
     /**
      * @inheritDoc
      */
@@ -69,20 +70,30 @@ class PilotController extends Controller
      */
     public function actionRegister()
     {
-        $model = new Pilot();
 
-        if($this->request->isPost){
-            // TODO
+        // TODO: MOVE TO CONFIGURATION STORED IN DB
+        $registration_is_closed = false;
+
+        if($registration_is_closed) {
+            return $this->render('registration_closed');
         } else {
-            $model->loadDefaultValues();
+            $model = new Pilot();
+
+            if($this->request->isPost){
+                if ($model->load($this->request->post()) && $model->save()) {
+                    return $this->redirect(['view', 'id' => $model->id]);
+                }
+            } else {
+                $model->loadDefaultValues();
+            }
+
+            $countries = Country::find()->select(['name'])->indexBy('id')->column();
+
+            return $this->render('register', [
+                'model' => $model,
+                'countries' => $countries,
+            ]);
         }
-
-        $countries = Country::find()->select(['name'])->indexBy('id')->column();
-
-        return $this->render('register', [
-            'model' => $model,
-            'countries' => $countries,
-        ]);
     }
 
     /**
