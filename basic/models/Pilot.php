@@ -16,6 +16,9 @@ use Yii;
  * @property string $city
  * @property int $country_id
  * @property string $password
+ * @property string $date_of_birth
+ * @property int|null $vatsim_id
+ * @property int|null $ivao_id
  *
  * @property Country $country
  * @property FlightReport[] $flightReports
@@ -37,9 +40,9 @@ class Pilot extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['license', 'name', 'surname', 'email', 'city', 'country_id', 'password'], 'required'],
-            [['registration_date'], 'safe'],
-            [['country_id'], 'integer'],
+            [['license', 'name', 'surname', 'email', 'city', 'country_id', 'password', 'date_of_birth'], 'required'],
+            [['registration_date', 'date_of_birth'], 'safe'],
+            [['country_id', 'vatsim_id', 'ivao_id'], 'integer'],
             [['license'], 'string', 'max' => 8],
             [['name'], 'string', 'max' => 20],
             [['surname', 'city'], 'string', 'max' => 40],
@@ -65,6 +68,9 @@ class Pilot extends \yii\db\ActiveRecord
             'city' => 'City',
             'country_id' => 'Country ID',
             'password' => 'Password',
+            'date_of_birth' => 'Date Of Birth',
+            'vatsim_id' => 'Vatsim ID',
+            'ivao_id' => 'Ivao ID',
         ];
     }
 

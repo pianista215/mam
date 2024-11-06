@@ -38,6 +38,9 @@ $this->params['breadcrumbs'][] = $this->title;
             //'city',
             //'country_id',
             //'password',
+            //'date_of_birth',
+            //'vatsim_id',
+            //'ivao_id',
             [
                 'class' => ActionColumn::className(),
                 'urlCreator' => function ($action, Pilot $model, $key, $index, $column) {

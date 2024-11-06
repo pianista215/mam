@@ -17,8 +17,8 @@ class PilotSearch extends Pilot
     public function rules()
     {
         return [
-            [['id', 'country_id'], 'integer'],
-            [['license', 'name', 'surname', 'email', 'registration_date', 'city', 'password'], 'safe'],
+            [['id', 'country_id', 'vatsim_id', 'ivao_id'], 'integer'],
+            [['license', 'name', 'surname', 'email', 'registration_date', 'city', 'password', 'date_of_birth'], 'safe'],
         ];
     }
 
@@ -61,6 +61,9 @@ class PilotSearch extends Pilot
             'id' => $this->id,
             'registration_date' => $this->registration_date,
             'country_id' => $this->country_id,
+            'date_of_birth' => $this->date_of_birth,
+            'vatsim_id' => $this->vatsim_id,
+            'ivao_id' => $this->ivao_id,
         ]);
 
         $query->andFilterWhere(['like', 'license', $this->license])

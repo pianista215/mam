@@ -33,6 +33,12 @@ use yii\widgets\ActiveForm;
 
     <?php // echo $form->field($model, 'password') ?>
 
+    <?php // echo $form->field($model, 'date_of_birth') ?>
+
+    <?php // echo $form->field($model, 'vatsim_id') ?>
+
+    <?php // echo $form->field($model, 'ivao_id') ?>
+
     <div class="form-group">
         <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
         <?= Html::resetButton('Reset', ['class' => 'btn btn-outline-secondary']) ?>
