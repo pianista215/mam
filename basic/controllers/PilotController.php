@@ -64,7 +64,7 @@ class PilotController extends Controller
 
     /**
      * Register a new Pilot in the system
-     * This pilot won't have permissions until an administrator activate it
+     * This pilot won't have permissions until an administrator activates it
      * If the creation is successful, the broser will be redirected to the 'welcome' page.
      * @return string|\yii\web\Response
      */
@@ -81,7 +81,7 @@ class PilotController extends Controller
 
             if($this->request->isPost){
                 if ($model->load($this->request->post()) && $model->save()) {
-                    return $this->redirect(['view', 'id' => $model->id]);
+                    return $this->redirect(['register-thanks']);
                 }
             } else {
                 $model->loadDefaultValues();
@@ -97,7 +97,17 @@ class PilotController extends Controller
     }
 
     /**
+     * Displays a thank you for registration message
+     * @return string
+     */
+    public function actionRegisterThanks()
+    {
+        return $this->render('register_thanks');
+    }
+
+    /**
      * Creates a new Pilot model.
+     * Creation is only supported for admin users
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return string|\yii\web\Response
      */

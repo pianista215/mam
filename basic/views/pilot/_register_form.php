@@ -10,9 +10,6 @@ use yii\widgets\ActiveForm;
 
 <div class="pilot-form">
 
-    <!-- TODO: REMOVE FROM PAGE-->
-    <?= print_r($model->errors); ?>
-
     <?php $form = ActiveForm::begin(); ?>
 
     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>

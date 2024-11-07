@@ -8,7 +8,7 @@ use Yii;
  * This is the model class for table "pilot".
  *
  * @property int $id
- * @property string $license
+ * @property string|null $license
  * @property string $name
  * @property string $surname
  * @property string $email
@@ -40,14 +40,16 @@ class Pilot extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['license', 'name', 'surname', 'email', 'city', 'country_id', 'password', 'date_of_birth'], 'required'],
+            [['name', 'surname', 'email', 'city', 'country_id', 'password', 'date_of_birth'], 'required'],
             [['registration_date', 'date_of_birth'], 'safe'],
             [['country_id', 'vatsim_id', 'ivao_id'], 'integer'],
             [['license'], 'string', 'max' => 8],
             [['name'], 'string', 'max' => 20],
             [['surname', 'city'], 'string', 'max' => 40],
             [['email'], 'string', 'max' => 80],
+            [['email'], 'email'],
             [['password'], 'string', 'max' => 255],
+            [['email'], 'unique'],
             [['license'], 'unique'],
             [['country_id'], 'exist', 'skipOnError' => true, 'targetClass' => Country::class, 'targetAttribute' => ['country_id' => 'id']],
         ];

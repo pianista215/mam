@@ -9,7 +9,7 @@ $this->title = 'Register Pilot';
 $this->params['breadcrumbs'][] = ['label' => 'Pilots', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="pilot-create">
+<div class="pilot-register">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
