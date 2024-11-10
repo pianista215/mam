@@ -95,12 +95,14 @@ CREATE TABLE `pilot` (
   `date_of_birth` date NOT NULL,
   `vatsim_id` bigint(20) unsigned DEFAULT NULL,
   `ivao_id` bigint(20) unsigned DEFAULT NULL,
+  `auth_key` char(32) DEFAULT NULL,
+  `access_token` char(32) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `pilot_unique` (`email`),
   UNIQUE KEY `pilots_unique_license` (`license`),
   KEY `pilots_countries_FK` (`country_id`),
   CONSTRAINT `pilots_countries_FK` FOREIGN KEY (`country_id`) REFERENCES `country` (`id`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `route` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,

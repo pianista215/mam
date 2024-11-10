@@ -37,7 +37,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'registration_date',
             'city',
             'country_id',
-            'password',
             'date_of_birth',
             'vatsim_id',
             'ivao_id',

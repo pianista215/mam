@@ -123,8 +123,11 @@ class PilotController extends Controller
             $model->loadDefaultValues();
         }
 
+        $countries = Country::find()->select(['name'])->indexBy('id')->column();
+
         return $this->render('create', [
             'model' => $model,
+            'countries' => $countries,
         ]);
     }
 

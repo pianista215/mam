@@ -20,15 +20,17 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'email')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'registration_date')->textInput() ?>
+    <!-- TODO REMOVE AND IF AN ADMIN CREATE A USER SEND AN EMAIL WITH THE PASSWORD -->
+    <?= $form->field($model, 'password')->passwordInput(['maxlength' => true]) ?>
+
+    <?= $form->field($model, 'country_id')->dropdownList(
+            $countries,
+            ['prompt'=>'Select Country']
+        ); ?>
 
     <?= $form->field($model, 'city')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'country_id')->textInput() ?>
-
-    <?= $form->field($model, 'password')->passwordInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'date_of_birth')->textInput() ?>
+    <?= $form->field($model, 'date_of_birth')->input('date') ?>
 
     <?= $form->field($model, 'vatsim_id')->textInput(['maxlength' => true]) ?>
 
