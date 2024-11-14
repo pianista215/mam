@@ -16,10 +16,12 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="pilot-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-
+    <?php if(Yii::$app->user->can('userCrud')) : ?>
     <p>
         <?= Html::a('Create Pilot', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
+
+    <?php endif; ?>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
@@ -43,9 +45,17 @@ $this->params['breadcrumbs'][] = $this->title;
             //'ivao_id',
             [
                 'class' => ActionColumn::className(),
+                'visibleButtons'=>[
+                    'delete'=> function($model){
+                        return Yii::$app->user->can('userCrud');
+                    },
+                    'update'=> function($model){
+                        return Yii::$app->user->can('userCrud');
+                    },
+                ],
                 'urlCreator' => function ($action, Pilot $model, $key, $index, $column) {
                     return Url::toRoute([$action, 'id' => $model->id]);
-                 }
+                 },
             ],
         ],
     ]); ?>
