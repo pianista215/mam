@@ -84,19 +84,25 @@ CREATE TABLE `flight_report` (
 
 CREATE TABLE `pilot` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `license` varchar(8) NOT NULL,
+  `license` varchar(8) DEFAULT NULL,
   `name` varchar(20) NOT NULL,
   `surname` varchar(40) NOT NULL,
   `email` varchar(80) NOT NULL,
-  `status` tinyint(3) unsigned NOT NULL DEFAULT 0,
-  `registration_date` date NOT NULL,
+  `registration_date` date NOT NULL DEFAULT current_timestamp(),
   `city` varchar(40) NOT NULL,
   `country_id` int(10) unsigned NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `date_of_birth` date NOT NULL,
+  `vatsim_id` bigint(20) unsigned DEFAULT NULL,
+  `ivao_id` bigint(20) unsigned DEFAULT NULL,
+  `auth_key` char(32) DEFAULT NULL,
+  `access_token` char(32) DEFAULT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `pilot_unique` (`email`),
   UNIQUE KEY `pilots_unique_license` (`license`),
   KEY `pilots_countries_FK` (`country_id`),
   CONSTRAINT `pilots_countries_FK` FOREIGN KEY (`country_id`) REFERENCES `country` (`id`) ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `route` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,

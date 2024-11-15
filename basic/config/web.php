@@ -20,8 +20,13 @@ $config = [
             'class' => 'yii\caching\FileCache',
         ],
         'user' => [
-            'identityClass' => 'app\models\User',
+            'identityClass' => 'app\models\Pilot',
             'enableAutoLogin' => true,
+        ],
+        'authManager' => [
+            'class' => 'yii\rbac\DbManager',
+            // uncomment if you want to cache RBAC items hierarchy (TODO: Check in the future)
+            //'cache' => 'cache',
         ],
         'errorHandler' => [
             'errorAction' => 'site/error',
