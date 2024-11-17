@@ -1,12 +1,14 @@
 CREATE DATABASE `mam` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
 
+-- TODO REVIEW ORDER BECAUSE WITH THAT ORDER WE CAN'T CREATE FROM SCRATCH THE DATABASE
+
 CREATE TABLE `aircraft` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `aircraft_type_id` int(10) unsigned NOT NULL,
   `registration` varchar(10) NOT NULL,
   `name` varchar(20) NOT NULL,
   `location` char(4) NOT NULL,
-  `hours_flown` double NOT NULL DEFAULT 0,
+  `hours_flown` double unsigned NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `aircrafts_registration_unique` (`registration`),
   UNIQUE KEY `aircrafts_name_unique` (`name`),
@@ -97,6 +99,7 @@ CREATE TABLE `pilot` (
   `ivao_id` bigint(20) unsigned DEFAULT NULL,
   `auth_key` char(32) DEFAULT NULL,
   `access_token` char(32) DEFAULT NULL,
+  `hours_flown` double unsigned DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `pilot_unique` (`email`),
   UNIQUE KEY `pilots_unique_license` (`license`),
