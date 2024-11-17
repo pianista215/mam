@@ -4,18 +4,17 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /** @var yii\web\View $this */
-/** @var app\models\Pilot $model */
+/** @var app\models\Airport $model */
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Pilots', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Airports', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
-<div class="pilot-view">
+<div class="airport-view">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?php if(Yii::$app->user->can('userCrud')) : ?>
     <p>
         <?= Html::a('Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
         <?= Html::a('Delete', ['delete', 'id' => $model->id], [
@@ -26,23 +25,17 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ]) ?>
     </p>
-    <?php endif; ?>
 
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
             'id',
-            'license',
+            'icao_code',
             'name',
-            'surname',
-            'email:email',
-            'registration_date',
+            'latitude',
+            'longitude',
             'city',
             'country_id',
-            'date_of_birth',
-            'vatsim_id',
-            'ivao_id',
-            'hours_flown',
         ],
     ]) ?>
 

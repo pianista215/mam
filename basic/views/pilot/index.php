@@ -43,6 +43,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'date_of_birth',
             //'vatsim_id',
             //'ivao_id',
+            'hours_flown',
             [
                 'class' => ActionColumn::className(),
                 'visibleButtons'=>[

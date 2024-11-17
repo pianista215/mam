@@ -2,17 +2,16 @@
 
 namespace app\controllers;
 
-use app\models\Aircraft;
-use app\models\AircraftSearch;
-use app\models\AircraftType;
+use app\models\Airport;
+use app\models\AirportSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
- * AircraftController implements the CRUD actions for Aircraft model.
+ * AirportController implements the CRUD actions for Airport model.
  */
-class AircraftController extends Controller
+class AirportController extends Controller
 {
     /**
      * @inheritDoc
@@ -33,13 +32,13 @@ class AircraftController extends Controller
     }
 
     /**
-     * Lists all Aircraft models.
+     * Lists all Airport models.
      *
      * @return string
      */
     public function actionIndex()
     {
-        $searchModel = new AircraftSearch();
+        $searchModel = new AirportSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 
         return $this->render('index', [
@@ -49,8 +48,8 @@ class AircraftController extends Controller
     }
 
     /**
-     * Displays a single Aircraft model.
-     * @param int $id ID
+     * Displays a single Airport model.
+     * @param string $id ID
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
      */
@@ -62,13 +61,13 @@ class AircraftController extends Controller
     }
 
     /**
-     * Creates a new Aircraft model.
+     * Creates a new Airport model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return string|\yii\web\Response
      */
     public function actionCreate()
     {
-        $model = new Aircraft();
+        $model = new Airport();
 
         if ($this->request->isPost) {
             if ($model->load($this->request->post()) && $model->save()) {
@@ -78,18 +77,15 @@ class AircraftController extends Controller
             $model->loadDefaultValues();
         }
 
-        $aircraftTypes = AircraftType::find()->select(['name'])->indexBy('id')->column();
-
         return $this->render('create', [
             'model' => $model,
-            'aircraftTypes' => $aircraftTypes,
         ]);
     }
 
     /**
-     * Updates an existing Aircraft model.
+     * Updates an existing Airport model.
      * If update is successful, the browser will be redirected to the 'view' page.
-     * @param int $id ID
+     * @param string $id ID
      * @return string|\yii\web\Response
      * @throws NotFoundHttpException if the model cannot be found
      */
@@ -107,9 +103,9 @@ class AircraftController extends Controller
     }
 
     /**
-     * Deletes an existing Aircraft model.
+     * Deletes an existing Airport model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param int $id ID
+     * @param string $id ID
      * @return \yii\web\Response
      * @throws NotFoundHttpException if the model cannot be found
      */
@@ -121,15 +117,15 @@ class AircraftController extends Controller
     }
 
     /**
-     * Finds the Aircraft model based on its primary key value.
+     * Finds the Airport model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param int $id ID
-     * @return Aircraft the loaded model
+     * @param string $id ID
+     * @return Airport the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = Aircraft::findOne(['id' => $id])) !== null) {
+        if (($model = Airport::findOne(['id' => $id])) !== null) {
             return $model;
         }
 

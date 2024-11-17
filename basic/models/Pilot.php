@@ -45,6 +45,7 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
             [['name', 'surname', 'email', 'city', 'country_id', 'password', 'date_of_birth'], 'required'],
             [['registration_date', 'date_of_birth'], 'safe'],
             [['country_id', 'vatsim_id', 'ivao_id'], 'integer'],
+            [['hours_flown'], 'number'],
             [['license'], 'string', 'max' => 8],
             [['name'], 'string', 'max' => 20],
             [['surname', 'city'], 'string', 'max' => 40],
@@ -78,6 +79,7 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
             'ivao_id' => 'Ivao ID',
             'auth_key' => 'Auth Key',
             'access_token' => 'Access Token',
+            'hours_flown' => 'Hours Flown',
         ];
     }
 
