@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\models\Airport;
 use app\models\AirportSearch;
+use app\models\Country;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -77,8 +78,11 @@ class AirportController extends Controller
             $model->loadDefaultValues();
         }
 
+        $countries = Country::find()->select(['name'])->indexBy('id')->column();
+
         return $this->render('create', [
             'model' => $model,
+            'countries' => $countries,
         ]);
     }
 

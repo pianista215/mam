@@ -20,9 +20,12 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'longitude')->textInput() ?>
 
-    <?= $form->field($model, 'city')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'country_id')->dropdownList(
+                $countries,
+                ['prompt'=>'Select Country']
+            ); ?>
 
-    <?= $form->field($model, 'country_id')->textInput() ?>
+    <?= $form->field($model, 'city')->textInput(['maxlength' => true]) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
