@@ -16,17 +16,17 @@ cnxmam = mysql.connector.connect(user=args.user, password=args.password, host=ar
 
 cursorvam = cnxvam.cursor()
 cursormam = cnxmam.cursor()
-query = ("select ident, name, latitude_deg, longitude_deg, municipality, iso_country from airports where length(ident)=4 AND length(gps_code)=4 AND length(municipality)>0")
+query = ("select plane_icao, plane_description, maximum_range, pax, cargo_capacity  from fleettypes where length(plane_icao)=4 AND maximum_range REGEXP '^[0-9]+$'")
 
 cursorvam.execute(query)
 
-imported_airports = 0
+imported_aircraft_types = 0
 	
-for airport in cursorvam:
-	cursormam.execute("INSERT INTO airport(icao_code, name, latitude, longitude, city, country_id) SELECT %s,%s,%s,%s,%s, id from country where iso2_code=%s", (airport[0], airport[1], airport[2], airport[3], airport[4], airport[5]))
-	imported_airports  = imported_airports + 1
+for aircraft_type in cursorvam:
+	cursormam.execute("INSERT INTO aircraft_type(icao_type_code, name, max_nm_range, pax_capacity, cargo_capacity) VALUES (%s,%s,%s,%s,%s) ", (aircraft_type[0], aircraft_type[1], aircraft_type[2], aircraft_type[3], aircraft_type[4]))
+	imported_aircraft_types  = imported_aircraft_types + 1
 
-print("%d airports imported from %s into %s" % (imported_airports, args.fromdb, args.destinationdb))
+print("%d aircraft types imported from %s into %s" % (imported_aircraft_types, args.fromdb, args.destinationdb))
 cnxmam.commit()
 cursorvam.close()
 cursormam.close()
