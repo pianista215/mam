@@ -16,10 +16,11 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="aircraft-type-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-
+    <?php if(Yii::$app->user->can('aircraftTypeCrud')) : ?>
     <p>
         <?= Html::a('Create Aircraft Type', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
+    <?php endif; ?>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
@@ -29,7 +30,6 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
 
-            'id',
             'icao_type_code',
             'name',
             'max_nm_range',
@@ -37,6 +37,14 @@ $this->params['breadcrumbs'][] = $this->title;
             //'cargo_capacity',
             [
                 'class' => ActionColumn::className(),
+                'visibleButtons'=>[
+                    'delete'=> function($model){
+                        return Yii::$app->user->can('aircraftTypeCrud');
+                    },
+                    'update'=> function($model){
+                        return Yii::$app->user->can('aircraftTypeCrud');
+                    },
+                ],
                 'urlCreator' => function ($action, AircraftType $model, $key, $index, $column) {
                     return Url::toRoute([$action, 'id' => $model->id]);
                  }
