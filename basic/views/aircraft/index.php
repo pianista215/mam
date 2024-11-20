@@ -30,8 +30,8 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
 
-            'id',
-            'aircraft_type_id',
+            //'id',
+            'aircraftType.icao_type_code',
             'registration',
             'name',
             'location',
