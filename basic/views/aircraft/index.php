@@ -16,10 +16,11 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="aircraft-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-
+    <?php if(Yii::$app->user->can('aircraftCrud')) : ?>
     <p>
         <?= Html::a('Create Aircraft', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
+    <?php endif; ?>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
@@ -37,6 +38,14 @@ $this->params['breadcrumbs'][] = $this->title;
             //'hours_flown',
             [
                 'class' => ActionColumn::className(),
+                'visibleButtons'=>[
+                    'delete'=> function($model){
+                        return Yii::$app->user->can('aircraftCrud');
+                    },
+                    'update'=> function($model){
+                        return Yii::$app->user->can('aircraftCrud');
+                    },
+                ],
                 'urlCreator' => function ($action, Aircraft $model, $key, $index, $column) {
                     return Url::toRoute([$action, 'id' => $model->id]);
                  }
