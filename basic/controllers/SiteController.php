@@ -229,6 +229,24 @@ class SiteController extends Controller
         $userCrud->description = 'Can create, delete, modify, activate and reset users';
         $auth->add($userCrud);
 
+        // TODO: Think if the aircrafts cruds and airport cruds should be on other role
+        $aircraftTypeCrud = $auth->createPermission('aircraftTypeCrud');
+        $aircraftTypeCrud->description = 'Can create, delete, and modify aircraft types';
+        $auth->add($aircraftTypeCrud);
+
+        $aircraftCrud = $auth->createPermission('aircraftCrud');
+        $aircraftCrud->description = 'Can create, delete, and modify aircrafts';
+        $auth->add($aircraftCrud);
+
+        $airportCrud = $auth->createPermission('airportCrud');
+        $airportCrud->description = 'Can create, delete, and modify airports';
+        $auth->add($airportCrud);
+
+        // TODO: Think if we need to manage countries, or we can consider them static
+        $countryCrud = $auth->createPermission('countryCrud');
+        $countryCrud->description = 'Can create, delete, and modify countries';
+        $auth->add($countryCrud);
+
         $roleAssignment = $auth->createPermission('roleAssignment');
         $roleAssignment->description = 'Can assign or remove roles to other users';
         $auth->add($roleAssignment);
@@ -236,6 +254,10 @@ class SiteController extends Controller
         $admin = $auth->createRole('admin');
         $auth->add($admin);
         $auth->addChild($admin, $userCrud);
+        $auth->addChild($admin, $aircraftTypeCrud);
+        $auth->addChild($admin, $aircraftCrud);
+        $auth->addChild($admin, $airportCrud);
+        $auth->addChild($admin, $countryCrud);
         $auth->addChild($admin, $roleAssignment);
         $auth->addChild($admin, $pilot);
         $auth->addChild($admin, $vfrValidator);

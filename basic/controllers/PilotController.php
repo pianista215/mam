@@ -6,7 +6,7 @@ use app\models\Country;
 use app\models\Pilot;
 use app\models\PilotSearch;
 use yii\web\Controller;
-use yii\web\ForbiddenHttpException ;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use Yii;

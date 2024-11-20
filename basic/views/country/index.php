@@ -16,10 +16,11 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="country-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-
+    <?php if(Yii::$app->user->can('userCrud')) : ?>
     <p>
         <?= Html::a('Create Country', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
+    <?php endif; ?>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
@@ -33,6 +34,14 @@ $this->params['breadcrumbs'][] = $this->title;
             'iso2_code',
             [
                 'class' => ActionColumn::className(),
+                'visibleButtons'=>[
+                    'delete'=> function($model){
+                        return Yii::$app->user->can('countryCrud');
+                    },
+                    'update'=> function($model){
+                        return Yii::$app->user->can('countryCrud');
+                    },
+                ],
                 'urlCreator' => function ($action, Country $model, $key, $index, $column) {
                     return Url::toRoute([$action, 'id' => $model->id]);
                  }
