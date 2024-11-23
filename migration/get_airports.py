@@ -16,7 +16,7 @@ cnxmam = mysql.connector.connect(user=args.user, password=args.password, host=ar
 
 cursorvam = cnxvam.cursor()
 cursormam = cnxmam.cursor()
-query = ("select ident, name, latitude_deg, longitude_deg, municipality, iso_country from airports where length(ident)=4 AND length(municipality)>0")
+query = ("select trim(ident), trim(name), latitude_deg, longitude_deg, trim(municipality), trim(iso_country) from airports where length(trim(ident))=4 AND length(trim(municipality))>0")
 
 cursorvam.execute(query)
 

@@ -26,14 +26,20 @@ cnxmam = mysql.connector.connect(user=args.user, password=args.password, host=ar
 
 cursorvam = cnxvam.cursor()
 cursormam = cnxmam.cursor()
-query = ("select trim(flight), departure, arrival, d.latitude_deg as dep_latitude, d.longitude_deg as dep_longitude, a.latitude_deg as arr_latitude, a.longitude_deg as arr_longitude from routes r left join airports d ON d.ident=r.departure left join airports a ON a.ident=r.arrival group by departure,arrival")
+query = ("select trim(flight), trim(departure), trim(arrival), d.latitude_deg as dep_latitude, d.longitude_deg as dep_longitude, a.latitude_deg as arr_latitude, a.longitude_deg as arr_longitude from routes r left join airports d ON d.ident=r.departure left join airports a ON a.ident=r.arrival group by departure,arrival")
 
 cursorvam.execute(query)
 
 imported_routes = 0
+route_generated_id = 1
 	
 for route in cursorvam:
 	code = route[0]
+	#If numeric code is used standarize to avoid duplicates
+	if code.isnumeric():
+		code_sufix = '{:0>9}'.format(route_generated_id)
+		code = "R%s" %code_sufix
+
 	departure = route[1]
 	arrival = route[2]
 	print("Generating distance for %s - %s" % (departure, arrival))
@@ -41,9 +47,10 @@ for route in cursorvam:
 		distance_nm = distance_in_nm(route[3], route[4], route[5], route[6])
 	else:
 		distance_nm = 0
-	print("Inserting %s - %s = %s NM" % (departure, arrival, distance_nm) )
+	print("Inserting (%s) %s - %s = %s NM" % (code, departure, arrival, distance_nm) )
 	cursormam.execute("INSERT INTO route(code, departure, arrival, distance_nm) VALUES (%s, %s, %s, %s)", (code, departure, arrival, distance_nm))
 	imported_routes  = imported_routes + 1
+	route_generated_id = route_generated_id + 1
 
 print("%d routes imported from %s into %s" % (imported_routes, args.fromdb, args.destinationdb))
 cnxmam.commit()
