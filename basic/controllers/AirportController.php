@@ -102,8 +102,11 @@ class AirportController extends Controller
             return $this->redirect(['view', 'id' => $model->id]);
         }
 
+        $countries = Country::find()->select(['name'])->indexBy('id')->column();
+
         return $this->render('update', [
             'model' => $model,
+            'countries' => $countries,
         ]);
     }
 

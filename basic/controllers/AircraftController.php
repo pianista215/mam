@@ -109,8 +109,11 @@ class AircraftController extends Controller
                 return $this->redirect(['view', 'id' => $model->id]);
             }
 
+            $aircraftTypes = AircraftType::find()->select(['name'])->indexBy('id')->column();
+
             return $this->render('update', [
                 'model' => $model,
+                'aircraftTypes' => $aircraftTypes,
             ]);
         } else {
             throw new ForbiddenHttpException();

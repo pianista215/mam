@@ -35,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'latitude',
             'longitude',
             'city',
-            'country_id',
+            'country.name',
         ],
     ]) ?>
 
