@@ -124,13 +124,13 @@ CREATE TABLE `route` (
   CONSTRAINT `routes_airports_departure_FK` FOREIGN KEY (`departure`) REFERENCES `airport` (`icao_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `submitted_flightplan` (
+CREATE TABLE `submitted_flight_plan` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `aircraft_id` int(10) unsigned NOT NULL,
   `flight_rules` char(1) NOT NULL,
   `flight_type` char(1) NOT NULL,
   `alternative1_icao` char(4) NOT NULL,
-  `alternative2_icao` char(4) NOT NULL,
+  `alternative2_icao` char(4) DEFAULT NULL,
   `cruise_speed` varchar(5) NOT NULL,
   `flight_level` varchar(5) NOT NULL,
   `route` varchar(400) NOT NULL,
@@ -143,6 +143,10 @@ CREATE TABLE `submitted_flightplan` (
   UNIQUE KEY `submited_flightplans_unique_pilot_id` (`pilot_id`),
   UNIQUE KEY `submitted_flightplan_unique_aircraft_id` (`aircraft_id`),
   KEY `submitted_flightplans_routes_FK` (`route_id`),
+  KEY `submitted_flightplan_airport_alt1_FK` (`alternative1_icao`),
+  KEY `submitted_flightplan_airport_alt2_FK` (`alternative2_icao`),
+  CONSTRAINT `submitted_flightplan_airport_alt1_FK` FOREIGN KEY (`alternative1_icao`) REFERENCES `airport` (`icao_code`) ON UPDATE CASCADE,
+  CONSTRAINT `submitted_flightplan_airport_alt2_FK` FOREIGN KEY (`alternative2_icao`) REFERENCES `airport` (`icao_code`) ON UPDATE CASCADE,
   CONSTRAINT `submitted_flightplans_aircraft_reserved_FK` FOREIGN KEY (`aircraft_id`) REFERENCES `aircraft` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `submitted_flightplans_pilots_FK` FOREIGN KEY (`pilot_id`) REFERENCES `pilot` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `submitted_flightplans_routes_FK` FOREIGN KEY (`route_id`) REFERENCES `route` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
