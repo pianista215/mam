@@ -26,7 +26,7 @@ cnxmam = mysql.connector.connect(user=args.user, password=args.password, host=ar
 
 cursorvam = cnxvam.cursor()
 cursormam = cnxmam.cursor()
-query = ("select trim(flight), trim(departure), trim(arrival), d.latitude_deg as dep_latitude, d.longitude_deg as dep_longitude, a.latitude_deg as arr_latitude, a.longitude_deg as arr_longitude from routes r left join airports d ON d.ident=r.departure left join airports a ON a.ident=r.arrival group by departure,arrival")
+query = ("select trim(flight), trim(departure), trim(arrival), d.latitude_deg as dep_latitude, d.longitude_deg as dep_longitude, a.latitude_deg as arr_latitude, a.longitude_deg as arr_longitude from routes r left join airports d ON d.ident=r.departure left join airports a ON a.ident=r.arrival group by departure,arrival ORDER BY flight")
 
 cursorvam.execute(query)
 

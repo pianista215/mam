@@ -16,7 +16,7 @@ cnxmam = mysql.connector.connect(user=args.user, password=args.password, host=ar
 
 cursorvam = cnxvam.cursor()
 cursormam = cnxmam.cursor()
-query = ("select plane_icao, plane_description, maximum_range, pax, cargo_capacity  from fleettypes where length(plane_icao)=4 AND maximum_range REGEXP '^[0-9]+$'")
+query = ("select plane_icao, plane_description, maximum_range, pax, cargo_capacity  from fleettypes where length(plane_icao)=4 AND maximum_range REGEXP '^[0-9]+$' ORDER BY plane_icao")
 
 cursorvam.execute(query)
 

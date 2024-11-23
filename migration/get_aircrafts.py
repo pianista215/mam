@@ -18,7 +18,7 @@ cursorvam = cnxvam.cursor()
 cursormam = cnxmam.cursor()
 
 # Retrieve the current aircraft types from the MAM, and get the registered aircrafts in the VAM to import in the database
-query = ("select icao_type_code from aircraft_type")
+query = ("select icao_type_code from aircraft_type ORDER BY icao_type_code")
 cursormam.execute(query)
 
 existing_types = []
@@ -28,7 +28,7 @@ for aircraft_type in cursormam:
 for aircraft_type in existing_types:
 	imported_aircrafts = 0
 	# TODO: Add location when the airport data is more consistent (there are a lot of airports not available if we ensure that the icao_code exists and is 4 letter)
-	cursorvam.execute("select registry, f.name, hours from fleets f LEFT JOIN fleettypes ft ON ft.fleettype_id=f.fleettype_id WHERE ft.plane_icao = %s", (aircraft_type, ))
+	cursorvam.execute("select registry, f.name, hours from fleets f LEFT JOIN fleettypes ft ON ft.fleettype_id=f.fleettype_id WHERE ft.plane_icao = %s ORDER BY registry", (aircraft_type, ))
 
 	for aircraft in cursorvam:
 		cursormam.execute("INSERT INTO aircraft(aircraft_type_id, registration, name, location, hours_flown)  select id,%s,%s,'LEVD',%s FROM aircraft_type WHERE icao_type_code=%s", (aircraft[0], aircraft[1], aircraft[2], aircraft_type))
