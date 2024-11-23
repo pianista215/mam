@@ -40,6 +40,7 @@ class AircraftTypeController extends Controller
      */
     public function actionIndex()
     {
+        // TODO: SORT BY
         $searchModel = new AircraftTypeSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 

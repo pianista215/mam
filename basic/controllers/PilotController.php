@@ -43,6 +43,7 @@ class PilotController extends Controller
      */
     public function actionIndex()
     {
+        // TODO: SORT BY
         $searchModel = new PilotSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 

@@ -39,6 +39,7 @@ class AirportController extends Controller
      */
     public function actionIndex()
     {
+        // TODO: SORT BY
         $searchModel = new AirportSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 
