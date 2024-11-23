@@ -20,9 +20,6 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'email')->textInput(['maxlength' => true]) ?>
 
-    <!-- TODO REMOVE AND IF AN ADMIN CREATE A USER SEND AN EMAIL WITH THE PASSWORD -->
-    <?= $form->field($model, 'password')->passwordInput(['maxlength' => true]) ?>
-
     <?= $form->field($model, 'country_id')->dropdownList(
             $countries,
             ['prompt'=>'Select Country']
@@ -35,6 +32,8 @@ use yii\widgets\ActiveForm;
     <?= $form->field($model, 'vatsim_id')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'ivao_id')->textInput(['maxlength' => true]) ?>
+
+    <?= $form->field($model, 'location')->textInput(['maxlength' => true]) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

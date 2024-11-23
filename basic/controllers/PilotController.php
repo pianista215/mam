@@ -18,6 +18,8 @@ use Yii;
 class PilotController extends Controller
 {
 
+    // TODO: WE NEED A RESET PASSWORD ACTION ALLOWING ADMIN OR PILOT TO RESET ITS PASSWORD
+
     /**
      * @inheritDoc
      */
@@ -155,8 +157,11 @@ class PilotController extends Controller
                 return $this->redirect(['view', 'id' => $model->id]);
             }
 
+            $countries = Country::find()->select(['name'])->indexBy('id')->column();
+
             return $this->render('update', [
                 'model' => $model,
+                'countries' => $countries,
             ]);
         } else {
             throw new ForbiddenHttpException();

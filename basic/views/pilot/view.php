@@ -42,6 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'vatsim_id',
             'ivao_id',
             'hours_flown',
+            'location',
         ],
     ]) ?>
 
