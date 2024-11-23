@@ -100,12 +100,15 @@ CREATE TABLE `pilot` (
   `auth_key` char(32) DEFAULT NULL,
   `access_token` char(32) DEFAULT NULL,
   `hours_flown` double unsigned DEFAULT 0,
+  `location` char(4) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `pilot_unique` (`email`),
   UNIQUE KEY `pilots_unique_license` (`license`),
   KEY `pilots_countries_FK` (`country_id`),
+  KEY `pilot_airport_FK` (`location`),
+  CONSTRAINT `pilot_airport_FK` FOREIGN KEY (`location`) REFERENCES `airport` (`icao_code`) ON UPDATE CASCADE,
   CONSTRAINT `pilots_countries_FK` FOREIGN KEY (`country_id`) REFERENCES `country` (`id`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `route` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -138,8 +141,8 @@ CREATE TABLE `submitted_flightplan` (
   `pilot_id` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `submited_flightplans_unique_pilot_id` (`pilot_id`),
+  UNIQUE KEY `submitted_flightplan_unique_aircraft_id` (`aircraft_id`),
   KEY `submitted_flightplans_routes_FK` (`route_id`),
-  KEY `submitted_flightplans_aircraft_reserved_FK` (`aircraft_id`),
   CONSTRAINT `submitted_flightplans_aircraft_reserved_FK` FOREIGN KEY (`aircraft_id`) REFERENCES `aircraft` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `submitted_flightplans_pilots_FK` FOREIGN KEY (`pilot_id`) REFERENCES `pilot` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `submitted_flightplans_routes_FK` FOREIGN KEY (`route_id`) REFERENCES `route` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
