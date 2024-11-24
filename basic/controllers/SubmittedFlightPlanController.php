@@ -60,6 +60,7 @@ class SubmittedFlightPlanController extends Controller
                 $dataProvider = $searchModel->searchAircraftsInLocationWithRange($route->departure, $route->distance_nm);
                 return $this->render('select_aircraft', [
                     'dataProvider' => $dataProvider,
+                    'route' => $route,
                 ]);
             } else {
                 throw new ForbiddenHttpException();

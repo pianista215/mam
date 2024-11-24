@@ -1,6 +1,7 @@
 <?php
 
 use app\models\Aircraft;
+use app\models\Route;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\ActionColumn;
@@ -12,10 +13,12 @@ use yii\grid\GridView;
 
 $this->title = 'Select aircraft';
 $this->params['breadcrumbs'][] = $this->title;
+$this->params['route_id'] = $route->id;
 ?>
 <div class="submitted-flight-plan-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
+    <h1><?= Html::encode($route->id) ?></h1>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
@@ -35,7 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
                      }
                  ],
                 'urlCreator' => function ($action, Aircraft $model, $key, $index, $column) {
-                    return Url::toRoute([$action, 'route_id' => $model->id]);
+                    return Url::toRoute([$action, 'route_id' => $this->params['route_id'], 'aircraft_id' => $model->id]);
                 }
             ],
         ],
