@@ -31,6 +31,27 @@ class RouteSearch extends Route
         return Model::scenarios();
     }
 
+    public function searchWithFixedDeparture($departure)
+    {
+        $query = Route::find();
+
+        // add conditions that should always apply here
+        $this->departure = $departure;
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
+
+        if (!$this->validate()) {
+            // Don't return nothing if validation fails
+            $query->where('0=1');
+            return $dataProvider;
+        }
+
+        $query->andFilterWhere(['like', 'departure', $this->departure]);
+
+        return $dataProvider;
+    }
+
     /**
      * Creates data provider instance with search query applied
      *
@@ -51,8 +72,8 @@ class RouteSearch extends Route
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            // Don't return nothing if validation fails
+            $query->where('0=1');
             return $dataProvider;
         }
 

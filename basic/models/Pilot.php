@@ -159,6 +159,14 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     }
 
     /**
+     * @return string current user location
+     */
+    public function getLocation()
+    {
+        return $this->location;
+    }
+
+    /**
      * @return string|null current user auth key
      */
     public function getAuthKey()

@@ -2,11 +2,17 @@
 
 namespace app\controllers;
 
+use app\models\Aircraft;
+use app\models\AircraftSearch;
+use app\models\Route;
+use app\models\RouteSearch;
 use app\models\SubmittedFlightPlan;
 use app\models\SubmittedFlightPlanSearch;
 use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use Yii;
 
 /**
  * SubmittedFlightPlanController implements the CRUD actions for SubmittedFlightPlan model.
@@ -30,6 +36,40 @@ class SubmittedFlightPlanController extends Controller
             ]
         );
     }
+
+    public function actionSelectRoute()
+    {
+        // TODO: EL ISSET CREO QUE SOBRA
+        if(Yii::$app->user->can('submitFpl') && isset(Yii::$app->user->identity->location)){
+            $searchModel = new RouteSearch();
+            $dataProvider = $searchModel->searchWithFixedDeparture(Yii::$app->user->identity->location);
+            return $this->render('select_route', [
+                'dataProvider' => $dataProvider,
+            ]);
+        } else {
+            throw new ForbiddenHttpException();
+        }
+    }
+
+    public function actionSelectAircraft($route_id)
+    {
+        if(Yii::$app->user->can('submitFpl')){
+            $route = Route::findOne(['id' => $route_id]);
+            if($route !== null && $route->departure == Yii::$app->user->identity->location){
+                $searchModel = new AircraftSearch();
+                $dataProvider = $searchModel->searchAircraftsInLocation($route->departure);
+                return $this->render('select_aircraft', [
+                    'dataProvider' => $dataProvider,
+                ]);
+            } else {
+                throw new ForbiddenHttpException();
+            }
+        } else {
+            throw new ForbiddenHttpException();
+        }
+    }
+
+    // TODO: REVIEW ALL THE ACTIONS FROM THIS CONTROLLER, REMOVE THE NOT NEEDED
 
     /**
      * Lists all SubmittedFlightPlan models.
