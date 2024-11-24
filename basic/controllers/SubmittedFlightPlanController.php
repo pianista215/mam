@@ -57,7 +57,7 @@ class SubmittedFlightPlanController extends Controller
             $route = Route::findOne(['id' => $route_id]);
             if($route !== null && $route->departure == Yii::$app->user->identity->location){
                 $searchModel = new AircraftSearch();
-                $dataProvider = $searchModel->searchAircraftsInLocation($route->departure);
+                $dataProvider = $searchModel->searchAircraftsInLocationWithRange($route->departure, $route->distance_nm);
                 return $this->render('select_aircraft', [
                     'dataProvider' => $dataProvider,
                 ]);

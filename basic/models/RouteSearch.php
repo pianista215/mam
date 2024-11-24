@@ -47,7 +47,7 @@ class RouteSearch extends Route
             return $dataProvider;
         }
 
-        $query->andFilterWhere(['like', 'departure', $this->departure]);
+        $query->andFilterWhere(['departure' => $this->departure]);
 
         return $dataProvider;
     }
