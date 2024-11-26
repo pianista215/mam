@@ -167,6 +167,14 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     }
 
     /**
+     * @return string current user fullname
+     */
+    public function getFullName()
+    {
+        return $this->name.' '.$this->surname;
+    }
+
+    /**
      * @return string|null current user auth key
      */
     public function getAuthKey()

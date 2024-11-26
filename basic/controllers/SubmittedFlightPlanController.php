@@ -60,9 +60,20 @@ class SubmittedFlightPlanController extends Controller
                 $this->checkRouteIsUserLocation($route) &&
                 $this->checkAircraftIsOnLocation($aircraft, $route->departure)
             ){
+                $flightRulesTypes = array(
+                    'I' => 'IFR (Instrument Flight)',
+                    'V' => 'VFR (Visual Flight)',
+                    'Y' => 'IFR/VFR (IFR changing to VFR)',
+                    'Z' => 'VFR/IFR (VFR changing to IFR)',
+                );
+
+                $pilotName = Yii::$app->user->identity->fullName;
+
                 return $this->render('prepare_fpl', [
                     'route' => $route,
                     'aircraft' => $aircraft,
+                    'flightRulesTypes' => $flightRulesTypes,
+                    'pilotName' => $pilotName,
                 ]);
             } else {
                 throw new ForbiddenHttpException();
