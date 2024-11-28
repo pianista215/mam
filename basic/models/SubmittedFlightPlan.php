@@ -83,6 +83,43 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
         ];
     }
 
+    public static function getFlightRulesTypes(){
+        return array(
+                    'I' => 'IFR (Instrument Flight)',
+                    'V' => 'VFR (Visual Flight)',
+                    'Y' => 'IFR/VFR (IFR changing to VFR)',
+                    'Z' => 'VFR/IFR (VFR changing to IFR)',
+        );
+    }
+
+    public static function getValidSpeedUnits(){
+        return ['N', 'M', 'K'];
+    }
+
+    public function getCruiseSpeedUnit()
+    {
+        return substr($this->cruise_speed, 0, 1);
+    }
+
+    public function getCruiseSpeedValue()
+    {
+        return substr($this->cruise_speed, 1, 4);
+    }
+
+    public static function getValidFlightLevelUnits(){
+        return ['F', 'A', 'S', 'M', 'VFR'];
+    }
+
+    public function getFlightLevelUnit()
+    {
+        return substr($this->flight_level, 0, 1);
+    }
+
+    public function getFlightLevelValue()
+    {
+        return substr($this->flight_level, 1, 4);
+    }
+
     /**
      * Gets query for [[Aircraft]].
      *

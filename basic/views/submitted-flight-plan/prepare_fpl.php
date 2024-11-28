@@ -34,7 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
         <div class="col-md-4">
             <div>Flight Rules</div>
-            <div><?= Html::dropDownList('flightRules', null, $flightRulesTypes, ['class' => 'form-control'])?></div>
+            <div><?= Html::dropDownList('flightRules', null, $model->flightRulesTypes, ['class' => 'form-control'])?></div>
         </div>
     </div>
 
@@ -46,14 +46,14 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="col-md-4">
             <div>Cruising speed</div>
             <div class="input-group">
-                <?= Html::dropDownList('cruiseSpeedUnit', null, ['N' => 'N', 'M' => 'M', 'K' => 'K'], ['class' => 'form-select flex-grow-0 w-auto'])?>
+                <?= Html::dropDownList('cruiseSpeedUnit', null, array_combine($model->validSpeedUnits, $model->validSpeedUnits), ['class' => 'form-select flex-grow-0 w-auto'])?>
                 <?= Html::input('text', 'cruiseSpeedValue', null, ['maxlength' => 4, 'class' => 'form-control'])?>
             </div>
         </div>
         <div class="col-md-4">
             <div>Level</div>
             <div class="input-group">
-                <?= Html::dropDownList('levelUnit', null, ['F' => 'F', 'A' => 'A', 'S' => 'S', 'M' => 'M', 'VFR' => 'VFR'], ['id' => 'levelUnit', 'class' => 'form-select flex-grow-0 w-auto'])?>
+                <?= Html::dropDownList('levelUnit', null, array_combine($model->validFlightLevelUnits, $model->validFlightLevelUnits), ['id' => 'levelUnit', 'class' => 'form-select flex-grow-0 w-auto'])?>
                 <?= Html::input('text', 'levelValue', null, ['id' => 'levelValue', 'maxlength' => 4, 'class' => 'form-control'])?>
             </div>
         </div>
