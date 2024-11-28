@@ -50,6 +50,15 @@ $this->params['breadcrumbs'][] = $this->title;
                  }
             ],
         ],
+        'tableOptions' => ['class' => 'table table-striped table-bordered'],
+        'pager' => [
+                'options' => ['class' => 'pagination justify-content-center'],
+                'linkContainerOptions' => ['class' => 'page-item'],
+                'linkOptions' => ['class' => 'page-link'],
+                'disabledListItemSubTagOptions' => ['class' => 'page-link'],
+                'hideOnSinglePage' => true,
+            ],
+        'summaryOptions' => ['class' => 'text-muted']
     ]); ?>
 
 
