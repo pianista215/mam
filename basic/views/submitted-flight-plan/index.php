@@ -32,7 +32,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'id',
             'aircraft_id',
             'flight_rules',
-            'flight_type',
             'alternative1_icao',
             //'alternative2_icao',
             //'cruise_speed',

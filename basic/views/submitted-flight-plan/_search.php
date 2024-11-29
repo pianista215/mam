@@ -21,8 +21,6 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'flight_rules') ?>
 
-    <?= $form->field($model, 'flight_type') ?>
-
     <?= $form->field($model, 'alternative1_icao') ?>
 
     <?php // echo $form->field($model, 'alternative2_icao') ?>

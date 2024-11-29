@@ -63,6 +63,14 @@ class SubmittedFlightPlanController extends Controller
                 $model = new SubmittedFlightPlan();
                 $pilotName = Yii::$app->user->identity->fullName;
 
+                 if ($this->request->isPost) {
+                    if ($model->load($this->request->post()) && $model->save()) {
+                        return $this->redirect(['view', 'id' => $model->id]);
+                    }
+                 } else {
+                    $model->loadDefaultValues();
+                 }
+
                 return $this->render('prepare_fpl', [
                     'route' => $route,
                     'aircraft' => $aircraft,
@@ -128,6 +136,8 @@ class SubmittedFlightPlanController extends Controller
         ]);
     }
 
+    // TODO: NEEDED?
+
     /**
      * Displays a single SubmittedFlightPlan model.
      * @param string $id ID
@@ -140,6 +150,8 @@ class SubmittedFlightPlanController extends Controller
             'model' => $this->findModel($id),
         ]);
     }
+
+    // TODO: REMOVE?
 
     /**
      * Creates a new SubmittedFlightPlan model.

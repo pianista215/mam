@@ -10,11 +10,12 @@ use Yii;
  * @property int $id
  * @property int $aircraft_id
  * @property string $flight_rules
- * @property string $flight_type
  * @property string $alternative1_icao
  * @property string|null $alternative2_icao
- * @property string $cruise_speed
- * @property string $flight_level
+ * @property string $cruise_speed_value
+ * @property string $cruise_speed_unit
+ * @property string $flight_level_value
+ * @property string $flight_level_unit
  * @property string $route
  * @property string $estimated_time
  * @property string $other_information
@@ -44,12 +45,17 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['aircraft_id', 'flight_rules', 'flight_type', 'alternative1_icao', 'cruise_speed', 'flight_level', 'route', 'estimated_time', 'other_information', 'endurance_time', 'route_id', 'pilot_id'], 'required'],
+            [['aircraft_id', 'flight_rules', 'alternative1_icao', 'cruise_speed_value', 'route', 'estimated_time', 'other_information', 'endurance_time', 'route_id', 'pilot_id', 'cruise_speed_unit', 'flight_level_unit'], 'required'],
             [['aircraft_id', 'route_id', 'pilot_id'], 'integer'],
-            [['flight_rules', 'flight_type'], 'string', 'max' => 1],
-            [['alternative1_icao', 'alternative2_icao', 'estimated_time', 'endurance_time'], 'string', 'max' => 4],
-            [['cruise_speed', 'flight_level'], 'string', 'max' => 5],
+            [['flight_rules', 'cruise_speed_unit'], 'string', 'length' => 1],
+            [['flight_rules'], 'in', 'range' => array_keys(SubmittedFlightPlan::getFlightRulesTypes())],
+            [['cruise_speed_unit'], 'in', 'range' => SubmittedFlightPlan::getValidSpeedUnits()],
+            [['cruise_speed_value'], 'integer'],
+            [['alternative1_icao', 'alternative2_icao', 'cruise_speed_value', 'flight_level_value', 'estimated_time', 'endurance_time'], 'string', 'max' => 4],
             [['route', 'other_information'], 'string', 'max' => 400],
+            [['flight_level_unit'], 'string', 'max' => 3],
+            [['flight_level_unit'], 'in', 'range' => SubmittedFlightPlan::getValidFlightLevelUnits()],
+            [['flight_level_value'], 'integer'],
             [['pilot_id'], 'unique'],
             [['aircraft_id'], 'unique'],
             [['alternative1_icao'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['alternative1_icao' => 'icao_code']],
@@ -69,11 +75,12 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
             'id' => 'ID',
             'aircraft_id' => 'Aircraft ID',
             'flight_rules' => 'Flight Rules',
-            'flight_type' => 'Flight Type',
             'alternative1_icao' => 'Alternative1 Icao',
             'alternative2_icao' => 'Alternative2 Icao',
-            'cruise_speed' => 'Cruise Speed',
-            'flight_level' => 'Flight Level',
+            'cruise_speed_unit' => 'Cruise Speed Unit',
+            'cruise_speed_value' => 'Cruise Speed Value',
+            'flight_level_unit' => 'Flight Level Unit',
+            'flight_level_value' => 'Flight Level Value',
             'route' => 'Route',
             'estimated_time' => 'Estimated Time',
             'other_information' => 'Other Information',
@@ -92,32 +99,13 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
         );
     }
 
+
     public static function getValidSpeedUnits(){
         return ['N', 'M', 'K'];
     }
 
-    public function getCruiseSpeedUnit()
-    {
-        return substr($this->cruise_speed, 0, 1);
-    }
-
-    public function getCruiseSpeedValue()
-    {
-        return substr($this->cruise_speed, 1, 4);
-    }
-
     public static function getValidFlightLevelUnits(){
         return ['F', 'A', 'S', 'M', 'VFR'];
-    }
-
-    public function getFlightLevelUnit()
-    {
-        return substr($this->flight_level, 0, 1);
-    }
-
-    public function getFlightLevelValue()
-    {
-        return substr($this->flight_level, 1, 4);
     }
 
     /**

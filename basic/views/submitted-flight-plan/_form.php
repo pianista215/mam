@@ -16,8 +16,6 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'flight_rules')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'flight_type')->textInput(['maxlength' => true]) ?>
-
     <?= $form->field($model, 'alternative1_icao')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'alternative2_icao')->textInput(['maxlength' => true]) ?>

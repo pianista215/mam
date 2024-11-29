@@ -18,7 +18,7 @@ class SubmittedFlightPlanSearch extends SubmittedFlightPlan
     {
         return [
             [['id', 'aircraft_id', 'route_id', 'pilot_id'], 'integer'],
-            [['flight_rules', 'flight_type', 'alternative1_icao', 'alternative2_icao', 'cruise_speed', 'flight_level', 'route', 'estimated_time', 'other_information', 'endurance_time'], 'safe'],
+            [['flight_rules', 'alternative1_icao', 'alternative2_icao', 'cruise_speed', 'flight_level', 'route', 'estimated_time', 'other_information', 'endurance_time'], 'safe'],
         ];
     }
 
@@ -65,7 +65,6 @@ class SubmittedFlightPlanSearch extends SubmittedFlightPlan
         ]);
 
         $query->andFilterWhere(['like', 'flight_rules', $this->flight_rules])
-            ->andFilterWhere(['like', 'flight_type', $this->flight_type])
             ->andFilterWhere(['like', 'alternative1_icao', $this->alternative1_icao])
             ->andFilterWhere(['like', 'alternative2_icao', $this->alternative2_icao])
             ->andFilterWhere(['like', 'cruise_speed', $this->cruise_speed])
