@@ -20,9 +20,11 @@ $this->params['breadcrumbs'][] = $this->title;
 <h1><?= Html::encode($this->title) ?></h1>
 
 <div class="container">
+
     <?php $form = ActiveForm::begin([
             'options' => ['class' => 'row'], // Agrega la clase 'row' para usar el sistema de grillas de Bootstrap
         ]); ?>
+
     <div class="row mb-3">
         <div class="col-md-4">
             <div>Aircraft identification</div>
@@ -53,14 +55,13 @@ $this->params['breadcrumbs'][] = $this->title;
             <div>Level</div><!-- TODO UNAI HACER QUE SI ALGUIEN METE MAL Y VUELVES AL FORMULARIO VFR BLOQUEE EL OTRO CAMPO -->
             <div class="input-group">
                 <?= $form->field($model, 'flight_level_unit')->dropDownList(array_combine($model->validFlightLevelUnits, $model->validFlightLevelUnits), ['id' => 'levelUnit', 'class' => 'form-select flex-grow-0 w-auto'])->label(false)?>
-                <?= $form->field($model, 'flight_level_value')->textInput(['id' => 'levelValue', 'class' => 'form-control'])->label(false)?>
+                <?= $form->field($model, 'flight_level_value')->textInput(['maxlength' => true, 'id' => 'levelValue', 'class' => 'form-control'])->label(false)?>
             </div>
         </div>
     </div>
     <div class="row mb-3">
         <div class="col-md-12">
-            <div>Route</div>
-            <div><?= Html::textarea('route', null, ['rows' => 3, 'class' => 'form-control'])?></div>
+            <div><?= $form->field($model, 'route')->textarea(['rows' => 3, 'class' => 'form-control'])?></div>
         </div>
     </div>
     <div class="row mb-3">
@@ -69,30 +70,25 @@ $this->params['breadcrumbs'][] = $this->title;
             <div><?= Html::input('text', 'destination', $route->arrival, ['disabled' => true, 'class' => 'form-control'])?></div>
         </div>
         <div class="col-md-3">
-            <div>Total EET</div>
-            <div><?= Html::input('text', 'eet', null, ['maxlength' => 4, 'class' => 'form-control'])?></div>
+            <div><?= $form->field($model, 'estimated_time')->textInput(['maxlength' => true, 'class' => 'form-control'])?></div>
         </div>
         <div class="col-md-3">
-            <div>Altn Aerodrome</div>
-            <div><?= Html::input('text', 'altAerodrome', null, ['maxlength' => 4, 'class' => 'form-control'])?></div>
+            <div><?= $form->field($model, 'alternative1_icao')->textInput(['maxlength' => true, 'class' => 'form-control'])?></div>
         </div>
         <div class="col-md-3">
-            <div>2nd Altn Aerodrome</div>
-            <div><?= Html::input('text', '2ndaltAerodrome', null, ['maxlength' => 4, 'class' => 'form-control'])?></div>
+            <div><?= $form->field($model, 'alternative2_icao')->textInput(['maxlength' => true, 'class' => 'form-control'])?></div>
         </div>
     </div>
 
     <div class="row mb-3">
         <div class="col-md-12">
-            <div>Other Information</div>
-            <div><?= Html::textarea('otherInfo', null, ['rows' => 3, 'class' => 'form-control'])?></div>
+            <div><?= $form->field($model, 'other_information')->textarea(['rows' => 3, 'class' => 'form-control'])?></div>
         </div>
     </div>
 
     <div class="row mb-3">
         <div class="col-md-4">
-            <div>Endurance</div>
-            <div><?= Html::input('text', 'endurance', null, ['maxlength' => 4, 'class' => 'form-control'])?></div>
+            <div><?= $form->field($model, 'endurance_time')->textInput(['maxlength' => true, 'class' => 'form-control'])?></div>
         </div>
         <div class="col-md-4">
             <div>People on board</div>
@@ -117,6 +113,7 @@ $this->registerJs(<<<JS
     $('#levelUnit').on('change', function() {
         const input = $('#levelValue');
         if ($(this).val() === 'VFR') {
+            input.prop('value', "");
             input.prop('disabled', true);
         } else {
             input.prop('disabled', false);

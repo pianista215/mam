@@ -37,6 +37,20 @@ class SubmittedFlightPlanController extends Controller
         );
     }
 
+    protected function checkRouteIsUserLocation($route){
+        return  isset($route) &&
+                isset(Yii::$app->user->identity->location) &&
+                $route->departure == Yii::$app->user->identity->location;
+    }
+
+    protected function checkAircraftIsOnLocation($aircraft, $location){
+        return  isset($aircraft) &&
+                isset($location) &&
+                isset($aircraft->location) &&
+                $aircraft->location == $location;
+
+    }
+
     public function actionSelectRoute()
     {
         // TODO: EL ISSET CREO QUE SOBRA
@@ -46,6 +60,25 @@ class SubmittedFlightPlanController extends Controller
             return $this->render('select_route', [
                 'dataProvider' => $dataProvider,
             ]);
+        } else {
+            throw new ForbiddenHttpException();
+        }
+    }
+
+    public function actionSelectAircraft($route_id)
+    {
+        if(Yii::$app->user->can('submitFpl')){
+            $route = Route::findOne(['id' => $route_id]);
+            if($this->checkRouteIsUserLocation($route)){
+                $searchModel = new AircraftSearch();
+                $dataProvider = $searchModel->searchAircraftsInLocationWithRange($route->departure, $route->distance_nm);
+                return $this->render('select_aircraft', [
+                    'dataProvider' => $dataProvider,
+                    'route' => $route,
+                ]);
+            } else {
+                throw new ForbiddenHttpException();
+            }
         } else {
             throw new ForbiddenHttpException();
         }
@@ -63,6 +96,10 @@ class SubmittedFlightPlanController extends Controller
                 $model = new SubmittedFlightPlan();
                 $pilotName = Yii::$app->user->identity->fullName;
 
+                $model->aircraft_id = $aircraft->id;
+                $model->pilot_id = Yii::$app->user->identity->id;
+                $model->route_id = $route->id;
+
                  if ($this->request->isPost) {
                     if ($model->load($this->request->post()) && $model->save()) {
                         return $this->redirect(['view', 'id' => $model->id]);
@@ -76,39 +113,6 @@ class SubmittedFlightPlanController extends Controller
                     'aircraft' => $aircraft,
                     'pilotName' => $pilotName,
                     'model' => $model,
-                ]);
-            } else {
-                throw new ForbiddenHttpException();
-            }
-        } else {
-            throw new ForbiddenHttpException();
-        }
-    }
-
-    protected function checkRouteIsUserLocation($route){
-        return  isset($route) &&
-                isset(Yii::$app->user->identity->location) &&
-                $route->departure == Yii::$app->user->identity->location;
-    }
-
-    protected function checkAircraftIsOnLocation($aircraft, $location){
-        return  isset($aircraft) &&
-                isset($location) &&
-                isset($aircraft->location) &&
-                $aircraft->location == $location;
-
-    }
-
-    public function actionSelectAircraft($route_id)
-    {
-        if(Yii::$app->user->can('submitFpl')){
-            $route = Route::findOne(['id' => $route_id]);
-            if($this->checkRouteIsUserLocation($route)){
-                $searchModel = new AircraftSearch();
-                $dataProvider = $searchModel->searchAircraftsInLocationWithRange($route->departure, $route->distance_nm);
-                return $this->render('select_aircraft', [
-                    'dataProvider' => $dataProvider,
-                    'route' => $route,
                 ]);
             } else {
                 throw new ForbiddenHttpException();

@@ -20,9 +20,9 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'alternative2_icao')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'cruise_speed')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'cruise_speed_value')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'flight_level')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'flight_level_value')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'route')->textInput(['maxlength' => true]) ?>
 
@@ -35,6 +35,10 @@ use yii\widgets\ActiveForm;
     <?= $form->field($model, 'route_id')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'pilot_id')->textInput() ?>
+
+    <?= $form->field($model, 'cruise_speed_unit')->textInput(['maxlength' => true]) ?>
+
+    <?= $form->field($model, 'flight_level_unit')->textInput(['maxlength' => true]) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

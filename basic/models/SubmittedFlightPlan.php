@@ -46,16 +46,15 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
     {
         return [
             [['aircraft_id', 'flight_rules', 'alternative1_icao', 'cruise_speed_value', 'route', 'estimated_time', 'other_information', 'endurance_time', 'route_id', 'pilot_id', 'cruise_speed_unit', 'flight_level_unit'], 'required'],
-            [['aircraft_id', 'route_id', 'pilot_id'], 'integer'],
+            [['aircraft_id', 'route_id', 'pilot_id', 'cruise_speed_value', 'flight_level_value', 'estimated_time', 'endurance_time'], 'integer'],
             [['flight_rules', 'cruise_speed_unit'], 'string', 'length' => 1],
             [['flight_rules'], 'in', 'range' => array_keys(SubmittedFlightPlan::getFlightRulesTypes())],
             [['cruise_speed_unit'], 'in', 'range' => SubmittedFlightPlan::getValidSpeedUnits()],
-            [['cruise_speed_value'], 'integer'],
             [['alternative1_icao', 'alternative2_icao', 'cruise_speed_value', 'flight_level_value', 'estimated_time', 'endurance_time'], 'string', 'max' => 4],
             [['route', 'other_information'], 'string', 'max' => 400],
             [['flight_level_unit'], 'string', 'max' => 3],
             [['flight_level_unit'], 'in', 'range' => SubmittedFlightPlan::getValidFlightLevelUnits()],
-            [['flight_level_value'], 'integer'],
+            [['flight_level_value'], 'validateFlightLevel'],
             [['pilot_id'], 'unique'],
             [['aircraft_id'], 'unique'],
             [['alternative1_icao'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['alternative1_icao' => 'icao_code']],
@@ -75,16 +74,16 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
             'id' => 'ID',
             'aircraft_id' => 'Aircraft ID',
             'flight_rules' => 'Flight Rules',
-            'alternative1_icao' => 'Alternative1 Icao',
+            'alternative1_icao' => 'Altn Aerodrome',
             'alternative2_icao' => 'Alternative2 Icao',
             'cruise_speed_unit' => 'Cruise Speed Unit',
             'cruise_speed_value' => 'Cruise Speed Value',
             'flight_level_unit' => 'Flight Level Unit',
             'flight_level_value' => 'Flight Level Value',
             'route' => 'Route',
-            'estimated_time' => 'Estimated Time',
+            'estimated_time' => 'Total EET',
             'other_information' => 'Other Information',
-            'endurance_time' => 'Endurance Time',
+            'endurance_time' => 'Endurance',
             'route_id' => 'Route ID',
             'pilot_id' => 'Pilot ID',
         ];
@@ -106,6 +105,12 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
 
     public static function getValidFlightLevelUnits(){
         return ['F', 'A', 'S', 'M', 'VFR'];
+    }
+
+    public function validateFlightLevel(){
+        if($this->flight_level_unit == 'VFR' && !empty($this->flight_level_value)){
+            $this->addError('flight_level_value', "If VFR is selected flight level should be empty");
+        }
     }
 
     /**
