@@ -67,7 +67,7 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
 
     public function beforeValidate()
     {
-        if (empty($this->alternative2_icao)) {
+        if ($this->alternative2_icao != null && empty(trim($this->alternative2_icao))) {
             $this->alternative2_icao = null;
         }
         if($this->flight_level_unit == 'VFR' && $this->flight_level_value == null){
