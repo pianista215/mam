@@ -52,10 +52,10 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
         </div>
         <div class="col-md-4">
-            <div>Level</div><!-- TODO UNAI HACER QUE SI ALGUIEN METE MAL Y VUELVES AL FORMULARIO VFR BLOQUEE EL OTRO CAMPO -->
+            <div>Level</div>
             <div class="input-group">
                 <?= $form->field($model, 'flight_level_unit')->dropDownList(array_combine($model->validFlightLevelUnits, $model->validFlightLevelUnits), ['id' => 'levelUnit', 'class' => 'form-select flex-grow-0 w-auto'])->label(false)?>
-                <?= $form->field($model, 'flight_level_value')->textInput(['maxlength' => true, 'id' => 'levelValue', 'class' => 'form-control'])->label(false)?>
+                <?= $form->field($model, 'flight_level_value')->textInput(['maxlength' => true, 'disabled' => ($model->flight_level_unit == 'VFR'), 'id' => 'levelValue', 'class' => 'form-control'])->label(false)?>
             </div>
         </div>
     </div>

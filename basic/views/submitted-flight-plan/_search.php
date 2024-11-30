@@ -23,11 +23,11 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'alternative1_icao') ?>
 
-    <?php // echo $form->field($model, 'alternative2_icao') ?>
+    <?= $form->field($model, 'alternative2_icao') ?>
 
-    <?php // echo $form->field($model, 'cruise_speed') ?>
+    <?php // echo $form->field($model, 'cruise_speed_value') ?>
 
-    <?php // echo $form->field($model, 'flight_level') ?>
+    <?php // echo $form->field($model, 'flight_level_value') ?>
 
     <?php // echo $form->field($model, 'route') ?>
 
@@ -40,6 +40,10 @@ use yii\widgets\ActiveForm;
     <?php // echo $form->field($model, 'route_id') ?>
 
     <?php // echo $form->field($model, 'pilot_id') ?>
+
+    <?php // echo $form->field($model, 'cruise_speed_unit') ?>
+
+    <?php // echo $form->field($model, 'flight_level_unit') ?>
 
     <div class="form-group">
         <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
