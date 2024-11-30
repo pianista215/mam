@@ -44,18 +44,27 @@ $this->params['breadcrumbs'][] = $this->title;
             <div>Departure Aerodrome</div>
             <div><?= Html::input('text', 'departure', $route->departure, ['disabled' => true, 'class' => 'form-control'])?></div>
         </div>
+    <!-- TODO: REVIEW HOW TO MAKE THIS SELECT AND INPUT APPEAR TOGETHER USING FORM FIELD-->
         <div class="col-md-4">
             <div>Cruising speed</div>
             <div class="input-group">
-                <?= $form->field($model, 'cruise_speed_unit')->dropDownList(array_combine($model->validSpeedUnits, $model->validSpeedUnits), ['class' => 'form-select flex-grow-0 w-auto'])->label(false)?>
-                <?= $form->field($model, 'cruise_speed_value')->textInput(['maxlength' => true, 'class' => 'form-control'])->label(false)?>
+                <?= $form->field($model, 'cruise_speed_unit', ['options' => ['tag' => false]])->dropDownList(array_combine($model->validSpeedUnits, $model->validSpeedUnits), ['class' => 'form-select flex-grow-0 w-auto'])->label(false)?>
+                <?= $form->field($model, 'cruise_speed_value', ['options' => ['tag' => false]])->textInput(['maxlength' => true, 'class' => 'form-control'])->label(false)?>
+            </div>
+            <div class="invalid-feedback d-block">
+                <?= Html::error($model, 'cruise_speed_unit', ['class' => 'd-block']) ?>
+                <?= Html::error($model, 'cruise_speed_value', ['class' => 'd-block']) ?>
             </div>
         </div>
         <div class="col-md-4">
             <div>Level</div>
             <div class="input-group">
-                <?= $form->field($model, 'flight_level_unit')->dropDownList(array_combine($model->validFlightLevelUnits, $model->validFlightLevelUnits), ['id' => 'levelUnit', 'class' => 'form-select flex-grow-0 w-auto'])->label(false)?>
-                <?= $form->field($model, 'flight_level_value')->textInput(['maxlength' => true, 'disabled' => ($model->flight_level_unit == 'VFR'), 'id' => 'levelValue', 'class' => 'form-control'])->label(false)?>
+                <?= $form->field($model, 'flight_level_unit', ['options' => ['tag' => false]])->dropDownList(array_combine($model->validFlightLevelUnits, $model->validFlightLevelUnits), ['id' => 'flight_level_unit', 'class' => 'form-select flex-grow-0 w-auto'])->label(false)?>
+                <?= $form->field($model, 'flight_level_value', ['options' => ['tag' => false]])->textInput(['maxlength' => true, 'disabled' => ($model->flight_level_unit == 'VFR'), 'id' => 'flight_level_value', 'class' => 'form-control'])->label(false)?>
+            </div>
+            <div class="invalid-feedback d-block">
+                <?= Html::error($model, 'flight_level_unit', ['class' => 'd-block']) ?>
+                <?= Html::error($model, 'flight_level_value', ['class' => 'd-block']) ?>
             </div>
         </div>
     </div>
@@ -110,8 +119,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <?php
 $this->registerJs(<<<JS
-    $('#levelUnit').on('change', function() {
-        const input = $('#levelValue');
+    $('#flight_level_unit').on('change', function() {
+        const input = $('#flight_level_value');
         if ($(this).val() === 'VFR') {
             input.prop('value', "");
             input.prop('disabled', true);
