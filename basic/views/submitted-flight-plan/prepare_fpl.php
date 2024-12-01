@@ -48,23 +48,15 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="col-md-4">
             <div>Cruising speed</div>
             <div class="input-group">
-                <?= $form->field($model, 'cruise_speed_unit', ['options' => ['tag' => false]])->dropDownList(array_combine($model->validSpeedUnits, $model->validSpeedUnits), ['class' => 'form-select flex-grow-0 w-auto'])->label(false)?>
-                <?= $form->field($model, 'cruise_speed_value', ['options' => ['tag' => false]])->textInput(['maxlength' => true, 'class' => 'form-control'])->label(false)?>
-            </div>
-            <div class="invalid-feedback d-block">
-                <?= Html::error($model, 'cruise_speed_unit', ['class' => 'd-block']) ?>
-                <?= Html::error($model, 'cruise_speed_value', ['class' => 'd-block']) ?>
+                <?= $form->field($model, 'cruise_speed_unit', ['enableClientValidation'=> false, 'options' => ['tag' => false]])->dropDownList(array_combine($model->validSpeedUnits, $model->validSpeedUnits), ['class' => 'form-select flex-grow-0 w-auto'])->label(false)?>
+                <?= $form->field($model, 'cruise_speed_value', ['enableClientValidation'=> false, 'options' => ['tag' => false]])->textInput(['maxlength' => true, 'class' => 'form-control'])->label(false)?>
             </div>
         </div>
         <div class="col-md-4">
             <div>Level</div>
             <div class="input-group">
-                <?= $form->field($model, 'flight_level_unit', ['options' => ['tag' => false]])->dropDownList(array_combine($model->validFlightLevelUnits, $model->validFlightLevelUnits), ['id' => 'flight_level_unit', 'class' => 'form-select flex-grow-0 w-auto'])->label(false)?>
-                <?= $form->field($model, 'flight_level_value', ['options' => ['tag' => false]])->textInput(['maxlength' => true, 'disabled' => ($model->flight_level_unit == 'VFR'), 'id' => 'flight_level_value', 'class' => 'form-control'])->label(false)?>
-            </div>
-            <div class="invalid-feedback d-block">
-                <?= Html::error($model, 'flight_level_unit', ['class' => 'd-block']) ?>
-                <?= Html::error($model, 'flight_level_value', ['class' => 'd-block']) ?>
+                <?= $form->field($model, 'flight_level_unit', ['enableClientValidation'=> false, 'options' => ['tag' => false]])->dropDownList(array_combine($model->validFlightLevelUnits, $model->validFlightLevelUnits), ['id' => 'flight_level_unit', 'class' => 'form-select flex-grow-0 w-auto'])->label(false)?>
+                <?= $form->field($model, 'flight_level_value', ['enableClientValidation'=> false, 'options' => ['tag' => false]])->textInput(['maxlength' => true, 'disabled' => ($model->flight_level_unit == 'VFR'), 'id' => 'flight_level_value', 'class' => 'form-control'])->label(false)?>
             </div>
         </div>
     </div>

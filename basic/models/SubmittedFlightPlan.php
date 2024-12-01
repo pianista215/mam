@@ -45,6 +45,7 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
+            [['alternative1_icao', 'alternative2_icao', 'flight_level_value', 'cruise_speed_value', 'route', 'estimated_time', 'other_information', 'endurance_time'], 'trim'],
             [['aircraft_id', 'flight_rules', 'alternative1_icao', 'cruise_speed_value', 'route', 'estimated_time', 'other_information', 'endurance_time', 'route_id', 'pilot_id', 'cruise_speed_unit', 'flight_level_unit'], 'required'],
             [['aircraft_id', 'route_id', 'pilot_id', 'cruise_speed_value', 'flight_level_value', 'estimated_time', 'endurance_time'], 'integer'],
             [['flight_rules', 'cruise_speed_unit'], 'string', 'length' => 1],
@@ -54,9 +55,10 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
             [['route', 'other_information'], 'string', 'max' => 400],
             [['flight_level_unit'], 'string', 'max' => 3],
             [['flight_level_unit'], 'in', 'range' => SubmittedFlightPlan::getValidFlightLevelUnits()],
-            [['flight_level_value'], 'validateFlightLevel'],
+            [['flight_level_value'], 'validateFlightLevel', 'skipOnEmpty' => false],
             [['pilot_id'], 'unique'],
             [['aircraft_id'], 'unique'],
+            [['alternative2_icao'], 'default', 'value' => null],
             [['alternative1_icao'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['alternative1_icao' => 'icao_code']],
             [['alternative2_icao'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['alternative2_icao' => 'icao_code']],
             [['aircraft_id'], 'exist', 'skipOnError' => true, 'targetClass' => Aircraft::class, 'targetAttribute' => ['aircraft_id' => 'id']],
@@ -67,9 +69,6 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
 
     public function beforeValidate()
     {
-        if ($this->alternative2_icao != null && empty(trim($this->alternative2_icao))) {
-            $this->alternative2_icao = null;
-        }
         if($this->flight_level_unit == 'VFR' && $this->flight_level_value == null){
             $this->flight_level_value = '';
         }
@@ -118,9 +117,15 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
         return ['F', 'A', 'S', 'M', 'VFR'];
     }
 
-    public function validateFlightLevel(){
-        if($this->flight_level_unit == 'VFR' && !empty($this->flight_level_value)){
-            $this->addError('flight_level_value', "If VFR is selected flight level should be empty");
+    public function validateFlightLevel($attribute, $params){
+        if($this->flight_level_unit == 'VFR'){
+            if(!empty($this->flight_level_value)){
+                $this->addError('flight_level_value', 'If VFR is selected flight level should be empty');
+            }
+        } else {
+            if(!isset($this->flight_level_value) || empty($this->flight_level_value)){
+                $this->addError('flight_level_value', 'Flight Level Value cannot be blank if VFR is not selected');
+            }
         }
     }
 
