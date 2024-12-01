@@ -51,10 +51,16 @@ class SubmittedFlightPlanController extends Controller
 
     }
 
+    protected function checkNonSubmittedFpl() {
+        if (($model = SubmittedFlightPlan::findOne(['pilot_id' => Yii::$app->user->identity->id])) !== null){
+            return $this->redirect(['view', 'id' => $model->id]);
+        }
+    }
+
     public function actionSelectRoute()
     {
-        // TODO: EL ISSET CREO QUE SOBRA
         if(Yii::$app->user->can('submitFpl') && isset(Yii::$app->user->identity->location)){
+            $this->checkNonSubmittedFpl();
             $searchModel = new RouteSearch();
             $dataProvider = $searchModel->searchWithFixedDeparture(Yii::$app->user->identity->location);
             return $this->render('select_route', [
@@ -68,6 +74,7 @@ class SubmittedFlightPlanController extends Controller
     public function actionSelectAircraft($route_id)
     {
         if(Yii::$app->user->can('submitFpl')){
+            $this->checkNonSubmittedFpl();
             $route = Route::findOne(['id' => $route_id]);
             if($this->checkRouteIsUserLocation($route)){
                 $searchModel = new AircraftSearch();
@@ -87,6 +94,7 @@ class SubmittedFlightPlanController extends Controller
     public function actionPrepareFpl($route_id, $aircraft_id)
     {
         if(Yii::$app->user->can('submitFpl')){
+            $this->checkNonSubmittedFpl();
             $route = Route::findOne(['id' => $route_id]);
             $aircraft = Aircraft::findOne(['id' => $aircraft_id]);
             if(
@@ -132,12 +140,15 @@ class SubmittedFlightPlanController extends Controller
     public function actionIndex()
     {
         $searchModel = new SubmittedFlightPlanSearch();
-        $dataProvider = $searchModel->search($this->request->queryParams);
+        $dataProvider = $searchModel->search(['pilot_id' => Yii::$app->user->identity->id]);
 
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
+        if ($dataProvider->getTotalCount() === 0) {
+            return $this->redirect(['submitted-flight-plan/select-route']);
+        } else {
+            return $this->render('index', [
+                'dataProvider' => $dataProvider,
+            ]);
+        }
     }
 
     // TODO: NEEDED?
@@ -158,28 +169,6 @@ class SubmittedFlightPlanController extends Controller
     // TODO: REMOVE?
 
     /**
-     * Creates a new SubmittedFlightPlan model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return string|\yii\web\Response
-     */
-    public function actionCreate()
-    {
-        $model = new SubmittedFlightPlan();
-
-        if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'id' => $model->id]);
-            }
-        } else {
-            $model->loadDefaultValues();
-        }
-
-        return $this->render('create', [
-            'model' => $model,
-        ]);
-    }
-
-    /**
      * Updates an existing SubmittedFlightPlan model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param string $id ID
@@ -190,13 +179,18 @@ class SubmittedFlightPlanController extends Controller
     {
         $model = $this->findModel($id);
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
-        }
+        if (Yii::$app->user->can('crudOwnFpl', ['submittedFlightPlan' => $model])) {
 
-        return $this->render('update', [
-            'model' => $model,
-        ]);
+            if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
+
+            return $this->render('update', [
+                'model' => $model,
+            ]);
+        } else {
+            throw new ForbiddenHttpException();
+        }
     }
 
     /**
@@ -208,9 +202,14 @@ class SubmittedFlightPlanController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
+        $model = $this->findModel($id);
 
-        return $this->redirect(['index']);
+        if (Yii::$app->user->can('crudOwnFpl', ['submittedFlightPlan' => $model])) {
+            $this->findModel($id)->delete();
+            return $this->redirect(['site/index']);
+        } else {
+            throw new ForbiddenHttpException();
+        }
     }
 
     /**

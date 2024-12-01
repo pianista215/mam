@@ -6,8 +6,7 @@ use yii\widgets\DetailView;
 /** @var yii\web\View $this */
 /** @var app\models\SubmittedFlightPlan $model */
 
-$this->title = $model->id;
-$this->params['breadcrumbs'][] = ['label' => 'Submitted Flight Plans', 'url' => ['index']];
+$this->title = 'Current Flight Plan';
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
@@ -26,25 +25,12 @@ $this->params['breadcrumbs'][] = $this->title;
         ]) ?>
     </p>
 
-    <?= DetailView::widget([
+    <?= $this->render('_form', [
         'model' => $model,
-        'attributes' => [
-            'id',
-            'aircraft_id',
-            'flight_rules',
-            'alternative1_icao',
-            'alternative2_icao',
-            'cruise_speed_value',
-            'flight_level_value',
-            'route',
-            'estimated_time',
-            'other_information',
-            'endurance_time',
-            'route_id',
-            'pilot_id',
-            'cruise_speed_unit',
-            'flight_level_unit',
-        ],
+        'aircraft' => $model->getAircraft()->one(),
+        'route' => $model->getRoute0()->one(),
+        'pilotName' => Yii::$app->user->identity->fullName,
+        'mode' => 'view',
     ]) ?>
 
 </div>

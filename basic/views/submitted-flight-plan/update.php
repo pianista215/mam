@@ -5,9 +5,7 @@ use yii\helpers\Html;
 /** @var yii\web\View $this */
 /** @var app\models\SubmittedFlightPlan $model */
 
-$this->title = 'Update Submitted Flight Plan: ' . $model->id;
-$this->params['breadcrumbs'][] = ['label' => 'Submitted Flight Plans', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->id, 'url' => ['view', 'id' => $model->id]];
+$this->title = 'Updating Flight Plan';
 $this->params['breadcrumbs'][] = 'Update';
 ?>
 <div class="submitted-flight-plan-update">
@@ -16,6 +14,10 @@ $this->params['breadcrumbs'][] = 'Update';
 
     <?= $this->render('_form', [
         'model' => $model,
+        'aircraft' => $model->getAircraft()->one(),
+        'route' => $model->getRoute0()->one(),
+        'pilotName' => Yii::$app->user->identity->fullName,
+        'mode' => 'update',
     ]) ?>
 
 </div>

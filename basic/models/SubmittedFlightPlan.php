@@ -69,6 +69,8 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
 
     public function beforeValidate()
     {
+        Yii::warning('UNAIIIIII '. $this->flight_level_unit);
+        Yii::warning('UNAIIIIII2 '. $this->flight_level_value);
         if($this->flight_level_unit == 'VFR' && $this->flight_level_value == null){
             $this->flight_level_value = '';
         }

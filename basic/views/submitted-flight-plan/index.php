@@ -17,31 +17,12 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <p>
-        <?= Html::a('Create Submitted Flight Plan', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
-
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
-
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
-
-            'id',
-            'aircraft_id',
-            'flight_rules',
-            'alternative1_icao',
-            //'alternative2_icao',
-            //'cruise_speed',
-            //'flight_level',
-            //'route',
-            //'estimated_time',
-            //'other_information',
-            //'endurance_time',
-            //'route_id',
-            //'pilot_id',
+            'route0.departure',
+            'route0.arrival',
+            'aircraft.name',
             [
                 'class' => ActionColumn::className(),
                 'urlCreator' => function ($action, SubmittedFlightPlan $model, $key, $index, $column) {
@@ -49,6 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
                  }
             ],
         ],
+        'summary' => '',
     ]); ?>
 
 
