@@ -42,9 +42,10 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     public function rules()
     {
         return [
-            [['name', 'surname', 'email', 'city', 'country_id', 'password', 'date_of_birth'], 'required'],
+            [['name', 'surname', 'email', 'city', 'country_id', 'password', 'date_of_birth', 'location'], 'required'],
             [['registration_date', 'date_of_birth'], 'safe'],
             [['country_id', 'vatsim_id', 'ivao_id'], 'integer'],
+            [['hours_flown'], 'number'],
             [['license'], 'string', 'max' => 8],
             [['name'], 'string', 'max' => 20],
             [['surname', 'city'], 'string', 'max' => 40],
@@ -52,8 +53,10 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
             [['email'], 'email'],
             [['password'], 'string', 'max' => 255], // TODO: Ensure complex password inputs before hash
             [['auth_key', 'access_token'], 'string', 'max' => 32],
+            [['location'], 'string', 'max' => 4],
             [['email'], 'unique'],
             [['license'], 'unique'],
+            [['location'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['location' => 'icao_code']],
             [['country_id'], 'exist', 'skipOnError' => true, 'targetClass' => Country::class, 'targetAttribute' => ['country_id' => 'id']],
         ];
     }
@@ -78,6 +81,8 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
             'ivao_id' => 'Ivao ID',
             'auth_key' => 'Auth Key',
             'access_token' => 'Access Token',
+            'hours_flown' => 'Hours Flown',
+            'location' => 'Location',
         ];
     }
 
@@ -99,6 +104,16 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     public function getFlightReports()
     {
         return $this->hasMany(FlightReport::class, ['pilot_id' => 'id']);
+    }
+
+    /**
+     * Gets query for [[Location0]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLocation0()
+    {
+        return $this->hasOne(Airport::class, ['icao_code' => 'location']);
     }
 
     /**
@@ -141,6 +156,22 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @return string current user location
+     */
+    public function getLocation()
+    {
+        return $this->location;
+    }
+
+    /**
+     * @return string current user fullname
+     */
+    public function getFullName()
+    {
+        return $this->name.' '.$this->surname;
     }
 
     /**

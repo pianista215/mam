@@ -6,7 +6,7 @@ use app\models\Country;
 use app\models\Pilot;
 use app\models\PilotSearch;
 use yii\web\Controller;
-use yii\web\ForbiddenHttpException ;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use Yii;
@@ -17,6 +17,8 @@ use Yii;
  */
 class PilotController extends Controller
 {
+
+    // TODO: WE NEED A RESET PASSWORD ACTION ALLOWING ADMIN OR PILOT TO RESET ITS PASSWORD
 
     /**
      * @inheritDoc
@@ -43,6 +45,7 @@ class PilotController extends Controller
      */
     public function actionIndex()
     {
+        // TODO: SORT BY
         $searchModel = new PilotSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 
@@ -154,8 +157,11 @@ class PilotController extends Controller
                 return $this->redirect(['view', 'id' => $model->id]);
             }
 
+            $countries = Country::find()->select(['name'])->indexBy('id')->column();
+
             return $this->render('update', [
                 'model' => $model,
+                'countries' => $countries,
             ]);
         } else {
             throw new ForbiddenHttpException();

@@ -32,6 +32,28 @@ class AircraftSearch extends Aircraft
         return Model::scenarios();
     }
 
+    // TODO: We can simplify more that functions in the search just to retrieve data provider???
+    public function searchAircraftsInLocationWithRange($location, $distance)
+    {
+        $query = Aircraft::find()->joinWith(['aircraftType']);
+        // add conditions that should always apply here
+        $this->location = $location;
+        $dataProvider = new ActiveDataProvider([
+           'query' => $query,
+        ]);
+
+        if (!$this->validate()) {
+            // Don't return nothing if validation fails
+            $query->where('0=1');
+            return $dataProvider;
+        }
+
+        $query->andFilterWhere(['location' =>$this->location]);
+        $query->andFilterWhere(['>=','aircraft_type.max_nm_range', $distance]);
+
+        return $dataProvider;
+    }
+
     /**
      * Creates data provider instance with search query applied
      *
@@ -52,8 +74,8 @@ class AircraftSearch extends Aircraft
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            // Don't return nothing if validation fails
+                        $query->where('0=1');
             return $dataProvider;
         }
 

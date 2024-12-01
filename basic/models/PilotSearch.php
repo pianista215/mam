@@ -16,9 +16,11 @@ class PilotSearch extends Pilot
      */
     public function rules()
     {
+        // TODO: CHECK IF IT'S DANGEROUS HAVING THE PASSWORD HERE
         return [
             [['id', 'country_id', 'vatsim_id', 'ivao_id'], 'integer'],
-            [['license', 'name', 'surname', 'email', 'registration_date', 'city', 'password', 'date_of_birth'], 'safe'],
+            [['license', 'name', 'surname', 'email', 'registration_date', 'city', 'password', 'date_of_birth', 'auth_key', 'access_token', 'location'], 'safe'],
+            [['hours_flown'], 'number'],
         ];
     }
 
@@ -51,8 +53,8 @@ class PilotSearch extends Pilot
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            // Don't return nothing if validation fails
+            $query->where('0=1');
             return $dataProvider;
         }
 
@@ -64,14 +66,20 @@ class PilotSearch extends Pilot
             'date_of_birth' => $this->date_of_birth,
             'vatsim_id' => $this->vatsim_id,
             'ivao_id' => $this->ivao_id,
+            'hours_flown' => $this->hours_flown,
         ]);
+
+        // TODO: CHECK IF IT'S DANGEROUS HAVING THE PASSWORD HERE
 
         $query->andFilterWhere(['like', 'license', $this->license])
             ->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'surname', $this->surname])
             ->andFilterWhere(['like', 'email', $this->email])
             ->andFilterWhere(['like', 'city', $this->city])
-            ->andFilterWhere(['like', 'password', $this->password]);
+            ->andFilterWhere(['like', 'password', $this->password])
+            ->andFilterWhere(['like', 'auth_key', $this->auth_key])
+            ->andFilterWhere(['like', 'access_token', $this->access_token])
+            ->andFilterWhere(['like', 'location', $this->location]);
 
         return $dataProvider;
     }

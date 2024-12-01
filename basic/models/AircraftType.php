@@ -18,6 +18,7 @@ use Yii;
  */
 class AircraftType extends \yii\db\ActiveRecord
 {
+    // TODO: CONSIDER DIFFERENT CONFIGURATIONS (737 carguero y 737 normal)
     /**
      * {@inheritdoc}
      */

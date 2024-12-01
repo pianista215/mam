@@ -12,7 +12,10 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'aircraft_type_id')->textInput() ?>
+    <?= $form->field($model, 'aircraft_type_id')->dropdownList(
+        $aircraftTypes,
+        ['prompt'=>'Select Aircraft Type']
+        ); ?>
 
     <?= $form->field($model, 'registration')->textInput(['maxlength' => true]) ?>
 

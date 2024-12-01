@@ -16,10 +16,11 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="aircraft-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-
+    <?php if(Yii::$app->user->can('aircraftCrud')) : ?>
     <p>
         <?= Html::a('Create Aircraft', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
+    <?php endif; ?>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
@@ -29,19 +30,36 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
 
-            'id',
-            'aircraft_type_id',
+            //'id',
+            'aircraftType.icao_type_code',
             'registration',
             'name',
             'location',
             //'hours_flown',
             [
                 'class' => ActionColumn::className(),
+                'visibleButtons'=>[
+                    'delete'=> function($model){
+                        return Yii::$app->user->can('aircraftCrud');
+                    },
+                    'update'=> function($model){
+                        return Yii::$app->user->can('aircraftCrud');
+                    },
+                ],
                 'urlCreator' => function ($action, Aircraft $model, $key, $index, $column) {
                     return Url::toRoute([$action, 'id' => $model->id]);
                  }
             ],
         ],
+        'tableOptions' => ['class' => 'table table-striped table-bordered'],
+        'pager' => [
+                'options' => ['class' => 'pagination justify-content-center'],
+                'linkContainerOptions' => ['class' => 'page-item'],
+                'linkOptions' => ['class' => 'page-link'],
+                'disabledListItemSubTagOptions' => ['class' => 'page-link'],
+                'hideOnSinglePage' => true,
+            ],
+        'summaryOptions' => ['class' => 'text-muted']
     ]); ?>
 
 

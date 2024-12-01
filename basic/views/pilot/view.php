@@ -31,7 +31,6 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
-            'id',
             'license',
             'name',
             'surname',
@@ -42,6 +41,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'date_of_birth',
             'vatsim_id',
             'ivao_id',
+            'hours_flown',
+            'location',
         ],
     ]) ?>
 

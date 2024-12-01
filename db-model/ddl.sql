@@ -1,12 +1,14 @@
 CREATE DATABASE `mam` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
 
+-- TODO REVIEW ORDER BECAUSE WITH THAT ORDER WE CAN'T CREATE FROM SCRATCH THE DATABASE
+
 CREATE TABLE `aircraft` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `aircraft_type_id` int(10) unsigned NOT NULL,
   `registration` varchar(10) NOT NULL,
   `name` varchar(20) NOT NULL,
   `location` char(4) NOT NULL,
-  `hours_flown` double NOT NULL DEFAULT 0,
+  `hours_flown` double unsigned NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `aircrafts_registration_unique` (`registration`),
   UNIQUE KEY `aircrafts_name_unique` (`name`),
@@ -97,12 +99,16 @@ CREATE TABLE `pilot` (
   `ivao_id` bigint(20) unsigned DEFAULT NULL,
   `auth_key` char(32) DEFAULT NULL,
   `access_token` char(32) DEFAULT NULL,
+  `hours_flown` double unsigned DEFAULT 0,
+  `location` char(4) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `pilot_unique` (`email`),
   UNIQUE KEY `pilots_unique_license` (`license`),
   KEY `pilots_countries_FK` (`country_id`),
+  KEY `pilot_airport_FK` (`location`),
+  CONSTRAINT `pilot_airport_FK` FOREIGN KEY (`location`) REFERENCES `airport` (`icao_code`) ON UPDATE CASCADE,
   CONSTRAINT `pilots_countries_FK` FOREIGN KEY (`country_id`) REFERENCES `country` (`id`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `route` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -118,25 +124,30 @@ CREATE TABLE `route` (
   CONSTRAINT `routes_airports_departure_FK` FOREIGN KEY (`departure`) REFERENCES `airport` (`icao_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `submitted_flightplan` (
+CREATE TABLE `submitted_flight_plan` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `aircraft_id` int(10) unsigned NOT NULL,
   `flight_rules` char(1) NOT NULL,
-  `flight_type` char(1) NOT NULL,
   `alternative1_icao` char(4) NOT NULL,
-  `alternative2_icao` char(4) NOT NULL,
-  `cruise_speed` varchar(5) NOT NULL,
-  `flight_level` varchar(5) NOT NULL,
+  `alternative2_icao` char(4) DEFAULT NULL,
+  `cruise_speed_value` varchar(4) NOT NULL,
+  `flight_level_value` varchar(4) NOT NULL,
   `route` varchar(400) NOT NULL,
   `estimated_time` char(4) NOT NULL,
   `other_information` varchar(400) NOT NULL,
   `endurance_time` char(4) NOT NULL,
   `route_id` bigint(20) unsigned NOT NULL,
   `pilot_id` int(10) unsigned NOT NULL,
+  `cruise_speed_unit` char(1) NOT NULL,
+  `flight_level_unit` varchar(3) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `submited_flightplans_unique_pilot_id` (`pilot_id`),
+  UNIQUE KEY `submitted_flightplan_unique_aircraft_id` (`aircraft_id`),
   KEY `submitted_flightplans_routes_FK` (`route_id`),
-  KEY `submitted_flightplans_aircraft_reserved_FK` (`aircraft_id`),
+  KEY `submitted_flightplan_airport_alt1_FK` (`alternative1_icao`),
+  KEY `submitted_flightplan_airport_alt2_FK` (`alternative2_icao`),
+  CONSTRAINT `submitted_flightplan_airport_alt1_FK` FOREIGN KEY (`alternative1_icao`) REFERENCES `airport` (`icao_code`) ON UPDATE CASCADE,
+  CONSTRAINT `submitted_flightplan_airport_alt2_FK` FOREIGN KEY (`alternative2_icao`) REFERENCES `airport` (`icao_code`) ON UPDATE CASCADE,
   CONSTRAINT `submitted_flightplans_aircraft_reserved_FK` FOREIGN KEY (`aircraft_id`) REFERENCES `aircraft` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `submitted_flightplans_pilots_FK` FOREIGN KEY (`pilot_id`) REFERENCES `pilot` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `submitted_flightplans_routes_FK` FOREIGN KEY (`route_id`) REFERENCES `route` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
