@@ -44,7 +44,6 @@ $this->params['breadcrumbs'][] = $this->title;
             <div>Departure Aerodrome</div>
             <div><?= Html::input('text', 'departure', $route->departure, ['disabled' => true, 'class' => 'form-control'])?></div>
         </div>
-    <!-- TODO: REVIEW HOW TO SHOW JAVASCRIPT ERRORS ON THAT -->
         <div class="col-md-4">
             <div>Cruising speed</div>
             <div class="input-group">
