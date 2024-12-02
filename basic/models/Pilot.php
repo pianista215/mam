@@ -206,7 +206,6 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     {
         if (parent::beforeSave($insert)) {
             if ($this->isNewRecord) {
-                // TODO: Add salt to the password
                 // TODO: Period of validation and ensure password could be modified later (is only hashed in the first time)
                 $this->auth_key = \Yii::$app->security->generateRandomString(32);
                 $this->access_token = \Yii::$app->security->generateRandomString(32);
