@@ -3,7 +3,7 @@
 use app\rbac\rules\SubmittedFlightPlanOwnerRule;
 use yii\db\Migration;
 
-
+// TODO: CHECK IF USE RBAC BASE FOR MIGRATIONS BEFORE THAT OR PROVIDE DIRECTLY SQL
 /**
  * Class m241202_180323_add_rbac_roles
  */
