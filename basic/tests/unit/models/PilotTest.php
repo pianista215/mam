@@ -33,8 +33,6 @@ class PilotTest extends DbTestCase
 
     public function testValidationRules()
     {
-
-
         $pilot = new Pilot();
 
         $this->assertFalse($pilot->validate());
@@ -128,5 +126,53 @@ class PilotTest extends DbTestCase
             'date_of_birth' => '1995-05-10',
         ]);
         $this->assertTrue($pilot->save(false));
+    }
+
+    public function testInvalidCountry()
+    {
+        $pilot = new Pilot([
+            'name' => 'John',
+            'surname' => 'Doe',
+            'email' => 'john.doe@example.com',
+            'country_id' => 999,
+            'city' => 'New York',
+            'location' => 'LEVD',
+            'password' => 'SecurePass123!',
+            'date_of_birth' => '1990-01-01',
+        ]);
+        $this->assertFalse($pilot->validate());
+        $this->assertArrayHasKey('country_id', $pilot->getErrors());
+    }
+
+    public function testInvalidLocation()
+    {
+        $pilot = new Pilot([
+            'name' => 'John',
+            'surname' => 'Doe',
+            'email' => 'john.doe@example.com',
+            'country_id' => 1,
+            'city' => 'New York',
+            'location' => 'INVALID',
+            'password' => 'SecurePass123!',
+            'date_of_birth' => '1990-01-01',
+        ]);
+        $this->assertFalse($pilot->validate());
+        $this->assertArrayHasKey('location', $pilot->getErrors());
+    }
+
+    public function testInvalidDateOfBirth()
+    {
+        $pilot = new Pilot([
+            'name' => 'John',
+            'surname' => 'Doe',
+            'email' => 'john.doe@example.com',
+            'country_id' => 1,
+            'city' => 'New York',
+            'location' => 'LEVD',
+            'password' => 'SecurePass123!',
+            'date_of_birth' => date('Y-m-d', strtotime('tomorrow')),
+        ]);
+        $this->assertFalse($pilot->validate());
+        $this->assertArrayHasKey('date_of_birth', $pilot->getErrors());
     }
 }

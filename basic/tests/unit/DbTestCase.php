@@ -9,13 +9,9 @@ abstract class DbTestCase extends \Codeception\Test\Unit
     protected function _after()
     {
         parent::_after();
-        // Limpiar la base de datos (si es necesario)
         $this->clearDatabase();
     }
 
-    /**
-     * Limpia las tablas de la base de datos.
-     */
     protected function clearDatabase()
     {
         $db = Yii::$app->db;
