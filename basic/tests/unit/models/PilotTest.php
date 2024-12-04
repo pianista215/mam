@@ -175,4 +175,29 @@ class PilotTest extends DbTestCase
         $this->assertFalse($pilot->validate());
         $this->assertArrayHasKey('date_of_birth', $pilot->getErrors());
     }
+
+    public function testPasswordValidation()
+    {
+        $pilot = new Pilot([
+            'name' => 'John',
+            'surname' => 'Doe',
+            'email' => 'john.doe@example.com',
+            'country_id' => 1,
+            'city' => 'New York',
+            'location' => 'LEVD',
+            'date_of_birth' => '1990-01-01',
+        ]);
+
+        $pilot->password = 'short';
+        $this->assertFalse($pilot->validate(), 'Password should fail because it is less than 8 characters.');
+
+        $pilot->password = 'password123';
+        $this->assertTrue($pilot->validate(), 'Password should pass because it has more than 8 characters and includes both letters and numbers.'. json_encode($pilot->getErrors()));
+
+        $pilot->password = 'password';
+        $this->assertFalse($pilot->validate(), 'Password should fail because it does not contain a number.');
+
+        $pilot->password = '12345678';
+        $this->assertFalse($pilot->validate(), 'Password should fail because it does not contain a letter.');
+    }
 }

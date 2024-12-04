@@ -52,8 +52,11 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
             [['surname', 'city'], 'string', 'max' => 40],
             [['email'], 'string', 'max' => 80],
             [['email'], 'email'],
-            [['password'], 'string', 'max' => 255], // TODO: Ensure complex password inputs before hash
+            [['password'], 'string', 'max' => 255],
+            [['password'], 'string', 'min' => 8],
             [['auth_key', 'access_token'], 'string', 'max' => 32],
+            [['password'], 'match', 'pattern'=>'/\d/', 'message' => 'Password must contain at least one numeric digit.'],
+            [['password'], 'match', 'pattern'=>'/[a-zA-Z]/', 'message' => 'Password must contain at least one letter.'],
             [['location'], 'string', 'max' => 4],
             [['email'], 'unique'],
             [['license'], 'unique'],
