@@ -40,8 +40,12 @@ class Airport extends \yii\db\ActiveRecord
         return [
             [['icao_code', 'name', 'latitude', 'longitude', 'city', 'country_id'], 'required'],
             [['latitude', 'longitude'], 'number'],
+            [['latitude'], 'compare', 'compareValue' => -90, 'operator' => '>=', 'message' => 'Latitude must be between -90 and 90.'],
+            [['latitude'], 'compare', 'compareValue' => 90, 'operator' => '<=', 'message' => 'Latitude must be between -90 and 90.'],
+            [['longitude'], 'compare', 'compareValue' => -180, 'operator' => '>=', 'message' => 'Longitude must be between -180 and 180.'],
+            [['longitude'], 'compare', 'compareValue' => 180, 'operator' => '<=', 'message' => 'Longitude must be between -180 and 180.']
             [['country_id'], 'integer'],
-            [['icao_code'], 'string', 'max' => 4],
+            [['icao_code'], 'string', 'length' => 4],
             [['name'], 'string', 'max' => 100],
             [['city'], 'string', 'max' => 80],
             [['icao_code'], 'unique'],
