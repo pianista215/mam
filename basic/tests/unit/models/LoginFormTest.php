@@ -41,7 +41,7 @@ class LoginFormTest extends DbTestCase
             'country_id' => 1,
             'city' => 'New York',
             'location' => 'LEVD',
-            'password' => Yii::$app->security->generatePasswordHash('SecurePass123!'),
+            'password' => 'SecurePass123!',
             'date_of_birth' => '1990-01-01',
         ]);
         $pilot->save(false);
