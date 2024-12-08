@@ -39,7 +39,7 @@ class Aircraft extends \yii\db\ActiveRecord
             [['hours_flown'], 'number'],
             [['registration'], 'string', 'max' => 10],
             [['name'], 'string', 'max' => 20],
-            [['location'], 'string', 'max' => 4],
+            [['location'], 'string', 'length' => 4],
             [['registration'], 'unique'],
             [['name'], 'unique'],
             [['aircraft_type_id'], 'exist', 'skipOnError' => true, 'targetClass' => AircraftType::class, 'targetAttribute' => ['aircraft_type_id' => 'id']],

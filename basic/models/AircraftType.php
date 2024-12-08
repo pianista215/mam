@@ -35,7 +35,7 @@ class AircraftType extends \yii\db\ActiveRecord
         return [
             [['icao_type_code', 'name', 'max_nm_range', 'pax_capacity', 'cargo_capacity'], 'required'],
             [['max_nm_range', 'pax_capacity', 'cargo_capacity'], 'integer'],
-            [['icao_type_code'], 'string', 'max' => 4],
+            [['icao_type_code'], 'string', 'length' => 4],
             [['name'], 'string', 'max' => 60],
             [['icao_type_code'], 'unique'],
         ];
