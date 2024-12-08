@@ -43,7 +43,7 @@ class Airport extends \yii\db\ActiveRecord
             [['latitude'], 'compare', 'compareValue' => -90, 'operator' => '>=', 'message' => 'Latitude must be between -90 and 90.'],
             [['latitude'], 'compare', 'compareValue' => 90, 'operator' => '<=', 'message' => 'Latitude must be between -90 and 90.'],
             [['longitude'], 'compare', 'compareValue' => -180, 'operator' => '>=', 'message' => 'Longitude must be between -180 and 180.'],
-            [['longitude'], 'compare', 'compareValue' => 180, 'operator' => '<=', 'message' => 'Longitude must be between -180 and 180.']
+            [['longitude'], 'compare', 'compareValue' => 180, 'operator' => '<=', 'message' => 'Longitude must be between -180 and 180.'],
             [['country_id'], 'integer'],
             [['icao_code'], 'string', 'length' => 4],
             [['name'], 'string', 'max' => 100],
