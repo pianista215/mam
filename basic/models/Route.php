@@ -36,7 +36,7 @@ class Route extends \yii\db\ActiveRecord
             [['code', 'departure', 'arrival'], 'required'],
             [['distance_nm'], 'integer'],
             [['code'], 'string', 'max' => 10],
-            [['departure', 'arrival'], 'string', 'max' => 4],
+            [['departure', 'arrival'], 'string', 'length' => 4],
             [['code'], 'unique'],
             [['departure', 'arrival'], 'unique', 'targetAttribute' => ['departure', 'arrival']],
             [['arrival'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['arrival' => 'icao_code']],
