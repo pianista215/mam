@@ -85,6 +85,9 @@ class PilotController extends Controller
         } else {
             $model = new Pilot();
 
+            // TODO: Default location? Make configurable? Disable required?
+            $model->location = "LEBB";
+
             if($this->request->isPost){
                 if ($model->load($this->request->post()) && $model->save()) {
                     return $this->redirect(['register-thanks']);

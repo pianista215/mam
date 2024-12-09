@@ -18,9 +18,6 @@ $this->params['route_id'] = $route->id;
 <div class="submitted-flight-plan-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-    <h1><?= Html::encode($route->id) ?></h1>
-
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
