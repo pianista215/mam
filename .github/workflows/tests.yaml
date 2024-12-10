@@ -44,16 +44,13 @@ jobs:
 
       - name: Import Database Schema
         run: |
-          mysql -h127.0.0.1 -uroot -proot test_mam_database < db-model/ddl.sql          
+          mysql -h127.0.0.1 -uroot -proot test_mam_database < db-model/ddl.sql        
 
       - name: Run Migrations
         run: |
           php basic/yii migrate/up --interactive=0
           php basic/yii migrate-rbac --interactive=0
           php basic/yii migrate-custom-rbac --interactive=0
-
-      - name: Set environment for GitHub Actions
-        run: echo "CONFIG_PATH=config/test_db_github.php" >> $GITHUB_ENV
 
       - name: Run Tests
         env:
