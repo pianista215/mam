@@ -1,7 +1,9 @@
 <?php
 
 $params = require __DIR__ . '/params.php';
-$db = require __DIR__ . '/db.php';
+$db = getenv('GITHUB_ACTIONS') === 'true'
+    ? require __DIR__ . '/test_db_github.php'
+    : require __DIR__ . '/db.php';
 
 $config = [
     'id' => 'basic-console',
