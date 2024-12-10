@@ -30,7 +30,9 @@ jobs:
           extensions: mbstring, intl, pdo_mysql, curl
 
       - name: Install Composer Dependencies
-        run: composer install --prefer-dist --no-progress --no-suggest
+        run: |
+          cd basic
+          composer install --prefer-dist --no-progress --no-suggest
 
       - name: Wait for Database
         run: |
@@ -56,4 +58,6 @@ jobs:
       - name: Run Tests
         env:
           CONFIG_PATH: ${{ env.CONFIG_PATH }}
-        run: vendor/bin/codecept run unit -c $CONFIG_PATH
+        run: |
+          cd basic
+          vendor/bin/codecept run unit -c $CONFIG_PATH
