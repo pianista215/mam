@@ -1,0 +1,60 @@
+name: Run Unit Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: mariadb:latest
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: test_mam_database
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1.2' # Cambia a la versión que uses
+          extensions: mbstring, intl, pdo_mysql, curl
+
+      - name: Install Composer Dependencies
+        run: |
+          cd basic
+          composer install --prefer-dist --no-progress --no-suggest
+
+      - name: Wait for Database
+        run: |
+          for i in {1..30}; do
+            mysqladmin ping -h 127.0.0.1 -u root -proot && break
+            echo "Waiting for database..."
+            sleep 1
+          done
+
+      - name: Import Database Schema
+        run: |
+          mysql -h127.0.0.1 -uroot -proot test_mam_database < db-model/ddl.sql        
+
+      - name: Run Migrations
+        run: |
+          php basic/yii migrate/up --interactive=0
+          php basic/yii migrate-rbac --interactive=0
+          php basic/yii migrate-custom-rbac --interactive=0
+
+      - name: Run Tests
+        env:
+          CONFIG_PATH: ${{ env.CONFIG_PATH }}
+        run: |
+          cd basic
+          vendor/bin/codecept run unit -c $CONFIG_PATH

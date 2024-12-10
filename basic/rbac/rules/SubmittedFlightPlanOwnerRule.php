@@ -1,6 +1,6 @@
 <?php
 
-namespace app\rbac;
+namespace app\rbac\rules;
 
 use Yii;
 use yii\rbac\Rule;

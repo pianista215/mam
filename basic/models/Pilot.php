@@ -44,6 +44,7 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
         return [
             [['name', 'surname', 'email', 'city', 'country_id', 'password', 'date_of_birth', 'location'], 'required'],
             [['registration_date', 'date_of_birth'], 'safe'],
+            [['date_of_birth'], 'compare', 'compareValue' => date('Y-m-d'), 'operator' => '<', 'message' => 'The date of birth must be earlier than today.'],
             [['country_id', 'vatsim_id', 'ivao_id'], 'integer'],
             [['hours_flown'], 'number'],
             [['license'], 'string', 'max' => 8],
@@ -51,8 +52,11 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
             [['surname', 'city'], 'string', 'max' => 40],
             [['email'], 'string', 'max' => 80],
             [['email'], 'email'],
-            [['password'], 'string', 'max' => 255], // TODO: Ensure complex password inputs before hash
+            [['password'], 'string', 'max' => 255],
+            [['password'], 'string', 'min' => 8],
             [['auth_key', 'access_token'], 'string', 'max' => 32],
+            [['password'], 'match', 'pattern'=>'/\d/', 'message' => 'Password must contain at least one numeric digit.'],
+            [['password'], 'match', 'pattern'=>'/[a-zA-Z]/', 'message' => 'Password must contain at least one letter.'],
             [['location'], 'string', 'max' => 4],
             [['email'], 'unique'],
             [['license'], 'unique'],
@@ -206,7 +210,6 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     {
         if (parent::beforeSave($insert)) {
             if ($this->isNewRecord) {
-                // TODO: Add salt to the password
                 // TODO: Period of validation and ensure password could be modified later (is only hashed in the first time)
                 $this->auth_key = \Yii::$app->security->generateRandomString(32);
                 $this->access_token = \Yii::$app->security->generateRandomString(32);

@@ -2,21 +2,61 @@
 
 namespace tests\unit\models;
 
+use app\models\Airport;
+use app\models\Country;
 use app\models\LoginForm;
+use app\models\Pilot;
+use tests\unit\DbTestCase;
+use Yii;
 
-class LoginFormTest extends \Codeception\Test\Unit
+class LoginFormTest extends DbTestCase
 {
     private $model;
+
+    protected function _before()
+    {
+        parent::_before();
+
+        $country = new Country(['id' => 1, 'name' => 'Spain', 'iso2_code' => 'ES']);
+        $country->save(false);
+
+        $airport = new Airport(
+            [
+                'id' => 1,
+                'icao_code' => 'LEVD',
+                'name' => 'Villanubla',
+                'latitude' => 0.0,
+                'longitude' => 0.0,
+                'city' => 'Valladolid',
+                'country_id' => 1
+            ]
+        );
+        $airport->save(false);
+
+        $pilot = new Pilot([
+            'license' => 'ABC12345',
+            'name' => 'John',
+            'surname' => 'Doe',
+            'email' => 'john.doe@example.com',
+            'country_id' => 1,
+            'city' => 'New York',
+            'location' => 'LEVD',
+            'password' => 'SecurePass123!',
+            'date_of_birth' => '1990-01-01',
+        ]);
+        $pilot->save(false);
+    }
 
     protected function _after()
     {
         \Yii::$app->user->logout();
+        parent::_after();
     }
 
     public function testLoginNoUser()
     {
         $this->model = new LoginForm([
-            'username' => 'not_existing_username',
+            'username' => 'NOTEXISTING',
             'password' => 'not_existing_password',
         ]);
 
@@ -27,7 +67,7 @@ class LoginFormTest extends \Codeception\Test\Unit
     public function testLoginWrongPassword()
     {
         $this->model = new LoginForm([
-            'username' => 'demo',
+            'username' => 'ABC12345',
             'password' => 'wrong_password',
         ]);
 
@@ -39,13 +79,13 @@ class LoginFormTest extends \Codeception\Test\Unit
     public function testLoginCorrect()
     {
         $this->model = new LoginForm([
-            'username' => 'demo',
-            'password' => 'demo',
+            'username' => 'ABC12345',
+            'password' => 'SecurePass123!',
         ]);
 
         verify($this->model->login())->true();
         verify(\Yii::$app->user->isGuest)->false();
         verify($this->model->errors)->arrayHasNotKey('password');
     }
-
 }
+
