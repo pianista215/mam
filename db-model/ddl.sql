@@ -27,15 +27,24 @@ CREATE TABLE `aircraft_type` (
   `icao_type_code` char(4) NOT NULL,
   `name` varchar(60) NOT NULL,
   `max_nm_range` int(10) unsigned NOT NULL,
-  `pax_capacity` smallint(5) unsigned NOT NULL,
-  `cargo_capacity` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `aircraft_types_unique` (`icao_type_code`)
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `aircraft_configuration` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `aircraft_type_id` int(10) unsigned NOT NULL,
+  `name` varchar(20) NOT NULL,
+  `pax_capacity` smallint(5) unsigned NOT NULL,
+  `cargo-capacity` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `aircraft_configuration_unique` (`aircraft_type_id`,`name`),
+  CONSTRAINT `aircraft_configuration_aircraft_type_FK` FOREIGN KEY (`aircraft_type_id`) REFERENCES `aircraft_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `aircraft` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `aircraft_type_id` int(10) unsigned NOT NULL,
+  `aircraft_configuration_id` int(10) unsigned NOT NULL,
   `registration` varchar(10) NOT NULL,
   `name` varchar(20) NOT NULL,
   `location` char(4) NOT NULL,
@@ -43,11 +52,11 @@ CREATE TABLE `aircraft` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `aircrafts_registration_unique` (`registration`),
   UNIQUE KEY `aircrafts_name_unique` (`name`),
-  KEY `aircrafts_aircraft_types_FK` (`aircraft_type_id`),
+  KEY `aircrafts_aircraft_types_FK` (`aircraft_configuration_id`),
   KEY `aircrafts_airports_FK` (`location`),
-  CONSTRAINT `aircrafts_aircraft_types_FK` FOREIGN KEY (`aircraft_type_id`) REFERENCES `aircraft_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `aircraft_aircraft_configuration_FK` FOREIGN KEY (`aircraft_configuration_id`) REFERENCES `aircraft_configuration` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `aircrafts_airports_FK` FOREIGN KEY (`location`) REFERENCES `airport` (`icao_code`) ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=88 DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `pilot` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
