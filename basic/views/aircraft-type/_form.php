@@ -18,10 +18,6 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'max_nm_range')->textInput() ?>
 
-    <?= $form->field($model, 'pax_capacity')->textInput() ?>
-
-    <?= $form->field($model, 'cargo_capacity')->textInput() ?>
-
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>

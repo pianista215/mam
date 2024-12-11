@@ -17,7 +17,7 @@ class AircraftTypeSearch extends AircraftType
     public function rules()
     {
         return [
-            [['id', 'max_nm_range', 'pax_capacity', 'cargo_capacity'], 'integer'],
+            [['id', 'max_nm_range'], 'integer'],
             [['icao_type_code', 'name'], 'safe'],
         ];
     }
@@ -60,8 +60,6 @@ class AircraftTypeSearch extends AircraftType
         $query->andFilterWhere([
             'id' => $this->id,
             'max_nm_range' => $this->max_nm_range,
-            'pax_capacity' => $this->pax_capacity,
-            'cargo_capacity' => $this->cargo_capacity,
         ]);
 
         $query->andFilterWhere(['like', 'icao_type_code', $this->icao_type_code])
