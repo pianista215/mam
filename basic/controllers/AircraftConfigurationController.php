@@ -4,18 +4,14 @@ namespace app\controllers;
 
 use app\models\AircraftConfiguration;
 use app\models\AircraftConfigurationSearch;
-use app\models\AircraftType;
-use app\models\AircraftTypeSearch;
 use yii\web\Controller;
-use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-use Yii;
 
 /**
- * AircraftTypeController implements the CRUD actions for AircraftType model.
+ * AircraftConfigurationController implements the CRUD actions for AircraftConfiguration model.
  */
-class AircraftTypeController extends Controller
+class AircraftConfigurationController extends Controller
 {
     /**
      * @inheritDoc
@@ -36,14 +32,13 @@ class AircraftTypeController extends Controller
     }
 
     /**
-     * Lists all AircraftType models.
+     * Lists all AircraftConfiguration models.
      *
      * @return string
      */
     public function actionIndex()
     {
-        // TODO: SORT BY
-        $searchModel = new AircraftTypeSearch();
+        $searchModel = new AircraftConfigurationSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 
         return $this->render('index', [
@@ -53,53 +48,42 @@ class AircraftTypeController extends Controller
     }
 
     /**
-     * Displays a single AircraftType model.
+     * Displays a single AircraftConfiguration model.
      * @param int $id ID
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionView($id)
     {
-        $model = $this->findModel($id);
-
-        $searchModel = new AircraftConfigurationSearch();
-        $searchModel->aircraft_type_id = $model->id;
-        $dataProvider = $searchModel->search([]);
-
         return $this->render('view', [
-            'model' => $model,
-            'dataProvider' => $dataProvider,
+            'model' => $this->findModel($id),
         ]);
     }
 
     /**
-     * Creates a new AircraftType model.
+     * Creates a new AircraftConfiguration model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return string|\yii\web\Response
      */
     public function actionCreate()
     {
-        if(Yii::$app->user->can('aircraftTypeCrud')){
-            $model = new AircraftType();
+        $model = new AircraftConfiguration();
 
-            if ($this->request->isPost) {
-                if ($model->load($this->request->post()) && $model->save()) {
-                    return $this->redirect(['view', 'id' => $model->id]);
-                }
-            } else {
-                $model->loadDefaultValues();
+        if ($this->request->isPost) {
+            if ($model->load($this->request->post()) && $model->save()) {
+                return $this->redirect(['view', 'id' => $model->id]);
             }
-
-            return $this->render('create', [
-                'model' => $model,
-            ]);
         } else {
-            throw new ForbiddenHttpException();
+            $model->loadDefaultValues();
         }
+
+        return $this->render('create', [
+            'model' => $model,
+        ]);
     }
 
     /**
-     * Updates an existing AircraftType model.
+     * Updates an existing AircraftConfiguration model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param int $id ID
      * @return string|\yii\web\Response
@@ -107,23 +91,19 @@ class AircraftTypeController extends Controller
      */
     public function actionUpdate($id)
     {
-        if(Yii::$app->user->can('aircraftTypeCrud')){
-            $model = $this->findModel($id);
+        $model = $this->findModel($id);
 
-            if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'id' => $model->id]);
-            }
-
-            return $this->render('update', [
-                'model' => $model,
-            ]);
-        } else {
-            throw new ForbiddenHttpException();
+        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
+            return $this->redirect(['view', 'id' => $model->id]);
         }
+
+        return $this->render('update', [
+            'model' => $model,
+        ]);
     }
 
     /**
-     * Deletes an existing AircraftType model.
+     * Deletes an existing AircraftConfiguration model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param int $id ID
      * @return \yii\web\Response
@@ -131,25 +111,21 @@ class AircraftTypeController extends Controller
      */
     public function actionDelete($id)
     {
-        if(Yii::$app->user->can('aircraftTypeCrud')){
-            $this->findModel($id)->delete();
+        $this->findModel($id)->delete();
 
-            return $this->redirect(['index']);
-        } else {
-            throw new ForbiddenHttpException();
-        }
+        return $this->redirect(['index']);
     }
 
     /**
-     * Finds the AircraftType model based on its primary key value.
+     * Finds the AircraftConfiguration model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param int $id ID
-     * @return AircraftType the loaded model
+     * @return AircraftConfiguration the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = AircraftType::findOne(['id' => $id])) !== null) {
+        if (($model = AircraftConfiguration::findOne(['id' => $id])) !== null) {
             return $model;
         }
 
