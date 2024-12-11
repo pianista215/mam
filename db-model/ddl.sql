@@ -36,7 +36,7 @@ CREATE TABLE `aircraft_configuration` (
   `aircraft_type_id` int(10) unsigned NOT NULL,
   `name` varchar(20) NOT NULL,
   `pax_capacity` smallint(5) unsigned NOT NULL,
-  `cargo-capacity` int(10) unsigned NOT NULL,
+  `cargo_capacity` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `aircraft_configuration_unique` (`aircraft_type_id`,`name`),
   CONSTRAINT `aircraft_configuration_aircraft_type_FK` FOREIGN KEY (`aircraft_type_id`) REFERENCES `aircraft_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE

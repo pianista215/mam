@@ -23,7 +23,8 @@ cursorvam.execute(query)
 imported_aircraft_types = 0
 	
 for aircraft_type in cursorvam:
-	cursormam.execute("INSERT INTO aircraft_type(icao_type_code, name, max_nm_range, pax_capacity, cargo_capacity) VALUES (%s,%s,%s,%s,%s)", (aircraft_type[0], aircraft_type[1], aircraft_type[2], aircraft_type[3], aircraft_type[4]))
+	cursormam.execute("INSERT INTO aircraft_type(icao_type_code, name, max_nm_range) VALUES (%s,%s,%s)", (aircraft_type[0], aircraft_type[1], aircraft_type[2]))
+	cursormam.execute("INSERT INTO aircraft_configuration(aircraft_type_id, name, pax_capacity, cargo_capacity) select id,'Standard',%s,%s FROM aircraft_type WHERE icao_type_code=%s", (aircraft_type[3], aircraft_type[4], aircraft_type[0]))
 	imported_aircraft_types  = imported_aircraft_types + 1
 
 print("%d aircraft types imported from %s into %s" % (imported_aircraft_types, args.fromdb, args.destinationdb))
