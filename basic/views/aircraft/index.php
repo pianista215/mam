@@ -29,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
-            'aircraftConfiguration.name',
+            'aircraftConfiguration.fullname',
             'registration',
             'name',
             'location',

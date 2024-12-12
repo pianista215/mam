@@ -31,10 +31,21 @@ for aircraft_type in existing_types:
 	cursorvam.execute("select registry, f.name, hours from fleets f LEFT JOIN fleettypes ft ON ft.fleettype_id=f.fleettype_id WHERE ft.plane_icao = %s ORDER BY registry", (aircraft_type, ))
 
 	for aircraft in cursorvam:
-		cursormam.execute("INSERT INTO aircraft(aircraft_type_id, registration, name, location, hours_flown)  select id,%s,%s,'LEVD',%s FROM aircraft_type WHERE icao_type_code=%s", (aircraft[0], aircraft[1], aircraft[2], aircraft_type))
+		cursormam.execute("INSERT INTO aircraft(aircraft_configuration_id, registration, name, location, hours_flown)  select ac.id,%s,%s,'LEVD',%s FROM aircraft_configuration ac LEFT JOIN aircraft_type at ON at.id=ac.aircraft_type_id WHERE at.icao_type_code=%s AND ac.name = 'Standard'", (aircraft[0], aircraft[1], aircraft[2], aircraft_type))
 		imported_aircrafts = imported_aircrafts + 1
 
-	print("%d aircrafts of type %s imported from %s into %s" % (imported_aircrafts, aircraft_type, args.fromdb, args.destinationdb))
+	print("%d standard aircrafts of type %s imported from %s into %s" % (imported_aircrafts, aircraft_type, args.fromdb, args.destinationdb))
+	imported_aircrafts = 0
+
+	# Check for cargo aircrafts (same icao ending on F)
+	cursorvam.execute("select registry, f.name, hours from fleets f LEFT JOIN fleettypes ft ON ft.fleettype_id=f.fleettype_id WHERE ft.plane_icao = CONCAT(%s,'F') ORDER BY registry", (aircraft_type, ))
+
+	for aircraft in cursorvam:
+		cursormam.execute("INSERT INTO aircraft(aircraft_configuration_id, registration, name, location, hours_flown)  select ac.id,%s,%s,'LEVD',%s FROM aircraft_configuration ac LEFT JOIN aircraft_type at ON at.id=ac.aircraft_type_id WHERE at.icao_type_code=%s AND ac.name = 'Cargo'", (aircraft[0], aircraft[1], aircraft[2], aircraft_type))
+		imported_aircrafts = imported_aircrafts + 1
+
+	print("%d cargo aircrafts of type %s imported from %s into %s" % (imported_aircrafts, aircraft_type, args.fromdb, args.destinationdb))
+
 
 cnxmam.commit()
 cursorvam.close()
