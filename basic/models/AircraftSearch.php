@@ -17,7 +17,7 @@ class AircraftSearch extends Aircraft
     public function rules()
     {
         return [
-            [['id', 'aircraft_type_id'], 'integer'],
+            [['id', 'aircraft_configuration_id'], 'integer'],
             [['registration', 'name', 'location'], 'safe'],
             [['hours_flown'], 'number'],
         ];
@@ -35,7 +35,7 @@ class AircraftSearch extends Aircraft
     // TODO: We can simplify more that functions in the search just to retrieve data provider???
     public function searchAircraftsInLocationWithRange($location, $distance)
     {
-        $query = Aircraft::find()->joinWith(['aircraftType']);
+        $query = Aircraft::find()->joinWith(['aircraftConfiguration'])->joinWith('aircraftConfiguration.aircraftType');
         // add conditions that should always apply here
         $this->location = $location;
         $dataProvider = new ActiveDataProvider([
@@ -75,14 +75,14 @@ class AircraftSearch extends Aircraft
 
         if (!$this->validate()) {
             // Don't return nothing if validation fails
-                        $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'aircraft_type_id' => $this->aircraft_type_id,
+            'aircraft_configuration_id' => $this->aircraft_configuration_id,
             'hours_flown' => $this->hours_flown,
         ]);
 

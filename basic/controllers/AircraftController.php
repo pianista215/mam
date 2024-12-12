@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\Aircraft;
+use app\models\AircraftConfiguration;
 use app\models\AircraftSearch;
 use app\models\AircraftType;
 use yii\web\Controller;
@@ -65,6 +66,21 @@ class AircraftController extends Controller
     }
 
     /**
+     * Retrieve all aircraft configurations prepared for dropdown lists
+     */
+    protected function getAircraftConfigurations()
+    {
+        return AircraftConfiguration::find()
+            ->joinWith('aircraftType')
+            ->select([
+                "CONCAT(aircraft_type.name, ' (', aircraft_configuration.name, ')') AS fullname"
+            ])
+            ->indexBy('id')
+            ->orderBy("fullname")
+            ->column();
+    }
+
+    /**
      * Creates a new Aircraft model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return string|\yii\web\Response
@@ -82,11 +98,11 @@ class AircraftController extends Controller
                 $model->loadDefaultValues();
             }
 
-            $aircraftTypes = AircraftType::find()->select(['name'])->indexBy('id')->column();
+            $aircraftConfigurations = $this->getAircraftConfigurations();
 
             return $this->render('create', [
                 'model' => $model,
-                'aircraftTypes' => $aircraftTypes,
+                'aircraftConfigurations' => $aircraftConfigurations,
             ]);
         } else {
             throw new ForbiddenHttpException();
@@ -109,11 +125,11 @@ class AircraftController extends Controller
                 return $this->redirect(['view', 'id' => $model->id]);
             }
 
-            $aircraftTypes = AircraftType::find()->select(['name'])->indexBy('id')->column();
+            $aircraftConfigurations = $this->getAircraftConfigurations();
 
             return $this->render('update', [
                 'model' => $model,
-                'aircraftTypes' => $aircraftTypes,
+                'aircraftConfigurations' => $aircraftConfigurations,
             ]);
         } else {
             throw new ForbiddenHttpException();

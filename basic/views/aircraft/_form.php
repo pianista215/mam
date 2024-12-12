@@ -12,9 +12,9 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'aircraft_type_id')->dropdownList(
-        $aircraftTypes,
-        ['prompt'=>'Select Aircraft Type']
+    <?= $form->field($model, 'aircraft_configuration_id')->dropdownList(
+        $aircraftConfigurations,
+        ['prompt'=>'Select Aircraft Configuration']
         ); ?>
 
     <?= $form->field($model, 'registration')->textInput(['maxlength' => true]) ?>
@@ -22,8 +22,6 @@ use yii\widgets\ActiveForm;
     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'location')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'hours_flown')->textInput() ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

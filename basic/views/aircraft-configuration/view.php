@@ -6,7 +6,7 @@ use yii\widgets\DetailView;
 /** @var yii\web\View $this */
 /** @var app\models\AircraftConfiguration $model */
 
-$this->title = $model->aircraftType->name . ' (' . $model->name .')';
+$this->title = $model->fullname;
 $this->params['breadcrumbs'][] = ['label' => 'Aircraft Configurations', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
@@ -29,7 +29,10 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
-            'aircraftType.name',
+            [
+                'attribute' =>'aircraftType.name',
+                'label' => 'Aircraft Type Name',
+            ],
             'name',
             'pax_capacity',
             'cargo_capacity',

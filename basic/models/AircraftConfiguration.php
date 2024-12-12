@@ -54,6 +54,10 @@ class AircraftConfiguration extends \yii\db\ActiveRecord
         ];
     }
 
+    public function getFullname(){
+        return $this->aircraftType->name.' ('.$this->name.')';
+    }
+
     /**
      * Gets query for [[AircraftType]].
      *

@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
-            'aircraftType.icao_type_code',
+            'aircraftConfiguration.fullname',
             'registration',
             'name',
             'location',

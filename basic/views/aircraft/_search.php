@@ -17,7 +17,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'id') ?>
 
-    <?= $form->field($model, 'aircraft_type_id') ?>
+    <?= $form->field($model, 'aircraft_configuration_id') ?>
 
     <?= $form->field($model, 'registration') ?>
 

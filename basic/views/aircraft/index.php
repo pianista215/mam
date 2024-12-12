@@ -29,13 +29,10 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
-
-            //'id',
-            'aircraftType.icao_type_code',
+            'aircraftConfiguration.name',
             'registration',
             'name',
             'location',
-            //'hours_flown',
             [
                 'class' => ActionColumn::className(),
                 'visibleButtons'=>[

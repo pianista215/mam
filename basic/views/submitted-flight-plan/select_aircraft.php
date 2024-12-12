@@ -23,9 +23,12 @@ $this->params['route_id'] = $route->id;
         'dataProvider' => $dataProvider,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
-            'aircraftType.name',
             'name',
             'registration',
+            [
+                'attribute' => 'aircraftConfiguration.fullname',
+                'label' => 'Type',
+            ],
             [
                 'class' => ActionColumn::className(),
                 'template' => '{prepare-fpl}',
