@@ -32,7 +32,7 @@ class Country extends \yii\db\ActiveRecord
         return [
             [['name', 'iso2_code'], 'required'],
             [['name'], 'string', 'max' => 80],
-            [['iso2_code'], 'string', 'max' => 2],
+            [['iso2_code'], 'string', 'length' => 2],
             [['iso2_code'], 'unique'],
         ];
     }
