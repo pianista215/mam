@@ -8,15 +8,15 @@ use Yii;
  * This is the model class for table "aircraft".
  *
  * @property int $id
- * @property int $aircraft_type_id
+ * @property int $aircraft_configuration_id
  * @property string $registration
  * @property string $name
  * @property string $location
  * @property float $hours_flown
  *
- * @property AircraftType $aircraftType
+ * @property AircraftConfiguration $aircraftConfiguration
  * @property Airport $location0
- * @property SubmittedFlightplan[] $submittedFlightplans
+ * @property SubmittedFlightPlan $submittedFlightPlan
  */
 class Aircraft extends \yii\db\ActiveRecord
 {
@@ -34,15 +34,15 @@ class Aircraft extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['aircraft_type_id', 'registration', 'name', 'location'], 'required'],
-            [['aircraft_type_id'], 'integer'],
+            [['aircraft_configuration_id', 'registration', 'name', 'location'], 'required'],
+            [['aircraft_configuration_id'], 'integer'],
             [['hours_flown'], 'number'],
             [['registration'], 'string', 'max' => 10],
             [['name'], 'string', 'max' => 20],
             [['location'], 'string', 'length' => 4],
             [['registration'], 'unique'],
             [['name'], 'unique'],
-            [['aircraft_type_id'], 'exist', 'skipOnError' => true, 'targetClass' => AircraftType::class, 'targetAttribute' => ['aircraft_type_id' => 'id']],
+            [['aircraft_configuration_id'], 'exist', 'skipOnError' => true, 'targetClass' => AircraftConfiguration::class, 'targetAttribute' => ['aircraft_configuration_id' => 'id']],
             [['location'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['location' => 'icao_code']],
         ];
     }
@@ -54,7 +54,7 @@ class Aircraft extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'aircraft_type_id' => 'Aircraft Type ID',
+            'aircraft_configuration_id' => 'Aircraft Configuration ID',
             'registration' => 'Registration',
             'name' => 'Name',
             'location' => 'Location',
@@ -63,13 +63,13 @@ class Aircraft extends \yii\db\ActiveRecord
     }
 
     /**
-     * Gets query for [[AircraftType]].
+     * Gets query for [[AircraftConfiguration]].
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getAircraftType()
+    public function getAircraftConfiguration()
     {
-        return $this->hasOne(AircraftType::class, ['id' => 'aircraft_type_id']);
+        return $this->hasOne(AircraftConfiguration::class, ['id' => 'aircraft_configuration_id']);
     }
 
     /**
@@ -83,12 +83,12 @@ class Aircraft extends \yii\db\ActiveRecord
     }
 
     /**
-     * Gets query for [[SubmittedFlightplans]].
+     * Gets query for [[SubmittedFlightPlan]].
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getSubmittedFlightplans()
+    public function getSubmittedFlightPlan()
     {
-        return $this->hasMany(SubmittedFlightplan::class, ['aircraft_id' => 'id']);
+        return $this->hasOne(SubmittedFlightPlan::class, ['aircraft_id' => 'id']);
     }
 }

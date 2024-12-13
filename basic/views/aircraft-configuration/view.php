@@ -4,18 +4,17 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /** @var yii\web\View $this */
-/** @var app\models\Aircraft $model */
+/** @var app\models\AircraftConfiguration $model */
 
-$this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Aircrafts', 'url' => ['index']];
+$this->title = $model->fullname;
+$this->params['breadcrumbs'][] = ['label' => 'Aircraft Configurations', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
-<div class="aircraft-view">
+<div class="aircraft-configuration-view">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?php if(Yii::$app->user->can('aircraftCrud')) : ?>
     <p>
         <?= Html::a('Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
         <?= Html::a('Delete', ['delete', 'id' => $model->id], [
@@ -26,16 +25,17 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ]) ?>
     </p>
-    <?php endif; ?>
 
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
-            'aircraftConfiguration.fullname',
-            'registration',
+            [
+                'attribute' =>'aircraftType.name',
+                'label' => 'Aircraft Type Name',
+            ],
             'name',
-            'location',
-            'hours_flown',
+            'pax_capacity',
+            'cargo_capacity',
         ],
     ]) ?>
 

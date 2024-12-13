@@ -4,12 +4,12 @@ namespace app\models;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\AircraftType;
+use app\models\AircraftConfiguration;
 
 /**
- * AircraftTypeSearch represents the model behind the search form of `app\models\AircraftType`.
+ * AircraftConfigurationSearch represents the model behind the search form of `app\models\AircraftConfiguration`.
  */
-class AircraftTypeSearch extends AircraftType
+class AircraftConfigurationSearch extends AircraftConfiguration
 {
     /**
      * {@inheritdoc}
@@ -17,8 +17,8 @@ class AircraftTypeSearch extends AircraftType
     public function rules()
     {
         return [
-            [['id', 'max_nm_range'], 'integer'],
-            [['icao_type_code', 'name'], 'safe'],
+            [['id', 'aircraft_type_id', 'pax_capacity', 'cargo_capacity'], 'integer'],
+            [['name'], 'safe'],
         ];
     }
 
@@ -40,7 +40,7 @@ class AircraftTypeSearch extends AircraftType
      */
     public function search($params)
     {
-        $query = AircraftType::find();
+        $query = AircraftConfiguration::find();
 
         // add conditions that should always apply here
 
@@ -51,19 +51,20 @@ class AircraftTypeSearch extends AircraftType
         $this->load($params);
 
         if (!$this->validate()) {
-            // Don't return nothing if validation fails
-            $query->where('0=1');
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
             return $dataProvider;
         }
 
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'max_nm_range' => $this->max_nm_range,
+            'aircraft_type_id' => $this->aircraft_type_id,
+            'pax_capacity' => $this->pax_capacity,
+            'cargo_capacity' => $this->cargo_capacity,
         ]);
 
-        $query->andFilterWhere(['like', 'icao_type_code', $this->icao_type_code])
-            ->andFilterWhere(['like', 'name', $this->name]);
+        $query->andFilterWhere(['like', 'name', $this->name]);
 
         return $dataProvider;
     }

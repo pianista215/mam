@@ -33,8 +33,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'icao_type_code',
             'name',
             'max_nm_range',
-            'pax_capacity',
-            //'cargo_capacity',
             [
                 'class' => ActionColumn::className(),
                 'visibleButtons'=>[

@@ -3,20 +3,19 @@
 use yii\helpers\Html;
 
 /** @var yii\web\View $this */
-/** @var app\models\Aircraft $model */
+/** @var app\models\AircraftConfiguration $model */
 
-$this->title = 'Update Aircraft: ' . $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Aircrafts', 'url' => ['index']];
+$this->title = 'Update Aircraft Configuration: ' . $model->name;
+$this->params['breadcrumbs'][] = ['label' => 'Aircraft Configurations', 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = 'Update';
 ?>
-<div class="aircraft-update">
+<div class="aircraft-configuration-update">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
     <?= $this->render('_form', [
         'model' => $model,
-        'aircraftConfigurations' => $aircraftConfigurations,
     ]) ?>
 
 </div>

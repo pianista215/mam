@@ -19,6 +19,8 @@ abstract class DbTestCase extends \Codeception\Test\Unit
         Yii::$app->db->createCommand()->delete('route')->execute();
         Yii::$app->db->createCommand()->delete('airport')->execute();
         Yii::$app->db->createCommand()->delete('country')->execute();
+        Yii::$app->db->createCommand()->delete('aircraft_configuration')->execute();
+        Yii::$app->db->createCommand()->delete('aircraft_type')->execute();
     }
 
 }

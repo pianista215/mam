@@ -26,7 +26,7 @@ use yii\widgets\ActiveForm;
         </div>
         <div class="col-md-4">
             <div>Aircraft type</div>
-            <div><?= Html::input('text', 'aircraftType', $aircraft->aircraftType->icao_type_code, ['disabled' => true, 'class' => 'form-control'])?></div>
+            <div><?= Html::input('text', 'aircraftType', $aircraft->aircraftConfiguration->aircraftType->icao_type_code, ['disabled' => true, 'class' => 'form-control'])?></div>
         </div>
         <div class="col-md-4">
             <div><?= $form->field($model, 'flight_rules')->dropDownList($model->flightRulesTypes, ['class' => 'form-control', 'disabled' => ($mode == 'view')])?></div>

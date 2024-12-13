@@ -11,14 +11,11 @@ use Yii;
  * @property string $icao_type_code
  * @property string $name
  * @property int $max_nm_range
- * @property int $pax_capacity
- * @property int $cargo_capacity
  *
- * @property Aircraft[] $aircrafts
+ * @property AircraftConfiguration[] $aircraftConfigurations
  */
 class AircraftType extends \yii\db\ActiveRecord
 {
-    // TODO: CONSIDER DIFFERENT CONFIGURATIONS (737 carguero y 737 normal)
     /**
      * {@inheritdoc}
      */
@@ -33,8 +30,8 @@ class AircraftType extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['icao_type_code', 'name', 'max_nm_range', 'pax_capacity', 'cargo_capacity'], 'required'],
-            [['max_nm_range', 'pax_capacity', 'cargo_capacity'], 'integer'],
+            [['icao_type_code', 'name', 'max_nm_range'], 'required'],
+            [['max_nm_range'], 'integer'],
             [['icao_type_code'], 'string', 'length' => 4],
             [['name'], 'string', 'max' => 60],
             [['icao_type_code'], 'unique'],
@@ -51,18 +48,16 @@ class AircraftType extends \yii\db\ActiveRecord
             'icao_type_code' => 'Icao Type Code',
             'name' => 'Name',
             'max_nm_range' => 'Max Nm Range',
-            'pax_capacity' => 'Pax Capacity',
-            'cargo_capacity' => 'Cargo Capacity',
         ];
     }
 
     /**
-     * Gets query for [[Aircrafts]].
+     * Gets query for [[AircraftConfigurations]].
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getAircrafts()
+    public function getAircraftConfigurations()
     {
-        return $this->hasMany(Aircraft::class, ['aircraft_type_id' => 'id']);
+        return $this->hasMany(AircraftConfiguration::class, ['aircraft_type_id' => 'id']);
     }
 }
