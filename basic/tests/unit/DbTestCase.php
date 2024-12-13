@@ -15,6 +15,7 @@ abstract class DbTestCase extends \Codeception\Test\Unit
     protected function clearDatabase()
     {
         $db = Yii::$app->db;
+        Yii::$app->db->createCommand()->delete('aircraft')->execute();
         Yii::$app->db->createCommand()->delete('pilot')->execute();
         Yii::$app->db->createCommand()->delete('route')->execute();
         Yii::$app->db->createCommand()->delete('airport')->execute();

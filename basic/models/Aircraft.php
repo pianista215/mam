@@ -36,7 +36,7 @@ class Aircraft extends \yii\db\ActiveRecord
         return [
             [['aircraft_configuration_id', 'registration', 'name', 'location'], 'required'],
             [['aircraft_configuration_id'], 'integer'],
-            [['hours_flown'], 'number'],
+            [['hours_flown'], 'number', 'min' => 0],
             [['registration'], 'string', 'max' => 10],
             [['name'], 'string', 'max' => 20],
             [['location'], 'string', 'length' => 4],
