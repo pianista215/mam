@@ -33,9 +33,9 @@ class AircraftConfiguration extends \yii\db\ActiveRecord
     {
         return [
             [['aircraft_type_id', 'name', 'pax_capacity', 'cargo_capacity'], 'required'],
-            [['aircraft_type_id', 'pax_capacity', 'cargo_capacity'], 'integer'],
+            [['aircraft_type_id', 'pax_capacity', 'cargo_capacity'], 'integer', 'min' => 0],
             [['name'], 'string', 'max' => 20],
-            [['aircraft_type_id', 'name'], 'unique', 'targetAttribute' => ['aircraft_type_id', 'name']],
+            [['name'], 'unique', 'targetAttribute' => ['aircraft_type_id', 'name']],
             [['aircraft_type_id'], 'exist', 'skipOnError' => true, 'targetClass' => AircraftType::class, 'targetAttribute' => ['aircraft_type_id' => 'id']],
         ];
     }
