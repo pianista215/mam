@@ -36,6 +36,7 @@ class AircraftSearch extends Aircraft
     public function searchAircraftsInLocationWithRange($location, $distance)
     {
         $query = Aircraft::find()->joinWith(['aircraftConfiguration'])->joinWith('aircraftConfiguration.aircraftType');
+        $query->orderBy(['aircraft_type.name' => SORT_ASC, 'registration' => SORT_ASC]);
         // add conditions that should always apply here
         $this->location = $location;
         $dataProvider = new ActiveDataProvider([

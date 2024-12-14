@@ -33,7 +33,7 @@ class RouteSearch extends Route
 
     public function searchWithFixedDeparture($departure)
     {
-        $query = Route::find();
+        $query = Route::find()->orderBy(['departure' => SORT_ASC, 'arrival' => SORT_ASC]);
 
         // add conditions that should always apply here
         $this->departure = $departure;

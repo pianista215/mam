@@ -23,12 +23,12 @@ $this->params['route_id'] = $route->id;
         'dataProvider' => $dataProvider,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
-            'name',
-            'registration',
             [
                 'attribute' => 'aircraftConfiguration.fullname',
                 'label' => 'Type',
             ],
+            'registration',
+            'name',
             [
                 'class' => ActionColumn::className(),
                 'template' => '{prepare-fpl}',
@@ -42,6 +42,15 @@ $this->params['route_id'] = $route->id;
                 }
             ],
         ],
+    'tableOptions' => ['class' => 'table table-striped table-bordered'],
+        'pager' => [
+                'options' => ['class' => 'pagination justify-content-center'],
+                'linkContainerOptions' => ['class' => 'page-item'],
+                'linkOptions' => ['class' => 'page-link'],
+                'disabledListItemSubTagOptions' => ['class' => 'page-link'],
+                'hideOnSinglePage' => true,
+            ],
+        'summaryOptions' => ['class' => 'text-muted']
     ]); ?>
 
 
