@@ -27,7 +27,6 @@ class AirportTest extends DbTestCase
             'city' => 'Madrid',
             'country_id' => 1,
         ]);
-        $this->assertTrue($airport->validate());
         $this->assertTrue($airport->save());
     }
 
@@ -41,7 +40,7 @@ class AirportTest extends DbTestCase
             'city' => 'Madrid',
             'country_id' => 1,
         ]);
-        $this->assertFalse($airport->validate());
+        $this->assertFalse($airport->save());
         $this->assertArrayHasKey('icao_code', $airport->getErrors());
     }
 
@@ -55,7 +54,7 @@ class AirportTest extends DbTestCase
             'city' => 'Madrid',
             'country_id' => 999,
         ]);
-        $this->assertFalse($airport->validate());
+        $this->assertFalse($airport->save());
         $this->assertArrayHasKey('country_id', $airport->getErrors());
     }
 
@@ -69,7 +68,7 @@ class AirportTest extends DbTestCase
             'city' => 'Madrid',
             'country_id' => 1,
         ]);
-        $this->assertFalse($airport->validate());
+        $this->assertFalse($airport->save());
         $this->assertArrayHasKey('latitude', $airport->getErrors());
     }
 
@@ -83,7 +82,7 @@ class AirportTest extends DbTestCase
             'city' => 'Madrid',
             'country_id' => 1,
         ]);
-        $this->assertFalse($airport->validate());
+        $this->assertFalse($airport->save());
         $this->assertArrayHasKey('longitude', $airport->getErrors());
     }
 

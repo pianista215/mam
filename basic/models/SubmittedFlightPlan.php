@@ -49,6 +49,7 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
             [['aircraft_id', 'flight_rules', 'alternative1_icao', 'cruise_speed_value', 'route', 'estimated_time', 'other_information', 'endurance_time', 'route_id', 'pilot_id', 'cruise_speed_unit', 'flight_level_unit'], 'required'],
             [['aircraft_id', 'route_id', 'pilot_id', 'cruise_speed_value', 'flight_level_value', 'estimated_time', 'endurance_time'], 'integer'],
             [['flight_rules', 'cruise_speed_unit'], 'string', 'length' => 1],
+            [['cruise_speed_value', 'flight_level_value', 'estimated_time', 'endurance_time'], 'number', 'min' => 0],
             [['flight_rules'], 'in', 'range' => array_keys(SubmittedFlightPlan::getFlightRulesTypes())],
             [['cruise_speed_unit'], 'in', 'range' => SubmittedFlightPlan::getValidSpeedUnits()],
             [['alternative1_icao', 'alternative2_icao', 'cruise_speed_value', 'flight_level_value', 'estimated_time', 'endurance_time'], 'string', 'max' => 4],
@@ -64,13 +65,13 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
             [['aircraft_id'], 'exist', 'skipOnError' => true, 'targetClass' => Aircraft::class, 'targetAttribute' => ['aircraft_id' => 'id']],
             [['pilot_id'], 'exist', 'skipOnError' => true, 'targetClass' => Pilot::class, 'targetAttribute' => ['pilot_id' => 'id']],
             [['route_id'], 'exist', 'skipOnError' => true, 'targetClass' => Route::class, 'targetAttribute' => ['route_id' => 'id']],
+            [['pilot_id'], 'validatePilotLocation'],
+            [['aircraft_id'], 'validateAircraftLocation'],
         ];
     }
 
     public function beforeValidate()
     {
-        Yii::warning('UNAIIIIII '. $this->flight_level_unit);
-        Yii::warning('UNAIIIIII2 '. $this->flight_level_value);
         if($this->flight_level_unit == 'VFR' && $this->flight_level_value == null){
             $this->flight_level_value = '';
         }
@@ -128,6 +129,19 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
             if(!isset($this->flight_level_value) || empty($this->flight_level_value)){
                 $this->addError('flight_level_value', 'Flight Level Value cannot be blank if VFR is not selected');
             }
+        }
+    }
+
+    public function validatePilotLocation($attribute, $params){
+        if ($this->route0->departure != $this->pilot->location) {
+            $this->addError($attribute, 'The pilot is not in the correct location.');
+        }
+    }
+
+    public function validateAircraftLocation($attribute, $params)
+    {
+        if ($this->route0->departure != $this->aircraft->location) {
+            $this->addError($attribute, 'The aircraft is not in the correct location.');
         }
     }
 
