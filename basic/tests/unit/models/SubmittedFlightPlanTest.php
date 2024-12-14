@@ -181,6 +181,27 @@ class SubmittedFlightPlanTest extends DbTestCase
         $this->assertTrue($flightPlan->save());
     }
 
+    public function testValidSubmittedFlightPlanOnlyOneAlternative()
+    {
+        $flightPlan = new SubmittedFlightPlan([
+            'aircraft_id' => $this->lemdAircraft->id,
+            'flight_rules' => 'V',
+            'alternative1_icao' => 'LEVD',
+            'cruise_speed_value' => 400,
+            'cruise_speed_unit' => 'N',
+            'flight_level_value' => 350,
+            'flight_level_unit' => 'F',
+            'route' => 'NAND UM871 MINGU/N0419F320 UM871 GODOX',
+            'estimated_time' => '0031',
+            'other_information' => 'PBN/A1B1D1L1O1S2 COM/TCAS DOF/20241214 REG/ECSSS EET/LECB0024 CODE/BXXXX RVR/200 OPR/XXX PER/C RMK/TCAS RMK/IFPS REROUTE ACCEPTED',
+            'endurance_time' => '0500',
+            'route_id' => $this->routeMadBcn->id,
+            'pilot_id' => $this->pilotMad->id,
+        ]);
+
+        $this->assertTrue($flightPlan->save());
+    }
+
     protected function createBaseFlightPlanData(): array
     {
         return [
@@ -287,6 +308,22 @@ class SubmittedFlightPlanTest extends DbTestCase
         $flightPlan = new SubmittedFlightPlan($data);
         $this->assertFalse($flightPlan->save(), "Flight plan should not save with flight_level_value set for VFR");
         $this->assertNotEmpty($flightPlan->getErrors('flight_level_value'));
+    }
+
+    public function testInvalidAlternative()
+    {
+        $data = $this->createBaseFlightPlanData();
+        $data['alternative1_icao'] = 'JAJA';
+        $flightPlan = new SubmittedFlightPlan($data);
+
+        $this->assertFalse($flightPlan->save(), "Flight plan should not save with invalid alternative1");
+        $this->assertNotEmpty($flightPlan->getErrors('alternative1_icao'));
+
+        $data['alternative2_icao'] = 'JAJA';
+        $flightPlan2 = new SubmittedFlightPlan($data);
+
+        $this->assertFalse($flightPlan2->save(), "Flight plan should not save with invalid alternative2");
+        $this->assertNotEmpty($flightPlan2->getErrors('alternative2_icao'));
     }
 
     public function testInvalidSubmittedFlightPlanWithoutRequiredFields()
