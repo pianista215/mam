@@ -134,10 +134,6 @@ class SubmittedFlightPlanTest extends DbTestCase
         $this->leblAircraft->save();
     }
 
-    // TODO: PROBAR
-    // TODOS LOS TIPOS DE PLANES DE VUELO
-    // TODOS LOS TIPOS DE VELOCIDADES VALIDAS
-    // TODOS LOS TIPOS DE NIVEL DE VUELO VALIDOS
     // INTENTAR RESERVAR EL AVION ESTANDO EN OTRO AEROPUERTO EL PILOTO
     // INTENTAR RESERVAR EL AVION ESTANDO EN OTRO AEROPUERTO EL AVION
     // QUE NO SE ADMITEN NEGATIVOS EN VALORES DE VELOCIDAD/ALTITUD/TIEMPO ESTIMADO/ENDURANCE
@@ -199,6 +195,16 @@ class SubmittedFlightPlanTest extends DbTestCase
         }
     }
 
+    public function testInvalidFlightRule()
+    {
+        $data = $this->createBaseFlightPlanData();
+        $data['flight_rules'] = 'X'; // Invalid flight rule
+
+        $flightPlan = new SubmittedFlightPlan($data);
+        $this->assertFalse($flightPlan->save(), "Flight plan should not save with invalid flight_rule");
+        $this->assertNotEmpty($flightPlan->getErrors('flight_rules'));
+    }
+
     public function testCruiseSpeedUnitCombinations()
     {
         $validSpeedUnits = ['N', 'M', 'K'];
@@ -211,6 +217,16 @@ class SubmittedFlightPlanTest extends DbTestCase
             $this->assertTrue($flightPlan->save(), "Failed for cruise_speed_unit: $speedUnit");
             $flightPlan->delete();
         }
+    }
+
+    public function testInvalidCruiseSpeedUnit()
+    {
+        $data = $this->createBaseFlightPlanData();
+        $data['cruise_speed_unit'] = 'Z'; // Invalid cruise speed unit
+
+        $flightPlan = new SubmittedFlightPlan($data);
+        $this->assertFalse($flightPlan->save(), "Flight plan should not save with invalid cruise_speed_unit");
+        $this->assertNotEmpty($flightPlan->getErrors('cruise_speed_unit'));
     }
 
     public function testFlightLevelUnitCombinations()
@@ -232,94 +248,57 @@ class SubmittedFlightPlanTest extends DbTestCase
         }
     }
 
+    public function testInvalidFlightLevelUnit()
+    {
+        $data = $this->createBaseFlightPlanData();
+        $data['flight_level_unit'] = 'X'; // Invalid flight level unit
 
+        $flightPlan = new SubmittedFlightPlan($data);
+        $this->assertFalse($flightPlan->save(), "Flight plan should not save with invalid flight_level_unit");
+        $this->assertNotEmpty($flightPlan->getErrors('flight_level_unit'));
+    }
 
+    public function testVFRFlightLevelWithValue()
+    {
+        $data = $this->createBaseFlightPlanData();
+        $data['flight_level_unit'] = 'VFR';
+        $data['flight_level_value'] = 100; // Should be null for VFR
 
-
-
-
-
-
-
-
+        $flightPlan = new SubmittedFlightPlan($data);
+        $this->assertFalse($flightPlan->save(), "Flight plan should not save with flight_level_value set for VFR");
+        $this->assertNotEmpty($flightPlan->getErrors('flight_level_value'));
+    }
 
     public function testInvalidSubmittedFlightPlanWithoutRequiredFields()
     {
-        $flightPlan = new SubmittedFlightPlan([
-            // No se pasa ningún campo obligatorio
-        ]);
+        $flightPlan = new SubmittedFlightPlan([]);
 
         $this->assertFalse($flightPlan->save());
         $this->assertArrayHasKey('aircraft_id', $flightPlan->errors);
         $this->assertArrayHasKey('flight_rules', $flightPlan->errors);
         $this->assertArrayHasKey('alternative1_icao', $flightPlan->errors);
         $this->assertArrayHasKey('cruise_speed_value', $flightPlan->errors);
-    }
-
-    public function testInvalidFlightRules()
-    {
-        $flightPlan = new SubmittedFlightPlan([
-            'aircraft_id' => 1,
-            'flight_rules' => 'X', // Valor inválido para flight_rules
-            'alternative1_icao' => 'TEST',
-            'cruise_speed_value' => 450,
-            'cruise_speed_unit' => 'K',
-            'flight_level_value' => 350,
-            'flight_level_unit' => 'FL',
-            'route' => 'ROUTE123',
-            'estimated_time' => '02:00',
-            'other_information' => 'No additional info',
-            'endurance_time' => 5,
-            'route_id' => 1,
-            'pilot_id' => 1,
-        ]);
-
-        $this->assertFalse($flightPlan->save());
-        $this->assertArrayHasKey('flight_rules', $flightPlan->errors);
-    }
-
-    public function testInvalidSpeedUnit()
-    {
-        $flightPlan = new SubmittedFlightPlan([
-            'aircraft_id' => 1,
-            'flight_rules' => 'V',
-            'alternative1_icao' => 'TEST',
-            'cruise_speed_value' => 450,
-            'cruise_speed_unit' => 'M', // Unidad de velocidad no válida
-            'flight_level_value' => 350,
-            'flight_level_unit' => 'FL',
-            'route' => 'ROUTE123',
-            'estimated_time' => '02:00',
-            'other_information' => 'No additional info',
-            'endurance_time' => 5,
-            'route_id' => 1,
-            'pilot_id' => 1,
-        ]);
-
-        $this->assertFalse($flightPlan->save());
+        $this->assertArrayHasKey('route', $flightPlan->errors);
+        $this->assertArrayHasKey('estimated_time', $flightPlan->errors);
+        $this->assertArrayHasKey('other_information', $flightPlan->errors);
+        $this->assertArrayHasKey('endurance_time', $flightPlan->errors);
+        $this->assertArrayHasKey('route_id', $flightPlan->errors);
+        $this->assertArrayHasKey('pilot_id', $flightPlan->errors);
         $this->assertArrayHasKey('cruise_speed_unit', $flightPlan->errors);
+        $this->assertArrayHasKey('flight_level_unit', $flightPlan->errors);
     }
 
-    public function testInvalidFlightLevelUnit()
+    public function testNegativeValuesNotAllowed()
     {
-        $flightPlan = new SubmittedFlightPlan([
-            'aircraft_id' => 1,
-            'flight_rules' => 'V',
-            'alternative1_icao' => 'TEST',
-            'cruise_speed_value' => 450,
-            'cruise_speed_unit' => 'K',
-            'flight_level_value' => 350,
-            'flight_level_unit' => 'XYZ', // Unidad de nivel de vuelo no válida
-            'route' => 'ROUTE123',
-            'estimated_time' => '02:00',
-            'other_information' => 'No additional info',
-            'endurance_time' => 5,
-            'route_id' => 1,
-            'pilot_id' => 1,
-        ]);
+        $fieldsToTest = ['cruise_speed_value', 'flight_level_value', 'estimated_time', 'endurance_time'];
+        foreach ($fieldsToTest as $field) {
+            $data = $this->createBaseFlightPlanData();
+            $data[$field] = -1; // Assign a negative value
 
-        $this->assertFalse($flightPlan->save());
-        $this->assertArrayHasKey('flight_level_unit', $flightPlan->errors);
+            $flightPlan = new SubmittedFlightPlan($data);
+            $this->assertFalse($flightPlan->save(), "Flight plan should not save with negative value for $field".json_encode($flightPlan->errors));
+            $this->assertNotEmpty($flightPlan->getErrors($field), "Expected errors for $field with negative value");
+        }
     }
 
     public function testUniqueAircraftAndPilot()
@@ -377,30 +356,4 @@ class SubmittedFlightPlanTest extends DbTestCase
         $this->assertArrayHasKey('pilot_id', $flightPlan2->errors);
     }
 
-    public function testValidAlternativeAirports()
-    {
-        $airport = new Airport([
-            'icao_code' => 'TEST',
-        ]);
-        $airport->save();
-
-        $flightPlan = new SubmittedFlightPlan([
-            'aircraft_id' => 1,
-            'flight_rules' => 'V',
-            'alternative1_icao' => 'TEST',
-            'alternative2_icao' => 'TEST',
-            'cruise_speed_value' => 450,
-            'cruise_speed_unit' => 'K',
-            'flight_level_value' => 350,
-            'flight_level_unit' => 'FL',
-            'route' => 'ROUTE123',
-            'estimated_time' => '02:00',
-            'other_information' => 'No additional info',
-            'endurance_time' => 5,
-            'route_id' => 1,
-            'pilot_id' => 1,
-        ]);
-
-        $this->assertTrue($flightPlan->save());
-    }
 }

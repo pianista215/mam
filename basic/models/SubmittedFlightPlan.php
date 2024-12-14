@@ -49,6 +49,7 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
             [['aircraft_id', 'flight_rules', 'alternative1_icao', 'cruise_speed_value', 'route', 'estimated_time', 'other_information', 'endurance_time', 'route_id', 'pilot_id', 'cruise_speed_unit', 'flight_level_unit'], 'required'],
             [['aircraft_id', 'route_id', 'pilot_id', 'cruise_speed_value', 'flight_level_value', 'estimated_time', 'endurance_time'], 'integer'],
             [['flight_rules', 'cruise_speed_unit'], 'string', 'length' => 1],
+            [['cruise_speed_value', 'flight_level_value', 'estimated_time', 'endurance_time'], 'number', 'min' => 0],
             [['flight_rules'], 'in', 'range' => array_keys(SubmittedFlightPlan::getFlightRulesTypes())],
             [['cruise_speed_unit'], 'in', 'range' => SubmittedFlightPlan::getValidSpeedUnits()],
             [['alternative1_icao', 'alternative2_icao', 'cruise_speed_value', 'flight_level_value', 'estimated_time', 'endurance_time'], 'string', 'max' => 4],
