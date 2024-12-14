@@ -18,10 +18,12 @@ class SubmittedFlightPlanTest extends DbTestCase
 {
 
     protected Aircraft $lemdAircraft;
+    protected Aircraft $lemd2Aircraft;
     protected Aircraft $leblAircraft;
     protected Route $routeMadBcn;
     protected Route $routeVllBcn;
     protected Pilot $pilotMad;
+    protected Pilot $pilot2Mad;
     protected Pilot $pilotBcn;
 
     protected function _before(){
@@ -87,7 +89,20 @@ class SubmittedFlightPlanTest extends DbTestCase
         ]);
         $this->pilotMad->save();
 
-        $this->pilotBcl = new Pilot([
+        $this->pilot2Mad = new Pilot([
+            'license' => 'MAD34567',
+            'name' => 'John2',
+            'surname' => 'Doe2',
+            'email' => 'john.doe2@example.com',
+            'password' => Yii::$app->security->generatePasswordHash('SecurePass123!'),
+            'country_id' => $country->id,
+            'city' => 'Madrid',
+            'location' => 'LEMD',
+            'date_of_birth' => '1992-01-01',
+        ]);
+        $this->pilot2Mad->save();
+
+        $this->pilotBcn = new Pilot([
             'license' => 'BCL12345',
             'name' => 'Bcl',
             'surname' => 'Doe',
@@ -98,7 +113,7 @@ class SubmittedFlightPlanTest extends DbTestCase
             'location' => 'LEBL',
             'date_of_birth' => '1988-01-01',
         ]);
-        $this->pilotBcl->save();
+        $this->pilotBcn->save();
 
         $aircraftType = new AircraftType([
             'icao_type_code' => 'B738',
@@ -124,6 +139,15 @@ class SubmittedFlightPlanTest extends DbTestCase
         ]);
         $this->lemdAircraft->save();
 
+        $this->lemd2Aircraft = new Aircraft([
+            'aircraft_configuration_id' => $config->id,
+            'registration' => 'EC-MAD2',
+            'name' => '737-800 Mad2',
+            'location' => 'LEMD',
+            'hours_flown' => 1000.5,
+        ]);
+        $this->lemd2Aircraft->save();
+
         $this->leblAircraft = new Aircraft([
             'aircraft_configuration_id' => $config->id,
             'registration' => 'EC-BCL',
@@ -133,10 +157,6 @@ class SubmittedFlightPlanTest extends DbTestCase
         ]);
         $this->leblAircraft->save();
     }
-
-    // INTENTAR RESERVAR EL AVION ESTANDO EN OTRO AEROPUERTO EL PILOTO
-    // INTENTAR RESERVAR EL AVION ESTANDO EN OTRO AEROPUERTO EL AVION
-    // QUE NO SE ADMITEN NEGATIVOS EN VALORES DE VELOCIDAD/ALTITUD/TIEMPO ESTIMADO/ENDURANCE
 
     public function testValidSubmittedFlightPlan()
     {
@@ -301,59 +321,73 @@ class SubmittedFlightPlanTest extends DbTestCase
         }
     }
 
-    public function testUniqueAircraftAndPilot()
+    // TODO: CHECK IF THE ERRORS ARE SHOWN IN THE VIEW WHEN TESTS OF THAT ARE CREATED, EXAMPLE AICRAFT RESERVED BY OTHER PILOT
+    public function testOnlyOneFPLPerPilot()
     {
-        $aircraft1 = new Aircraft([
-            'id' => 1,
-            'registration' => 'ABC123',
-            'name' => 'Boeing 737',
-            'location' => 'TEST',
-            'hours_flown' => 1000.0,
-        ]);
-        $aircraft1->save();
-
-        $pilot1 = new Pilot([
-            'id' => 1,
-            'name' => 'John Doe',
-        ]);
-        $pilot1->save();
-
-        $flightPlan1 = new SubmittedFlightPlan([
-            'aircraft_id' => $aircraft1->id,
-            'flight_rules' => 'V',
-            'alternative1_icao' => 'TEST',
-            'cruise_speed_value' => 450,
-            'cruise_speed_unit' => 'K',
-            'flight_level_value' => 350,
-            'flight_level_unit' => 'FL',
-            'route' => 'ROUTE123',
-            'estimated_time' => '02:00',
-            'other_information' => 'No additional info',
-            'endurance_time' => 5,
-            'route_id' => 1,
-            'pilot_id' => $pilot1->id,
-        ]);
+        $data1 = $this->createBaseFlightPlanData();
+        $data1['pilot_id'] = $this->pilotMad->id;
+        $flightPlan1 = new SubmittedFlightPlan($data1);
         $flightPlan1->save();
 
-        $flightPlan2 = new SubmittedFlightPlan([
-            'aircraft_id' => $aircraft1->id, // El mismo aircraft_id
-            'flight_rules' => 'V',
-            'alternative1_icao' => 'TEST',
-            'cruise_speed_value' => 450,
-            'cruise_speed_unit' => 'K',
-            'flight_level_value' => 350,
-            'flight_level_unit' => 'FL',
-            'route' => 'ROUTE123',
-            'estimated_time' => '02:00',
-            'other_information' => 'No additional info',
-            'endurance_time' => 5,
-            'route_id' => 1,
-            'pilot_id' => $pilot1->id, // El mismo pilot_id
-        ]);
+        $data2 = $this->createBaseFlightPlanData();
+        $data2['pilot_id'] = $this->pilotMad->id;
+        $data2['aircraft_id'] = $this->lemdAircraft->id;
+        $flightPlan2 = new SubmittedFlightPlan($data2);
+
+        $this->assertFalse($flightPlan2->save());
+        $this->assertArrayHasKey('pilot_id', $flightPlan2->errors);
+    }
+
+    public function testOnlyOneFPLPerAircraft()
+    {
+        $data1 = $this->createBaseFlightPlanData();
+        $data1['aircraft_id'] = $this->lemdAircraft->id;
+        $data1['pilot_id'] = $this->pilotMad->id;
+        $flightPlan1 = new SubmittedFlightPlan($data1);
+        $flightPlan1->save();
+
+        $data2 = $this->createBaseFlightPlanData();
+        $data2['aircraft_id'] = $this->lemdAircraft->id;
+        $data2['pilot_id'] = $this->pilot2Mad->id;
+        $flightPlan2 = new SubmittedFlightPlan($data2);
 
         $this->assertFalse($flightPlan2->save());
         $this->assertArrayHasKey('aircraft_id', $flightPlan2->errors);
-        $this->assertArrayHasKey('pilot_id', $flightPlan2->errors);
+    }
+
+    public function testInvalidPilotIsInOtherLocation()
+    {
+        $data1 = $this->createBaseFlightPlanData();
+        $data1['aircraft_id'] = $this->lemdAircraft->id;
+        $data1['pilot_id'] = $this->pilotBcn->id;
+        $flightPlan1 = new SubmittedFlightPlan($data1);
+
+        $this->assertFalse($flightPlan1->save());
+        $this->assertArrayHasKey('pilot_id', $flightPlan1->errors);
+    }
+
+    public function testInvalidAircrafttIsInOtherLocation()
+    {
+        $data1 = $this->createBaseFlightPlanData();
+        $data1['aircraft_id'] = $this->leblAircraft->id;
+        $data1['pilot_id'] = $this->pilotMad->id;
+        $flightPlan1 = new SubmittedFlightPlan($data1);
+
+        $this->assertFalse($flightPlan1->save());
+        $this->assertArrayHasKey('aircraft_id', $flightPlan1->errors);
+    }
+
+    public function testInvalidRouteLocationWithPilotAndAircraft()
+    {
+        $data1 = $this->createBaseFlightPlanData();
+        $data1['aircraft_id'] = $this->lemdAircraft->id;
+        $data1['pilot_id'] = $this->pilotMad->id;
+        $data1['route_id'] = $this->routeVllBcn->id;
+        $flightPlan1 = new SubmittedFlightPlan($data1);
+
+        $this->assertFalse($flightPlan1->save());
+        $this->assertArrayHasKey('pilot_id', $flightPlan1->errors);
+        $this->assertArrayHasKey('aircraft_id', $flightPlan1->errors);
     }
 
 }
