@@ -65,6 +65,8 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
             [['aircraft_id'], 'exist', 'skipOnError' => true, 'targetClass' => Aircraft::class, 'targetAttribute' => ['aircraft_id' => 'id']],
             [['pilot_id'], 'exist', 'skipOnError' => true, 'targetClass' => Pilot::class, 'targetAttribute' => ['pilot_id' => 'id']],
             [['route_id'], 'exist', 'skipOnError' => true, 'targetClass' => Route::class, 'targetAttribute' => ['route_id' => 'id']],
+            [['pilot_id'], 'validatePilotLocation'],
+            [['aircraft_id'], 'validateAircraftLocation'],
         ];
     }
 
@@ -127,6 +129,19 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
             if(!isset($this->flight_level_value) || empty($this->flight_level_value)){
                 $this->addError('flight_level_value', 'Flight Level Value cannot be blank if VFR is not selected');
             }
+        }
+    }
+
+    public function validatePilotLocation($attribute, $params){
+        if ($this->route0->departure != $this->pilot->location) {
+            $this->addError($attribute, 'The pilot is not in the correct location.');
+        }
+    }
+
+    public function validateAircraftLocation($attribute, $params)
+    {
+        if ($this->route0->departure != $this->aircraft->location) {
+            $this->addError($attribute, 'The aircraft is not in the correct location.');
         }
     }
 

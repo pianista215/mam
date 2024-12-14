@@ -152,7 +152,7 @@ class SubmittedFlightPlanTest extends DbTestCase
             'aircraft_configuration_id' => $config->id,
             'registration' => 'EC-BCL',
             'name' => '737-800 Bcn',
-            'location' => 'LEMD',
+            'location' => 'LEBL',
             'hours_flown' => 5000.1,
         ]);
         $this->leblAircraft->save();
@@ -366,7 +366,7 @@ class SubmittedFlightPlanTest extends DbTestCase
         $this->assertArrayHasKey('pilot_id', $flightPlan1->errors);
     }
 
-    public function testInvalidAircrafttIsInOtherLocation()
+    public function testInvalidAircraftIsInOtherLocation()
     {
         $data1 = $this->createBaseFlightPlanData();
         $data1['aircraft_id'] = $this->leblAircraft->id;
