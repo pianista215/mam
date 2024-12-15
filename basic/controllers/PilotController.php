@@ -2,9 +2,11 @@
 
 namespace app\controllers;
 
+use app\config\Config;
 use app\models\Country;
 use app\models\Pilot;
 use app\models\PilotSearch;
+use DateTime;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
@@ -77,10 +79,21 @@ class PilotController extends Controller
     public function actionRegister()
     {
 
-        // TODO: MOVE TO CONFIGURATION STORED IN DB
-        $registration_is_closed = false;
+        $registrationStart = DateTime::createFromFormat('Y-m-d', Config::get('registration_start'));
+        $registrationEnd = DateTime::createFromFormat('Y-m-d', Config::get('registration_end'));
 
-        if($registration_is_closed) {
+        if ($registrationStart === false || $registrationEnd === false) {
+            throw new Exception("Invalid registration dates. Contact an admin.");
+        }
+
+        Yii::warning($registrationStart);
+        Yii::warning($registrationEnd);
+
+        $now = new DateTime();
+
+        Yii::warning($now);
+
+        if($now < $registrationStart || $now > $registrationEnd) {
             return $this->render('registration_closed');
         } else {
             $model = new Pilot();

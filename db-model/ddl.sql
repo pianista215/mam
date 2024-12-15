@@ -1,5 +1,13 @@
 -- CREATE DATABASE `mam` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
 
+CREATE TABLE `config` (
+  `key` varchar(255) NOT NULL,
+  `value` text NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `country` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(80) NOT NULL,
