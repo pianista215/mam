@@ -8,9 +8,8 @@ use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\Response;
 use yii\filters\VerbFilter;
-use app\models\LoginForm;
-use app\models\ContactForm;
-use app\models\EntryForm;
+use app\models\PilotSearch;
+
 
 class AdminController extends Controller
 {
@@ -34,7 +33,12 @@ class AdminController extends Controller
 
     public function actionActivateUsers(){
         if(Yii::$app->user->can('userCrud')){
-
+            $searchModel = new PilotSearch();
+            $dataProvider = $searchModel->search([]);
+            $dataProvider->query->andWhere(['license' => null]);
+            return $this->render('activate-users', [
+                        'dataProvider' => $dataProvider,
+                    ]);
         } else {
             throw new ForbiddenHttpException();
         }
