@@ -81,25 +81,18 @@ class PilotController extends Controller
 
         $registrationStart = DateTime::createFromFormat('Y-m-d', Config::get('registration_start'));
         $registrationEnd = DateTime::createFromFormat('Y-m-d', Config::get('registration_end'));
+        $now = new DateTime();
 
         if ($registrationStart === false || $registrationEnd === false) {
             throw new Exception("Invalid registration dates. Contact an admin.");
         }
 
-        Yii::warning($registrationStart);
-        Yii::warning($registrationEnd);
-
-        $now = new DateTime();
-
-        Yii::warning($now);
-
         if($now < $registrationStart || $now > $registrationEnd) {
             return $this->render('registration_closed');
         } else {
             $model = new Pilot();
-
-            // TODO: Default location? Make configurable? Disable required?
-            $model->location = "LEBB";
+            $model->scenario = Pilot::SCENARIO_REGISTER;
+            $model->location = Config::get('registration_start_location', 'LEVD');
 
             if($this->request->isPost){
                 if ($model->load($this->request->post()) && $model->save()) {

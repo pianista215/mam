@@ -36,6 +36,14 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
         return 'pilot';
     }
 
+    const SCENARIO_REGISTER = 'register';
+
+    public function scenarios(){
+        $scenarios = parent::scenarios();
+        $scenarios[self::SCENARIO_REGISTER] = ['name', 'surname', 'email', 'city', 'country_id', 'password', 'date_of_birth', 'vatsim_id', 'ivao_id'];
+        return $scenarios;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -57,7 +65,7 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
             [['auth_key', 'access_token'], 'string', 'max' => 32],
             [['password'], 'match', 'pattern'=>'/\d/', 'message' => 'Password must contain at least one numeric digit.'],
             [['password'], 'match', 'pattern'=>'/[a-zA-Z]/', 'message' => 'Password must contain at least one letter.'],
-            [['location'], 'string', 'max' => 4],
+            [['location'], 'string', 'length' => 4],
             [['email'], 'unique'],
             [['license'], 'unique'],
             [['location'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['location' => 'icao_code']],

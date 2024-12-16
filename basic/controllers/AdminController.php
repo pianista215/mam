@@ -5,6 +5,7 @@ namespace app\controllers;
 use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
 use yii\web\Response;
 use yii\filters\VerbFilter;
 use app\models\LoginForm;
@@ -31,6 +32,12 @@ class AdminController extends Controller
         return $this->redirect(['site/index']);
     }
 
-    // TODO: VALIDATE PILOTS? OR BETTER IN PILOT CONTROLLER?
+    public function actionActivateUsers(){
+        if(Yii::$app->user->can('userCrud')){
+
+        } else {
+            throw new ForbiddenHttpException();
+        }
+    }
 
 }
