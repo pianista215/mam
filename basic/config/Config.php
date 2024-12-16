@@ -32,8 +32,8 @@ class Config
 
     public static function delete($key)
     {
-        Yii::$app->db->createCommand()
-            ->delete('config', ['key' => $key])
+        Yii::$app->db->createCommand('DELETE FROM config WHERE `key` = :key')
+            ->bindValue(':key', $key)
             ->execute();
 
         Yii::$app->cache->delete(self::CACHE_KEY);
