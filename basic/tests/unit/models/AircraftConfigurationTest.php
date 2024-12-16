@@ -1,5 +1,5 @@
 <?php
-namespace tests\unit;
+namespace tests\unit\models;
 
 use app\models\AircraftConfiguration;
 use app\models\AircraftType;
