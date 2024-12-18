@@ -37,10 +37,13 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     }
 
     const SCENARIO_REGISTER = 'register';
+    const SCENARIO_ACTIVATE = 'activate';
+    const SCENARIO_UPDATE = 'update';
 
     public function scenarios(){
         $scenarios = parent::scenarios();
         $scenarios[self::SCENARIO_REGISTER] = ['name', 'surname', 'email', 'city', 'country_id', 'password', 'date_of_birth', 'vatsim_id', 'ivao_id'];
+        $scenarios[self::SCENARIO_ACTIVATE] = ['license'];
         return $scenarios;
     }
 
@@ -56,6 +59,8 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
             [['country_id', 'vatsim_id', 'ivao_id'], 'integer'],
             [['hours_flown'], 'number'],
             [['license'], 'string', 'max' => 8],
+            [['license'], 'trim'],
+            ['license', 'required', 'on' => [self::SCENARIO_ACTIVATE, self::SCENARIO_UPDATE]],
             [['name'], 'string', 'max' => 20],
             [['surname', 'city'], 'string', 'max' => 40],
             [['email'], 'string', 'max' => 80],
@@ -217,6 +222,9 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     public function beforeSave($insert)
     {
         if (parent::beforeSave($insert)) {
+            if ($this->license) {
+                $this->license = strtolower($this->license);
+            }
             if ($this->isNewRecord) {
                 // TODO: Period of validation and ensure password could be modified later (is only hashed in the first time)
                 $this->auth_key = \Yii::$app->security->generateRandomString(32);

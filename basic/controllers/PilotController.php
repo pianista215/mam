@@ -162,6 +162,13 @@ class PilotController extends Controller
         if(Yii::$app->user->can('userCrud')){
             $model = $this->findModel($id);
 
+            if(!isset($model->license)){
+                $msg = "You can't update a user that hasn't been activated. Please active the user first.";
+                throw new ForbiddenHttpException($msg);
+            }
+
+            $model->setScenario(Pilot::SCENARIO_UPDATE);
+
             if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
                 return $this->redirect(['view', 'id' => $model->id]);
             }
@@ -190,6 +197,40 @@ class PilotController extends Controller
             $this->findModel($id)->delete();
 
             return $this->redirect(['index']);
+        } else {
+            throw new ForbiddenHttpException();
+        }
+    }
+
+    public function actionActivatePilots(){
+        if(Yii::$app->user->can('userCrud')){
+            $searchModel = new PilotSearch();
+            $dataProvider = $searchModel->search([]);
+            $dataProvider->query->andWhere(['license' => null]);
+            return $this->render('activate-pilots', [
+                'dataProvider' => $dataProvider,
+            ]);
+        } else {
+            throw new ForbiddenHttpException();
+        }
+    }
+
+    public function actionActivate($id){
+        if(Yii::$app->user->can('userCrud')){
+            $model = $this->findModel($id);
+
+            if(isset($model->license)){
+                $msg = "The user is already activated.";
+                throw new ForbiddenHttpException($msg);
+            }
+
+            $model->setScenario(Pilot::SCENARIO_ACTIVATE);
+
+            if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
+                // TODO: SEND MAIL TO THE PILOT
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
+            return $this->render('activate', ['model' => $model]);
         } else {
             throw new ForbiddenHttpException();
         }

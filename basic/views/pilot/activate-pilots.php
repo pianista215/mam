@@ -9,7 +9,7 @@ use yii\grid\GridView;
 /** @var yii\web\View $this */
 /** @var yii\data\ActiveDataProvider $dataProvider */
 
-$this->title = 'Activate users';
+$this->title = 'Activate pilots';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="activate-users-index">
@@ -26,7 +26,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'registration_date',
             [
                 'class' => ActionColumn::className(),
-                'template' => '{view}{delete}',
+                'template' => '{view} {delete}',
                 'urlCreator' => function ($action, Pilot $model, $key, $index, $column) {
                     return Url::toRoute([$action, 'id' => $model->id]);
                  }
