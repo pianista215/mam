@@ -19,6 +19,19 @@ class AircraftTypeTest extends DbTestCase
         $this->assertNotEmpty($aircraftType->id);
     }
 
+    public function testTrimAndToUpperAircraftType()
+    {
+        $aircraftType = new AircraftType([
+            'icao_type_code' => ' b7 3 8',
+            'name' => '   Boeing 737-800   ',
+            'max_nm_range' => 2900,
+        ]);
+
+        $this->assertTrue($aircraftType->save());
+        $this->assertEquals($aircraftType->icao_type_code, "B738");
+        $this->assertEquals($aircraftType->name, "Boeing 737-800");
+    }
+
     public function testCreateAircraftTypeWithoutRequiredFields()
     {
         $aircraftType = new AircraftType([]);

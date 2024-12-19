@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\CustomRules;
 use Yii;
 
 /**
@@ -31,9 +32,11 @@ class AircraftType extends \yii\db\ActiveRecord
     {
         return [
             [['icao_type_code', 'name', 'max_nm_range'], 'required'],
+            [['icao_type_code'], 'filter', 'filter' => [CustomRules::class, 'removeSpaces']],
             [['max_nm_range'], 'integer'],
             [['icao_type_code'], 'string', 'length' => 4],
             [['name'], 'string', 'max' => 60],
+            [['name'], 'trim'],
             [['icao_type_code'], 'unique'],
         ];
     }
@@ -59,5 +62,16 @@ class AircraftType extends \yii\db\ActiveRecord
     public function getAircraftConfigurations()
     {
         return $this->hasMany(AircraftConfiguration::class, ['aircraft_type_id' => 'id']);
+    }
+
+    public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert)) {
+            if ($this->icao_type_code) {
+                $this->icao_type_code = mb_strtoupper($this->icao_type_code);
+            }
+            return true;
+        }
+        return false;
     }
 }
