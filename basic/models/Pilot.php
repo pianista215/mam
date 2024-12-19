@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\CustomRules;
 use Yii;
 
 /**
@@ -58,11 +59,12 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
             [['date_of_birth'], 'compare', 'compareValue' => date('Y-m-d'), 'operator' => '<', 'message' => 'The date of birth must be earlier than today.'],
             [['country_id', 'vatsim_id', 'ivao_id'], 'integer'],
             [['hours_flown'], 'number'],
+            [['license'], 'filter', 'filter' => [CustomRules::class, 'removeSpaces']],
             [['license'], 'string', 'max' => 8],
-            [['license'], 'trim'],
             ['license', 'required', 'on' => [self::SCENARIO_ACTIVATE, self::SCENARIO_UPDATE]],
             [['name'], 'string', 'max' => 20],
             [['surname', 'city'], 'string', 'max' => 40],
+            [['name', 'surname', 'city', 'email'], 'trim'],
             [['email'], 'string', 'max' => 80],
             [['email'], 'email'],
             [['password'], 'string', 'max' => 255],
