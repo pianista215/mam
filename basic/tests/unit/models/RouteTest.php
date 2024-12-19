@@ -46,7 +46,6 @@ class RouteTest extends DbTestCase
             'departure' => 'LEMD',
             'arrival' => 'LEBL',
         ]);
-        $this->assertTrue($route->validate());
         $this->assertTrue($route->save());
         $this->assertNotEmpty($route->distance_nm);
     }
@@ -65,8 +64,19 @@ class RouteTest extends DbTestCase
             'departure' => 'LEMD',
             'arrival' => 'LEBL',
         ]);
-        $this->assertFalse($route2->validate());
+        $this->assertFalse($route2->save());
         $this->assertArrayHasKey('code', $route2->getErrors());
+    }
+
+    public function testTrimToUpper()
+    {
+        $route = new Route([
+            'code' => '   Mad - Bcn ',
+            'departure' => 'LEMD',
+            'arrival' => 'LEBL',
+        ]);
+        $this->assertTrue($route->save());
+        $this->assertEquals($route->code, 'MAD-BCN');
     }
 
     public function testUniqueDepartureArrivalPair()
@@ -83,7 +93,7 @@ class RouteTest extends DbTestCase
             'departure' => 'LEMD',
             'arrival' => 'LEBL',
         ]);
-        $this->assertFalse($route2->validate());
+        $this->assertFalse($route2->save());
         $this->assertArrayHasKey('departure', $route2->getErrors());
     }
 
@@ -94,7 +104,7 @@ class RouteTest extends DbTestCase
             'departure' => 'XXXX',
             'arrival' => 'LEBL',
         ]);
-        $this->assertFalse($route->validate());
+        $this->assertFalse($route->save());
         $this->assertArrayHasKey('departure', $route->getErrors());
     }
 
@@ -105,7 +115,7 @@ class RouteTest extends DbTestCase
             'departure' => 'LEMD',
             'arrival' => 'YYYY',
         ]);
-        $this->assertFalse($route->validate());
+        $this->assertFalse($route->save());
         $this->assertArrayHasKey('arrival', $route->getErrors());
     }
 
@@ -116,7 +126,7 @@ class RouteTest extends DbTestCase
             'departure' => 'LEMD',
             'arrival' => 'LEBL',
         ]);
-        $this->assertFalse($route->validate());
+        $this->assertFalse($route->save());
         $this->assertArrayHasKey('code', $route->getErrors());
     }
 
