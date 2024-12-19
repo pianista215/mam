@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\CustomRules;
 use Yii;
 
 /**
@@ -39,6 +40,7 @@ class Airport extends \yii\db\ActiveRecord
     {
         return [
             [['icao_code', 'name', 'latitude', 'longitude', 'city', 'country_id'], 'required'],
+            [['icao_code'], 'filter', 'filter' => [CustomRules::class, 'removeSpaces']],
             [['latitude', 'longitude'], 'number'],
             [['latitude'], 'compare', 'compareValue' => -90, 'operator' => '>=', 'message' => 'Latitude must be between -90 and 90.'],
             [['latitude'], 'compare', 'compareValue' => 90, 'operator' => '<=', 'message' => 'Latitude must be between -90 and 90.'],
@@ -47,7 +49,9 @@ class Airport extends \yii\db\ActiveRecord
             [['country_id'], 'integer'],
             [['icao_code'], 'string', 'length' => 4],
             [['name'], 'string', 'max' => 100],
+            [['name'], 'trim'],
             [['city'], 'string', 'max' => 80],
+            [['city'], 'trim'],
             [['icao_code'], 'unique'],
             [['country_id'], 'exist', 'skipOnError' => true, 'targetClass' => Country::class, 'targetAttribute' => ['country_id' => 'id']],
         ];
@@ -127,5 +131,16 @@ class Airport extends \yii\db\ActiveRecord
     public function getRoutes0()
     {
         return $this->hasMany(Route::class, ['departure' => 'icao_code']);
+    }
+
+    public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert)) {
+            if ($this->icao_code) {
+                $this->icao_code = mb_strtoupper($this->icao_code);
+            }
+            return true;
+        }
+        return false;
     }
 }

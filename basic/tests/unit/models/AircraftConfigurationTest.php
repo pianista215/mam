@@ -98,6 +98,6 @@ class AircraftConfigurationTest extends DbTestCase
             'cargo_capacity' => 2000,
         ]);
         $this->assertTrue($standardConfig->save());
-        $this->assertEquals($standardConfig->name, "Trimmed");
+        $this->assertEquals($standardConfig->name, 'Trimmed');
     }
 }

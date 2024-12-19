@@ -53,4 +53,16 @@ class CountryTest extends DbTestCase
         $this->assertFalse($country->save());
         $this->assertArrayHasKey('iso2_code', $country->errors);
     }
+
+    public function testTrimToUpperCountry()
+    {
+        $country = new Country([
+            'name' => '   Spain   ',
+            'iso2_code' => 'es',
+        ]);
+
+        $this->assertTrue($country->save());
+        $this->assertEquals($country->name, 'Spain');
+        $this->assertEquals($country->iso2_code, 'ES');
+    }
 }

@@ -28,8 +28,8 @@ class AircraftTypeTest extends DbTestCase
         ]);
 
         $this->assertTrue($aircraftType->save());
-        $this->assertEquals($aircraftType->icao_type_code, "B738");
-        $this->assertEquals($aircraftType->name, "Boeing 737-800");
+        $this->assertEquals($aircraftType->icao_type_code, 'B738');
+        $this->assertEquals($aircraftType->name, 'Boeing 737-800');
     }
 
     public function testCreateAircraftTypeWithoutRequiredFields()

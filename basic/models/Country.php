@@ -31,6 +31,7 @@ class Country extends \yii\db\ActiveRecord
     {
         return [
             [['name', 'iso2_code'], 'required'],
+            [['name'], 'trim'],
             [['name'], 'string', 'max' => 80],
             [['iso2_code'], 'string', 'length' => 2],
             [['iso2_code'], 'unique'],
@@ -67,5 +68,16 @@ class Country extends \yii\db\ActiveRecord
     public function getPilots()
     {
         return $this->hasMany(Pilot::class, ['country_id' => 'id']);
+    }
+
+    public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert)) {
+            if ($this->iso2_code) {
+                $this->iso2_code = mb_strtoupper($this->iso2_code);
+            }
+            return true;
+        }
+        return false;
     }
 }

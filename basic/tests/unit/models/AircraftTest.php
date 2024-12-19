@@ -142,8 +142,8 @@ class AircraftTest extends DbTestCase
             'hours_flown' => 1000.0,
         ]);
         $this->assertTrue($aircraft1->save());
-        $this->assertEquals($aircraft1->registration,"UNAM123");
-        $this->assertEquals($aircraft1->name,"Boeing repeated");
+        $this->assertEquals($aircraft1->registration, 'UNAM123');
+        $this->assertEquals($aircraft1->name, 'Boeing repeated');
     }
 
     public function testUniqueRegistration()
