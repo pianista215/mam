@@ -132,6 +132,20 @@ class AircraftTest extends DbTestCase
         $this->assertArrayHasKey('location', $aircraft->errors);
     }
 
+    public function testRegistrationToUpperNameTrim()
+    {
+        $aircraft1 = new Aircraft([
+            'aircraft_configuration_id' => $this->standardConfig->id,
+            'registration' => 'unam 123',
+            'name' => ' Boeing repeated  ',
+            'location' => 'LEMD',
+            'hours_flown' => 1000.0,
+        ]);
+        $this->assertTrue($aircraft1->save());
+        $this->assertEquals($aircraft1->registration,"UNAM123");
+        $this->assertEquals($aircraft1->name,"Boeing repeated");
+    }
+
     public function testUniqueRegistration()
     {
         $aircraft1 = new Aircraft([
@@ -153,6 +167,16 @@ class AircraftTest extends DbTestCase
 
         $this->assertFalse($aircraft2->save());
         $this->assertArrayHasKey('registration', $aircraft2->errors);
+
+        $aircraft3 = new Aircraft([
+            'aircraft_configuration_id' => $this->cargoConfig->id,
+            'registration' => 'u n i q 123',
+            'name' => 'Unique 737-2',
+            'location' => 'LEMD',
+            'hours_flown' => 1200.0,
+        ]);
+        $this->assertFalse($aircraft3->save());
+        $this->assertArrayHasKey('registration', $aircraft3->errors);
     }
 
     public function testUniqueName()

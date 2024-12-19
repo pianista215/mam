@@ -223,7 +223,7 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     {
         if (parent::beforeSave($insert)) {
             if ($this->license) {
-                $this->license = strtolower($this->license);
+                $this->license = mb_strtoupper($this->license);
             }
             if ($this->isNewRecord) {
                 // TODO: Period of validation and ensure password could be modified later (is only hashed in the first time)
