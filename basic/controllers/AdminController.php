@@ -31,17 +31,4 @@ class AdminController extends Controller
         return $this->redirect(['site/index']);
     }
 
-    public function actionActivateUsers(){
-        if(Yii::$app->user->can('userCrud')){
-            $searchModel = new PilotSearch();
-            $dataProvider = $searchModel->search([]);
-            $dataProvider->query->andWhere(['license' => null]);
-            return $this->render('activate-users', [
-                        'dataProvider' => $dataProvider,
-                    ]);
-        } else {
-            throw new ForbiddenHttpException();
-        }
-    }
-
 }

@@ -227,6 +227,9 @@ class PilotController extends Controller
             $model->setScenario(Pilot::SCENARIO_ACTIVATE);
 
             if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
+                $auth = Yii::$app->authManager;
+                $pilotRole = $auth->getRole('pilot');
+                $auth->assign($pilotRole, $model->id);
                 // TODO: SEND MAIL TO THE PILOT
                 return $this->redirect(['view', 'id' => $model->id]);
             }
