@@ -6,10 +6,10 @@ use app\models\Airport;
 use app\models\Country;
 use app\models\LoginForm;
 use app\models\Pilot;
-use tests\unit\DbTestCase;
+use tests\unit\BaseUnitTest;
 use Yii;
 
-class LoginFormTest extends DbTestCase
+class LoginFormTest extends BaseUnitTest
 {
     private $model;
 

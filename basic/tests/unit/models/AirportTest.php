@@ -4,10 +4,10 @@ namespace tests\unit\models;
 
 use app\models\Airport;
 use app\models\Country;
-use tests\unit\DbTestCase;
+use tests\unit\BaseUnitTest;
 use Yii;
 
-class AirportTest extends DbTestCase
+class AirportTest extends BaseUnitTest
 {
 
     protected function _before(){

@@ -3,9 +3,9 @@
 namespace tests\unit\models;
 
 use app\models\Country;
-use tests\unit\DbTestCase;
+use tests\unit\BaseUnitTest;
 
-class CountryTest extends DbTestCase
+class CountryTest extends BaseUnitTest
 {
     public function testCreateValidCountry()
     {

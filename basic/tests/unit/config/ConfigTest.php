@@ -3,11 +3,11 @@
 namespace tests\unit\config;
 
 use app\config\Config;
-use tests\unit\DbTestCase;
+use tests\unit\BaseUnitTest;
 use Yii;
 use DateTime;
 
-class ConfigTest extends DbTestCase
+class ConfigTest extends BaseUnitTest
 {
     protected function _before()
     {

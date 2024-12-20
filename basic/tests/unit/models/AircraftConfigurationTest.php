@@ -3,9 +3,9 @@ namespace tests\unit\models;
 
 use app\models\AircraftConfiguration;
 use app\models\AircraftType;
-use tests\unit\DbTestCase;
+use tests\unit\BaseUnitTest;
 
-class AircraftConfigurationTest extends DbTestCase
+class AircraftConfigurationTest extends BaseUnitTest
 {
     public function testValidConfiguration()
     {

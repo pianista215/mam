@@ -3,14 +3,14 @@
 namespace tests\unit\models;
 
 use Yii;
-use tests\unit\DbTestCase;
+use tests\unit\BaseUnitTest;
 use app\models\Aircraft;
 use app\models\AircraftConfiguration;
 use app\models\AircraftType;
 use app\models\Airport;
 use app\models\Country;
 
-class AircraftTest extends DbTestCase
+class AircraftTest extends BaseUnitTest
 {
     protected AircraftConfiguration $standardConfig;
     protected AircraftConfiguration $cargoConfig;

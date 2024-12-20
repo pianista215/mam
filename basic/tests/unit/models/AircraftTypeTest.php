@@ -3,9 +3,9 @@
 namespace tests\unit\models;
 
 use app\models\AircraftType;
-use tests\unit\DbTestCase;
+use tests\unit\BaseUnitTest;
 
-class AircraftTypeTest extends DbTestCase
+class AircraftTypeTest extends BaseUnitTest
 {
     public function testCreateValidAircraftType()
     {

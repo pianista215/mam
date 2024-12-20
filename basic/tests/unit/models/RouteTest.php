@@ -5,10 +5,10 @@ namespace tests\unit\models;
 use app\models\Airport;
 use app\models\Country;
 use app\models\Route;
-use tests\unit\DbTestCase;
+use tests\unit\BaseUnitTest;
 use Yii;
 
-class RouteTest extends DbTestCase
+class RouteTest extends BaseUnitTest
 {
 
     protected function _before()
