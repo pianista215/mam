@@ -58,3 +58,4 @@ jobs:
         run: |
           cd basic
           vendor/bin/codecept run unit -c $CONFIG_PATH
+          vendor/bin/codecept run functional -c $CONFIG_PATH
