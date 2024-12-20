@@ -62,4 +62,14 @@ class LoginFormCest
         $I->see('Logout (AB1234)');
         $I->dontSeeElement('form#login-form');              
     }
+
+    public function loginCaseInsensitiveSuccessfully(\FunctionalTester $I)
+    {
+        $I->submitForm('#login-form', [
+            'LoginForm[username]' => 'ab1234',
+            'LoginForm[password]' => 'SecurePass123!',
+        ]);
+        $I->see('Logout (AB1234)');
+        $I->dontSeeElement('form#login-form');
+    }
 }
