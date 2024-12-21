@@ -13,7 +13,7 @@ class CountryCreateCest
         ];
     }
 
-    public function openCountryPageAsAdmin(\FunctionalTester $I)
+    public function openCountryIndexAsAdmin(\FunctionalTester $I)
     {
         $I->amLoggedInAs(2);
 
@@ -30,7 +30,7 @@ class CountryCreateCest
         $I->seeElement('a', ['title' => 'Delete']);
     }
 
-    public function openCountryPageAsUser(\FunctionalTester $I)
+    public function openCountryIndexAsUser(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
 
@@ -45,6 +45,32 @@ class CountryCreateCest
         $I->seeElement('a', ['title' => 'View']);
         $I->dontSeeElement('a', ['title' => 'Update']);
         $I->dontSeeElement('a', ['title' => 'Delete']);
+    }
+
+    public function openCountryViewAsAdmin(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(2);
+
+        $I->amOnRoute('country/view', [ 'id' => '1' ]);
+
+        $I->see('Spain');
+        $I->see('ES');
+
+        $I->see('Update', 'a');
+        $I->see('Delete', 'a');
+    }
+
+    public function openCountryViewAsUser(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(1);
+
+        $I->amOnRoute('country/view', [ 'id' => '1' ]);
+
+        $I->see('Spain');
+        $I->see('ES');
+
+        $I->dontSee('Update', 'a');
+        $I->dontSee('Delete', 'a');
     }
 
 
