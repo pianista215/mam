@@ -34,6 +34,11 @@ return [
         'user' => [
             'identityClass' => 'app\models\Pilot',
         ],
+        'authManager' => [
+            'class' => 'yii\rbac\DbManager',
+            // uncomment if you want to cache RBAC items hierarchy (TODO: Check in the future)
+            //'cache' => 'cache',
+        ],
         'request' => [
             'cookieValidationKey' => 'test',
             'enableCsrfValidation' => false,

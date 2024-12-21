@@ -1,5 +1,8 @@
 <?php
 
+namespace tests\functional\auth;
+
+// TODO: See if we maintain or remove this functionality
 class ContactFormCest 
 {
     public function _before(\FunctionalTester $I)

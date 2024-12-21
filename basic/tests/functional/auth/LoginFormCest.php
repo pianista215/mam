@@ -1,6 +1,6 @@
 <?php
 
-namespace tests\functional;
+namespace tests\functional\auth;
 
 use tests\fixtures\PilotFixture;
 
