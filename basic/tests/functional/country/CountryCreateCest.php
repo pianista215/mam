@@ -56,6 +56,10 @@ class CountryCreateCest
        $I->see('PR');
        $I->see('Update', 'a');
        $I->see('Delete', 'a');
+
+       $model = \app\models\Country::find()->where(['iso2_code' => 'PR'])->one();
+       $I->assertNotNull($model);
+       $I->assertEquals('Prueba', $model->name);
     }
 
 }

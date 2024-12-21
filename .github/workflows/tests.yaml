@@ -57,8 +57,7 @@ jobs:
           CONFIG_PATH: ${{ env.CONFIG_PATH }}
         run: |
           cd basic
-          XDEBUG_MODE=coverage vendor/bin/codecept run unit --coverage --coverage-xml -c $CONFIG_PATH 
-          XDEBUG_MODE=coverage vendor/bin/codecept run functional --coverage --coverage-xml -c $CONFIG_PATH 
+          XDEBUG_MODE=coverage vendor/bin/codecept run --coverage --coverage-xml -c $CONFIG_PATH 
 
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v4
