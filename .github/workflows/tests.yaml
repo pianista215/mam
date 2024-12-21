@@ -65,8 +65,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          extraArgs: >
-            -Dsonar.projectKey=mam_mam
-            -Dsonar.organization=mam
-            -Dsonar.php.coverage.reportPaths=tests/_output/coverage.xml
