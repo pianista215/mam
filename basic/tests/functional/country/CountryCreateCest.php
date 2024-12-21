@@ -13,65 +13,49 @@ class CountryCreateCest
         ];
     }
 
-    public function openCountryIndexAsAdmin(\FunctionalTester $I)
+    public function openCountryCreateAsAdmin(\FunctionalTester $I)
     {
         $I->amLoggedInAs(2);
+        $I->amOnRoute('country/create');
 
-        $I->amOnRoute('country/index');
-
-        $I->see('Countries');
-        $I->see('Showing 1-1 of 1 item');
-        $I->see('Spain');
-        $I->see('ES');
-
-        $I->see('Create Country', 'a');
-        $I->seeElement('a', ['title' => 'View']);
-        $I->seeElement('a', ['title' => 'Update']);
-        $I->seeElement('a', ['title' => 'Delete']);
+        $I->see('Create Country');
+        $I->see('Save', 'button');
     }
 
-    public function openCountryIndexAsUser(\FunctionalTester $I)
+    public function openCountryCreateAsUser(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
+        $I->amOnRoute('country/create');
+        $I->seeResponseCodeIs(403);
 
-        $I->amOnRoute('country/index');
-
-        $I->see('Countries');
-        $I->see('Showing 1-1 of 1 item');
-        $I->see('Spain');
-        $I->see('ES');
-
-        $I->dontSee('Create Country', 'a');
-        $I->seeElement('a', ['title' => 'View']);
-        $I->dontSeeElement('a', ['title' => 'Update']);
-        $I->dontSeeElement('a', ['title' => 'Delete']);
+        $I->see('Forbidden');
+        $I->dontSee('Create Country');
+        $I->dontSee('Save', 'button');
     }
 
-    public function openCountryViewAsAdmin(\FunctionalTester $I)
+    public function submitEmptyCountry(\FunctionalTester $I)
     {
-        $I->amLoggedInAs(2);
-
-        $I->amOnRoute('country/view', [ 'id' => '1' ]);
-
-        $I->see('Spain');
-        $I->see('ES');
-
-        $I->see('Update', 'a');
-        $I->see('Delete', 'a');
+       $I->amLoggedInAs(2);
+       $I->amOnRoute('country/create');
+       $I->submitForm('#country-form', []);
+       $I->expectTo('see validations errors');
+       $I->see('Name cannot be blank.');
+       $I->see('Iso2 Code cannot be blank.');
     }
 
-    public function openCountryViewAsUser(\FunctionalTester $I)
+    public function submitValidCountry(\FunctionalTester $I)
     {
-        $I->amLoggedInAs(1);
-
-        $I->amOnRoute('country/view', [ 'id' => '1' ]);
-
-        $I->see('Spain');
-        $I->see('ES');
-
-        $I->dontSee('Update', 'a');
-        $I->dontSee('Delete', 'a');
+       $I->amLoggedInAs(2);
+       $I->amOnRoute('country/create');
+       $I->submitForm('#country-form', [
+            'Country[name]' => 'Prueba',
+            'Country[iso2_code]' => 'PR',
+       ]);
+       $I->seeResponseCodeIs(200);
+       $I->see('Prueba');
+       $I->see('PR');
+       $I->see('Update', 'a');
+       $I->see('Delete', 'a');
     }
-
 
 }
