@@ -20,9 +20,13 @@ class AirportIndexViewCest
         $I->amOnRoute('airport/index');
 
         $I->see('Airports');
-        $I->see('Showing 1-1 of 1 item');
+        $I->see('Showing 1-3 of 3 item');
         $I->see('LEMD');
         $I->see('Madrid-Barajas');
+        $I->see('LEBL');
+        $I->see('Barcelona-El Prat');
+        $I->see('LEVC');
+        $I->see('Valencia-Manises');
 
         $I->see('Create Airport', 'a');
         $I->seeElement('a', ['title' => 'View']);
@@ -37,9 +41,13 @@ class AirportIndexViewCest
         $I->amOnRoute('airport/index');
 
         $I->see('Airports');
-        $I->see('Showing 1-1 of 1 item');
+        $I->see('Showing 1-3 of 3 item');
         $I->see('LEMD');
         $I->see('Madrid-Barajas');
+        $I->see('LEBL');
+        $I->see('Barcelona-El Prat');
+        $I->see('LEVC');
+        $I->see('Valencia-Manises');
 
         $I->dontSee('Create Airport', 'a');
         $I->seeElement('a', ['title' => 'View']);
@@ -52,9 +60,13 @@ class AirportIndexViewCest
         $I->amOnRoute('airport/index');
 
         $I->see('Airports');
-        $I->see('Showing 1-1 of 1 item');
+        $I->see('Showing 1-3 of 3 item');
         $I->see('LEMD');
         $I->see('Madrid-Barajas');
+        $I->see('LEBL');
+        $I->see('Barcelona-El Prat');
+        $I->see('LEVC');
+        $I->see('Valencia-Manises');
 
         $I->dontSee('Create Airport', 'a');
         $I->seeElement('a', ['title' => 'View']);

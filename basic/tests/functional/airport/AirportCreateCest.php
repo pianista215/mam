@@ -57,7 +57,7 @@ class AirportCreateCest
        $I->see('City cannot be blank.');
 
        $count = \app\models\Airport::find()->count();
-       $I->assertEquals(1, $count);
+       $I->assertEquals(3, $count);
     }
 
     public function submitValidAirport(\FunctionalTester $I)
@@ -89,7 +89,7 @@ class AirportCreateCest
        $I->assertEquals(-4.84472, $model->longitude);
 
        $count = \app\models\Airport::find()->count();
-       $I->assertEquals(2, $count);
+       $I->assertEquals(4, $count);
     }
 
 }
