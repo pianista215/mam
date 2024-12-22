@@ -47,6 +47,21 @@ class CountryIndexViewCest
         $I->dontSeeElement('a', ['title' => 'Delete']);
     }
 
+    public function openCountryIndexAsVisitor(\FunctionalTester $I)
+    {
+        $I->amOnRoute('country/index');
+
+        $I->see('Countries');
+        $I->see('Showing 1-1 of 1 item');
+        $I->see('Spain');
+        $I->see('ES');
+
+        $I->dontSee('Create Country', 'a');
+        $I->seeElement('a', ['title' => 'View']);
+        $I->dontSeeElement('a', ['title' => 'Update']);
+        $I->dontSeeElement('a', ['title' => 'Delete']);
+    }
+
     public function openCountryViewAsAdmin(\FunctionalTester $I)
     {
         $I->amLoggedInAs(2);
@@ -64,6 +79,17 @@ class CountryIndexViewCest
     {
         $I->amLoggedInAs(1);
 
+        $I->amOnRoute('country/view', [ 'id' => '1' ]);
+
+        $I->see('Spain');
+        $I->see('ES');
+
+        $I->dontSee('Update', 'a');
+        $I->dontSee('Delete', 'a');
+    }
+
+    public function openCountryViewAsVisitor(\FunctionalTester $I)
+    {
         $I->amOnRoute('country/view', [ 'id' => '1' ]);
 
         $I->see('Spain');

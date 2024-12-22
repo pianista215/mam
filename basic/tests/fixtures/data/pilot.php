@@ -25,4 +25,16 @@ return [
         'location' => 'LEMD',
         'date_of_birth' => '1980-01-01',
     ],
+    [
+        'id' => 3,
+        'country_id' => 1,
+        'license' => null,
+        'name' => 'nonactivated',
+        'surname' => 'nonactivated',
+        'email' => 'nonactivated@example.com',
+        'password' => Yii::$app->security->generatePasswordHash('nonactivated1234!'),
+        'city' => 'Valladolid',
+        'location' => 'LEMD',
+        'date_of_birth' => '1980-01-01',
+    ],
 ];

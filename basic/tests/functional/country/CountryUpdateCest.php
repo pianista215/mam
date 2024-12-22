@@ -39,6 +39,19 @@ class CountryUpdateCest
         $I->dontSee('Save', 'button');
     }
 
+    public function openCountryUpdateAsVisitor(\FunctionalTester $I)
+    {
+        $I->amOnRoute('country/update', [ 'id' => '1' ]);
+        $I->seeResponseCodeIs(403);
+
+        $I->see('Forbidden');
+        $I->dontSee('Name');
+        $I->dontSee('Spain');
+        $I->dontSee('Iso2 Code');
+        $I->dontSee('ES');
+        $I->dontSee('Save', 'button');
+    }
+
     public function updateEmptyCountry(\FunctionalTester $I)
     {
        $I->amLoggedInAs(2);

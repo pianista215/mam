@@ -38,4 +38,10 @@ class CountryDeleteCest
         $I->seeResponseCodeIs(405);
     }
 
+    public function deleteOnlyPostAsVisitor(\FunctionalTester $I)
+    {
+        $I->amOnRoute('country/delete', [ 'id' => '1' ]);
+        $I->seeResponseCodeIs(405);
+    }
+
 }

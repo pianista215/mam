@@ -33,6 +33,16 @@ class CountryCreateCest
         $I->dontSee('Save', 'button');
     }
 
+    public function openCountryCreateAsVisitor(\FunctionalTester $I)
+    {
+        $I->amOnRoute('country/create');
+        $I->seeResponseCodeIs(403);
+
+        $I->see('Forbidden');
+        $I->dontSee('Create Country');
+        $I->dontSee('Save', 'button');
+    }
+
     public function submitEmptyCountry(\FunctionalTester $I)
     {
        $I->amLoggedInAs(2);
