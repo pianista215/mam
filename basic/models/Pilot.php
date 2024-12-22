@@ -56,6 +56,7 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
         return [
             [['name', 'surname', 'email', 'city', 'country_id', 'password', 'date_of_birth', 'location'], 'required'],
             [['registration_date', 'date_of_birth'], 'safe'],
+            ['date_of_birth', 'date', 'format' => 'php:Y-m-d'],
             [['date_of_birth'], 'compare', 'compareValue' => date('Y-m-d'), 'operator' => '<', 'message' => 'The date of birth must be earlier than today.'],
             [['country_id', 'vatsim_id', 'ivao_id'], 'integer'],
             [['hours_flown'], 'number'],

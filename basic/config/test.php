@@ -29,7 +29,7 @@ return [
             'showScriptName' => true,
         ],
         'cache' => [
-            'class' => 'yii\caching\FileCache',
+            'class' => 'yii\caching\DummyCache',
         ],
         'user' => [
             'identityClass' => 'app\models\Pilot',

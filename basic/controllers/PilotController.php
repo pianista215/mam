@@ -92,7 +92,7 @@ class PilotController extends Controller
         } else {
             $model = new Pilot();
             $model->scenario = Pilot::SCENARIO_REGISTER;
-            $model->location = Config::get('registration_start_location', 'LEVD');
+            $model->location = Config::get('registration_start_location');
 
             if($this->request->isPost){
                 if ($model->load($this->request->post()) && $model->save()) {

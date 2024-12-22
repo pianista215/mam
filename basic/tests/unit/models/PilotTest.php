@@ -174,6 +174,10 @@ class PilotTest extends BaseUnitTest
         ]);
         $this->assertFalse($pilot->save());
         $this->assertArrayHasKey('date_of_birth', $pilot->getErrors());
+
+        $pilot->date_of_birth = '10/02/1980';
+        $this->assertFalse($pilot->save());
+        $this->assertArrayHasKey('date_of_birth', $pilot->getErrors());
     }
 
     public function testPasswordValidation()
