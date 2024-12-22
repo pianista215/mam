@@ -72,6 +72,7 @@ class PilotOpenRegistrationCest
        $I->assertEquals(0, $model->hours_flown);
        $I->assertNotNull($model->auth_key);
        $I->assertNotNull($model->access_token);
+       $I->assertNull($model->license);
        $I->assertEquals('LEMD', $model->location);
        $I->assertEquals(date('Y-m-d'), $model->registration_date);
     }
