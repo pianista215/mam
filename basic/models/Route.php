@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\CustomRules;
 use Yii;
 
 /**
@@ -35,6 +36,7 @@ class Route extends \yii\db\ActiveRecord
         return [
             [['code', 'departure', 'arrival'], 'required'],
             [['distance_nm'], 'integer'],
+            [['code'], 'filter', 'filter' => [CustomRules::class, 'removeSpaces']],
             [['code'], 'string', 'max' => 10],
             [['departure', 'arrival'], 'string', 'length' => 4],
             [['code'], 'unique'],
@@ -103,13 +105,16 @@ class Route extends \yii\db\ActiveRecord
     }
 
     public function beforeSave($insert)
-        {
-            if (parent::beforeSave($insert)) {
-                $dep = $this->departure0;
-                $arr = $this->arrival0;
-                $this->distance_nm = $this->distanceBetween($dep->latitude, $dep->longitude, $arr->latitude, $arr->longitude);
-                return true;
+    {
+        if (parent::beforeSave($insert)) {
+            if($this->code){
+                $this->code = mb_strtoupper($this->code);
             }
-            return false;
+            $dep = $this->departure0;
+            $arr = $this->arrival0;
+            $this->distance_nm = $this->distanceBetween($dep->latitude, $dep->longitude, $arr->latitude, $arr->longitude);
+            return true;
         }
+        return false;
+    }
 }

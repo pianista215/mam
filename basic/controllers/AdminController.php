@@ -5,11 +5,11 @@ namespace app\controllers;
 use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
 use yii\web\Response;
 use yii\filters\VerbFilter;
-use app\models\LoginForm;
-use app\models\ContactForm;
-use app\models\EntryForm;
+use app\models\PilotSearch;
+
 
 class AdminController extends Controller
 {
@@ -30,7 +30,5 @@ class AdminController extends Controller
         }
         return $this->redirect(['site/index']);
     }
-
-    // TODO: VALIDATE PILOTS? OR BETTER IN PILOT CONTROLLER?
 
 }

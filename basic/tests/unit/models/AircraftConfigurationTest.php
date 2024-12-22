@@ -3,9 +3,9 @@ namespace tests\unit\models;
 
 use app\models\AircraftConfiguration;
 use app\models\AircraftType;
-use tests\unit\DbTestCase;
+use tests\unit\BaseUnitTest;
 
-class AircraftConfigurationTest extends DbTestCase
+class AircraftConfigurationTest extends BaseUnitTest
 {
     public function testValidConfiguration()
     {
@@ -79,5 +79,25 @@ class AircraftConfigurationTest extends DbTestCase
         ]);
         $this->assertFalse($nonExistentConfig->save());
         $this->assertArrayHasKey('aircraft_type_id', $nonExistentConfig->errors);
+    }
+
+    public function testTrimName()
+    {
+        $aircraftType = new AircraftType([
+            'icao_type_code' => 'B738',
+            'name' => '    Boeing 737-800    ',
+            'max_nm_range' => 2950,
+        ]);
+
+        $this->assertTrue($aircraftType->save());
+
+        $standardConfig = new AircraftConfiguration([
+            'aircraft_type_id' => $aircraftType->id,
+            'name' => '   Trimmed    ',
+            'pax_capacity' => 180,
+            'cargo_capacity' => 2000,
+        ]);
+        $this->assertTrue($standardConfig->save());
+        $this->assertEquals($standardConfig->name, 'Trimmed');
     }
 }

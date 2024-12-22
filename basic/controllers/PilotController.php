@@ -81,25 +81,18 @@ class PilotController extends Controller
 
         $registrationStart = DateTime::createFromFormat('Y-m-d', Config::get('registration_start'));
         $registrationEnd = DateTime::createFromFormat('Y-m-d', Config::get('registration_end'));
+        $now = new DateTime();
 
         if ($registrationStart === false || $registrationEnd === false) {
             throw new Exception("Invalid registration dates. Contact an admin.");
         }
 
-        Yii::warning($registrationStart);
-        Yii::warning($registrationEnd);
-
-        $now = new DateTime();
-
-        Yii::warning($now);
-
         if($now < $registrationStart || $now > $registrationEnd) {
             return $this->render('registration_closed');
         } else {
             $model = new Pilot();
-
-            // TODO: Default location? Make configurable? Disable required?
-            $model->location = "LEBB";
+            $model->scenario = Pilot::SCENARIO_REGISTER;
+            $model->location = Config::get('registration_start_location');
 
             if($this->request->isPost){
                 if ($model->load($this->request->post()) && $model->save()) {
@@ -169,6 +162,13 @@ class PilotController extends Controller
         if(Yii::$app->user->can('userCrud')){
             $model = $this->findModel($id);
 
+            if(!isset($model->license)){
+                $msg = "You can't update a user that hasn't been activated. Please active the user first.";
+                throw new ForbiddenHttpException($msg);
+            }
+
+            $model->setScenario(Pilot::SCENARIO_UPDATE);
+
             if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
                 return $this->redirect(['view', 'id' => $model->id]);
             }
@@ -197,6 +197,43 @@ class PilotController extends Controller
             $this->findModel($id)->delete();
 
             return $this->redirect(['index']);
+        } else {
+            throw new ForbiddenHttpException();
+        }
+    }
+
+    public function actionActivatePilots(){
+        if(Yii::$app->user->can('userCrud')){
+            $searchModel = new PilotSearch();
+            $dataProvider = $searchModel->search([]);
+            $dataProvider->query->andWhere(['license' => null]);
+            return $this->render('activate-pilots', [
+                'dataProvider' => $dataProvider,
+            ]);
+        } else {
+            throw new ForbiddenHttpException();
+        }
+    }
+
+    public function actionActivate($id){
+        if(Yii::$app->user->can('userCrud')){
+            $model = $this->findModel($id);
+
+            if(isset($model->license)){
+                $msg = "The user is already activated.";
+                throw new ForbiddenHttpException($msg);
+            }
+
+            $model->setScenario(Pilot::SCENARIO_ACTIVATE);
+
+            if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
+                $auth = Yii::$app->authManager;
+                $pilotRole = $auth->getRole('pilot');
+                $auth->assign($pilotRole, $model->id);
+                // TODO: SEND MAIL TO THE PILOT
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
+            return $this->render('activate', ['model' => $model]);
         } else {
             throw new ForbiddenHttpException();
         }

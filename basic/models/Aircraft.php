@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\CustomRules;
 use Yii;
 
 /**
@@ -38,7 +39,9 @@ class Aircraft extends \yii\db\ActiveRecord
             [['aircraft_configuration_id'], 'integer'],
             [['hours_flown'], 'number', 'min' => 0],
             [['registration'], 'string', 'max' => 10],
+            [['registration'], 'filter', 'filter' => [CustomRules::class, 'removeSpaces']],
             [['name'], 'string', 'max' => 20],
+            [['name'], 'trim'],
             [['location'], 'string', 'length' => 4],
             [['registration'], 'unique'],
             [['name'], 'unique'],
@@ -90,5 +93,16 @@ class Aircraft extends \yii\db\ActiveRecord
     public function getSubmittedFlightPlan()
     {
         return $this->hasOne(SubmittedFlightPlan::class, ['aircraft_id' => 'id']);
+    }
+
+    public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert)) {
+            if ($this->registration) {
+                $this->registration = mb_strtoupper($this->registration);
+            }
+            return true;
+        }
+        return false;
     }
 }

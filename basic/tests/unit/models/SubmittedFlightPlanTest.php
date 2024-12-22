@@ -3,7 +3,7 @@
 namespace tests\unit\models;
 
 use Yii;
-use tests\unit\DbTestCase;
+use tests\unit\BaseUnitTest;
 use app\models\Aircraft;
 use app\models\AircraftConfiguration;
 use app\models\AircraftType;
@@ -14,7 +14,7 @@ use app\models\Route;
 use app\models\SubmittedFlightPlan;
 
 
-class SubmittedFlightPlanTest extends DbTestCase
+class SubmittedFlightPlanTest extends BaseUnitTest
 {
 
     protected Aircraft $lemdAircraft;

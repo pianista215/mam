@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\CustomRules;
 use Yii;
 
 /**
@@ -36,6 +37,17 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
         return 'pilot';
     }
 
+    const SCENARIO_REGISTER = 'register';
+    const SCENARIO_ACTIVATE = 'activate';
+    const SCENARIO_UPDATE = 'update';
+
+    public function scenarios(){
+        $scenarios = parent::scenarios();
+        $scenarios[self::SCENARIO_REGISTER] = ['name', 'surname', 'email', 'city', 'country_id', 'password', 'date_of_birth', 'vatsim_id', 'ivao_id'];
+        $scenarios[self::SCENARIO_ACTIVATE] = ['license'];
+        return $scenarios;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -44,12 +56,16 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
         return [
             [['name', 'surname', 'email', 'city', 'country_id', 'password', 'date_of_birth', 'location'], 'required'],
             [['registration_date', 'date_of_birth'], 'safe'],
+            ['date_of_birth', 'date', 'format' => 'php:Y-m-d'],
             [['date_of_birth'], 'compare', 'compareValue' => date('Y-m-d'), 'operator' => '<', 'message' => 'The date of birth must be earlier than today.'],
             [['country_id', 'vatsim_id', 'ivao_id'], 'integer'],
             [['hours_flown'], 'number'],
+            [['license'], 'filter', 'filter' => [CustomRules::class, 'removeSpaces']],
             [['license'], 'string', 'max' => 8],
+            ['license', 'required', 'on' => [self::SCENARIO_ACTIVATE, self::SCENARIO_UPDATE]],
             [['name'], 'string', 'max' => 20],
             [['surname', 'city'], 'string', 'max' => 40],
+            [['name', 'surname', 'city', 'email'], 'trim'],
             [['email'], 'string', 'max' => 80],
             [['email'], 'email'],
             [['password'], 'string', 'max' => 255],
@@ -57,7 +73,7 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
             [['auth_key', 'access_token'], 'string', 'max' => 32],
             [['password'], 'match', 'pattern'=>'/\d/', 'message' => 'Password must contain at least one numeric digit.'],
             [['password'], 'match', 'pattern'=>'/[a-zA-Z]/', 'message' => 'Password must contain at least one letter.'],
-            [['location'], 'string', 'max' => 4],
+            [['location'], 'string', 'length' => 4],
             [['email'], 'unique'],
             [['license'], 'unique'],
             [['location'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['location' => 'icao_code']],
@@ -209,6 +225,9 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     public function beforeSave($insert)
     {
         if (parent::beforeSave($insert)) {
+            if ($this->license) {
+                $this->license = mb_strtoupper($this->license);
+            }
             if ($this->isNewRecord) {
                 // TODO: Period of validation and ensure password could be modified later (is only hashed in the first time)
                 $this->auth_key = \Yii::$app->security->generateRandomString(32);

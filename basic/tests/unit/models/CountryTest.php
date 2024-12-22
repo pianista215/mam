@@ -3,9 +3,9 @@
 namespace tests\unit\models;
 
 use app\models\Country;
-use tests\unit\DbTestCase;
+use tests\unit\BaseUnitTest;
 
-class CountryTest extends DbTestCase
+class CountryTest extends BaseUnitTest
 {
     public function testCreateValidCountry()
     {
@@ -52,5 +52,17 @@ class CountryTest extends DbTestCase
 
         $this->assertFalse($country->save());
         $this->assertArrayHasKey('iso2_code', $country->errors);
+    }
+
+    public function testTrimToUpperCountry()
+    {
+        $country = new Country([
+            'name' => '   Spain   ',
+            'iso2_code' => 'es',
+        ]);
+
+        $this->assertTrue($country->save());
+        $this->assertEquals($country->name, 'Spain');
+        $this->assertEquals($country->iso2_code, 'ES');
     }
 }

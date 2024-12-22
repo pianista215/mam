@@ -29,10 +29,15 @@ return [
             'showScriptName' => true,
         ],
         'cache' => [
-            'class' => 'yii\caching\FileCache',
+            'class' => 'yii\caching\DummyCache',
         ],
         'user' => [
-            'identityClass' => 'app\models\User',
+            'identityClass' => 'app\models\Pilot',
+        ],
+        'authManager' => [
+            'class' => 'yii\rbac\DbManager',
+            // uncomment if you want to cache RBAC items hierarchy (TODO: Check in the future)
+            //'cache' => 'cache',
         ],
         'request' => [
             'cookieValidationKey' => 'test',

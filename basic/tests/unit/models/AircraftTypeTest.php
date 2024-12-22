@@ -3,9 +3,9 @@
 namespace tests\unit\models;
 
 use app\models\AircraftType;
-use tests\unit\DbTestCase;
+use tests\unit\BaseUnitTest;
 
-class AircraftTypeTest extends DbTestCase
+class AircraftTypeTest extends BaseUnitTest
 {
     public function testCreateValidAircraftType()
     {
@@ -17,6 +17,19 @@ class AircraftTypeTest extends DbTestCase
 
         $this->assertTrue($aircraftType->save());
         $this->assertNotEmpty($aircraftType->id);
+    }
+
+    public function testTrimAndToUpperAircraftType()
+    {
+        $aircraftType = new AircraftType([
+            'icao_type_code' => ' b7 3 8',
+            'name' => '   Boeing 737-800   ',
+            'max_nm_range' => 2900,
+        ]);
+
+        $this->assertTrue($aircraftType->save());
+        $this->assertEquals($aircraftType->icao_type_code, 'B738');
+        $this->assertEquals($aircraftType->name, 'Boeing 737-800');
     }
 
     public function testCreateAircraftTypeWithoutRequiredFields()

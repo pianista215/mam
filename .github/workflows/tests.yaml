@@ -27,7 +27,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.1.2' # Cambia a la versión que uses
-          extensions: mbstring, intl, pdo_mysql, curl
+          extensions: mbstring, intl, pdo_mysql, curl, xdebug
 
       - name: Install Composer Dependencies
         run: |
@@ -57,4 +57,10 @@ jobs:
           CONFIG_PATH: ${{ env.CONFIG_PATH }}
         run: |
           cd basic
-          vendor/bin/codecept run unit -c $CONFIG_PATH
+          XDEBUG_MODE=coverage vendor/bin/codecept run --coverage --coverage-xml -c $CONFIG_PATH 
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

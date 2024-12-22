@@ -4,10 +4,10 @@ namespace tests\unit\models;
 
 use app\models\Airport;
 use app\models\Country;
-use tests\unit\DbTestCase;
+use tests\unit\BaseUnitTest;
 use Yii;
 
-class AirportTest extends DbTestCase
+class AirportTest extends BaseUnitTest
 {
 
     protected function _before(){
@@ -84,6 +84,22 @@ class AirportTest extends DbTestCase
         ]);
         $this->assertFalse($airport->save());
         $this->assertArrayHasKey('longitude', $airport->getErrors());
+    }
+
+    public function testTrimAndToUpper()
+    {
+        $airport = new Airport([
+            'icao_code' => 'lemd',
+            'name' => '   Madrid-Barajas    ',
+            'latitude' => 40.471926,
+            'longitude' => -3.56264,
+            'city' => '   Madrid    ',
+            'country_id' => 1,
+        ]);
+        $this->assertTrue($airport->save());
+        $this->assertEquals($airport->icao_code, 'LEMD');
+        $this->assertEquals($airport->name, 'Madrid-Barajas');
+        $this->assertEquals($airport->city, 'Madrid');
     }
 
 }

@@ -5,10 +5,10 @@ namespace tests\unit\models;
 use app\models\Airport;
 use app\models\Country;
 use app\models\Pilot;
-use tests\unit\DbTestCase;
+use tests\unit\BaseUnitTest;
 use Yii;
 
-class PilotTest extends DbTestCase
+class PilotTest extends BaseUnitTest
 {
 
     protected function _before(){
@@ -35,7 +35,7 @@ class PilotTest extends DbTestCase
     {
         $pilot = new Pilot();
 
-        $this->assertFalse($pilot->validate());
+        $this->assertFalse($pilot->save());
 
         $pilot->name = 'John';
         $pilot->surname = 'Doe';
@@ -46,7 +46,7 @@ class PilotTest extends DbTestCase
         $pilot->password = 'SecurePass123!';
         $pilot->date_of_birth = '1990-01-01';
         $this->assertTrue(
-            $pilot->validate(),
+            $pilot->save(),
             'Validation failed: ' . json_encode($pilot->getErrors())
         );
     }
@@ -140,7 +140,7 @@ class PilotTest extends DbTestCase
             'password' => 'SecurePass123!',
             'date_of_birth' => '1990-01-01',
         ]);
-        $this->assertFalse($pilot->validate());
+        $this->assertFalse($pilot->save());
         $this->assertArrayHasKey('country_id', $pilot->getErrors());
     }
 
@@ -156,7 +156,7 @@ class PilotTest extends DbTestCase
             'password' => 'SecurePass123!',
             'date_of_birth' => '1990-01-01',
         ]);
-        $this->assertFalse($pilot->validate());
+        $this->assertFalse($pilot->save());
         $this->assertArrayHasKey('location', $pilot->getErrors());
     }
 
@@ -172,7 +172,11 @@ class PilotTest extends DbTestCase
             'password' => 'SecurePass123!',
             'date_of_birth' => date('Y-m-d', strtotime('tomorrow')),
         ]);
-        $this->assertFalse($pilot->validate());
+        $this->assertFalse($pilot->save());
+        $this->assertArrayHasKey('date_of_birth', $pilot->getErrors());
+
+        $pilot->date_of_birth = '10/02/1980';
+        $this->assertFalse($pilot->save());
         $this->assertArrayHasKey('date_of_birth', $pilot->getErrors());
     }
 
@@ -189,15 +193,36 @@ class PilotTest extends DbTestCase
         ]);
 
         $pilot->password = 'short';
-        $this->assertFalse($pilot->validate(), 'Password should fail because it is less than 8 characters.');
+        $this->assertFalse($pilot->save(), 'Password should fail because it is less than 8 characters.');
 
         $pilot->password = 'password123';
-        $this->assertTrue($pilot->validate(), 'Password should pass because it has more than 8 characters and includes both letters and numbers.'. json_encode($pilot->getErrors()));
+        $this->assertTrue($pilot->save(), 'Password should pass because it has more than 8 characters and includes both letters and numbers.'. json_encode($pilot->getErrors()));
 
         $pilot->password = 'password';
-        $this->assertFalse($pilot->validate(), 'Password should fail because it does not contain a number.');
+        $this->assertFalse($pilot->save(), 'Password should fail because it does not contain a number.');
 
         $pilot->password = '12345678';
-        $this->assertFalse($pilot->validate(), 'Password should fail because it does not contain a letter.');
+        $this->assertFalse($pilot->save(), 'Password should fail because it does not contain a letter.');
+    }
+
+    public function testTrimToUpper()
+    {
+        $pilot = new Pilot([
+            'name' => '  John  ',
+            'surname' => '  Doe  ',
+            'email' => '  john.doe@example.com  ',
+            'country_id' => 1,
+            'city' => '  New York   ',
+            'location' => 'LEVD',
+            'password' => 'SecurePass123!',
+            'license' => ' l i c 1 2 3',
+            'date_of_birth' => '1990-01-01',
+        ]);
+        $this->assertTrue($pilot->save());
+        $this->assertEquals($pilot->name, 'John');
+        $this->assertEquals($pilot->surname, 'Doe');
+        $this->assertEquals($pilot->email, 'john.doe@example.com');
+        $this->assertEquals($pilot->city, 'New York');
+        $this->assertEquals($pilot->license, 'LIC123');
     }
 }

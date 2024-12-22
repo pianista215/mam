@@ -4,7 +4,7 @@ namespace tests\unit;
 
 use Yii;
 
-abstract class DbTestCase extends \Codeception\Test\Unit
+abstract class BaseUnitTest extends \Codeception\Test\Unit
 {
     protected function _after()
     {
