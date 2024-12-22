@@ -108,8 +108,6 @@ class AirportIndexViewCest
 
     public function openAirportViewAsVisitor(\FunctionalTester $I)
     {
-        $I->amLoggedInAs(1);
-
         $I->amOnRoute('airport/view', [ 'id' => '1' ]);
 
         $I->see('LEMD');
