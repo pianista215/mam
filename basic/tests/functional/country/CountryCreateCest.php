@@ -51,6 +51,8 @@ class CountryCreateCest
        $I->expectTo('see validations errors');
        $I->see('Name cannot be blank.');
        $I->see('Iso2 Code cannot be blank.');
+       $count = \app\models\Country::find()->count();
+       $I->assertEquals(1, $count);
     }
 
     public function submitValidCountry(\FunctionalTester $I)
@@ -70,6 +72,8 @@ class CountryCreateCest
        $model = \app\models\Country::find()->where(['iso2_code' => 'PR'])->one();
        $I->assertNotNull($model);
        $I->assertEquals('Prueba', $model->name);
+       $count = \app\models\Country::find()->count();
+       $I->assertEquals(2, $count);
     }
 
 }

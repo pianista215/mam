@@ -29,6 +29,8 @@ class CountryDeleteCest
         $I->amLoggedInAs(2);
         $I->amOnRoute('country/delete', [ 'id' => '1' ]);
         $I->seeResponseCodeIs(405);
+        $count = \app\models\Country::find()->count();
+        $I->assertEquals(1, $count);
     }
 
     public function deleteOnlyPostAsUser(\FunctionalTester $I)
@@ -36,12 +38,17 @@ class CountryDeleteCest
         $I->amLoggedInAs(1);
         $I->amOnRoute('country/delete', [ 'id' => '1' ]);
         $I->seeResponseCodeIs(405);
+
+        $count = \app\models\Country::find()->count();
+        $I->assertEquals(1, $count);
     }
 
     public function deleteOnlyPostAsVisitor(\FunctionalTester $I)
     {
         $I->amOnRoute('country/delete', [ 'id' => '1' ]);
         $I->seeResponseCodeIs(405);
+        $count = \app\models\Country::find()->count();
+        $I->assertEquals(1, $count);
     }
 
 }
