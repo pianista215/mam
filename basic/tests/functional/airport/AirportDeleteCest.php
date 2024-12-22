@@ -1,11 +1,11 @@
 <?php
 
-namespace tests\functional\country;
+namespace tests\functional\airport;
 
 use tests\fixtures\AuthAssignmentFixture;
 use Yii;
 
-class CountryDeleteCest
+class AirportDeleteCest
 {
 
     // TODO: Create acceptance tests to delete (lack of JS Support, POST not available in codeception API)
@@ -16,10 +16,10 @@ class CountryDeleteCest
         ];
     }
 
-    public function deleteCountryAsAdmin(\FunctionalTester $I)
+    public function deleteAirportAsAdmin(\FunctionalTester $I)
     {
         $I->amLoggedInAs(2);
-        $I->amOnRoute('country/view', [ 'id' => '1' ]);
+        $I->amOnRoute('airport/view', [ 'id' => '1' ]);
 
         $I->see('Delete');
     }
@@ -27,28 +27,27 @@ class CountryDeleteCest
     public function deleteOnlyPostAsAdmin(\FunctionalTester $I)
     {
         $I->amLoggedInAs(2);
-        $I->amOnRoute('country/delete', [ 'id' => '1' ]);
+        $I->amOnRoute('airport/delete', [ 'id' => '1' ]);
         $I->seeResponseCodeIs(405);
-        $count = \app\models\Country::find()->count();
-        $I->assertEquals(1, $count);
+        $count = \app\models\Airport::find()->count();
+        $I->assertEquals(3, $count);
     }
 
     public function deleteOnlyPostAsUser(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
-        $I->amOnRoute('country/delete', [ 'id' => '1' ]);
+        $I->amOnRoute('airport/delete', [ 'id' => '1' ]);
         $I->seeResponseCodeIs(405);
-
-        $count = \app\models\Country::find()->count();
-        $I->assertEquals(1, $count);
+        $count = \app\models\Airport::find()->count();
+        $I->assertEquals(3, $count);
     }
 
     public function deleteOnlyPostAsVisitor(\FunctionalTester $I)
     {
-        $I->amOnRoute('country/delete', [ 'id' => '1' ]);
+        $I->amOnRoute('airport/delete', [ 'id' => '1' ]);
         $I->seeResponseCodeIs(405);
-        $count = \app\models\Country::find()->count();
-        $I->assertEquals(1, $count);
+        $count = \app\models\Airport::find()->count();
+        $I->assertEquals(3, $count);
     }
 
 }
