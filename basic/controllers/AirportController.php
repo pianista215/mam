@@ -6,8 +6,10 @@ use app\models\Airport;
 use app\models\AirportSearch;
 use app\models\Country;
 use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use Yii;
 
 /**
  * AirportController implements the CRUD actions for Airport model.
@@ -69,22 +71,26 @@ class AirportController extends Controller
      */
     public function actionCreate()
     {
-        $model = new Airport();
+        if(Yii::$app->user->can('airportCrud')){
+            $model = new Airport();
 
-        if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'id' => $model->id]);
+            if ($this->request->isPost) {
+                if ($model->load($this->request->post()) && $model->save()) {
+                    return $this->redirect(['view', 'id' => $model->id]);
+                }
+            } else {
+                $model->loadDefaultValues();
             }
+
+            $countries = Country::find()->select(['name'])->indexBy('id')->column();
+
+            return $this->render('create', [
+                'model' => $model,
+                'countries' => $countries,
+            ]);
         } else {
-            $model->loadDefaultValues();
+            throw new ForbiddenHttpException();
         }
-
-        $countries = Country::find()->select(['name'])->indexBy('id')->column();
-
-        return $this->render('create', [
-            'model' => $model,
-            'countries' => $countries,
-        ]);
     }
 
     /**
@@ -96,18 +102,22 @@ class AirportController extends Controller
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
+        if(Yii::$app->user->can('airportCrud')){
+            $model = $this->findModel($id);
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+            if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
+
+            $countries = Country::find()->select(['name'])->indexBy('id')->column();
+
+            return $this->render('update', [
+                'model' => $model,
+                'countries' => $countries,
+            ]);
+        } else {
+            throw new ForbiddenHttpException();
         }
-
-        $countries = Country::find()->select(['name'])->indexBy('id')->column();
-
-        return $this->render('update', [
-            'model' => $model,
-            'countries' => $countries,
-        ]);
     }
 
     /**
@@ -119,9 +129,13 @@ class AirportController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
+        if(Yii::$app->user->can('airportCrud')){
+            $this->findModel($id)->delete();
 
-        return $this->redirect(['index']);
+            return $this->redirect(['index']);
+        } else {
+            throw new ForbiddenHttpException();
+        }
     }
 
     /**
