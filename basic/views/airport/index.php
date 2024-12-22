@@ -17,9 +17,11 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
+    <?php if(Yii::$app->user->can('userCrud')) : ?>
     <p>
         <?= Html::a('Create Airport', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
+    <?php endif; ?>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
@@ -38,6 +40,14 @@ $this->params['breadcrumbs'][] = $this->title;
             //'country_id',
             [
                 'class' => ActionColumn::className(),
+                'visibleButtons'=>[
+                    'delete'=> function($model){
+                        return Yii::$app->user->can('airportCrud');
+                    },
+                    'update'=> function($model){
+                        return Yii::$app->user->can('airportCrud');
+                    },
+                ],
                 'urlCreator' => function ($action, Airport $model, $key, $index, $column) {
                     return Url::toRoute([$action, 'id' => $model->id]);
                  }
