@@ -2,7 +2,7 @@
 
 namespace tests\functional\aircraftType;
 
-use tests\fixtures\AircraftTypeFixture;
+use tests\fixtures\AircraftConfigurationFixture;
 use tests\fixtures\AuthAssignmentFixture;
 use Yii;
 
@@ -11,7 +11,7 @@ class AircraftTypeIndexViewCest
     public function _fixtures(){
         return [
             'authAssignment' => AuthAssignmentFixture::class,
-            'aircraftType' => AircraftTypeFixture::class,
+            'aircraftConfiguration' => AircraftConfigurationFixture::class,
         ];
     }
 
@@ -26,7 +26,7 @@ class AircraftTypeIndexViewCest
         $I->see('A320');
         $I->see('Airbus A320');
         $I->see('B738');
-        $I->see('Boeing 737-800 ER');
+        $I->see('Boeing 737-800');
         $I->see('B350');
         $I->see('Beechcraft King Air 350i');
 
@@ -47,7 +47,7 @@ class AircraftTypeIndexViewCest
         $I->see('A320');
         $I->see('Airbus A320');
         $I->see('B738');
-        $I->see('Boeing 737-800 ER');
+        $I->see('Boeing 737-800');
         $I->see('B350');
         $I->see('Beechcraft King Air 350i');
 
@@ -66,7 +66,7 @@ class AircraftTypeIndexViewCest
         $I->see('A320');
         $I->see('Airbus A320');
         $I->see('B738');
-        $I->see('Boeing 737-800 ER');
+        $I->see('Boeing 737-800');
         $I->see('B350');
         $I->see('Beechcraft King Air 350i');
 
@@ -80,14 +80,20 @@ class AircraftTypeIndexViewCest
     {
         $I->amLoggedInAs(2);
 
-        $I->amOnRoute('aircraft-type/view', [ 'id' => '1' ]);
+        $I->amOnRoute('aircraft-type/view', [ 'id' => '2' ]);
 
-        $I->see('A320');
-        $I->see('Airbus A320');
-        $I->see('3186');
+        $I->see('B738');
+        $I->see('Boeing 737-800');
+        $I->see('5665');
 
-        // TODO: Add configurations and aircrafts to test view
-        $I->see('No results found');
+        $I->see('Configurations');
+        $I->see('Showing 1-2 of 2 items.');
+        $I->see('Standard');
+        $I->see('160');
+        $I->see('4900');
+        $I->see('Cargo');
+        $I->see('0');
+        $I->see('23500');
 
         $I->see('Update', 'a');
         $I->see('Delete', 'a');
@@ -97,14 +103,20 @@ class AircraftTypeIndexViewCest
     {
         $I->amLoggedInAs(1);
 
-        $I->amOnRoute('aircraft-type/view', [ 'id' => '1' ]);
+        $I->amOnRoute('aircraft-type/view', [ 'id' => '2' ]);
 
-        $I->see('A320');
-        $I->see('Airbus A320');
-        $I->see('3186');
+        $I->see('B738');
+        $I->see('Boeing 737-800');
+        $I->see('5665');
 
-        // TODO: Add configurations and aircrafts to test view
-        $I->see('No results found');
+        $I->see('Configurations');
+        $I->see('Showing 1-2 of 2 items.');
+        $I->see('Standard');
+        $I->see('160');
+        $I->see('4900');
+        $I->see('Cargo');
+        $I->see('0');
+        $I->see('23500');
 
         $I->dontSee('Update', 'a');
         $I->dontSee('Delete', 'a');
@@ -112,14 +124,20 @@ class AircraftTypeIndexViewCest
 
     public function openAircraftTypeViewAsVisitor(\FunctionalTester $I)
     {
-        $I->amOnRoute('aircraft-type/view', [ 'id' => '1' ]);
+        $I->amOnRoute('aircraft-type/view', [ 'id' => '2' ]);
 
-        $I->see('A320');
-        $I->see('Airbus A320');
-        $I->see('3186');
+        $I->see('B738');
+        $I->see('Boeing 737-800');
+        $I->see('5665');
 
-        // TODO: Add configurations and aircrafts to test view
-        $I->see('No results found');
+        $I->see('Configurations');
+        $I->see('Showing 1-2 of 2 items.');
+        $I->see('Standard');
+        $I->see('160');
+        $I->see('4900');
+        $I->see('Cargo');
+        $I->see('0');
+        $I->see('23500');
 
         $I->dontSee('Update', 'a');
         $I->dontSee('Delete', 'a');

@@ -10,7 +10,7 @@ return [
     [
         'id' => 2,
         'icao_type_code' => 'B738',
-        'name' => 'Boeing 737-800 ER',
+        'name' => 'Boeing 737-800',
         'max_nm_range' => 5665,
     ],
     [
