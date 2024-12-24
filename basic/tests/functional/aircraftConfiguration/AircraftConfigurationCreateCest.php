@@ -2,7 +2,7 @@
 
 namespace tests\functional\AircraftConfiguration;
 
-use tests\fixtures\AircraftConfigurationFixture;
+use tests\fixtures\AircraftFixture;
 use tests\fixtures\AuthAssignmentFixture;
 use Yii;
 
