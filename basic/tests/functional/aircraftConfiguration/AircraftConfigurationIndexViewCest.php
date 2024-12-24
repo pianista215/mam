@@ -15,10 +15,7 @@ class AircraftConfigurationIndexViewCest
         ];
     }
 
-    public function openAircraftConfigurationIndexAsAdmin(\FunctionalTester $I)
-    {
-        $I->amLoggedInAs(2);
-
+    private function checkAircraftConfigIndexCommon(\FunctionalTester $I){
         $I->amOnRoute('aircraft-configuration/index');
 
         $I->see('Aircraft Configurations');
@@ -26,6 +23,13 @@ class AircraftConfigurationIndexViewCest
         $I->see('Boeing 737-800');
         $I->see('Cargo');
         $I->see('Standard');
+    }
+
+    public function openAircraftConfigurationIndexAsAdmin(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(2);
+
+        $this->checkAircraftConfigIndexCommon($I);
 
         $I->see('Create Aircraft Configuration', 'a');
         $I->seeElement('a', ['title' => 'View']);
@@ -37,13 +41,7 @@ class AircraftConfigurationIndexViewCest
     {
         $I->amLoggedInAs(1);
 
-        $I->amOnRoute('aircraft-configuration/index');
-
-        $I->see('Aircraft Configurations');
-        $I->see('Showing 1-2 of 2 items.');
-        $I->see('Boeing 737-800');
-        $I->see('Cargo');
-        $I->see('Standard');
+        $this->checkAircraftConfigIndexCommon($I);
 
         $I->dontSee('Create Aircraft Configuration', 'a');
         $I->seeElement('a', ['title' => 'View']);
@@ -53,15 +51,7 @@ class AircraftConfigurationIndexViewCest
 
     public function openAircraftConfigurationIndexAsVisitor(\FunctionalTester $I)
     {
-        $I->amOnRoute('aircraft-type/index');
-
-        $I->amOnRoute('aircraft-configuration/index');
-
-        $I->see('Aircraft Configurations');
-        $I->see('Showing 1-2 of 2 items.');
-        $I->see('Boeing 737-800');
-        $I->see('Cargo');
-        $I->see('Standard');
+        $this->checkAircraftConfigIndexCommon($I);
 
         $I->dontSee('Create Aircraft Configuration', 'a');
         $I->seeElement('a', ['title' => 'View']);
@@ -69,10 +59,7 @@ class AircraftConfigurationIndexViewCest
         $I->dontSeeElement('a', ['title' => 'Delete']);
     }
 
-    public function openAircraftConfigurationViewAsAdmin(\FunctionalTester $I)
-    {
-        $I->amLoggedInAs(2);
-
+    private function checkAircraftConfigViewCommon(\FunctionalTester $I) {
         $I->amOnRoute('aircraft-configuration/view', [ 'id' => '1' ]);
 
         $I->see('Aircraft Type Name');
@@ -81,15 +68,22 @@ class AircraftConfigurationIndexViewCest
         $I->see('160');
         $I->see('4900');
 
-        $I->see('Update', 'a');
-        $I->see('Delete', 'a');
-
         $I->see('Aircrafts');
 
         $I->see('Showing 1-1 of 1 item.');
         $I->see('Boeing Name Std');
         $I->see('EC-AAA');
         $I->see('LEMD');
+    }
+
+    public function openAircraftConfigurationViewAsAdmin(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(2);
+
+        $this->checkAircraftConfigViewCommon($I);
+
+        $I->see('Update', 'a');
+        $I->see('Delete', 'a');
 
         $I->seeElement('a', ['title' => 'View']);
         $I->seeElement('a', ['title' => 'Update']);
@@ -100,23 +94,10 @@ class AircraftConfigurationIndexViewCest
     {
         $I->amLoggedInAs(1);
 
-        $I->amOnRoute('aircraft-configuration/view', [ 'id' => '1' ]);
-
-        $I->see('Aircraft Type Name');
-        $I->see('Boeing 737-800');
-        $I->see('Standard');
-        $I->see('160');
-        $I->see('4900');
+        $this->checkAircraftConfigViewCommon($I);
 
         $I->dontSee('Update', 'a');
         $I->dontSee('Delete', 'a');
-
-        $I->see('Aircrafts');
-
-        $I->see('Showing 1-1 of 1 item.');
-        $I->see('Boeing Name Std');
-        $I->see('EC-AAA');
-        $I->see('LEMD');
 
         $I->seeElement('a', ['title' => 'View']);
         $I->dontSeeElement('a', ['title' => 'Update']);
@@ -125,23 +106,12 @@ class AircraftConfigurationIndexViewCest
 
     public function openAircraftConfigurationViewAsVisitor(\FunctionalTester $I)
     {
-        $I->amOnRoute('aircraft-configuration/view', [ 'id' => '1' ]);
-
-        $I->see('Aircraft Type Name');
-        $I->see('Boeing 737-800');
-        $I->see('Standard');
-        $I->see('160');
-        $I->see('4900');
+        $this->checkAircraftConfigViewCommon($I);
 
         $I->dontSee('Update', 'a');
         $I->dontSee('Delete', 'a');
 
-        $I->see('Aircrafts');
-
-        $I->see('Showing 1-1 of 1 item.');
-        $I->see('Boeing Name Std');
-        $I->see('EC-AAA');
-        $I->see('LEMD');
+        $this->checkAircraftConfigViewCommon($I);
 
         $I->seeElement('a', ['title' => 'View']);
         $I->dontSeeElement('a', ['title' => 'Update']);
