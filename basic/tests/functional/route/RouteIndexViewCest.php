@@ -15,10 +15,7 @@ class RouteIndexViewCest
         ];
     }
 
-    public function openRouteIndexAsAdmin(\FunctionalTester $I)
-    {
-        $I->amLoggedInAs(2);
-
+    private function checkRouteIndexCommon(\FunctionalTester $I){
         $I->amOnRoute('route/index');
 
         $I->see('Routes');
@@ -27,6 +24,13 @@ class RouteIndexViewCest
         $I->see('LEVC');
         $I->see('R001');
         $I->see('R002');
+    }
+
+    public function openRouteIndexAsAdmin(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(2);
+
+        $this->checkRouteIndexCommon($I);
 
         $I->see('Create Route', 'a');
         $I->seeElement('a', ['title' => 'View']);
@@ -38,14 +42,7 @@ class RouteIndexViewCest
     {
         $I->amLoggedInAs(1);
 
-        $I->amOnRoute('route/index');
-
-        $I->see('Routes');
-        $I->see('Showing 1-2 of 2 item');
-        $I->see('LEBL');
-        $I->see('LEVC');
-        $I->see('R001');
-        $I->see('R002');
+        $this->checkRouteIndexCommon($I);
 
         $I->dontSee('Create Route', 'a');
         $I->seeElement('a', ['title' => 'View']);
@@ -55,14 +52,7 @@ class RouteIndexViewCest
 
     public function openRouteIndexAsVisitor(\FunctionalTester $I)
     {
-        $I->amOnRoute('route/index');
-
-        $I->see('Routes');
-        $I->see('Showing 1-2 of 2 item');
-        $I->see('LEBL');
-        $I->see('LEVC');
-        $I->see('R001');
-        $I->see('R002');
+        $this->checkRouteIndexCommon($I);
 
         $I->dontSee('Create Route', 'a');
         $I->seeElement('a', ['title' => 'View']);
@@ -70,16 +60,20 @@ class RouteIndexViewCest
         $I->dontSeeElement('a', ['title' => 'Delete']);
     }
 
-    public function openRouteViewAsAdmin(\FunctionalTester $I)
-    {
-        $I->amLoggedInAs(2);
-
+    private function checkAircraftConfigViewCommon(\FunctionalTester $I) {
         $I->amOnRoute('route/view', [ 'id' => '1' ]);
 
         $I->see('LEBL');
         $I->see('LEVC');
         $I->see('R001');
         $I->see('165');
+    }
+
+    public function openRouteViewAsAdmin(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(2);
+
+        $this->checkAircraftConfigViewCommon($I);
 
         $I->see('Update', 'a');
         $I->see('Delete', 'a');
@@ -89,12 +83,7 @@ class RouteIndexViewCest
     {
         $I->amLoggedInAs(1);
 
-        $I->amOnRoute('route/view', [ 'id' => '1' ]);
-
-        $I->see('LEBL');
-        $I->see('LEVC');
-        $I->see('R001');
-        $I->see('165');
+        $this->checkAircraftConfigViewCommon($I);
 
         $I->dontSee('Update', 'a');
         $I->dontSee('Delete', 'a');
@@ -102,12 +91,7 @@ class RouteIndexViewCest
 
     public function openRouteViewAsVisitor(\FunctionalTester $I)
     {
-        $I->amOnRoute('route/view', [ 'id' => '1' ]);
-
-        $I->see('LEBL');
-        $I->see('LEVC');
-        $I->see('R001');
-        $I->see('165');
+        $this->checkAircraftConfigViewCommon($I);
 
         $I->dontSee('Update', 'a');
         $I->dontSee('Delete', 'a');
