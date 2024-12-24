@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\models\AircraftConfiguration;
 use app\models\AircraftConfigurationSearch;
+use app\models\AircraftType;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
@@ -80,8 +81,14 @@ class AircraftConfigurationController extends Controller
                 $model->loadDefaultValues();
             }
 
+            $aircraftTypes = AircraftType::find()
+                ->select(['name'])
+                ->indexBy('id')
+                ->orderBy(['name' => SORT_ASC])->column();
+
             return $this->render('create', [
                 'model' => $model,
+                'aircraftTypes' => $aircraftTypes,
             ]);
         } else {
             throw new ForbiddenHttpException();
@@ -104,8 +111,15 @@ class AircraftConfigurationController extends Controller
                 return $this->redirect(['view', 'id' => $model->id]);
             }
 
+            $aircraftTypes = AircraftType::find()
+                ->select(['name'])
+                ->indexBy('id')
+                ->orderBy(['name' => SORT_ASC])
+                ->column();
+
             return $this->render('update', [
                 'model' => $model,
+                'aircraftTypes' => $aircraftTypes,
             ]);
         } else {
             throw new ForbiddenHttpException();
