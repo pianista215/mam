@@ -15,10 +15,7 @@ class AircraftIndexViewCest
         ];
     }
 
-    public function openAircraftIndexAsAdmin(\FunctionalTester $I)
-    {
-        $I->amLoggedInAs(2);
-
+    private function checkAircraftIndexCommon(\FunctionalTester $I){
         $I->amOnRoute('aircraft/index');
 
         $I->see('Aircrafts');
@@ -33,6 +30,13 @@ class AircraftIndexViewCest
         $I->see('Boeing Name Cargo');
         $I->see('EC-BBB');
         $I->see('LEBL');
+    }
+
+    public function openAircraftIndexAsAdmin(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(2);
+
+        $this->checkAircraftIndexCommon($I);
 
         $I->see('Create Aircraft', 'a');
         $I->seeElement('a', ['title' => 'View']);
@@ -44,20 +48,7 @@ class AircraftIndexViewCest
     {
         $I->amLoggedInAs(1);
 
-        $I->amOnRoute('aircraft/index');
-
-        $I->see('Aircrafts');
-        $I->see('Showing 1-2 of 2 items.');
-
-        $I->see('Boeing 737-800 (Standard)');
-        $I->see('Boeing Name Std');
-        $I->see('EC-AAA');
-        $I->see('LEMD');
-
-        $I->see('Boeing 737-800 (Cargo)');
-        $I->see('Boeing Name Cargo');
-        $I->see('EC-BBB');
-        $I->see('LEBL');
+        $this->checkAircraftIndexCommon($I);
 
         $I->dontSee('Create Aircraft', 'a');
         $I->seeElement('a', ['title' => 'View']);
@@ -67,22 +58,7 @@ class AircraftIndexViewCest
 
     public function openAircraftIndexAsVisitor(\FunctionalTester $I)
     {
-        $I->amOnRoute('aircraft-type/index');
-
-        $I->amOnRoute('aircraft/index');
-
-        $I->see('Aircrafts');
-        $I->see('Showing 1-2 of 2 items.');
-
-        $I->see('Boeing 737-800 (Standard)');
-        $I->see('Boeing Name Std');
-        $I->see('EC-AAA');
-        $I->see('LEMD');
-
-        $I->see('Boeing 737-800 (Cargo)');
-        $I->see('Boeing Name Cargo');
-        $I->see('EC-BBB');
-        $I->see('LEBL');
+        $this->checkAircraftIndexCommon($I);
 
         $I->dontSee('Create Aircraft', 'a');
         $I->seeElement('a', ['title' => 'View']);
@@ -90,10 +66,7 @@ class AircraftIndexViewCest
         $I->dontSeeElement('a', ['title' => 'Delete']);
     }
 
-    public function openAircraftViewAsAdmin(\FunctionalTester $I)
-    {
-        $I->amLoggedInAs(2);
-
+    private function checkAircraftViewCommon(\FunctionalTester $I) {
         $I->amOnRoute('aircraft/view', [ 'id' => '1' ]);
 
         $I->see('Boeing Name Std');
@@ -101,6 +74,13 @@ class AircraftIndexViewCest
         $I->see('EC-AAA');
         $I->see('LEMD');
         $I->see('255.7');
+    }
+
+    public function openAircraftViewAsAdmin(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(2);
+
+        $this->checkAircraftViewCommon($I);
 
         $I->see('Update', 'a');
         $I->see('Delete', 'a');
@@ -110,13 +90,7 @@ class AircraftIndexViewCest
     {
         $I->amLoggedInAs(1);
 
-        $I->amOnRoute('aircraft/view', [ 'id' => '1' ]);
-
-        $I->see('Boeing Name Std');
-        $I->see('Boeing 737-800 (Standard)');
-        $I->see('EC-AAA');
-        $I->see('LEMD');
-        $I->see('255.7');
+        $this->checkAircraftViewCommon($I);
 
         $I->dontSee('Update', 'a');
         $I->dontSee('Delete', 'a');
@@ -124,15 +98,7 @@ class AircraftIndexViewCest
 
     public function openAircraftViewAsVisitor(\FunctionalTester $I)
     {
-        $I->amOnRoute('aircraft-type/view', [ 'id' => '2' ]);
-
-        $I->amOnRoute('aircraft/view', [ 'id' => '1' ]);
-
-        $I->see('Boeing Name Std');
-        $I->see('Boeing 737-800 (Standard)');
-        $I->see('EC-AAA');
-        $I->see('LEMD');
-        $I->see('255.7');
+        $this->checkAircraftViewCommon($I);
 
         $I->dontSee('Update', 'a');
         $I->dontSee('Delete', 'a');
