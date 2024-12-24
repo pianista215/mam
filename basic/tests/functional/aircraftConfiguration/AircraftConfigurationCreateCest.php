@@ -67,9 +67,9 @@ class AircraftConfigurationCreateCest
        $I->amOnRoute('aircraft-configuration/create');
 
        $I->selectOption('form select[name="AircraftConfiguration[aircraft_type_id]"]', 'Airbus A320');
-       $I->fillField('#aircraftconfiguration-name','Business Special');
-       $I->fillField('#aircraftconfiguration-pax_capacity','140');
-       $I->fillField('#aircraftconfiguration-cargo_capacity','950');
+       $I->fillField('#aircraftconfiguration-name', 'Business Special');
+       $I->fillField('#aircraftconfiguration-pax_capacity', '140');
+       $I->fillField('#aircraftconfiguration-cargo_capacity', '950');
        $I->click('Save', 'button');
 
        $I->seeResponseCodeIs(200);
