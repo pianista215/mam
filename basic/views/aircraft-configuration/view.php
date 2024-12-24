@@ -1,6 +1,10 @@
 <?php
 
+use app\models\Aircraft;
+use yii\grid\ActionColumn;
+use yii\grid\GridView;
 use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\widgets\DetailView;
 
 /** @var yii\web\View $this */
@@ -40,5 +44,40 @@ $this->params['breadcrumbs'][] = $this->title;
             'cargo_capacity',
         ],
     ]) ?>
+
+    <h4>Aircrafts</h4>
+
+    <?= GridView::widget([
+            'dataProvider' => $dataProvider,
+            'columns' => [
+                ['class' => 'yii\grid\SerialColumn'],
+                'registration',
+                'name',
+                'location',
+                [
+                    'class' => ActionColumn::className(),
+                    'visibleButtons'=>[
+                        'delete'=> function($model){
+                            return Yii::$app->user->can('aircraftCrud');
+                        },
+                        'update'=> function($model){
+                            return Yii::$app->user->can('aircraftCrud');
+                        },
+                    ],
+                    'urlCreator' => function ($action, Aircraft $model, $key, $index, $column) {
+                        return Url::toRoute(['aircraft/'.$action, 'id' => $model->id]);
+                     }
+                ],
+            ],
+            'tableOptions' => ['class' => 'table table-striped table-bordered'],
+            'pager' => [
+                    'options' => ['class' => 'pagination justify-content-center'],
+                    'linkContainerOptions' => ['class' => 'page-item'],
+                    'linkOptions' => ['class' => 'page-link'],
+                    'disabledListItemSubTagOptions' => ['class' => 'page-link'],
+                    'hideOnSinglePage' => true,
+                ],
+            'summaryOptions' => ['class' => 'text-muted']
+        ]); ?>
 
 </div>

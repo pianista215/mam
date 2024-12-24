@@ -86,6 +86,9 @@ class AircraftTypeIndexViewCest
         $I->see('Boeing 737-800');
         $I->see('5665');
 
+        $I->see('Update', 'a');
+        $I->see('Delete', 'a');
+
         $I->see('Configurations');
         $I->see('Showing 1-2 of 2 items.');
         $I->see('Standard');
@@ -95,8 +98,9 @@ class AircraftTypeIndexViewCest
         $I->see('0');
         $I->see('23500');
 
-        $I->see('Update', 'a');
-        $I->see('Delete', 'a');
+        $I->seeElement('a', ['title' => 'View']);
+        $I->seeElement('a', ['title' => 'Update']);
+        $I->seeElement('a', ['title' => 'Delete']);
     }
 
     public function openAircraftTypeViewAsUser(\FunctionalTester $I)
@@ -109,6 +113,9 @@ class AircraftTypeIndexViewCest
         $I->see('Boeing 737-800');
         $I->see('5665');
 
+        $I->dontSee('Update', 'a');
+        $I->dontSee('Delete', 'a');
+
         $I->see('Configurations');
         $I->see('Showing 1-2 of 2 items.');
         $I->see('Standard');
@@ -118,8 +125,9 @@ class AircraftTypeIndexViewCest
         $I->see('0');
         $I->see('23500');
 
-        $I->dontSee('Update', 'a');
-        $I->dontSee('Delete', 'a');
+        $I->seeElement('a', ['title' => 'View']);
+        $I->dontSeeElement('a', ['title' => 'Update']);
+        $I->dontSeeElement('a', ['title' => 'Delete']);
     }
 
     public function openAircraftTypeViewAsVisitor(\FunctionalTester $I)
@@ -130,6 +138,9 @@ class AircraftTypeIndexViewCest
         $I->see('Boeing 737-800');
         $I->see('5665');
 
+        $I->dontSee('Update', 'a');
+        $I->dontSee('Delete', 'a');
+
         $I->see('Configurations');
         $I->see('Showing 1-2 of 2 items.');
         $I->see('Standard');
@@ -139,8 +150,9 @@ class AircraftTypeIndexViewCest
         $I->see('0');
         $I->see('23500');
 
-        $I->dontSee('Update', 'a');
-        $I->dontSee('Delete', 'a');
+        $I->seeElement('a', ['title' => 'View']);
+        $I->dontSeeElement('a', ['title' => 'Update']);
+        $I->dontSeeElement('a', ['title' => 'Delete']);
     }
 
 

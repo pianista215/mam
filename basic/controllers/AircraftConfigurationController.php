@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\AircraftSearch;
 use app\models\AircraftConfiguration;
 use app\models\AircraftConfigurationSearch;
 use app\models\AircraftType;
@@ -58,8 +59,15 @@ class AircraftConfigurationController extends Controller
      */
     public function actionView($id)
     {
+        $model = $this->findModel($id);
+
+        $searchModel = new AircraftSearch();
+        $searchModel->aircraft_configuration_id = $model->id;
+        $dataProvider = $searchModel->search([]);
+
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $model,
+            'dataProvider' => $dataProvider,
         ]);
     }
 
