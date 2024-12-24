@@ -118,6 +118,8 @@ class m241202_180323_add_rbac_roles extends Migration
         $aircraftTypeCrud->description = 'Can create, delete, and modify aircraft types';
         $auth->add($aircraftTypeCrud);
 
+        // TODO: THINK IF WE NEED AIRCRAFT CONFIGURATION CRUD OR JUST USE AIRCRAFT TYPE FOR ALL
+
         $aircraftCrud = $auth->createPermission('aircraftCrud');
         $aircraftCrud->description = 'Can create, delete, and modify aircrafts';
         $auth->add($aircraftCrud);

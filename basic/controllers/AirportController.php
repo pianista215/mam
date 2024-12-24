@@ -82,7 +82,11 @@ class AirportController extends Controller
                 $model->loadDefaultValues();
             }
 
-            $countries = Country::find()->select(['name'])->indexBy('id')->column();
+            $countries = Country::find()
+                ->select(['name'])
+                ->indexBy('id')
+                ->orderBy(['name' => SORT_ASC])
+                ->column();
 
             return $this->render('create', [
                 'model' => $model,
@@ -109,7 +113,11 @@ class AirportController extends Controller
                 return $this->redirect(['view', 'id' => $model->id]);
             }
 
-            $countries = Country::find()->select(['name'])->indexBy('id')->column();
+            $countries = Country::find()
+                ->select(['name'])
+                ->indexBy('id')
+                ->orderBy(['name' => SORT_ASC])
+                ->column();
 
             return $this->render('update', [
                 'model' => $model,

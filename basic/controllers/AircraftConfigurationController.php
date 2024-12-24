@@ -2,11 +2,15 @@
 
 namespace app\controllers;
 
+use app\models\AircraftSearch;
 use app\models\AircraftConfiguration;
 use app\models\AircraftConfigurationSearch;
+use app\models\AircraftType;
 use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use Yii;
 
 /**
  * AircraftConfigurationController implements the CRUD actions for AircraftConfiguration model.
@@ -55,8 +59,15 @@ class AircraftConfigurationController extends Controller
      */
     public function actionView($id)
     {
+        $model = $this->findModel($id);
+
+        $searchModel = new AircraftSearch();
+        $searchModel->aircraft_configuration_id = $model->id;
+        $dataProvider = $searchModel->search([]);
+
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $model,
+            'dataProvider' => $dataProvider,
         ]);
     }
 
@@ -67,19 +78,29 @@ class AircraftConfigurationController extends Controller
      */
     public function actionCreate()
     {
-        $model = new AircraftConfiguration();
+        if(Yii::$app->user->can('aircraftTypeCrud')){
+            $model = new AircraftConfiguration();
 
-        if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'id' => $model->id]);
+            if ($this->request->isPost) {
+                if ($model->load($this->request->post()) && $model->save()) {
+                    return $this->redirect(['view', 'id' => $model->id]);
+                }
+            } else {
+                $model->loadDefaultValues();
             }
-        } else {
-            $model->loadDefaultValues();
-        }
 
-        return $this->render('create', [
-            'model' => $model,
-        ]);
+            $aircraftTypes = AircraftType::find()
+                ->select(['name'])
+                ->indexBy('id')
+                ->orderBy(['name' => SORT_ASC])->column();
+
+            return $this->render('create', [
+                'model' => $model,
+                'aircraftTypes' => $aircraftTypes,
+            ]);
+        } else {
+            throw new ForbiddenHttpException();
+        }
     }
 
     /**
@@ -91,15 +112,26 @@ class AircraftConfigurationController extends Controller
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
+        if(Yii::$app->user->can('aircraftTypeCrud')){
+            $model = $this->findModel($id);
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+            if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
+
+            $aircraftTypes = AircraftType::find()
+                ->select(['name'])
+                ->indexBy('id')
+                ->orderBy(['name' => SORT_ASC])
+                ->column();
+
+            return $this->render('update', [
+                'model' => $model,
+                'aircraftTypes' => $aircraftTypes,
+            ]);
+        } else {
+            throw new ForbiddenHttpException();
         }
-
-        return $this->render('update', [
-            'model' => $model,
-        ]);
     }
 
     /**
@@ -111,9 +143,13 @@ class AircraftConfigurationController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
+        if(Yii::$app->user->can('aircraftTypeCrud')){
+            $this->findModel($id)->delete();
 
-        return $this->redirect(['index']);
+            return $this->redirect(['index']);
+        } else {
+            throw new ForbiddenHttpException();
+        }
     }
 
     /**
