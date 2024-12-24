@@ -14,7 +14,7 @@ class AircraftConfigurationDeleteCest
     public function _fixtures(){
         return [
             'authAssignment' => AuthAssignmentFixture::class,
-            'aircraftConfiguration' => AircraftConfigurationFixture::class,
+            'aircraft' => AircraftFixture::class,
         ];
     }
 

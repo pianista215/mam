@@ -2,7 +2,7 @@
 
 namespace tests\functional\aircraftConfiguration;
 
-use tests\fixtures\AircraftConfigurationFixture;
+use tests\fixtures\AircraftFixture;
 use tests\fixtures\AuthAssignmentFixture;
 use Yii;
 
@@ -11,7 +11,7 @@ class AircraftConfigurationIndexViewCest
     public function _fixtures(){
         return [
             'authAssignment' => AuthAssignmentFixture::class,
-            'aircraftConfiguration' => AircraftConfigurationFixture::class,
+            'aircraft' => AircraftFixture::class,
         ];
     }
 
@@ -83,6 +83,17 @@ class AircraftConfigurationIndexViewCest
 
         $I->see('Update', 'a');
         $I->see('Delete', 'a');
+
+        $I->see('Aircrafts');
+
+        $I->see('Showing 1-1 of 1 item.');
+        $I->see('Boeing Name Std');
+        $I->see('EC-AAA');
+        $I->see('LEMD');
+
+        $I->seeElement('a', ['title' => 'View']);
+        $I->seeElement('a', ['title' => 'Update']);
+        $I->seeElement('a', ['title' => 'Delete']);
     }
 
     public function openAircraftConfigurationViewAsUser(\FunctionalTester $I)
@@ -99,12 +110,21 @@ class AircraftConfigurationIndexViewCest
 
         $I->dontSee('Update', 'a');
         $I->dontSee('Delete', 'a');
+
+        $I->see('Aircrafts');
+
+        $I->see('Showing 1-1 of 1 item.');
+        $I->see('Boeing Name Std');
+        $I->see('EC-AAA');
+        $I->see('LEMD');
+
+        $I->seeElement('a', ['title' => 'View']);
+        $I->dontSeeElement('a', ['title' => 'Update']);
+        $I->dontSeeElement('a', ['title' => 'Delete']);
     }
 
     public function openAircraftConfigurationViewAsVisitor(\FunctionalTester $I)
     {
-        $I->amOnRoute('aircraft-type/view', [ 'id' => '2' ]);
-
         $I->amOnRoute('aircraft-configuration/view', [ 'id' => '1' ]);
 
         $I->see('Aircraft Type Name');
@@ -115,6 +135,17 @@ class AircraftConfigurationIndexViewCest
 
         $I->dontSee('Update', 'a');
         $I->dontSee('Delete', 'a');
+
+        $I->see('Aircrafts');
+
+        $I->see('Showing 1-1 of 1 item.');
+        $I->see('Boeing Name Std');
+        $I->see('EC-AAA');
+        $I->see('LEMD');
+
+        $I->seeElement('a', ['title' => 'View']);
+        $I->dontSeeElement('a', ['title' => 'Update']);
+        $I->dontSeeElement('a', ['title' => 'Delete']);
     }
 
 
