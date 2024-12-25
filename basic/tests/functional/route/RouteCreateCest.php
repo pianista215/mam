@@ -58,7 +58,7 @@ class RouteCreateCest
        $I->see('Arrival cannot be blank.');
 
        $count = \app\models\Route::find()->count();
-       $I->assertEquals(2, $count);
+       $I->assertEquals(3, $count);
     }
 
     public function submitValidRoute(\FunctionalTester $I)
@@ -84,7 +84,7 @@ class RouteCreateCest
        $I->assertEquals('LEVC', $model->arrival);
 
        $count = \app\models\Route::find()->count();
-       $I->assertEquals(3, $count);
+       $I->assertEquals(4, $count);
     }
 
 }

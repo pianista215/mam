@@ -19,11 +19,13 @@ class RouteIndexViewCest
         $I->amOnRoute('route/index');
 
         $I->see('Routes');
-        $I->see('Showing 1-2 of 2 item');
+        $I->see('Showing 1-3 of 3 items.');
         $I->see('LEBL');
         $I->see('LEVC');
+        $I->see('GCLP');
         $I->see('R001');
         $I->see('R002');
+        $I->see('R003');
     }
 
     public function openRouteIndexAsAdmin(\FunctionalTester $I)

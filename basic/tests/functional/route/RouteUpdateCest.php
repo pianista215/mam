@@ -62,7 +62,7 @@ class RouteUpdateCest
        $I->see('Arrival cannot be blank.');
 
        $count = \app\models\Route::find()->count();
-       $I->assertEquals(2, $count);
+       $I->assertEquals(3, $count);
     }
 
     public function updateValidRoute(\FunctionalTester $I)
@@ -92,7 +92,7 @@ class RouteUpdateCest
        $I->assertEquals(260, $model->distance_nm);
 
        $count = \app\models\Route::find()->count();
-       $I->assertEquals(2, $count);
+       $I->assertEquals(3, $count);
     }
 
 }
