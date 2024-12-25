@@ -15,4 +15,11 @@ return [
         'pax_capacity' => 0,
         'cargo_capacity' => 23500,
     ],
+    [
+        'id' => 3,
+        'aircraft_type_id' => 4,
+        'name' => 'Standard',
+        'pax_capacity' => 4,
+        'cargo_capacity' => 300,
+    ],
 ];

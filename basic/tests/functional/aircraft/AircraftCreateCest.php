@@ -58,7 +58,7 @@ class AircraftCreateCest
        $I->see('Location cannot be blank.');
 
        $count = \app\models\Aircraft::find()->count();
-       $I->assertEquals(2, $count);
+       $I->assertEquals(3, $count);
     }
 
     public function submitValidAircraft(\FunctionalTester $I)
@@ -89,7 +89,7 @@ class AircraftCreateCest
        $I->assertEquals(0, $model->hours_flown);
 
        $count = \app\models\Aircraft::find()->count();
-       $I->assertEquals(3, $count);
+       $I->assertEquals(4, $count);
     }
 
 }

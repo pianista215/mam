@@ -19,10 +19,11 @@ class AircraftConfigurationIndexViewCest
         $I->amOnRoute('aircraft-configuration/index');
 
         $I->see('Aircraft Configurations');
-        $I->see('Showing 1-2 of 2 items.');
+        $I->see('Showing 1-3 of 3 items.');
         $I->see('Boeing 737-800');
         $I->see('Cargo');
         $I->see('Standard');
+        $I->see('Cessna 172');
     }
 
     public function openAircraftConfigurationIndexAsAdmin(\FunctionalTester $I)

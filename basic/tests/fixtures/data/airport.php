@@ -28,4 +28,13 @@ return [
         'longitude' => -0.48166,
         'city' => 'Valencia',
     ],
+    [
+        'id' => 4,
+        'country_id' => 1,
+        'icao_code' => 'GCLP',
+        'name' => 'Gran Canaria',
+        'latitude' => 27.931944444444,
+        'longitude' => -15.386666666667,
+        'city' => 'Las Palmas',
+    ],
 ];

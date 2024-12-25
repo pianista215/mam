@@ -19,7 +19,7 @@ class AircraftIndexViewCest
         $I->amOnRoute('aircraft/index');
 
         $I->see('Aircrafts');
-        $I->see('Showing 1-2 of 2 items.');
+        $I->see('Showing 1-3 of 3 items.');
 
         $I->see('Boeing 737-800 (Standard)');
         $I->see('Boeing Name Std');
@@ -29,6 +29,11 @@ class AircraftIndexViewCest
         $I->see('Boeing 737-800 (Cargo)');
         $I->see('Boeing Name Cargo');
         $I->see('EC-BBB');
+        $I->see('LEBL');
+
+        $I->see('Cessna 172 (Standard)');
+        $I->see('C172 Std');
+        $I->see('EC-UUU');
         $I->see('LEBL');
     }
 
