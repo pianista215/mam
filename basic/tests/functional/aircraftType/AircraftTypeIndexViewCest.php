@@ -19,13 +19,15 @@ class AircraftTypeIndexViewCest
         $I->amOnRoute('aircraft-type/index');
 
         $I->see('Aircraft Types');
-        $I->see('Showing 1-3 of 3 item');
+        $I->see('Showing 1-4 of 4 items.');
         $I->see('A320');
         $I->see('Airbus A320');
         $I->see('B738');
         $I->see('Boeing 737-800');
         $I->see('B350');
         $I->see('Beechcraft King Air 350i');
+        $I->see('C172');
+        $I->see('Cessna 172');
     }
 
     public function openAircraftTypeIndexAsAdmin(\FunctionalTester $I)
