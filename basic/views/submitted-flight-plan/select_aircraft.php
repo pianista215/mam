@@ -11,7 +11,7 @@ use yii\grid\GridView;
 /** @var app\models\SubmittedFlightPlanSearch $searchModel */
 /** @var yii\data\ActiveDataProvider $dataProvider */
 
-$this->title = 'Select aircraft';
+$this->title = 'Select aircraft (' . $route->departure . '-' . $route->arrival. ')';
 $this->params['breadcrumbs'][] = $this->title;
 $this->params['route_id'] = $route->id;
 ?>
