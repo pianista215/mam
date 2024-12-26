@@ -17,13 +17,86 @@ class SubmitFplCest
         ];
     }
 
-    public function openRouteCreateAsAdmin(\FunctionalTester $I)
+    public function openPrepareFplAsVisitor(\FunctionalTester $I)
+    {
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
+
+        $I->see('Forbidden');
+        $I->seeResponseCodeIs(403);
+        $I->dontSee('Flight Plan Submission');
+        $I->dontSee('Submit FPL', 'button');
+    }
+
+    public function openPrepareFplAsNonActivatedUser(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(3);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
+
+        $I->see('Forbidden');
+        $I->seeResponseCodeIs(403);
+        $I->dontSee('Flight Plan Submission');
+        $I->dontSee('Submit FPL', 'button');
+    }
+
+    public function openPrepareFplRouteDepartureDifferentFromUserLocation(\FunctionalTester $I)
     {
         $I->amLoggedInAs(2);
-        $I->amOnRoute('route/create');
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
 
-        $I->see('Create Route');
-        $I->see('Save', 'button');
+        $I->see('Forbidden');
+        $I->seeResponseCodeIs(403);
+        $I->dontSee('Flight Plan Submission');
+        $I->dontSee('Submit FPL', 'button');
+    }
+
+    public function openPrepareFplAircraftInDifferentLocation(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(1);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '1', 'aircraft_id' => '1' ]);
+
+        $I->see('Forbidden');
+        $I->seeResponseCodeIs(403);
+        $I->dontSee('Flight Plan Submission');
+        $I->dontSee('Submit FPL', 'button');
+    }
+
+    public function openPrepareFplAircraftBadRangeForRoute(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(1);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '3', 'aircraft_id' => '3' ]);
+
+        $I->see('Forbidden');
+        $I->seeResponseCodeIs(403);
+        $I->dontSee('Flight Plan Submission');
+        $I->dontSee('Submit FPL', 'button');
+    }
+
+    public function openPrepareFplEmptyFields(\FunctionalTester $I)
+    {
+    }
+
+    public function openPrepareFplInvalidAlternatives(\FunctionalTester $I)
+    {
+    }
+
+    public function openPrepareFplInvalidIntegerFields(\FunctionalTester $I)
+    {
+    }
+
+    public function openPrepareFplValidVFRPlan(\FunctionalTester $I)
+    {
+    }
+
+    public function openPrepareFplValidIFRPlan(\FunctionalTester $I)
+    {
+    }
+
+    public function openPrepareFplValidIFRToVFRPlan(\FunctionalTester $I)
+    {
+    }
+
+    public function openPrepareFplValidVFRtoIFRPlan(\FunctionalTester $I)
+    {
     }
 
 }

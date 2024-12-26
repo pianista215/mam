@@ -16,7 +16,7 @@ use yii\widgets\ActiveForm;
 <div class="container">
 
     <?php $form = ActiveForm::begin([
-            'options' => ['class' => 'row'], // Agrega la clase 'row' para usar el sistema de grillas de Bootstrap
+            'options' => ['class' => 'row'],
         ]); ?>
 
     <div class="row mb-3">

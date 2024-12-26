@@ -104,10 +104,10 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
 
     public static function getFlightRulesTypes(){
         return array(
-                    'I' => 'IFR (Instrument Flight)',
-                    'V' => 'VFR (Visual Flight)',
-                    'Y' => 'IFR/VFR (IFR changing to VFR)',
-                    'Z' => 'VFR/IFR (VFR changing to IFR)',
+                    'I' => 'I - IFR (Instrument Flight)',
+                    'V' => 'V - VFR (Visual Flight)',
+                    'Y' => 'Y - IFR/VFR (IFR changing to VFR)',
+                    'Z' => 'Z - VFR/IFR (VFR changing to IFR)',
         );
     }
 
