@@ -88,7 +88,7 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
             'aircraft_id' => 'Aircraft ID',
             'flight_rules' => 'Flight Rules',
             'alternative1_icao' => 'Altn Aerodrome',
-            'alternative2_icao' => 'Alternative2 Icao',
+            'alternative2_icao' => '2nd Altn Aerodrome',
             'cruise_speed_unit' => 'Cruise Speed Unit',
             'cruise_speed_value' => 'Cruise Speed Value',
             'flight_level_unit' => 'Flight Level Unit',
@@ -127,7 +127,7 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
             }
         } else {
             if(!isset($this->flight_level_value) || empty($this->flight_level_value)){
-                $this->addError('flight_level_value', 'Flight Level Value cannot be blank if VFR is not selected');
+                $this->addError('flight_level_value', 'Flight Level Value cannot be blank if VFR is not selected.');
             }
         }
     }
