@@ -333,10 +333,148 @@ class SubmitFplCest
 
     public function openPrepareFplValidIFRToVFRPlan(\FunctionalTester $I)
     {
+        $I->amLoggedInAs(1);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
+
+        $I->see('Flight Plan Submission');
+        $I->seeInField('input[name=aircraftRegistration]', 'EC-UUU');
+        $I->seeInField('input[name=aircraftType]', 'C172');
+        $I->seeInField('input[name=departure]', 'LEBL');
+        $I->seeInField('input[name=destination]', 'LEVC');
+        $I->seeInField('input[name=pilot]', 'John Doe');
+        $I->see('Submit FPL', 'button');
+
+        $I->selectOption('select[name="SubmittedFlightPlan[flight_rules]"]', 'Y - IFR/VFR (IFR changing to VFR)');
+        $I->selectOption('select[name="SubmittedFlightPlan[cruise_speed_unit]"]', 'N');
+        $I->fillField('#submittedflightplan-cruise_speed_value','110');
+        $I->selectOption('select[name="SubmittedFlightPlan[flight_level_unit]"]', 'M');
+        $I->fillField('#flight_level_value','1100');
+        $I->fillField('#submittedflightplan-route','LOTOS VFR');
+        $I->fillField('#submittedflightplan-estimated_time','0132');
+        $I->fillField('#submittedflightplan-alternative1_icao','LEAL');
+        $I->fillField('#submittedflightplan-alternative2_icao','');
+        $I->fillField('#submittedflightplan-other_information','DOF/20241205 REG/ECUUU');
+        $I->fillField('#submittedflightplan-endurance_time','0400');
+
+        $I->click('Submit FPL', 'button');
+        $I->seeResponseCodeIs(200);
+        $I->seeInCurrentUrl('submitted-flight-plan%2Fview');
+
+        $I->see('Current Flight Plan');
+
+        $I->seeInField('input[name=aircraftRegistration]', 'EC-UUU');
+        $I->seeInField('input[name=aircraftType]', 'C172');
+        $I->seeOptionIsSelected('select[name="SubmittedFlightPlan[flight_rules]"]', 'Y - IFR/VFR (IFR changing to VFR)');
+
+        $I->seeInField('input[name=departure]', 'LEBL');
+        $I->seeOptionIsSelected('select[name="SubmittedFlightPlan[cruise_speed_unit]"]', 'N');
+        $I->seeInField('input[name="SubmittedFlightPlan[cruise_speed_value]"]', '110');
+        $I->seeOptionIsSelected('select[name="SubmittedFlightPlan[flight_level_unit]"]', 'M');
+        $I->seeInField('input[name="SubmittedFlightPlan[flight_level_value]"]', '1100');
+
+        $I->seeInField('textarea[name="SubmittedFlightPlan[route]"]', 'LOTOS VFR');
+
+        $I->seeInField('input[name="destination"]', 'LEVC');
+        $I->seeInField('input[name="SubmittedFlightPlan[estimated_time]"]', '0132');
+        $I->seeInField('input[name="SubmittedFlightPlan[alternative1_icao]"]', 'LEAL');
+        $I->seeInField('input[name="SubmittedFlightPlan[alternative2_icao]"]', '');
+
+        $I->seeInField('textarea[name="SubmittedFlightPlan[other_information]"]', 'DOF/20241205 REG/ECUUU');
+
+        $I->seeInField('input[name="SubmittedFlightPlan[endurance_time]"]', '0400');
+        $I->seeInField('input[name=pilot]', 'John Doe');
+
+        $model = \app\models\SubmittedFlightPlan::find()->where(['pilot_id' => '1'])->one();
+        $I->assertNotNull($model);
+        $I->assertEquals(3, $model->aircraft_id);
+        $I->assertEquals(1, $model->route_id);
+        $I->assertEquals('Y', $model->flight_rules);
+        $I->assertEquals('N', $model->cruise_speed_unit);
+        $I->assertEquals('110', $model->cruise_speed_value);
+        $I->assertEquals('M', $model->flight_level_unit);
+        $I->assertEquals('1100', $model->flight_level_value);
+        $I->assertEquals('LOTOS VFR', $model->route);
+        $I->assertEquals('0132', $model->estimated_time);
+        $I->assertEquals('LEAL', $model->alternative1_icao);
+        $I->assertNull($model->alternative2_icao);
+        $I->assertEquals('DOF/20241205 REG/ECUUU', $model->other_information);
+        $I->assertEquals('0400', $model->endurance_time);
+
+        $count = \app\models\SubmittedFlightPlan::find()->count();
+        $I->assertEquals(1, $count);
     }
 
     public function openPrepareFplValidVFRtoIFRPlan(\FunctionalTester $I)
     {
+        $I->amLoggedInAs(1);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
+
+        $I->see('Flight Plan Submission');
+        $I->seeInField('input[name=aircraftRegistration]', 'EC-UUU');
+        $I->seeInField('input[name=aircraftType]', 'C172');
+        $I->seeInField('input[name=departure]', 'LEBL');
+        $I->seeInField('input[name=destination]', 'LEVC');
+        $I->seeInField('input[name=pilot]', 'John Doe');
+        $I->see('Submit FPL', 'button');
+
+        $I->selectOption('select[name="SubmittedFlightPlan[flight_rules]"]', 'Z - VFR/IFR (VFR changing to IFR)');
+        $I->selectOption('select[name="SubmittedFlightPlan[cruise_speed_unit]"]', 'M');
+        $I->fillField('#submittedflightplan-cruise_speed_value','020');
+        $I->selectOption('select[name="SubmittedFlightPlan[flight_level_unit]"]', 'A');
+        $I->fillField('#flight_level_value','045');
+        $I->fillField('#submittedflightplan-route','DCT LOTOS M985 SOPET');
+        $I->fillField('#submittedflightplan-estimated_time','0140');
+        $I->fillField('#submittedflightplan-alternative1_icao','LEAL');
+        $I->fillField('#submittedflightplan-alternative2_icao','LEBL');
+        $I->fillField('#submittedflightplan-other_information','DOF/20241205 REG/ECUUU OPR/XXX RMK/IFPS REROUTE ACCEPTED');
+        $I->fillField('#submittedflightplan-endurance_time','0325');
+
+        $I->click('Submit FPL', 'button');
+        $I->seeResponseCodeIs(200);
+        $I->seeInCurrentUrl('submitted-flight-plan%2Fview');
+
+        $I->see('Current Flight Plan');
+
+        $I->seeInField('input[name=aircraftRegistration]', 'EC-UUU');
+        $I->seeInField('input[name=aircraftType]', 'C172');
+        $I->seeOptionIsSelected('select[name="SubmittedFlightPlan[flight_rules]"]', 'Z - VFR/IFR (VFR changing to IFR)');
+
+        $I->seeInField('input[name=departure]', 'LEBL');
+        $I->seeOptionIsSelected('select[name="SubmittedFlightPlan[cruise_speed_unit]"]', 'M');
+        $I->seeInField('input[name="SubmittedFlightPlan[cruise_speed_value]"]', '020');
+        $I->seeOptionIsSelected('select[name="SubmittedFlightPlan[flight_level_unit]"]', 'A');
+        $I->seeInField('input[name="SubmittedFlightPlan[flight_level_value]"]', '045');
+
+        $I->seeInField('textarea[name="SubmittedFlightPlan[route]"]', 'DCT LOTOS M985 SOPET');
+
+        $I->seeInField('input[name="destination"]', 'LEVC');
+        $I->seeInField('input[name="SubmittedFlightPlan[estimated_time]"]', '0140');
+        $I->seeInField('input[name="SubmittedFlightPlan[alternative1_icao]"]', 'LEAL');
+        $I->seeInField('input[name="SubmittedFlightPlan[alternative2_icao]"]', 'LEBL');
+
+        $I->seeInField('textarea[name="SubmittedFlightPlan[other_information]"]', 'DOF/20241205 REG/ECUUU OPR/XXX RMK/IFPS REROUTE ACCEPTED');
+
+        $I->seeInField('input[name="SubmittedFlightPlan[endurance_time]"]', '0325');
+        $I->seeInField('input[name=pilot]', 'John Doe');
+
+        $model = \app\models\SubmittedFlightPlan::find()->where(['pilot_id' => '1'])->one();
+        $I->assertNotNull($model);
+        $I->assertEquals(3, $model->aircraft_id);
+        $I->assertEquals(1, $model->route_id);
+        $I->assertEquals('Z', $model->flight_rules);
+        $I->assertEquals('M', $model->cruise_speed_unit);
+        $I->assertEquals('020', $model->cruise_speed_value);
+        $I->assertEquals('A', $model->flight_level_unit);
+        $I->assertEquals('045', $model->flight_level_value);
+        $I->assertEquals('DCT LOTOS M985 SOPET', $model->route);
+        $I->assertEquals('0140', $model->estimated_time);
+        $I->assertEquals('LEAL', $model->alternative1_icao);
+        $I->assertEquals('LEBL', $model->alternative2_icao);
+        $I->assertEquals('DOF/20241205 REG/ECUUU OPR/XXX RMK/IFPS REROUTE ACCEPTED', $model->other_information);
+        $I->assertEquals('0325', $model->endurance_time);
+
+        $count = \app\models\SubmittedFlightPlan::find()->count();
+        $I->assertEquals(1, $count);
     }
 
 }
