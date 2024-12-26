@@ -1,6 +1,6 @@
 <?php
 
-namespace tests\functional\AircraftConfiguration;
+namespace tests\functional\aircraftConfiguration;
 
 use tests\fixtures\AircraftFixture;
 use tests\fixtures\AuthAssignmentFixture;

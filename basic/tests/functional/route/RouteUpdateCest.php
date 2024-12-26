@@ -1,6 +1,6 @@
 <?php
 
-namespace tests\functional\Route;
+namespace tests\functional\route;
 
 use tests\fixtures\AuthAssignmentFixture;
 use tests\fixtures\RouteFixture;

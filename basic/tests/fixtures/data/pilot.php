@@ -10,7 +10,7 @@ return [
         'email' => 'john.doe@example.com',
         'password' => Yii::$app->security->generatePasswordHash('SecurePass123!'),
         'city' => 'Madrid',
-        'location' => 'LEMD',
+        'location' => 'LEBL',
         'date_of_birth' => '1990-01-01',
     ],
     [
@@ -34,7 +34,7 @@ return [
         'email' => 'nonactivated@example.com',
         'password' => Yii::$app->security->generatePasswordHash('nonactivated1234!'),
         'city' => 'Valladolid',
-        'location' => 'LEMD',
+        'location' => 'LEBL',
         'date_of_birth' => '1980-01-01',
     ],
 ];
