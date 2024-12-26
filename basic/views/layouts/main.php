@@ -36,30 +36,62 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
         'brandUrl' => Yii::$app->homeUrl,
         'options' => ['class' => 'navbar-expand-md navbar-dark bg-dark fixed-top']
     ]);
+
+    $items =
+    [
+            ['label' => 'Home', 'url' => ['/site/index']],
+            ['label' => 'Pilots', 'url' => ['/pilot/index']],
+            [
+                'label' => 'Operations',
+                'items' => [
+                    ['label' => 'Aircraft Types', 'url' => ['/aircraft-type/index']],
+                    ['label' => 'Countries', 'url' => ['/country/index']],
+                    ['label' => 'Airports', 'url' => ['/airport/index']],
+                    ['label' => 'Routes', 'url' => ['/route/index']],
+                ],
+            ],
+            [
+                'label' => 'Site',
+                'items' => [
+                    ['label' => 'About', 'url' => ['/site/about']],
+                    ['label' => 'Contact', 'url' => ['/site/contact']],
+                ],
+            ],
+        ];
+
+    if (Yii::$app->authManager->getAssignment('pilot', Yii::$app->user->id) !== null) {
+        $items[] = [
+            'label' => 'Actions',
+            'items' => [
+                ['label' => 'Submit FPL', 'url' => ['/submitted-flight-plan/index']],
+            ],
+        ];
+    }
+
+    if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) !== null) {
+        $items[] = [
+            'label' => 'Admin',
+            'items' => [
+                ['label' => 'List FPL', 'url' => ['/fpl/list']],
+                ['label' => 'Validate Flight', 'url' => ['/fpl/validate']],
+            ],
+        ];
+    }
+
+    $items[] = Yii::$app->user->isGuest
+        ? ['label' => 'Login', 'url' => ['/site/login']]
+        : '<li class="nav-item">'
+            . Html::beginForm(['/site/logout'])
+            . Html::submitButton(
+                'Logout (' . Yii::$app->user->identity->license . ')',
+                ['class' => 'nav-link btn btn-link logout']
+            )
+            . Html::endForm()
+            . '</li>';
+
     echo Nav::widget([
         'options' => ['class' => 'navbar-nav'],
-        'items' => [
-            ['label' => 'Home', 'url' => ['/site/index']],
-            ['label' => 'About', 'url' => ['/site/about']],
-            ['label' => 'Contact', 'url' => ['/site/contact']],
-            ['label' => 'Countries', 'url' => ['/country/index']],
-            ['label' => 'Pilots', 'url' => ['/pilot/index']],
-            ['label' => 'Aircraft Types', 'url' => ['/aircraft-type/index']],
-            ['label' => 'Aircrafts', 'url' => ['/aircraft/index']],
-            ['label' => 'Airports', 'url' => ['/airport/index']],
-            ['label' => 'Routes', 'url' => ['/route/index']],
-            ['label' => 'Submit FPL', 'url' => ['/submitted-flight-plan/index']],
-            Yii::$app->user->isGuest
-                ? ['label' => 'Login', 'url' => ['/site/login']]
-                : '<li class="nav-item">'
-                    . Html::beginForm(['/site/logout'])
-                    . Html::submitButton(
-                        'Logout (' . Yii::$app->user->identity->license . ')',
-                        ['class' => 'nav-link btn btn-link logout']
-                    )
-                    . Html::endForm()
-                    . '</li>'
-        ]
+        'items' => $items,
     ]);
     NavBar::end();
     ?>
