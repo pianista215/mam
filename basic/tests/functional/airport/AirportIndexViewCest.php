@@ -17,7 +17,7 @@ class AirportIndexViewCest
         $I->amOnRoute('airport/index');
 
         $I->see('Airports');
-        $I->see('Showing 1-4 of 4 items.');
+        $I->see('Showing 1-5 of 5 items.');
         $I->see('LEMD');
         $I->see('Madrid-Barajas');
         $I->see('LEBL');
@@ -26,6 +26,8 @@ class AirportIndexViewCest
         $I->see('Valencia-Manises');
         $I->see('GCLP');
         $I->see('Gran Canaria');
+        $I->see('LEAL');
+        $I->see('Alicante');
     }
 
     public function openAirportIndexAsAdmin(\FunctionalTester $I)
