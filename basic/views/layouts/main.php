@@ -63,7 +63,7 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
         $items[] = [
             'label' => 'Actions',
             'items' => [
-                ['label' => 'Submit FPL', 'url' => ['/submitted-flight-plan/index']],
+                ['label' => 'Submit FPL', 'url' => ['/submitted-flight-plan/my-fpl']],
             ],
         ];
     }
@@ -73,8 +73,8 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
         $items[] = [
             'label' => 'Admin',
             'items' => [
-                ['label' => 'List FPL', 'url' => ['/fpl/list']],
-                ['label' => 'Validate Flight', 'url' => ['/fpl/validate']],
+                ['label' => 'List FPL', 'url' => ['/submitted-flight-plan/index']],
+                ['label' => 'Validate Flight', 'url' => ['/TODOOOOOO/validate']],
             ],
         ];
     }

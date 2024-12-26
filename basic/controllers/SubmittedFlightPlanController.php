@@ -144,17 +144,40 @@ class SubmittedFlightPlanController extends Controller
      *
      * @return string
      */
-    public function actionIndex()
+    public function actionMyFpl()
     {
         $searchModel = new SubmittedFlightPlanSearch();
-        $dataProvider = $searchModel->search(['pilot_id' => Yii::$app->user->identity->id]);
+        $searchModel->pilot_id = Yii::$app->user->identity->id;
+        $dataProvider = $searchModel->search([]);
 
         if ($dataProvider->getTotalCount() === 0) {
             return $this->redirect(['submitted-flight-plan/select-route']);
         } else {
+            $firstId = $dataProvider->getModels()[0]->id;
+            return $this->redirect(['submitted-flight-plan/view',  'id' => $firstId ]);
+        }
+    }
+
+    public function actionIndex()
+    {
+        if (Yii::$app->user->can('validateVfrFlight') || Yii::$app->user->can('validateIfrFlight')) {
+            $searchModel = new SubmittedFlightPlanSearch();
+            $queryParams = $this->request->queryParams;
+
+            if(Yii::$app->user->can('validateVfrFlight') && !Yii::$app->user->can('validateIfrFlight')){
+                $queryParams['SubmittedFlightPlanSearch']['flight_rules'] = 'V';
+            } else if(!Yii::$app->user->can('validateVfrFlight') && Yii::$app->user->can('validateIfrFlight')){
+                $queryParams['SubmittedFlightPlanSearch']['flight_rules'] = ['I', 'Y', 'Z'];
+            }
+
+            $dataProvider = $searchModel->search($queryParams);
+
             return $this->render('index', [
+                'searchModel' => $searchModel,
                 'dataProvider' => $dataProvider,
             ]);
+        } else {
+            throw new ForbiddenHttpException();
         }
     }
 
