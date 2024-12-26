@@ -11,4 +11,14 @@ return [
         'user_id' => '1',
         'created_at' => time(),
     ],
+    [
+        'item_name' => 'vfrValidator',
+        'user_id' => '4',
+        'created_at' => time(),
+    ],
+    [
+        'item_name' => 'ifrValidator',
+        'user_id' => '5',
+        'created_at' => time(),
+    ],
 ];

@@ -84,7 +84,7 @@ class SubmittedFlightPlanController extends Controller
             $route = Route::findOne(['id' => $route_id]);
             if($this->checkRouteIsUserLocation($route)){
                 $searchModel = new AircraftSearch();
-                $dataProvider = $searchModel->searchAircraftsInLocationWithRange($route->departure, $route->distance_nm);
+                $dataProvider = $searchModel->searchAvailableAircraftsInLocationWithRange($route->departure, $route->distance_nm);
                 return $this->render('select_aircraft', [
                     'dataProvider' => $dataProvider,
                     'route' => $route,

@@ -25,4 +25,12 @@ return [
         'location' => 'LEBL',
         'hours_flown' => 20.5,
     ],
+    [
+        'id' => 4,
+        'aircraft_configuration_id' => 2,
+        'registration' => 'EC-DDD',
+        'name' => 'Boeing Name 2 Cargo',
+        'location' => 'LEBL',
+        'hours_flown' => 129.4,
+    ],
 ];
