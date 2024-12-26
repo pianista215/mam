@@ -37,4 +37,13 @@ return [
         'longitude' => -15.386666666667,
         'city' => 'Las Palmas',
     ],
+    [
+        'id' => 5,
+        'country_id' => 1,
+        'icao_code' => 'LEAL',
+        'name' => 'Alicante',
+        'latitude' => 38.28222,
+        'longitude' => 0.55805,
+        'city' => 'Alicante',
+    ],
 ];

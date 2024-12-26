@@ -77,6 +77,11 @@ class SubmitFplCest
         $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
 
         $I->see('Flight Plan Submission');
+        $I->seeInField('input[name=aircraftRegistration]', 'EC-UUU');
+        $I->seeInField('input[name=aircraftType]', 'C172');
+        $I->seeInField('input[name=departure]', 'LEBL');
+        $I->seeInField('input[name=destination]', 'LEVC');
+        $I->seeInField('input[name=pilot]', 'John Doe');
         $I->see('Submit FPL', 'button');
     }
 
@@ -86,6 +91,11 @@ class SubmitFplCest
         $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '3', 'aircraft_id' => '2' ]);
 
         $I->see('Flight Plan Submission');
+        $I->seeInField('input[name=aircraftRegistration]', 'EC-BBB');
+        $I->seeInField('input[name=aircraftType]', 'B738');
+        $I->seeInField('input[name=departure]', 'LEBL');
+        $I->seeInField('input[name=destination]', 'GCLP');
+        $I->seeInField('input[name=pilot]', 'John Doe');
         $I->see('Submit FPL', 'button');
         $I->click('Submit FPL', 'button');
 
@@ -108,7 +118,13 @@ class SubmitFplCest
         $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '3', 'aircraft_id' => '2' ]);
 
         $I->see('Flight Plan Submission');
+        $I->seeInField('input[name=aircraftRegistration]', 'EC-BBB');
+        $I->seeInField('input[name=aircraftType]', 'B738');
+        $I->seeInField('input[name=departure]', 'LEBL');
+        $I->seeInField('input[name=destination]', 'GCLP');
+        $I->seeInField('input[name=pilot]', 'John Doe');
         $I->see('Submit FPL', 'button');
+
 
         $I->fillField('#submittedflightplan-cruise_speed_value','350');
         $I->fillField('#flight_level_value','340');
@@ -143,13 +159,17 @@ class SubmitFplCest
         $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '3', 'aircraft_id' => '2' ]);
 
         $I->see('Flight Plan Submission');
+        $I->seeInField('input[name=aircraftRegistration]', 'EC-BBB');
+        $I->seeInField('input[name=aircraftType]', 'B738');
+        $I->seeInField('input[name=departure]', 'LEBL');
+        $I->seeInField('input[name=destination]', 'GCLP');
+        $I->seeInField('input[name=pilot]', 'John Doe');
         $I->see('Submit FPL', 'button');
 
         $I->fillField('#submittedflightplan-route','LOTOS M985 SOPET');
 
         $I->fillField('#submittedflightplan-other_information','DOF/20241205 REG/ECBBB OPR/XXX PER/B NAV/TCAS');
         $I->fillField('#submittedflightplan-alternative1_icao','LEMD');
-
 
         $I->fillField('#submittedflightplan-endurance_time','aaaa');
         $I->fillField('#submittedflightplan-estimated_time','bbbb');
@@ -171,10 +191,144 @@ class SubmitFplCest
 
     public function openPrepareFplValidVFRPlan(\FunctionalTester $I)
     {
+        $I->amLoggedInAs(1);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
+
+        $I->see('Flight Plan Submission');
+        $I->seeInField('input[name=aircraftRegistration]', 'EC-UUU');
+        $I->seeInField('input[name=aircraftType]', 'C172');
+        $I->seeInField('input[name=departure]', 'LEBL');
+        $I->seeInField('input[name=destination]', 'LEVC');
+        $I->seeInField('input[name=pilot]', 'John Doe');
+        $I->see('Submit FPL', 'button');
+
+        $I->selectOption('select[name="SubmittedFlightPlan[flight_rules]"]', 'V - VFR (Visual Flight)');
+        $I->selectOption('select[name="SubmittedFlightPlan[cruise_speed_unit]"]', 'K');
+        $I->fillField('#submittedflightplan-cruise_speed_value','100');
+        $I->selectOption('select[name="SubmittedFlightPlan[flight_level_unit]"]', 'VFR');
+        $I->fillField('#flight_level_value','');
+        $I->fillField('#submittedflightplan-route','S // N');
+        $I->fillField('#submittedflightplan-estimated_time','0130');
+        $I->fillField('#submittedflightplan-alternative1_icao','LEAL');
+        $I->fillField('#submittedflightplan-alternative2_icao','LEBL');
+        $I->fillField('#submittedflightplan-other_information','DOF/20241205 REG/ECUUU RMK/IFPS REROUTE ACCEPTED');
+        $I->fillField('#submittedflightplan-endurance_time','0335');
+
+        $I->click('Submit FPL', 'button');
+        $I->seeResponseCodeIs(200);
+        $I->seeInCurrentUrl('submitted-flight-plan%2Fview');
+
+        $I->see('Current Flight Plan');
+
+        $I->seeInField('input[name=aircraftRegistration]', 'EC-UUU');
+        $I->seeInField('input[name=aircraftType]', 'C172');
+        $I->seeOptionIsSelected('select[name="SubmittedFlightPlan[flight_rules]"]', 'V - VFR (Visual Flight)');
+
+        $I->seeInField('input[name=departure]', 'LEBL');
+        $I->seeOptionIsSelected('select[name="SubmittedFlightPlan[cruise_speed_unit]"]', 'K');
+        $I->seeInField('input[name="SubmittedFlightPlan[cruise_speed_value]"]', '100');
+        $I->seeOptionIsSelected('select[name="SubmittedFlightPlan[flight_level_unit]"]', 'VFR');
+        $I->seeInField('input[name="SubmittedFlightPlan[flight_level_value]"]', '');
+
+        $I->seeInField('textarea[name="SubmittedFlightPlan[route]"]', 'S // N');
+
+        $I->seeInField('input[name="destination"]', 'LEVC');
+        $I->seeInField('input[name="SubmittedFlightPlan[estimated_time]"]', '0130');
+        $I->seeInField('input[name="SubmittedFlightPlan[alternative1_icao]"]', 'LEAL');
+        $I->seeInField('input[name="SubmittedFlightPlan[alternative2_icao]"]', 'LEBL');
+
+        $I->seeInField('textarea[name="SubmittedFlightPlan[other_information]"]', 'DOF/20241205 REG/ECUUU RMK/IFPS REROUTE ACCEPTED');
+
+        $I->seeInField('input[name="SubmittedFlightPlan[endurance_time]"]', '0335');
+        $I->seeInField('input[name=pilot]', 'John Doe');
+
+        $model = \app\models\SubmittedFlightPlan::find()->where(['pilot_id' => '1'])->one();
+        $I->assertNotNull($model);
+        $I->assertEquals(3, $model->aircraft_id);
+        $I->assertEquals(1, $model->route_id);
+        $I->assertEquals('V', $model->flight_rules);
+        $I->assertEquals('K', $model->cruise_speed_unit);
+        $I->assertEquals('100', $model->cruise_speed_value);
+        $I->assertEquals('VFR', $model->flight_level_unit);
+        $I->assertEquals('', $model->flight_level_value);
+        $I->assertEquals('S // N', $model->route);
+        $I->assertEquals('0130', $model->estimated_time);
+        $I->assertEquals('LEAL', $model->alternative1_icao);
+        $I->assertEquals('LEBL', $model->alternative2_icao);
+        $I->assertEquals('DOF/20241205 REG/ECUUU RMK/IFPS REROUTE ACCEPTED', $model->other_information);
+        $I->assertEquals('0335', $model->endurance_time);
+
+        $count = \app\models\SubmittedFlightPlan::find()->count();
+        $I->assertEquals(1, $count);
     }
 
     public function openPrepareFplValidIFRPlan(\FunctionalTester $I)
     {
+        $I->amLoggedInAs(1);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '3', 'aircraft_id' => '2' ]);
+
+        $I->see('Flight Plan Submission');
+        $I->seeInField('input[name=aircraftRegistration]', 'EC-BBB');
+        $I->seeInField('input[name=aircraftType]', 'B738');
+        $I->seeInField('input[name=departure]', 'LEBL');
+        $I->seeInField('input[name=destination]', 'GCLP');
+        $I->seeInField('input[name=pilot]', 'John Doe');
+        $I->see('Submit FPL', 'button');
+
+        $I->fillField('#submittedflightplan-cruise_speed_value','350');
+        $I->fillField('#flight_level_value','340');
+        $I->fillField('#submittedflightplan-route','LOTOS M985 SOPET');
+        $I->fillField('#submittedflightplan-estimated_time','0049');
+        $I->fillField('#submittedflightplan-alternative1_icao','LEMD');
+        $I->fillField('#submittedflightplan-other_information','DOF/20241205 REG/ECBBB OPR/XXX PER/B NAV/TCAS');
+        $I->fillField('#submittedflightplan-endurance_time','0235');
+
+        $I->click('Submit FPL', 'button');
+        $I->seeResponseCodeIs(200);
+        $I->seeInCurrentUrl('submitted-flight-plan%2Fview');
+
+        $I->see('Current Flight Plan');
+
+        $I->seeInField('input[name=aircraftRegistration]', 'EC-BBB');
+        $I->seeInField('input[name=aircraftType]', 'B738');
+        $I->seeOptionIsSelected('select[name="SubmittedFlightPlan[flight_rules]"]', 'I - IFR (Instrument Flight)');
+
+        $I->seeInField('input[name=departure]', 'LEBL');
+        $I->seeOptionIsSelected('select[name="SubmittedFlightPlan[cruise_speed_unit]"]', 'N');
+        $I->seeInField('input[name="SubmittedFlightPlan[cruise_speed_value]"]', '350');
+        $I->seeOptionIsSelected('select[name="SubmittedFlightPlan[flight_level_unit]"]', 'F');
+        $I->seeInField('input[name="SubmittedFlightPlan[flight_level_value]"]', '340');
+
+        $I->seeInField('textarea[name="SubmittedFlightPlan[route]"]', 'LOTOS M985 SOPET');
+
+        $I->seeInField('input[name="destination"]', 'GCLP');
+        $I->seeInField('input[name="SubmittedFlightPlan[estimated_time]"]', '0049');
+        $I->seeInField('input[name="SubmittedFlightPlan[alternative1_icao]"]', 'LEMD');
+        $I->seeInField('input[name="SubmittedFlightPlan[alternative2_icao]"]', '');
+
+        $I->seeInField('textarea[name="SubmittedFlightPlan[other_information]"]', 'DOF/20241205 REG/ECBBB OPR/XXX PER/B NAV/TCAS');
+
+        $I->seeInField('input[name="SubmittedFlightPlan[endurance_time]"]', '0235');
+        $I->seeInField('input[name=pilot]', 'John Doe');
+
+        $model = \app\models\SubmittedFlightPlan::find()->where(['pilot_id' => '1'])->one();
+        $I->assertNotNull($model);
+        $I->assertEquals(2, $model->aircraft_id);
+        $I->assertEquals(3, $model->route_id);
+        $I->assertEquals('I', $model->flight_rules);
+        $I->assertEquals('N', $model->cruise_speed_unit);
+        $I->assertEquals('350', $model->cruise_speed_value);
+        $I->assertEquals('F', $model->flight_level_unit);
+        $I->assertEquals('340', $model->flight_level_value);
+        $I->assertEquals('LOTOS M985 SOPET', $model->route);
+        $I->assertEquals('0049', $model->estimated_time);
+        $I->assertEquals('LEMD', $model->alternative1_icao);
+        $I->assertNull($model->alternative2_icao);
+        $I->assertEquals('DOF/20241205 REG/ECBBB OPR/XXX PER/B NAV/TCAS', $model->other_information);
+        $I->assertEquals('0235', $model->endurance_time);
+
+        $count = \app\models\SubmittedFlightPlan::find()->count();
+        $I->assertEquals(1, $count);
     }
 
     public function openPrepareFplValidIFRToVFRPlan(\FunctionalTester $I)
