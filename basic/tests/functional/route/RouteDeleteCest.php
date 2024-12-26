@@ -1,6 +1,6 @@
 <?php
 
-namespace tests\functional\Route;
+namespace tests\functional\route;
 
 use tests\fixtures\AuthAssignmentFixture;
 use tests\fixtures\RouteFixture;
@@ -32,7 +32,7 @@ class RouteDeleteCest
         $I->amOnRoute('route/delete', [ 'id' => '1' ]);
         $I->seeResponseCodeIs(405);
         $count = \app\models\Route::find()->count();
-        $I->assertEquals(2, $count);
+        $I->assertEquals(3, $count);
     }
 
     public function deleteOnlyPostAsUser(\FunctionalTester $I)
@@ -41,7 +41,7 @@ class RouteDeleteCest
         $I->amOnRoute('route/delete', [ 'id' => '1' ]);
         $I->seeResponseCodeIs(405);
         $count = \app\models\Route::find()->count();
-        $I->assertEquals(2, $count);
+        $I->assertEquals(3, $count);
     }
 
     public function deleteOnlyPostAsVisitor(\FunctionalTester $I)
@@ -49,7 +49,7 @@ class RouteDeleteCest
         $I->amOnRoute('route/delete', [ 'id' => '1' ]);
         $I->seeResponseCodeIs(405);
         $count = \app\models\Route::find()->count();
-        $I->assertEquals(2, $count);
+        $I->assertEquals(3, $count);
     }
 
 }

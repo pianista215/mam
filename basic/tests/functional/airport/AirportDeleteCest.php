@@ -30,7 +30,7 @@ class AirportDeleteCest
         $I->amOnRoute('airport/delete', [ 'id' => '1' ]);
         $I->seeResponseCodeIs(405);
         $count = \app\models\Airport::find()->count();
-        $I->assertEquals(3, $count);
+        $I->assertEquals(5, $count);
     }
 
     public function deleteOnlyPostAsUser(\FunctionalTester $I)
@@ -39,7 +39,7 @@ class AirportDeleteCest
         $I->amOnRoute('airport/delete', [ 'id' => '1' ]);
         $I->seeResponseCodeIs(405);
         $count = \app\models\Airport::find()->count();
-        $I->assertEquals(3, $count);
+        $I->assertEquals(5, $count);
     }
 
     public function deleteOnlyPostAsVisitor(\FunctionalTester $I)
@@ -47,7 +47,7 @@ class AirportDeleteCest
         $I->amOnRoute('airport/delete', [ 'id' => '1' ]);
         $I->seeResponseCodeIs(405);
         $count = \app\models\Airport::find()->count();
-        $I->assertEquals(3, $count);
+        $I->assertEquals(5, $count);
     }
 
 }

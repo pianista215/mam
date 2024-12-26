@@ -19,4 +19,10 @@ return [
         'name' => 'Beechcraft King Air 350i',
         'max_nm_range' => 1750,
     ],
+    [
+        'id' => 4,
+        'icao_type_code' => 'C172',
+        'name' => 'Cessna 172',
+        'max_nm_range' => 696,
+    ],
 ];

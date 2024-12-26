@@ -57,7 +57,7 @@ class AircraftTypeCreateCest
        $I->see('Max Nm Range cannot be blank.');
 
        $count = \app\models\AircraftType::find()->count();
-       $I->assertEquals(3, $count);
+       $I->assertEquals(4, $count);
     }
 
     public function submitValidAircraftType(\FunctionalTester $I)
@@ -84,7 +84,7 @@ class AircraftTypeCreateCest
        $I->assertEquals(1250, $model->max_nm_range);
 
        $count = \app\models\AircraftType::find()->count();
-       $I->assertEquals(4, $count);
+       $I->assertEquals(5, $count);
     }
 
 }

@@ -65,7 +65,7 @@ class AircraftConfigurationUpdateCest
         $I->see('Cargo Capacity cannot be blank.');
 
         $count = \app\models\AircraftConfiguration::find()->count();
-        $I->assertEquals(2, $count);
+        $I->assertEquals(3, $count);
     }
 
     public function updateValidAircraftConfiguration(\FunctionalTester $I)
@@ -94,7 +94,7 @@ class AircraftConfigurationUpdateCest
         $I->assertEquals(800, $model->cargo_capacity);
 
         $count = \app\models\AircraftConfiguration::find()->count();
-        $I->assertEquals(2, $count);
+        $I->assertEquals(3, $count);
     }
 
 }

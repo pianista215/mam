@@ -69,7 +69,7 @@ class AirportUpdateCest
        $I->see('City cannot be blank.');
 
        $count = \app\models\Airport::find()->count();
-       $I->assertEquals(3, $count);
+       $I->assertEquals(5, $count);
     }
 
     public function updateValidAirport(\FunctionalTester $I)
@@ -100,7 +100,7 @@ class AirportUpdateCest
        $I->assertEquals('Valladolid', $model->city);
 
        $count = \app\models\Airport::find()->count();
-       $I->assertEquals(3, $count);
+       $I->assertEquals(5, $count);
     }
 
 }

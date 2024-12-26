@@ -67,7 +67,7 @@ class AircraftTypeUpdateCest
         $I->see('Max Nm Range cannot be blank.');
 
         $count = \app\models\AircraftType::find()->count();
-        $I->assertEquals(3, $count);
+        $I->assertEquals(4, $count);
     }
 
     public function updateValidAircraftType(\FunctionalTester $I)
@@ -95,7 +95,7 @@ class AircraftTypeUpdateCest
         $I->assertEquals(915, $model->max_nm_range);
 
         $count = \app\models\AircraftType::find()->count();
-        $I->assertEquals(3, $count);
+        $I->assertEquals(4, $count);
     }
 
 }

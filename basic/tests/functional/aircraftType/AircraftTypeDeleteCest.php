@@ -32,7 +32,7 @@ class AircraftTypeDeleteCest
         $I->amOnRoute('aircraft-type/delete', [ 'id' => '1' ]);
         $I->seeResponseCodeIs(405);
         $count = \app\models\AircraftType::find()->count();
-        $I->assertEquals(3, $count);
+        $I->assertEquals(4, $count);
     }
 
     public function deleteOnlyPostAsUser(\FunctionalTester $I)
@@ -41,7 +41,7 @@ class AircraftTypeDeleteCest
         $I->amOnRoute('aircraft-type/delete', [ 'id' => '1' ]);
         $I->seeResponseCodeIs(405);
         $count = \app\models\AircraftType::find()->count();
-        $I->assertEquals(3, $count);
+        $I->assertEquals(4, $count);
     }
 
     public function deleteOnlyPostAsVisitor(\FunctionalTester $I)
@@ -49,7 +49,7 @@ class AircraftTypeDeleteCest
         $I->amOnRoute('aircraft-type/delete', [ 'id' => '1' ]);
         $I->seeResponseCodeIs(405);
         $count = \app\models\AircraftType::find()->count();
-        $I->assertEquals(3, $count);
+        $I->assertEquals(4, $count);
     }
 
 }

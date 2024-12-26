@@ -48,7 +48,13 @@ class SubmittedFlightPlanController extends Controller
                 isset($location) &&
                 isset($aircraft->location) &&
                 $aircraft->location == $location;
+    }
 
+    protected function checkAircraftHaveValidRange($aircraft, $distance_nm){
+        return  isset($aircraft) &&
+                isset($distance_nm) &&
+                isset($aircraft->aircraftConfiguration->aircraftType->max_nm_range) &&
+                $aircraft->aircraftConfiguration->aircraftType->max_nm_range >= $distance_nm;
     }
 
     protected function checkNonSubmittedFpl() {
@@ -99,7 +105,8 @@ class SubmittedFlightPlanController extends Controller
             $aircraft = Aircraft::findOne(['id' => $aircraft_id]);
             if(
                 $this->checkRouteIsUserLocation($route) &&
-                $this->checkAircraftIsOnLocation($aircraft, $route->departure)
+                $this->checkAircraftIsOnLocation($aircraft, $route->departure) &&
+                $this->checkAircraftHaveValidRange($aircraft, $route->distance_nm)
             ){
                 $model = new SubmittedFlightPlan();
                 $pilotName = Yii::$app->user->identity->fullName;
