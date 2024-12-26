@@ -59,7 +59,7 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
             ],
         ];
 
-    if (Yii::$app->authManager->getAssignment('pilot', Yii::$app->user->id) !== null) {
+    if (Yii::$app->user->can('submitFpl')) {
         $items[] = [
             'label' => 'Actions',
             'items' => [
@@ -68,6 +68,7 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
         ];
     }
 
+    // TODO: REFINE THE PERMISSIONS HERE. Not checking the role
     if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) !== null) {
         $items[] = [
             'label' => 'Admin',
