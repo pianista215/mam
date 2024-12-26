@@ -135,11 +135,38 @@ class SubmitFplCest
 
         $count = \app\models\SubmittedFlightPlan::find()->count();
         $I->assertEquals(0, $count);
-
     }
 
     public function openPrepareFplInvalidIntegerFields(\FunctionalTester $I)
     {
+        $I->amLoggedInAs(1);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '3', 'aircraft_id' => '2' ]);
+
+        $I->see('Flight Plan Submission');
+        $I->see('Submit FPL', 'button');
+
+        $I->fillField('#submittedflightplan-route','LOTOS M985 SOPET');
+
+        $I->fillField('#submittedflightplan-other_information','DOF/20241205 REG/ECBBB OPR/XXX PER/B NAV/TCAS');
+        $I->fillField('#submittedflightplan-alternative1_icao','LEMD');
+
+
+        $I->fillField('#submittedflightplan-endurance_time','aaaa');
+        $I->fillField('#submittedflightplan-estimated_time','bbbb');
+        $I->fillField('#submittedflightplan-cruise_speed_value','cccc');
+        $I->fillField('#flight_level_value','dddd');
+
+        $I->click('Submit FPL', 'button');
+
+        $I->expectTo('see validations errors');
+
+        $I->see('Endurance must be an integer.');
+        $I->see('Total EET must be an integer.');
+        $I->see('Cruise Speed Value must be an integer.');
+        $I->see('Flight Level Value must be an integer.');
+
+        $count = \app\models\SubmittedFlightPlan::find()->count();
+        $I->assertEquals(0, $count);
     }
 
     public function openPrepareFplValidVFRPlan(\FunctionalTester $I)
