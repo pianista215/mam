@@ -15,8 +15,6 @@ class SelectAircraftCest
         ];
     }
 
-    // TODO: SELECT AIRCRAFT WHEN THE AIRCRAFT IS SELECTED BY OTHER FLIGHT PLAN
-
     public function openSelectAircraftRouteNotAvailableLocation(\FunctionalTester $I){
         $I->amLoggedInAs(2);
         $I->amOnRoute('submitted-flight-plan/select-aircraft',[ 'route_id' => '1' ]);

@@ -3,8 +3,7 @@
 namespace tests\functional\submitFlightPlan;
 
 use tests\fixtures\AuthAssignmentFixture;
-use tests\fixtures\AircraftFixture;
-use tests\fixtures\RouteFixture;
+use tests\fixtures\SubmittedFlightPlanFixture;
 use Yii;
 
 class SubmitFplCest
@@ -12,8 +11,7 @@ class SubmitFplCest
     public function _fixtures(){
         return [
             'authAssignment' => AuthAssignmentFixture::class,
-            'aircraft' => AircraftFixture::class,
-            'route' => RouteFixture::class,
+            'submittedFlightPlan' => SubmittedFlightPlanFixture::class,
         ];
     }
 
@@ -71,6 +69,28 @@ class SubmitFplCest
         $I->dontSee('Submit FPL', 'button');
     }
 
+    public function openPrepareFplAircraftValidButAlreadyReserved(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(1);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '3', 'aircraft_id' => '4' ]);
+
+        $I->see('Forbidden');
+        $I->seeResponseCodeIs(403);
+        $I->dontSee('Flight Plan Submission');
+        $I->dontSee('Submit FPL', 'button');
+    }
+
+    public function openPrepareFplButAlreadyHaveOneSubmitted(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(5);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '3', 'aircraft_id' => '4' ]);
+
+        $I->seeResponseCodeIs(200);
+        $I->seeInCurrentUrl('submitted-flight-plan%2Fview');
+        $I->dontSee('Flight Plan Submission');
+        $I->dontSee('Submit FPL', 'button');
+    }
+
     public function openPrepareFplAircraftValidRangeForRoute(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
@@ -109,7 +129,7 @@ class SubmitFplCest
         $I->see('Endurance cannot be blank.');
 
         $count = \app\models\SubmittedFlightPlan::find()->count();
-        $I->assertEquals(0, $count);
+        $I->assertEquals(1, $count);
     }
 
     public function openPrepareFplInvalidAlternatives(\FunctionalTester $I)
@@ -150,7 +170,7 @@ class SubmitFplCest
         $I->see('2nd Altn Aerodrome is invalid.');
 
         $count = \app\models\SubmittedFlightPlan::find()->count();
-        $I->assertEquals(0, $count);
+        $I->assertEquals(1, $count);
     }
 
     public function openPrepareFplInvalidIntegerFields(\FunctionalTester $I)
@@ -186,7 +206,7 @@ class SubmitFplCest
         $I->see('Flight Level Value must be an integer.');
 
         $count = \app\models\SubmittedFlightPlan::find()->count();
-        $I->assertEquals(0, $count);
+        $I->assertEquals(1, $count);
     }
 
     public function openPrepareFplValidVFRPlan(\FunctionalTester $I)
@@ -259,7 +279,7 @@ class SubmitFplCest
         $I->assertEquals('0335', $model->endurance_time);
 
         $count = \app\models\SubmittedFlightPlan::find()->count();
-        $I->assertEquals(1, $count);
+        $I->assertEquals(2, $count);
     }
 
     public function openPrepareFplValidIFRPlan(\FunctionalTester $I)
@@ -328,7 +348,7 @@ class SubmitFplCest
         $I->assertEquals('0235', $model->endurance_time);
 
         $count = \app\models\SubmittedFlightPlan::find()->count();
-        $I->assertEquals(1, $count);
+        $I->assertEquals(2, $count);
     }
 
     public function openPrepareFplValidIFRToVFRPlan(\FunctionalTester $I)
@@ -401,7 +421,7 @@ class SubmitFplCest
         $I->assertEquals('0400', $model->endurance_time);
 
         $count = \app\models\SubmittedFlightPlan::find()->count();
-        $I->assertEquals(1, $count);
+        $I->assertEquals(2, $count);
     }
 
     public function openPrepareFplValidVFRtoIFRPlan(\FunctionalTester $I)
@@ -474,7 +494,7 @@ class SubmitFplCest
         $I->assertEquals('0325', $model->endurance_time);
 
         $count = \app\models\SubmittedFlightPlan::find()->count();
-        $I->assertEquals(1, $count);
+        $I->assertEquals(2, $count);
     }
 
 }
