@@ -424,7 +424,7 @@ class SubmitFplCest
         $I->assertEquals(2, $count);
     }
 
-    public function openPrepareFplValidVFRtoIFRPlan(\FunctionalTester $I)
+    public function openPrepareFplValidVFRToIFRPlan(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
         $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
