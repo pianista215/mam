@@ -64,7 +64,7 @@ return [
     [
         'id' => 6,
         'country_id' => 1,
-        'license' => 'AB4567',
+        'license' => 'Z1234',
         'name' => 'Vfr',
         'surname' => 'School',
         'email' => 'id6@example.com',

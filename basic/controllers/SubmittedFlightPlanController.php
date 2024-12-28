@@ -69,12 +69,16 @@ class SubmittedFlightPlanController extends Controller
     public function actionSelectRoute()
     {
         if(Yii::$app->user->can('submitFpl') && isset(Yii::$app->user->identity->location)){
-            $this->checkNonSubmittedFpl();
-            $searchModel = new RouteSearch();
-            $dataProvider = $searchModel->searchWithFixedDeparture(Yii::$app->user->identity->location);
-            return $this->render('select_route', [
-                'dataProvider' => $dataProvider,
-            ]);
+            $model = $this->getCurrentFpl();
+            if($model !== null){
+                return $this->redirect(['view', 'id' => $model->id]);
+            } else {
+                $searchModel = new RouteSearch();
+                $dataProvider = $searchModel->searchWithFixedDeparture(Yii::$app->user->identity->location);
+                return $this->render('select_route', [
+                    'dataProvider' => $dataProvider,
+                ]);
+            }
         } else {
             throw new ForbiddenHttpException();
         }
@@ -83,17 +87,21 @@ class SubmittedFlightPlanController extends Controller
     public function actionSelectAircraft($route_id)
     {
         if(Yii::$app->user->can('submitFpl')){
-            $this->checkNonSubmittedFpl();
-            $route = Route::findOne(['id' => $route_id]);
-            if($this->checkRouteIsUserLocation($route)){
-                $searchModel = new AircraftSearch();
-                $dataProvider = $searchModel->searchAvailableAircraftsInLocationWithRange($route->departure, $route->distance_nm);
-                return $this->render('select_aircraft', [
-                    'dataProvider' => $dataProvider,
-                    'route' => $route,
-                ]);
+            $model = $this->getCurrentFpl();
+            if($model !== null){
+                return $this->redirect(['view', 'id' => $model->id]);
             } else {
-                throw new ForbiddenHttpException();
+                $route = Route::findOne(['id' => $route_id]);
+                if($this->checkRouteIsUserLocation($route)){
+                    $searchModel = new AircraftSearch();
+                    $dataProvider = $searchModel->searchAvailableAircraftsInLocationWithRange($route->departure, $route->distance_nm);
+                    return $this->render('select_aircraft', [
+                        'dataProvider' => $dataProvider,
+                        'route' => $route,
+                    ]);
+                } else {
+                    throw new ForbiddenHttpException();
+                }
             }
         } else {
             throw new ForbiddenHttpException();

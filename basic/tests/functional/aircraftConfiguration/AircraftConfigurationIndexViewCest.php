@@ -71,10 +71,17 @@ class AircraftConfigurationIndexViewCest
 
         $I->see('Aircrafts');
 
-        $I->see('Showing 1-1 of 1 item.');
+        $I->see('Showing 1-3 of 3 items.');
+
         $I->see('Boeing Name Std');
         $I->see('EC-AAA');
         $I->see('LEMD');
+
+        $I->see('Boeing Std 1');
+        $I->see('EC-DOS');
+        $I->see('Boeing Std 2');
+        $I->see('EC-FOS');
+        $I->see('LEBL');
     }
 
     public function openAircraftConfigurationViewAsAdmin(\FunctionalTester $I)

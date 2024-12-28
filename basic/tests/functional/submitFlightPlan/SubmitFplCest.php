@@ -129,7 +129,7 @@ class SubmitFplCest
         $I->see('Endurance cannot be blank.');
 
         $count = \app\models\SubmittedFlightPlan::find()->count();
-        $I->assertEquals(1, $count);
+        $I->assertEquals(4, $count);
     }
 
     public function openPrepareFplInvalidAlternatives(\FunctionalTester $I)
@@ -170,7 +170,7 @@ class SubmitFplCest
         $I->see('2nd Altn Aerodrome is invalid.');
 
         $count = \app\models\SubmittedFlightPlan::find()->count();
-        $I->assertEquals(1, $count);
+        $I->assertEquals(4, $count);
     }
 
     public function openPrepareFplInvalidIntegerFields(\FunctionalTester $I)
@@ -206,7 +206,7 @@ class SubmitFplCest
         $I->see('Flight Level Value must be an integer.');
 
         $count = \app\models\SubmittedFlightPlan::find()->count();
-        $I->assertEquals(1, $count);
+        $I->assertEquals(4, $count);
     }
 
     public function openPrepareFplValidVFRPlan(\FunctionalTester $I)
@@ -279,7 +279,7 @@ class SubmitFplCest
         $I->assertEquals('0335', $model->endurance_time);
 
         $count = \app\models\SubmittedFlightPlan::find()->count();
-        $I->assertEquals(2, $count);
+        $I->assertEquals(5, $count);
     }
 
     public function openPrepareFplValidIFRPlan(\FunctionalTester $I)
@@ -348,7 +348,7 @@ class SubmitFplCest
         $I->assertEquals('0235', $model->endurance_time);
 
         $count = \app\models\SubmittedFlightPlan::find()->count();
-        $I->assertEquals(2, $count);
+        $I->assertEquals(5, $count);
     }
 
     public function openPrepareFplValidIFRToVFRPlan(\FunctionalTester $I)
@@ -421,7 +421,7 @@ class SubmitFplCest
         $I->assertEquals('0400', $model->endurance_time);
 
         $count = \app\models\SubmittedFlightPlan::find()->count();
-        $I->assertEquals(2, $count);
+        $I->assertEquals(5, $count);
     }
 
     public function openPrepareFplValidVFRToIFRPlan(\FunctionalTester $I)
@@ -494,7 +494,7 @@ class SubmitFplCest
         $I->assertEquals('0325', $model->endurance_time);
 
         $count = \app\models\SubmittedFlightPlan::find()->count();
-        $I->assertEquals(2, $count);
+        $I->assertEquals(5, $count);
     }
 
 }
