@@ -33,4 +33,28 @@ return [
         'location' => 'LEBL',
         'hours_flown' => 129.4,
     ],
+    [
+        'id' => 5,
+        'aircraft_configuration_id' => 3,
+        'registration' => 'EC-COS',
+        'name' => 'C172 Other',
+        'location' => 'LEBL',
+        'hours_flown' => 2.4,
+    ],
+    [
+        'id' => 6,
+        'aircraft_configuration_id' => 1,
+        'registration' => 'EC-DOS',
+        'name' => 'Boeing Std 1',
+        'location' => 'LEBL',
+        'hours_flown' => 200.7,
+    ],
+    [
+        'id' => 7,
+        'aircraft_configuration_id' => 1,
+        'registration' => 'EC-FOS',
+        'name' => 'Boeing Std 2',
+        'location' => 'LEBL',
+        'hours_flown' => 200.7,
+    ],
 ];

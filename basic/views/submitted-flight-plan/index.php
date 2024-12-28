@@ -24,6 +24,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'route0.departure',
             'route0.arrival',
             'aircraft.name',
+            'flight_rules',
             [
                 'class' => ActionColumn::className(),
                 'template' => '{view}',

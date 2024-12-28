@@ -174,9 +174,9 @@ class SubmittedFlightPlanController extends Controller
             $queryParams = $this->request->queryParams;
 
             if(Yii::$app->user->can('validateVfrFlight') && !Yii::$app->user->can('validateIfrFlight')){
-                $queryParams['SubmittedFlightPlanSearch']['flight_rules'] = 'V';
+                $searchModel->flight_rules = 'V';
             } else if(!Yii::$app->user->can('validateVfrFlight') && Yii::$app->user->can('validateIfrFlight')){
-                $queryParams['SubmittedFlightPlanSearch']['flight_rules'] = ['I', 'Y', 'Z'];
+                $searchModel->flight_rules = ['I', 'Y', 'Z'];
             }
 
             $dataProvider = $searchModel->search($queryParams);
@@ -190,8 +190,6 @@ class SubmittedFlightPlanController extends Controller
         }
     }
 
-    // TODO: NEEDED?
-
     /**
      * Displays a single SubmittedFlightPlan model.
      * @param string $id ID
@@ -204,8 +202,6 @@ class SubmittedFlightPlanController extends Controller
             'model' => $this->findModel($id),
         ]);
     }
-
-    // TODO: REMOVE?
 
     /**
      * Updates an existing SubmittedFlightPlan model.
