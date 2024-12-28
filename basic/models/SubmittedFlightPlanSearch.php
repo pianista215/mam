@@ -64,8 +64,7 @@ class SubmittedFlightPlanSearch extends SubmittedFlightPlan
             'pilot_id' => $this->pilot_id,
         ]);
 
-        $query->andFilterWhere(['like', 'flight_rules', $this->flight_rules])
-            ->andFilterWhere(['like', 'alternative1_icao', $this->alternative1_icao])
+        $query->andFilterWhere(['like', 'alternative1_icao', $this->alternative1_icao])
             ->andFilterWhere(['like', 'alternative2_icao', $this->alternative2_icao])
             ->andFilterWhere(['like', 'cruise_speed_value', $this->cruise_speed_value])
             ->andFilterWhere(['like', 'flight_level_value', $this->flight_level_value])
@@ -75,6 +74,12 @@ class SubmittedFlightPlanSearch extends SubmittedFlightPlan
             ->andFilterWhere(['like', 'endurance_time', $this->endurance_time])
             ->andFilterWhere(['like', 'cruise_speed_unit', $this->cruise_speed_unit])
             ->andFilterWhere(['like', 'flight_level_unit', $this->flight_level_unit]);
+
+        if (is_array($this->flight_rules)) {
+            $query->andFilterWhere(['IN', 'flight_rules', $this->flight_rules]);
+        } else if ($this->flight_rules) {
+            $query->andFilterWhere(['flight_rules' => $this->flight_rules]);
+        }
 
         return $dataProvider;
     }

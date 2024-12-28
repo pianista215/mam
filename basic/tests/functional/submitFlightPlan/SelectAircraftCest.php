@@ -3,8 +3,7 @@
 namespace tests\functional\submitFlightPlan;
 
 use tests\fixtures\AuthAssignmentFixture;
-use tests\fixtures\AircraftFixture;
-use tests\fixtures\RouteFixture;
+use tests\fixtures\SubmittedFlightPlanFixture;
 use Yii;
 
 class SelectAircraftCest
@@ -12,8 +11,7 @@ class SelectAircraftCest
     public function _fixtures(){
         return [
             'authAssignment' => AuthAssignmentFixture::class,
-            'aircraft' => AircraftFixture::class,
-            'route' => RouteFixture::class,
+            'submittedFlightPlan' => SubmittedFlightPlanFixture::class,
         ];
     }
 
@@ -69,6 +67,10 @@ class SelectAircraftCest
         $I->see('Boeing Name Cargo');
         $I->see('EC-UUU');
         $I->see('C172 Std');
+
+        // Already reserved plane
+        $I->dontSee('EC-DDD');
+        $I->dontSee('Boeing Name 2 Cargo');
     }
 
     public function openSelectAircraftRouteFiltersPlanesBasedOnRange(\FunctionalTester $I){
@@ -82,6 +84,10 @@ class SelectAircraftCest
         $I->see('Boeing Name Cargo');
         $I->dontSee('EC-UUU');
         $I->dontSee('C172 Std');
+
+        // Already reserved plane
+        $I->dontSee('EC-DDD');
+        $I->dontSee('Boeing Name 2 Cargo');
     }
 
 }

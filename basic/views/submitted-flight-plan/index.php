@@ -20,11 +20,14 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'columns' => [
+            'pilot.fullname',
             'route0.departure',
             'route0.arrival',
             'aircraft.name',
+            'flight_rules',
             [
                 'class' => ActionColumn::className(),
+                'template' => '{view}',
                 'urlCreator' => function ($action, SubmittedFlightPlan $model, $key, $index, $column) {
                     return Url::toRoute([$action, 'id' => $model->id]);
                  }

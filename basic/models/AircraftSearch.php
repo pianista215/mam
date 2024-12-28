@@ -32,15 +32,18 @@ class AircraftSearch extends Aircraft
         return Model::scenarios();
     }
 
-    // TODO: We can simplify more that functions in the search just to retrieve data provider???
-    public function searchAircraftsInLocationWithRange($location, $distance)
+
+    public function searchAvailableAircraftsInLocationWithRange($location, $distance)
     {
+        $subquery = SubmittedFlightPlan::find()->select('aircraft_id');
+
         $query = Aircraft::find()->joinWith(['aircraftConfiguration'])->joinWith('aircraftConfiguration.aircraftType');
         $query->orderBy(['aircraft_type.name' => SORT_ASC, 'registration' => SORT_ASC]);
-        // add conditions that should always apply here
+
         $this->location = $location;
+
         $dataProvider = new ActiveDataProvider([
-           'query' => $query,
+           'query' => $query->where(['NOT IN', 'aircraft.id', $subquery]),
         ]);
 
         if (!$this->validate()) {
