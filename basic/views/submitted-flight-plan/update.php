@@ -16,7 +16,7 @@ $this->params['breadcrumbs'][] = 'Update';
         'model' => $model,
         'aircraft' => $model->getAircraft()->one(),
         'route' => $model->getRoute0()->one(),
-        'pilotName' => Yii::$app->user->identity->fullName,
+        'pilotName' => $model->pilot->fullname,
         'mode' => 'update',
     ]) ?>
 

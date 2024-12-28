@@ -198,9 +198,18 @@ class SubmittedFlightPlanController extends Controller
      */
     public function actionView($id)
     {
-        return $this->render('view', [
-            'model' => $this->findModel($id),
-        ]);
+        $model = $this->findModel($id);
+        if (
+            Yii::$app->user->can('crudOwnFpl', ['submittedFlightPlan' => $model]) ||
+            Yii::$app->user->can('validateVfrFlight') && $model->isVfrFlight() ||
+            Yii::$app->user->can('validateIfrFlight') && $model->isIfrFlight()
+            ) {
+            return $this->render('view', [
+                'model' => $model,
+            ]);
+        } else {
+            throw new ForbiddenHttpException();
+        }
     }
 
     /**
@@ -256,6 +265,7 @@ class SubmittedFlightPlanController extends Controller
      */
     protected function findModel($id)
     {
+        // TODO: May be refactor that to not disclose to a visitor that one model doesn't exist
         if (($model = SubmittedFlightPlan::findOne(['id' => $id])) !== null) {
             return $model;
         }

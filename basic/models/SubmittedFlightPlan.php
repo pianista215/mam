@@ -111,6 +111,14 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
         );
     }
 
+    public function isVfrFlight(){
+        return isset($this->flight_rules) && 'V' === $this->flight_rules;
+    }
+
+    public function isIfrFlight(){
+        return isset($this->flight_rules) && 'V' !== $this->flight_rules;
+    }
+
 
     public static function getValidSpeedUnits(){
         return ['N', 'M', 'K'];

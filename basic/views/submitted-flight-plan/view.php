@@ -14,6 +14,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
+    <?php if (Yii::$app->user->can('crudOwnFpl', ['submittedFlightPlan' => $model])) : ?>
     <p>
         <?= Html::a('Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
         <?= Html::a('Delete', ['delete', 'id' => $model->id], [
@@ -24,12 +25,13 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ]) ?>
     </p>
+    <?php endif; ?>
 
     <?= $this->render('_form', [
         'model' => $model,
         'aircraft' => $model->getAircraft()->one(),
         'route' => $model->getRoute0()->one(),
-        'pilotName' => Yii::$app->user->identity->fullName,
+        'pilotName' => $model->pilot->fullname,
         'mode' => 'view',
     ]) ?>
 
