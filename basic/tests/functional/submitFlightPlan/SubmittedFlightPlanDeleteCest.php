@@ -26,7 +26,7 @@ class SubmittedFlightPlanDeleteCest
         $I->assertEquals(4, $count);
     }
 
-    public function cantDeleteAnyoneOthersSubmittedFpl(\FunctionalTester $I)
+    public function noOneCantDeleteOthersSubmittedFpl(\FunctionalTester $I)
     {
         // Visitor
         $this->cantDeleteSubmittedFpl($I);
