@@ -4,7 +4,7 @@ namespace app\modules\api\controllers\v1;
 use Yii;
 use yii\rest\Controller;
 use yii\web\Response;
-use yii\web\BadRequestHttpException;
+use yii\web\UnauthorizedHttpException;
 use app\models\Pilot;
 
 class AuthController extends Controller
@@ -37,13 +37,13 @@ class AuthController extends Controller
         $password = $request['password'] ?? null;
 
         if (!$license || !$password) {
-            throw new BadRequestHttpException('License and password are required.');
+            throw new UnauthorizedHttpException('License and password are required.');
         }
 
         $pilot = Pilot::findOne(['license' => $license]);
 
-        if (!$license || !Yii::$app->security->validatePassword($password, $pilot->password)) {
-            throw new BadRequestHttpException('Invalid username or password.');
+        if (!$pilot || !Yii::$app->security->validatePassword($password, $pilot->password)) {
+            throw new UnauthorizedHttpException('Invalid username or password.');
         }
 
         // Generate unique token
