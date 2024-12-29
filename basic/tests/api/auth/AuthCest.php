@@ -23,14 +23,19 @@ class AuthCest
         $I->seeResponseContainsJson(['message' => 'License and password are required.']);
     }
 
+    private function checkInvalidUsernameOrPassword(ApiTester $I)
+    {
+        $I->seeResponseCodeIs(401);
+        $I->seeResponseContainsJson(['message' => 'Invalid username or password.']);
+    }
+
     public function testLoginFailureIfNonExistingLicense(ApiTester $I)
     {
         $I->sendPOST('/auth/login', [
             'license' => 'non_existing_license',
             'password' => 'somepassword'
         ]);
-        $I->seeResponseCodeIs(401);
-        $I->seeResponseContainsJson(['message' => 'Invalid username or password.']);
+        $this->checkInvalidUsernameOrPassword($I);
     }
 
     public function testLoginFailureIfPasswordMismatch(ApiTester $I)
@@ -39,8 +44,7 @@ class AuthCest
             'license' => 'ADM123',
             'password' => 'somepassword'
         ]);
-        $I->seeResponseCodeIs(401);
-        $I->seeResponseContainsJson(['message' => 'Invalid username or password.']);
+        $this->checkInvalidUsernameOrPassword($I);
     }
 
     private function checkLoginTokenChanges($license, $password, $I)
