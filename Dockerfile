@@ -1,3 +1,4 @@
+# Docker for Acars testing purposes, don't use in production
 FROM php:8.1-apache
 
 RUN apt-get update && apt-get install -y \
