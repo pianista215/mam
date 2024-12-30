@@ -30,7 +30,7 @@ class FlightPlanController extends Controller
     {
         $submittedFlightPlan = SubmittedFlightPlan::findOne(['pilot_id' => Yii::$app->user->identity->id]);
         if(!$submittedFlightPlan){
-            throw new NotFoundHttpException("Flight plan not found");
+            throw new NotFoundHttpException("Flight plan not found.");
         }
 
         $dto = FlightPlanDTO::fromModel($submittedFlightPlan);
