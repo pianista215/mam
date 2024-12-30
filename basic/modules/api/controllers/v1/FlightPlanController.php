@@ -3,6 +3,7 @@
 namespace app\modules\api\controllers\v1;
 
 use app\models\SubmittedFlightPlan;
+use app\modules\api\dto\v1\FlightPlanDTO;
 use yii\filters\auth\HttpBearerAuth;
 use yii\rest\Controller;
 use yii\web\NotFoundHttpException;
@@ -32,6 +33,8 @@ class FlightPlanController extends Controller
             throw new NotFoundHttpException("Flight plan not found");
         }
 
-        return $submittedFlightPlan;
+        $dto = FlightPlanDTO::fromModel($submittedFlightPlan);
+
+        return $dto;
     }
 }

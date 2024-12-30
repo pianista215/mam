@@ -1,11 +1,13 @@
 <?php
 namespace app\modules\api\controllers\v1;
 
-use Yii;
+
+use app\models\Pilot;
+use app\modules\api\dto\v1\TokenInfoDTO;
 use yii\rest\Controller;
 use yii\web\Response;
 use yii\web\UnauthorizedHttpException;
-use app\models\Pilot;
+use Yii;
 
 class AuthController extends Controller
 {
@@ -50,9 +52,8 @@ class AuthController extends Controller
         $pilot->access_token = Yii::$app->security->generateRandomString(32);
         $pilot->save(false);
 
-        return [
-            'status' => 'success',
-            'access_token' => $pilot->access_token,
-        ];
+        $dto = TokenInfoDTO::fromModel($pilot);
+
+        return $dto;
     }
 }
