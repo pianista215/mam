@@ -86,7 +86,7 @@ class SubmitFplCest
         $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '3', 'aircraft_id' => '4' ]);
 
         $I->seeResponseCodeIs(200);
-        $I->seeInCurrentUrl('submitted-flight-plan%2Fview');
+        $I->seeInCurrentUrl('submitted-flight-plan/view');
         $I->dontSee('Flight Plan Submission');
         $I->dontSee('Submit FPL', 'button');
     }
@@ -236,7 +236,7 @@ class SubmitFplCest
 
         $I->click('Submit FPL', 'button');
         $I->seeResponseCodeIs(200);
-        $I->seeInCurrentUrl('submitted-flight-plan%2Fview');
+        $I->seeInCurrentUrl('submitted-flight-plan/view');
 
         $I->see('Current Flight Plan');
 
@@ -305,7 +305,7 @@ class SubmitFplCest
 
         $I->click('Submit FPL', 'button');
         $I->seeResponseCodeIs(200);
-        $I->seeInCurrentUrl('submitted-flight-plan%2Fview');
+        $I->seeInCurrentUrl('submitted-flight-plan/view');
 
         $I->see('Current Flight Plan');
 
@@ -378,7 +378,7 @@ class SubmitFplCest
 
         $I->click('Submit FPL', 'button');
         $I->seeResponseCodeIs(200);
-        $I->seeInCurrentUrl('submitted-flight-plan%2Fview');
+        $I->seeInCurrentUrl('submitted-flight-plan/view');
 
         $I->see('Current Flight Plan');
 
@@ -451,7 +451,7 @@ class SubmitFplCest
 
         $I->click('Submit FPL', 'button');
         $I->seeResponseCodeIs(200);
-        $I->seeInCurrentUrl('submitted-flight-plan%2Fview');
+        $I->seeInCurrentUrl('submitted-flight-plan/view');
 
         $I->see('Current Flight Plan');
 

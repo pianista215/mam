@@ -25,9 +25,6 @@ return [
         'assetManager' => [
             'basePath' => __DIR__ . '/../web/assets',
         ],
-        'urlManager' => [
-            'showScriptName' => true,
-        ],
         'cache' => [
             'class' => 'yii\caching\DummyCache',
         ],
@@ -39,15 +36,45 @@ return [
             // uncomment if you want to cache RBAC items hierarchy (TODO: Check in the future)
             //'cache' => 'cache',
         ],
+        'urlManager' => [
+            'enablePrettyUrl' => true,
+            'showScriptName' => true,
+            'rules' => [
+                [
+                    'prefix' => 'api/v1',
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => ['auth'],
+                ],
+                [
+                    'prefix' => 'api/v1',
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => ['flight-plan'],
+                ],
+            ],
+        ],
         'request' => [
             'cookieValidationKey' => 'test',
             'enableCsrfValidation' => false,
+            'parsers' => [
+                'application/json' => 'yii\web\JsonParser',
+            ],
             // but if you absolutely need it set cookie domain to localhost
             /*
             'csrfCookie' => [
                 'domain' => 'localhost',
             ],
             */
+        ],
+    ],
+    'modules' => [
+        'api' => [
+            'class' => 'app\modules\api\Module',
+                'modules' => [
+                    'v1' => [
+                        'class' => 'yii\base\Module',
+                        'controllerNamespace' => 'app\modules\api\controllers\v1',
+                ]
+            ]
         ],
     ],
     'params' => $params,
