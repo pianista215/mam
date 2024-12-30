@@ -1,7 +1,8 @@
 <?php
 
-namespace tests\api\auth;
+namespace tests\api\v1\auth;
 
+use app\modules\api\dto\v1\TokenInfoDTO;
 use tests\fixtures\AuthAssignmentFixture;
 use \ApiTester;
 
@@ -57,13 +58,14 @@ class AuthCest
         ]);
 
         $I->seeResponseCodeIs(200);
+        $I->seeResponseIsJson();
 
         $newToken = \app\models\Pilot::find()->where(['license' => $license])->one()->access_token;
 
-        $I->seeResponseContainsJson(
-            ['status' => 'success'],
-            ['access_token' => $newToken],
-        );
+        $expectedDTO = new TokenInfoDTO();
+        $expectedDTO->access_token = $newToken;
+
+        $I->seeResponseContainsJson($expectedDTO->toArray());
 
         $I->assertNotEquals($oldToken, $newToken);
     }
