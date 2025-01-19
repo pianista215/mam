@@ -202,4 +202,5 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Route::class, ['id' => 'route_id']);
     }
+
 }

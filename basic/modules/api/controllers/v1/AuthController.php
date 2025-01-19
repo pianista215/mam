@@ -3,7 +3,7 @@ namespace app\modules\api\controllers\v1;
 
 
 use app\models\Pilot;
-use app\modules\api\dto\v1\TokenInfoDTO;
+use app\modules\api\dto\v1\response\TokenInfoDTO;
 use yii\rest\Controller;
 use yii\web\Response;
 use yii\web\UnauthorizedHttpException;
