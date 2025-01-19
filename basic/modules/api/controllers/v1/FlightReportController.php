@@ -72,6 +72,8 @@ class FlightReportController extends Controller
                 $this->movePilotToLocation($submittedFlightPlan->pilot_id, $nearestAirport);
                 $this->moveAircraftToLocation($submittedFlightPlan->pilot_id, $nearestAirport);
 
+                $submittedFlightPlan->delete();
+
                 $response = new ReportSavedDTO();
                 $response->flight_report_id = $report->id;
 
