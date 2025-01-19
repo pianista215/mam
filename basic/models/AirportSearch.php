@@ -71,4 +71,31 @@ class AirportSearch extends Airport
 
         return $dataProvider;
     }
+
+    public static function findNearestAirport($latitude, $longitude)
+    {
+        $earthRadius = 6371;
+
+        return self::find()
+            ->select([
+                '*',
+                // Haversine Formule
+                new \yii\db\Expression("
+                    (
+                        $earthRadius * ACOS(
+                            COS(RADIANS(:latitude)) * COS(RADIANS(latitude)) *
+                            COS(RADIANS(longitude) - RADIANS(:longitude)) +
+                            SIN(RADIANS(:latitude)) * SIN(RADIANS(latitude))
+                        )
+                    ) AS distance
+                "),
+            ])
+            ->addParams([
+                ':latitude' => $latitude,
+                ':longitude' => $longitude,
+            ])
+            ->orderBy(['distance' => SORT_ASC])
+            ->limit(1)
+            ->one();
+    }
 }

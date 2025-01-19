@@ -2,6 +2,7 @@
 
 namespace app\modules\api\controllers\v1;
 
+use app\models\AirportSearch;
 use app\models\SubmittedFlightPlan;
 use app\modules\api\dto\v1\response\FlightPlanDTO;
 use app\modules\api\dto\v1\response\ReportSavedDTO;
@@ -62,7 +63,14 @@ class FlightReportController extends Controller
                     }
                 }
 
-                // TODO: MOVE Pilot and aircraft to new location
+                $nearestAirport = AirportSearch::findNearestAirport($dto->last_position_lat, $dto->last_position_lon);
+
+                if(!$nearestAirport){
+                    throw new ServerErrorHttpException('Error finding nearest airport of'.$dto->last_position_lat.' '.$dto->last_position_lon);
+                }
+
+                $this->movePilotToLocation($submittedFlightPlan->pilot_id, $nearestAirport);
+                $this->moveAircraftToLocation($submittedFlightPlan->pilot_id, $nearestAirport);
 
                 $response = new ReportSavedDTO();
                 $response->flight_report_id = $report->id;
@@ -134,7 +142,23 @@ class FlightReportController extends Controller
         return $chunks;
     }
 
+    private function movePilotToLocation($pilot_id, $airport)
+    {
+        $pilot = Pilot::findOne(['id' => $pilot_id]);
+        $pilot->location = $airport->id;
+        if(!$pilot->save()){
+            throw new ServerErrorHttpException('Error moving pilot'. $pilot_id. ' to location '. $airport->id);
+        }
+    }
 
+    private function moveAircraftToLocation($aircraft_id, $airport)
+    {
+        $aircraft = Aircraft::findOne(['id' => $aircraft_id]);
+        $aircraft->location = $airport->id;
+        if(!$aircraft->save()){
+            throw new ServerErrorHttpException('Error moving aircraft'. $aircraft_id. ' to location '. $airport->id);
+        }
+    }
 
     public function actionCurrentFpl()
     {
