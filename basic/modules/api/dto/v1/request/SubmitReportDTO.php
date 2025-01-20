@@ -11,6 +11,7 @@ class SubmitReportDTO extends Model
     public $last_position_lat;
     public $last_position_lon;
     public $network;
+    public $sim_aircraft_name;
     public $report_tool;
     public $start_time;
     public $end_time;
@@ -29,10 +30,11 @@ class SubmitReportDTO extends Model
             [['last_position_lat'], 'compare', 'compareValue' => 90, 'operator' => '<=', 'message' => 'Latitude must be between -90 and 90.'],
             [['last_position_lon'], 'compare', 'compareValue' => -180, 'operator' => '>=', 'message' => 'Longitude must be between -180 and 180.'],
             [['last_position_lon'], 'compare', 'compareValue' => 180, 'operator' => '<=', 'message' => 'Longitude must be between -180 and 180.'],
-            [['pilot_comments', 'report_tool', 'network'], 'trim'],
+            [['pilot_comments', 'report_tool', 'network', 'sim_aircraft_name'], 'trim'],
             [['pilot_comments'], 'string', 'max' => 400],
             [['report_tool'], 'string', 'max' => 20],
             [['network'], 'string', 'max' => 50],
+            [['sim_aircraft_name'], 'string', 'max' => 50],
             [['start_time', 'end_time'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
             [['chunks'], 'validateChunks'],
         ];

@@ -124,6 +124,7 @@ class FlightReportController extends Controller
         $report->start_time = $dto->start_time;
         $report->end_time = $dto->end_time;
         $report->pilot_comments = $dto->pilot_comments;
+        $report->sim_aircraft_name = $dto->sim_aircraft_name;
 
         return $report;
     }
