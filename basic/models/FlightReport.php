@@ -20,6 +20,7 @@ use Yii;
  * @property int|null $initial_fuel_on_board
  * @property int|null $zero_fuel_weight
  * @property int|null $crash
+ * @property string|null $sim_aircraft_name
  *
  * @property AcarsFile[] $acarsFiles
  * @property Flight $flight
@@ -44,7 +45,9 @@ class FlightReport extends \yii\db\ActiveRecord
             [['flight_id', 'flight_time_minutes', 'block_time_minutes', 'total_fuel_burn_kg', 'distance_nm', 'initial_fuel_on_board', 'zero_fuel_weight', 'crash'], 'integer'],
             [['start_time', 'end_time'], 'safe'],
             [['start_time', 'end_time'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+            [['pilot_comments', 'validator_comments', 'sim_aircraft_name'], 'trim'],
             [['pilot_comments', 'validator_comments'], 'string', 'max' => 400],
+            [['sim_aircraft_name'], 'string', 'max' => 50],
             [['flight_id'], 'unique'],
             [['flight_id'], 'exist', 'skipOnError' => true, 'targetClass' => Flight::class, 'targetAttribute' => ['flight_id' => 'id']],
         ];
@@ -69,6 +72,7 @@ class FlightReport extends \yii\db\ActiveRecord
             'initial_fuel_on_board' => 'Initial Fuel On Board',
             'zero_fuel_weight' => 'Zero Fuel Weight',
             'crash' => 'Crash',
+            'sim_aircraft_name' => 'Sim Aircraft Name',
         ];
     }
 

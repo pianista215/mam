@@ -185,6 +185,7 @@ CREATE TABLE `flight_report` (
   `initial_fuel_on_board` mediumint(8) unsigned DEFAULT NULL,
   `zero_fuel_weight` int(10) unsigned DEFAULT NULL,
   `crash` tinyint(1) DEFAULT NULL,
+  `sim_aircraft_name` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `flight_report_unique` (`flight_id`),
   CONSTRAINT `flight_report_flight_FK` FOREIGN KEY (`flight_id`) REFERENCES `flight` (`id`) ON UPDATE CASCADE
