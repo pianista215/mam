@@ -42,8 +42,11 @@ class SubmitReportDTO extends Model
 
     public function validateChunks($attribute, $params)
     {
-        foreach ($this->$attribute as $chunkData) {
-            $chunk = new AcarsChunkDTO($chunkData);
+        if (empty($this->chunks)) {
+            $this->addError($attribute, 'At least one chunk is required.');
+            return;
+        }
+        foreach ($this->chunks as $chunk) {
             if (!$chunk->validate()) {
                 $this->addError($attribute, "Invalid chunk data: " . json_encode($chunk->getErrors()));
             }
@@ -53,6 +56,8 @@ class SubmitReportDTO extends Model
     public function load($data, $formName = null)
     {
         $result = parent::load($data, $formName);
+
+        $this->chunks = [];
 
         if (isset($data['chunks']) && is_array($data['chunks'])) {
             foreach ($data['chunks'] as $chunkData) {
