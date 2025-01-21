@@ -161,7 +161,7 @@ class FlightReportTest extends BaseUnitTest
             'end_time' => '2025-01-01 12:00:00',
         ]);
 
-        $this->assertFalse($model->validate(), 'Model should not validate with a non-existing flight_id.');
+        $this->assertFalse($model->save(), 'Model should not validate with a non-existing flight_id.');
         $this->assertArrayHasKey('flight_id', $model->getErrors(), 'Error for invalid flight_id should be present.');
     }
 
@@ -173,7 +173,7 @@ class FlightReportTest extends BaseUnitTest
             'end_time' => '2025/01/01 12:00:00',
         ]);
 
-        $this->assertFalse($model->validate(), 'Model should not validate with incorrect datetime formats.');
+        $this->assertFalse($model->save(), 'Model should not validate with incorrect datetime formats.');
         $this->assertArrayHasKey('start_time', $model->getErrors(), 'Error for start_time with invalid format should be present.');
         $this->assertArrayHasKey('end_time', $model->getErrors(), 'Error for end_time with invalid format should be present.');
     }
@@ -192,7 +192,7 @@ class FlightReportTest extends BaseUnitTest
             'start_time' => '2025-01-02 10:00:00',
             'end_time' => '2025-01-02 12:00:00',
         ]);
-        $this->assertFalse($model2->validate(), 'Model should not validate with duplicate flight_id.');
+        $this->assertFalse($model2->save(), 'Model should not validate with duplicate flight_id.');
         $this->assertArrayHasKey('flight_id', $model2->getErrors(), 'Error for duplicate flight_id should be present.');
     }
 

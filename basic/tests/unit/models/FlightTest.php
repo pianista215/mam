@@ -128,7 +128,7 @@ class FlightTest extends BaseUnitTest
         $model->departure = 'LEMD';
         $model->arrival = 'LEBL';
         $model->alternative1_icao = 'LEVC';
-        $this->assertFalse($model->validate(), 'Model should not validate with some required fields missing.');
+        $this->assertFalse($model->save(), 'Model should not validate with some required fields missing.');
         $this->assertArrayHasKey('code', $model->getErrors(), 'Missing error for code with partial data.');
 
         // Valid
@@ -143,7 +143,7 @@ class FlightTest extends BaseUnitTest
         $model->endurance_time = '0500';
         $model->report_tool = 'ToolName';
 
-        $this->assertTrue($model->validate(), 'Model should validate with all required fields provided.');
+        $this->assertTrue($model->save(), 'Model should validate with all required fields provided.');
     }
 
     public function testFlightCreationTwoAlternatives()
@@ -166,7 +166,7 @@ class FlightTest extends BaseUnitTest
         $model->endurance_time = '0500';
         $model->report_tool = 'ToolName';
 
-        $this->assertTrue($model->validate(), 'Model should validate with two alternatives.');
+        $this->assertTrue($model->save(), 'Model should validate with two alternatives.');
     }
 
     public function testFlightCreationInvalidPilotAircraft()
@@ -188,7 +188,7 @@ class FlightTest extends BaseUnitTest
         $model->endurance_time = '0500';
         $model->report_tool = 'ToolName';
 
-        $this->assertFalse($model->validate(), 'Model should not validate with invalid aircraft/pilot.');
+        $this->assertFalse($model->save(), 'Model should not validate with invalid aircraft/pilot.');
         $this->assertArrayHasKey('pilot_id', $model->getErrors());
         $this->assertArrayHasKey('aircraft_id', $model->getErrors());
     }
@@ -213,7 +213,7 @@ class FlightTest extends BaseUnitTest
         $model->endurance_time = '0500';
         $model->report_tool = 'ToolName';
 
-        $this->assertFalse($model->validate(), 'Model should not validate with invalid airports.');
+        $this->assertFalse($model->save(), 'Model should not validate with invalid airports.');
         $this->assertArrayHasKey('departure', $model->getErrors());
         $this->assertArrayHasKey('arrival', $model->getErrors());
         $this->assertArrayHasKey('alternative1_icao', $model->getErrors());
