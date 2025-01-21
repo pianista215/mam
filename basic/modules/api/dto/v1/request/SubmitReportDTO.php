@@ -23,8 +23,8 @@ class SubmitReportDTO extends Model
     public function rules()
     {
         return [
-            [['pilot_comments', 'last_position_lat', 'last_position_lon', 'network', 'aircraft_name', 'start_time', 'end_time', 'chunks'], 'required'],
-            [['pilot_comments', 'network', 'aircraft_name'], 'string'],
+            [['pilot_comments', 'last_position_lat', 'last_position_lon', 'network', 'sim_aircraft_name', 'start_time', 'end_time', 'chunks'], 'required'],
+            [['pilot_comments', 'network', 'sim_aircraft_name'], 'string'],
             [['last_position_lat', 'last_position_lon'], 'number'],
             [['last_position_lat'], 'compare', 'compareValue' => -90, 'operator' => '>=', 'message' => 'Latitude must be between -90 and 90.'],
             [['last_position_lat'], 'compare', 'compareValue' => 90, 'operator' => '<=', 'message' => 'Latitude must be between -90 and 90.'],
@@ -46,10 +46,26 @@ class SubmitReportDTO extends Model
             $this->addError($attribute, 'At least one chunk is required.');
             return;
         }
+
+        $chunkIds = [];
+
         foreach ($this->chunks as $chunk) {
             if (!$chunk->validate()) {
                 $this->addError($attribute, "Invalid chunk data: " . json_encode($chunk->getErrors()));
+                return;
             }
+            $chunkIds[] = $chunk->id;
+        }
+
+        // Check correlative ids and starting in 1
+        sort($chunkIds);
+        $expectedIds = range(1, count($chunkIds));
+
+        if ($chunkIds !== $expectedIds) {
+            $this->addError(
+                $attribute,
+                'Chunk IDs must be sequential and start from 1. Missing or duplicated IDs detected.'
+            );
         }
     }
 
