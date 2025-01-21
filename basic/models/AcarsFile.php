@@ -33,7 +33,7 @@ class AcarsFile extends \yii\db\ActiveRecord
             [['chunk_id', 'flight_report_id', 'sha256sum'], 'required'],
             [['chunk_id', 'flight_report_id'], 'integer'],
             [['upload_date'], 'safe'],
-            [['sha256sum'], 'string', 'max' => 32],
+            [['sha256sum'], 'string', 'length' => 32],
             [['chunk_id', 'flight_report_id'], 'unique', 'targetAttribute' => ['chunk_id', 'flight_report_id']],
             [['flight_report_id'], 'exist', 'skipOnError' => true, 'targetClass' => FlightReport::class, 'targetAttribute' => ['flight_report_id' => 'id']],
         ];

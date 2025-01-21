@@ -137,7 +137,7 @@ class FlightReportController extends Controller
             $acarsFile = new AcarsFile();
             $acarsFile->flight_report_id = $report->id;
             $acarsFile->chunk_id = $ch->id;
-            $acarsFile->sha256sum = $ch->sha256sum;
+            $acarsFile->sha256sum = base64_decode($ch->sha256sum);
 
             $chunks[] = $acarsFile;
         }
