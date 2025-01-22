@@ -72,7 +72,6 @@ class SubmitReportDTO extends Model
     public function load($data, $formName = null)
     {
         $result = parent::load($data, $formName);
-
         $this->chunks = [];
 
         if (isset($data['chunks']) && is_array($data['chunks'])) {

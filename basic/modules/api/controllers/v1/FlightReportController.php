@@ -2,8 +2,10 @@
 
 namespace app\modules\api\controllers\v1;
 
+use app\models\AcarsFile;
 use app\models\AirportSearch;
 use app\models\SubmittedFlightPlan;
+use app\modules\api\dto\v1\request\SubmitReportDTO;
 use app\modules\api\dto\v1\response\FlightPlanDTO;
 use app\modules\api\dto\v1\response\ReportSavedDTO;
 use yii\filters\auth\HttpBearerAuth;
@@ -87,8 +89,12 @@ class FlightReportController extends Controller
                 throw new ServerErrorHttpException('An error occurred while processing the report:'. $e->message);
             }
         } else {
-            $errorMessages = $this->getFirstErrors();
-            throw new BadRequestHttpException("Invalid data: " . implode(', ', $errorMessages));
+            $errorMessages = $dto->getFirstErrors();
+            if(empty($errorMessages)) {
+                throw new BadRequestHttpException('Invalid data. No data was provided.');
+            } else {
+                throw new BadRequestHttpException('Invalid data: ' . implode(', ', $errorMessages));
+            }
         }
     }
 

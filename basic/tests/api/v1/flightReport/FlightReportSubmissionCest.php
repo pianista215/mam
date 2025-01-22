@@ -56,29 +56,61 @@ class FlightReportSubmissionCest
         ]);
     }
 
-    /*public function testUserTriesToSubmitReportForAnotherFlightPlan(ApiTester $I)
+    public function testUserTriesToSubmitReportForAnotherFlightPlan(ApiTester $I)
     {
-        $I->amBearerAuthenticated('validTokenForUserWithFlightPlan');
-        $I->sendPOST('/flight-report/submit-report/otherUserFlightPlanId');
-        $I->seeResponseCodeIs(403);
-        $I->seeResponseContains('Access denied');
+        $this->loginAsUser(5, $I);
+        $I->sendPOST('/flight-report/submit-report/?flightPlanId=3');
+        $I->seeResponseCodeIs(404);
+        $I->seeResponseContainsJson([
+            'name' => 'Not Found',
+            'message' => 'User flight plan and sent flight plan doesn\'t match.',
+            'code' => 0,
+            'status' => 404
+        ]);
     }
 
-    public function testUserMissingRequiredFields(ApiTester $I)
+    public function testUserMissingAllFields(ApiTester $I)
     {
-        $I->amBearerAuthenticated('validTokenForUserWithFlightPlan');
-        $I->sendPOST('/flight-report/submit-report/validFlightPlanId', []);
-        $I->seeResponseCodeIs(422);
-        $I->seeResponseContains('Missing required fields');
+        $this->loginAsUser(5, $I);
+        $I->sendPOST('/flight-report/submit-report/?flightPlanId=1', []);
+        $I->seeResponseCodeIs(400);
+        $I->seeResponseContainsJson([
+            'name' => 'Bad Request',
+            'message' => 'Invalid data. No data was provided.',
+            'code' => 0,
+            'status' => 400
+        ]);
     }
 
-    public function testUserMissingAcarsFileDetails(ApiTester $I)
+    public function testUserMissingSomeFields(ApiTester $I)
     {
-        $I->amBearerAuthenticated('validTokenForUserWithFlightPlan');
+        $this->loginAsUser(5, $I);
+        $I->sendPOST('/flight-report/submit-report/?flightPlanId=1', [
+            'pilot_comments' => 'Good flight',
+        ]);
+        $I->seeResponseCodeIs(400);
+        $I->seeResponseContainsJson([
+            'name' => 'Bad Request',
+            'message' => 'Invalid data: '
+                . 'Last Position Lat cannot be blank., '
+                . 'Last Position Lon cannot be blank., '
+                . 'Network cannot be blank., '
+                . 'Sim Aircraft Name cannot be blank., '
+                . 'Start Time cannot be blank., '
+                . 'End Time cannot be blank., '
+                . 'Chunks cannot be blank.',
+            'code' => 0,
+            'status' => 400
+        ]);
+    }
+
+    /*public function testUserMissingAcarsFileDetails(ApiTester $I)
+    {
+        $this->loginAsUser(5, $I);
         $I->sendPOST('/flight-report/submit-report/validFlightPlanId', [
-            'flightTime' => 120,
-            'blockTime' => 130,
-            'fuelBurn' => 5000,
+            'pilot_comments' => 120,
+            'last_position_lat' => 130,
+            'last_position_lon' => 5000,
             'distance' => 300,
             'acarsFiles' => [], // Missing ACARS file details
         ]);
@@ -137,7 +169,27 @@ class FlightReportSubmissionCest
         ]);
         $I->seeResponseCodeIs(200);
         $I->seeResponseContains('Flight report submitted successfully');
-    }*/
+    }
+
+    public function testAfterValidSubmissionFPLIsClosed(ApiTester $I)
+    {
+        $I->amBearerAuthenticated('validTokenForUserWithFlightPlan');
+        $I->sendPOST('/flight-report/submit-report/validFlightPlanId', [
+            'flightTime' => 120,
+            'blockTime' => 130,
+            'fuelBurn' => 5000,
+            'distance' => 300,
+            'acarsFiles' => [
+                ['id' => 1, 'sha256sum' => 'hash1'],
+                ['id' => 2, 'sha256sum' => 'hash2'],
+                ['id' => 3, 'sha256sum' => 'hash3'],
+            ],
+        ]);
+        $I->seeResponseCodeIs(200);
+        $I->seeResponseContains('Flight report submitted successfully');
+    }
+
+*/
 
 
 }
