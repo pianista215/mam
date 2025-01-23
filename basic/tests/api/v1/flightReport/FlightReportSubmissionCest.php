@@ -327,6 +327,13 @@ class FlightReportSubmissionCest
         $I->assertEquals($flight_report->start_time, '2025-02-01 11:00:00');
         $I->assertEquals($flight_report->end_time, '2025-02-01 12:15:13');
 
+        $acars_files = \app\models\AcarsFile::find()->where(['flight_report_id' => $flight_report_id])->all();
+        $I->assertCount(1, $acars_files);
+        $file = $acars_files[0];
+        $I->assertEquals($file->chunk_id, 1);
+        $I->assertEquals($file->sha256sum, str_repeat('A', 44));
+
+
         $flight = \app\models\Flight::find()->where(['id' => $flight_report->flight_id])->one();
         $I->assertEquals($flight->pilot_id, $pilot_id);
         $I->assertEquals($flight->aircraft_id, $aircraft_id);
