@@ -3,7 +3,11 @@
 namespace app\modules\api\controllers\v1;
 
 use app\models\AcarsFile;
+use app\models\Aircraft;
 use app\models\AirportSearch;
+use app\models\Flight;
+use app\models\FlightReport;
+use app\models\Pilot;
 use app\models\SubmittedFlightPlan;
 use app\modules\api\dto\v1\request\SubmitReportDTO;
 use app\modules\api\dto\v1\response\FlightPlanDTO;
@@ -12,6 +16,7 @@ use yii\filters\auth\HttpBearerAuth;
 use yii\rest\Controller;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
+use yii\web\ServerErrorHttpException;
 use yii\web\Response;
 use Yii;
 
@@ -72,7 +77,7 @@ class FlightReportController extends Controller
                 }
 
                 $this->movePilotToLocation($submittedFlightPlan->pilot_id, $nearestAirport);
-                $this->moveAircraftToLocation($submittedFlightPlan->pilot_id, $nearestAirport);
+                $this->moveAircraftToLocation($submittedFlightPlan->aircraft_id, $nearestAirport);
 
                 $submittedFlightPlan->delete();
 
@@ -86,7 +91,7 @@ class FlightReportController extends Controller
             } catch (\Throwable $e) {
                 $transaction->rollBack();
                 // TODO: Think logs globally, don't let the user know a lot. Better log and answer without much details
-                throw new ServerErrorHttpException('An error occurred while processing the report:'. $e->message);
+                throw new ServerErrorHttpException('An error occurred while processing the report:'. $e->getMessage());
             }
         } else {
             $errorMessages = $dto->getFirstErrors();
@@ -108,6 +113,7 @@ class FlightReportController extends Controller
         $flight->arrival = $submittedFpl->route0->arrival;
         $flight->alternative1_icao = $submittedFpl->alternative1_icao;
         $flight->alternative2_icao = $submittedFpl->alternative2_icao;
+        $flight->flight_rules = $submittedFpl->flight_rules;
         $flight->cruise_speed_value = $submittedFpl->cruise_speed_value;
         $flight->cruise_speed_unit = $submittedFpl->cruise_speed_unit;
         $flight->flight_level_value = $submittedFpl->flight_level_value;
@@ -143,7 +149,7 @@ class FlightReportController extends Controller
             $acarsFile = new AcarsFile();
             $acarsFile->flight_report_id = $report->id;
             $acarsFile->chunk_id = $ch->id;
-            $acarsFile->sha256sum = base64_decode($ch->sha256sum);
+            $acarsFile->sha256sum = $ch->sha256sum;
 
             $chunks[] = $acarsFile;
         }
@@ -154,18 +160,18 @@ class FlightReportController extends Controller
     private function movePilotToLocation($pilot_id, $airport)
     {
         $pilot = Pilot::findOne(['id' => $pilot_id]);
-        $pilot->location = $airport->id;
+        $pilot->location = $airport->icao_code;
         if(!$pilot->save()){
-            throw new ServerErrorHttpException('Error moving pilot'. $pilot_id. ' to location '. $airport->id);
+            throw new ServerErrorHttpException('Error moving pilot '. $pilot_id. ' to location '. $airport->icao_code);
         }
     }
 
     private function moveAircraftToLocation($aircraft_id, $airport)
     {
         $aircraft = Aircraft::findOne(['id' => $aircraft_id]);
-        $aircraft->location = $airport->id;
+        $aircraft->location = $airport->icao_code;
         if(!$aircraft->save()){
-            throw new ServerErrorHttpException('Error moving aircraft'. $aircraft_id. ' to location '. $airport->id);
+            throw new ServerErrorHttpException('Error moving aircraft '. $aircraft_id. ' to location '. $airport->icao_code);
         }
     }
 

@@ -144,6 +144,7 @@ CREATE TABLE `flight` (
   `arrival` char(4) NOT NULL,
   `alternative1_icao` char(4) NOT NULL,
   `alternative2_icao` char(4) DEFAULT NULL,
+  `flight_rules` char(1) NOT NULL,
   `cruise_speed_value` varchar(4) NOT NULL,
   `cruise_speed_unit` char(1) NOT NULL,
   `flight_level_value` varchar(4) NOT NULL,
@@ -194,7 +195,7 @@ CREATE TABLE `flight_report` (
 CREATE TABLE `acars_file` (
   `chunk_id` tinyint(3) unsigned NOT NULL,
   `flight_report_id` bigint(20) unsigned NOT NULL,
-  `sha256sum` binary(32) NOT NULL,
+  `sha256sum` char(44) NOT NULL,
   `upload_date` datetime DEFAULT NULL,
   PRIMARY KEY (`flight_report_id`,`chunk_id`),
   CONSTRAINT `acars_file_flight_report_FK` FOREIGN KEY (`flight_report_id`) REFERENCES `flight_report` (`id`) ON UPDATE CASCADE

@@ -7,14 +7,15 @@ use yii\base\Model;
 class AcarsChunkDTO extends Model
 {
     public $id;
-    public $sha256;
+    public $sha256sum;
 
     public function rules()
     {
         return [
-            [['id', 'sha256'], 'required'],
+            [['id', 'sha256sum'], 'required'],
+            [['id'], 'filter', 'filter' => 'intval'],
             [['id'], 'integer'],
-            [['sha256'], 'string', 'length' => 64],
+            [['sha256sum'], 'string', 'length' => 44],
         ];
     }
 }

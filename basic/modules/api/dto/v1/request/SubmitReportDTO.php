@@ -36,6 +36,7 @@ class SubmitReportDTO extends Model
             [['network'], 'string', 'max' => 50],
             [['sim_aircraft_name'], 'string', 'max' => 50],
             [['start_time', 'end_time'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+            [['start_time'], 'compare', 'compareAttribute' => 'end_time', 'operator' => '<', 'message' => 'Start Time must be earlier than End Time.'],
             [['chunks'], 'validateChunks'],
         ];
     }

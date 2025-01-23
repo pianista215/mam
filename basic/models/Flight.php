@@ -15,6 +15,7 @@ use Yii;
  * @property string $arrival
  * @property string $alternative1_icao
  * @property string|null $alternative2_icao
+ * @property string $flight_rules
  * @property string $cruise_speed_value
  * @property string $cruise_speed_unit
  * @property string $flight_level_value
@@ -52,12 +53,12 @@ class Flight extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['pilot_id', 'aircraft_id', 'code', 'departure', 'arrival', 'alternative1_icao', 'cruise_speed_value', 'cruise_speed_unit', 'flight_level_value', 'flight_level_unit', 'route', 'estimated_time', 'other_information', 'endurance_time', 'report_tool'], 'required'],
+            [['pilot_id', 'aircraft_id', 'code', 'departure', 'arrival', 'alternative1_icao', 'flight_rules', 'cruise_speed_value', 'cruise_speed_unit', 'flight_level_value', 'flight_level_unit', 'route', 'estimated_time', 'other_information', 'endurance_time', 'report_tool'], 'required'],
             [['pilot_id', 'aircraft_id'], 'integer'],
             [['creation_date'], 'safe'],
             [['code'], 'string', 'max' => 10],
             [['departure', 'arrival', 'alternative1_icao', 'alternative2_icao', 'cruise_speed_value', 'flight_level_value', 'estimated_time', 'endurance_time'], 'string', 'max' => 4],
-            [['cruise_speed_unit', 'status'], 'string', 'max' => 1],
+            [['cruise_speed_unit', 'status', 'flight_rules'], 'string', 'max' => 1],
             [['flight_level_unit'], 'string', 'max' => 3],
             [['route', 'other_information'], 'string', 'max' => 400],
             [['report_tool'], 'string', 'max' => 20],
@@ -85,6 +86,7 @@ class Flight extends \yii\db\ActiveRecord
             'arrival' => 'Arrival',
             'alternative1_icao' => 'Alternative1 Icao',
             'alternative2_icao' => 'Alternative2 Icao',
+            'flight_rules' => 'Flight Rules',
             'cruise_speed_value' => 'Cruise Speed Value',
             'cruise_speed_unit' => 'Cruise Speed Unit',
             'flight_level_value' => 'Flight Level Value',
