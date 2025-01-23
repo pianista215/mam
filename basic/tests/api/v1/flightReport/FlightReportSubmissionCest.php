@@ -282,27 +282,12 @@ class FlightReportSubmissionCest
         ]);
     }
 
-    public function testValidFlightReportSubmissionOneChunk(ApiTester $I)
+    private function testValidWithRequest(ApiTester $I, $request)
     {
-
         // FPL with id 1 has aircraft_id 4 and pilot_id 4
         $aircraft_id = 4;
         $pilot_id = 5;
-        $request = [
-            'pilot_comments' => 'Good flight',
-            'last_position_lat' => 38.280722,
-            'last_position_lon' => -0.55235,
-            'network' => 'IVAO',
-            'sim_aircraft_name' => 'Xplane King Air 350',
-            'report_tool' => 'Mam Acars 1.0',
-            'start_time' => '2025-02-01 11:00:00',
-            'end_time' => '2025-02-01 12:15:13',
-            'chunks' => [
-                ['id' => 1, 'sha256sum' => str_repeat('A', 44)],
-            ]
-        ];
 
-        // Only one chunk
         $this->loginAsUser($pilot_id, $I);
         $I->sendPOST('/flight-report/submit-report/?flightPlanId=1', $request);
         $I->seeResponseCodeIs(200);
@@ -327,13 +312,6 @@ class FlightReportSubmissionCest
         $I->assertEquals($flight_report->start_time, '2025-02-01 11:00:00');
         $I->assertEquals($flight_report->end_time, '2025-02-01 12:15:13');
 
-        $acars_files = \app\models\AcarsFile::find()->where(['flight_report_id' => $flight_report_id])->all();
-        $I->assertCount(1, $acars_files);
-        $file = $acars_files[0];
-        $I->assertEquals($file->chunk_id, 1);
-        $I->assertEquals($file->sha256sum, str_repeat('A', 44));
-
-
         $flight = \app\models\Flight::find()->where(['id' => $flight_report->flight_id])->one();
         $I->assertEquals($flight->pilot_id, $pilot_id);
         $I->assertEquals($flight->aircraft_id, $aircraft_id);
@@ -354,33 +332,80 @@ class FlightReportSubmissionCest
         $I->assertEquals($flight->code, 'R003');
         $I->assertEquals($flight->status, 'C');
 
+        // If we try to close another time the FPL we have an error
+        $I->sendPOST('/flight-report/submit-report/?flightPlanId=1', $request);
+        $I->seeResponseCodeIs(404);
+        $I->seeResponseContainsJson([
+            'name' => 'Not Found',
+            'message' => 'The user hasn\'t any submitted flight plan.',
+            'code' => 0,
+            'status' => 404
+        ]);
+
+        return $flight_report_id;
+    }
+
+    public function testValidFlightReportSubmissionOneChunk(ApiTester $I)
+    {
+        $request = [
+            'pilot_comments' => 'Good flight',
+            'last_position_lat' => 38.280722,
+            'last_position_lon' => -0.55235,
+            'network' => 'IVAO',
+            'sim_aircraft_name' => 'Xplane King Air 350',
+            'report_tool' => 'Mam Acars 1.0',
+            'start_time' => '2025-02-01 11:00:00',
+            'end_time' => '2025-02-01 12:15:13',
+            'chunks' => [
+                ['id' => 1, 'sha256sum' => str_repeat('A', 44)],
+            ]
+        ];
+
+        $flight_report_id = $this->testValidWithRequest($I, $request);
+
+        $acars_files = \app\models\AcarsFile::find()->where(['flight_report_id' => $flight_report_id])->all();
+        $I->assertCount(1, $acars_files);
+        $file = $acars_files[0];
+        $I->assertEquals($file->chunk_id, 1);
+        $I->assertEquals($file->sha256sum, str_repeat('A', 44));
     }
 
     public function testValidFlightReportSubmissionMultipleChunk(ApiTester $I)
     {
+        $request = [
+            'pilot_comments' => 'Good flight',
+            'last_position_lat' => 38.280722,
+            'last_position_lon' => -0.55235,
+            'network' => 'IVAO',
+            'sim_aircraft_name' => 'Xplane King Air 350',
+            'report_tool' => 'Mam Acars 1.0',
+            'start_time' => '2025-02-01 11:00:00',
+            'end_time' => '2025-02-01 12:15:13',
+            'chunks' => [
+                ['id' => 1, 'sha256sum' => str_repeat('A', 44)],
+                ['id' => 2, 'sha256sum' => str_repeat('B', 44)],
+                ['id' => 3, 'sha256sum' => str_repeat('C', 44)],
+                ['id' => 4, 'sha256sum' => str_repeat('D', 44)],
+            ]
+        ];
 
+        $flight_report_id = $this->testValidWithRequest($I, $request);
 
+        $acars_files = \app\models\AcarsFile::find()->where(['flight_report_id' => $flight_report_id])->all();
+        $I->assertCount(4, $acars_files);
+        $file = $acars_files[0];
+        $I->assertEquals($file->chunk_id, 1);
+        $I->assertEquals($file->sha256sum, str_repeat('A', 44));
+        $file = $acars_files[1];
+        $I->assertEquals($file->chunk_id, 2);
+        $I->assertEquals($file->sha256sum, str_repeat('B', 44));
+        $file = $acars_files[2];
+        $I->assertEquals($file->chunk_id, 3);
+        $I->assertEquals($file->sha256sum, str_repeat('C', 44));
+        $file = $acars_files[3];
+        $I->assertEquals($file->chunk_id, 4);
+        $I->assertEquals($file->sha256sum, str_repeat('D', 44));
     }
-
-    /*public function testAfterValidSubmissionFPLIsClosed(ApiTester $I)
-    {
-        $I->amBearerAuthenticated('validTokenForUserWithFlightPlan');
-        $I->sendPOST('/flight-report/submit-report/validFlightPlanId', [
-            'flightTime' => 120,
-            'blockTime' => 130,
-            'fuelBurn' => 5000,
-            'distance' => 300,
-            'acarsFiles' => [
-                ['id' => 1, 'sha256sum' => 'hash1'],
-                ['id' => 2, 'sha256sum' => 'hash2'],
-                ['id' => 3, 'sha256sum' => 'hash3'],
-            ],
-        ]);
-        $I->seeResponseCodeIs(200);
-        $I->seeResponseContains('Flight report submitted successfully');
-    }
-
-*/
 
 
 }
