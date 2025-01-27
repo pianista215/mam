@@ -2,6 +2,7 @@
 
 namespace app\modules\api\controllers\v1;
 
+use app\config\Config;
 use app\models\AcarsFile;
 use app\models\Aircraft;
 use app\models\AirportSearch;
@@ -39,12 +40,12 @@ class FlightReportController extends Controller
     /**
      * Close the flight plan, create the flight, the report and prepare the acars files to be uploaded
      */
-    public function actionSubmitReport($flightPlanId)
+    public function actionSubmitReport($flight_plan_id)
     {
         $submittedFlightPlan = SubmittedFlightPlan::findOne(['pilot_id' => Yii::$app->user->identity->id]);
         if(!$submittedFlightPlan){
             throw new NotFoundHttpException("The user hasn't any submitted flight plan.");
-        } else if($submittedFlightPlan->id != $flightPlanId){
+        } else if($submittedFlightPlan->id != $flight_plan_id){
             throw new NotFoundHttpException("User flight plan and sent flight plan doesn't match.");
         }
 
@@ -175,15 +176,92 @@ class FlightReportController extends Controller
         }
     }
 
-    public function actionCurrentFpl()
+    public function actionUploadChunk($flight_report_id, $chunk_id)
     {
-        $submittedFlightPlan = SubmittedFlightPlan::findOne(['pilot_id' => Yii::$app->user->identity->id]);
-        if(!$submittedFlightPlan){
-            throw new NotFoundHttpException("Flight plan not found.");
+        $storagePath = Config::get('chunks_storage_path', '/tmp/chunks_storage_path');
+
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+
+            $flightReport = FlightReport::findOne(['id' => $flight_report_id]);
+            if (!$flightReport) {
+                throw new NotFoundHttpException("Flight report not found.");
+            }
+
+            $flight = Flight::findOne(['id' => $flightReport->flight_id, 'pilot_id' => Yii::$app->user->id]);
+            if (!$flight || !$flight->isOpenForUpload()) {
+                throw new NotFoundHttpException("Flight access denied or not available for chunk uploads.");
+            }
+
+            $chunk = AcarsFile::findOne(['chunk_id' => $chunk_id, 'flight_report_id' => $flight_report_id]);
+            if (!$chunk) {
+                throw new NotFoundHttpException("Chunk not found for this flight report.");
+            }
+
+            if ($chunk->isUploaded()) {
+                throw new ConflictHttpException("Chunk $chunk_id already uploaded.");
+            }
+
+            $flightReportPath = $storagePath . DIRECTORY_SEPARATOR . $flight_report_id;
+            if (!file_exists($flightReportPath)) {
+                if (!mkdir($flightReportPath, 0755, true)) {
+                    throw new ServerErrorHttpException("Failed to create directory for flight report.");
+                }
+            }
+
+            $chunkFilePath = $flightReportPath . DIRECTORY_SEPARATOR . $chunk_id;
+            if (file_exists($chunkFilePath)) {
+                throw new ConflictHttpException("Chunk $chunk_id already exists.");
+            }
+
+            $uploadedFile = UploadedFile::getInstanceByName('chunkFile');
+            if (!$uploadedFile) {
+                throw new BadRequestHttpException("No file uploaded.");
+            }
+
+            $tempFilePath = $chunkFilePath . '.tmp';
+            if (!$uploadedFile->saveAs($tempFilePath)) {
+                throw new ServerErrorHttpException("Failed to save the uploaded chunk.");
+            }
+
+            $expectedSha256 = $chunk->sha256sum;
+            $actualSha256 = hash_file('sha256', $tempFilePath);
+            if ($expectedSha256 !== $actualSha256) {
+                unlink($tempFilePath);
+                throw new BadRequestHttpException("SHA256 mismatch. Expected: $expectedSha256, Actual: $actualSha256");
+            }
+
+            rename($tempFilePath, $chunkFilePath);
+
+            $chunk->upload_date = date('Y-m-d H:i:s');
+            if (!$chunk->save()) {
+                throw new ServerErrorHttpException('Failed to update chunk upload date: ' . json_encode($chunk->getErrors()));
+            }
+
+            $pendingChunks = AcarsFile::find()
+                ->where(['flight_report_id' => $flight_report_id, 'upload_date' => null])
+                ->exists();
+
+            if (!$pendingChunks) {
+                $flightReport->status = 'S';
+                if (!$flightReport->save()) {
+                    throw new ServerErrorHttpException('Failed to update flight report status: ' . json_encode($flightReport->getErrors()));
+                }
+            }
+
+            $transaction->commit();
+            return ['status' => 'success'];
+
+        } catch (\Throwable $e) {
+            if (isset($tempFilePath) && file_exists($tempFilePath)) {
+                unlink($tempFilePath);
+            }
+            if (isset($chunkFilePath) && file_exists($chunkFilePath)) {
+                unlink($chunkFilePath);
+            }
+
+            $transaction->rollBack();
+            throw $e;
         }
-
-        $dto = FlightPlanDTO::fromModel($submittedFlightPlan);
-
-        return $dto;
     }
 }

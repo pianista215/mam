@@ -102,6 +102,19 @@ class Flight extends \yii\db\ActiveRecord
         ];
     }
 
+    public static function getFlightStatus(){
+        return array(
+            'C' => 'Created. Basic information received. Awaiting ACARS files to be uploaded.',
+            'S' => 'ACARS files received. Awaiting processing.',
+            'V' => 'Pending validation.',
+            'F' => 'Finished',
+        );
+    }
+
+    public function isOpenForUpload(){
+        return $this->status === 'C';
+    }
+
     /**
      * Gets query for [[Aircraft]].
      *

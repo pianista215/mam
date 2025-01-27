@@ -39,6 +39,10 @@ class AcarsFile extends \yii\db\ActiveRecord
         ];
     }
 
+    public function isUploaded() {
+        return $this->upload_date !== null;
+    }
+
     /**
      * {@inheritdoc}
      */

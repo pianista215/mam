@@ -35,18 +35,18 @@ class FlightReportSubmissionCest
 
     public function testUserUnauthenticated(ApiTester $I)
     {
-        $I->sendPOST('/flight-report/submit-report/?flightPlanId=1');
+        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=1');
         $this->checkUnauthenticated($I);
 
         $I->amBearerAuthenticated('inventedToken');
-        $I->sendPOST('/flight-report/submit-report/?flightPlanId=1');
+        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=1');
         $this->checkUnauthenticated($I);
     }
 
     public function testUserAuthenticatedWithoutFlightPlan(ApiTester $I)
     {
         $this->loginAsUser(1, $I);
-        $I->sendPOST('/flight-report/submit-report/?flightPlanId=1');
+        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=1');
         $I->seeResponseCodeIs(404);
         $I->seeResponseContainsJson([
             'name' => 'Not Found',
@@ -59,7 +59,7 @@ class FlightReportSubmissionCest
     public function testUserTriesToSubmitReportForAnotherFlightPlan(ApiTester $I)
     {
         $this->loginAsUser(5, $I);
-        $I->sendPOST('/flight-report/submit-report/?flightPlanId=3');
+        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=3');
         $I->seeResponseCodeIs(404);
         $I->seeResponseContainsJson([
             'name' => 'Not Found',
@@ -72,7 +72,7 @@ class FlightReportSubmissionCest
     public function testUserMissingAllFields(ApiTester $I)
     {
         $this->loginAsUser(5, $I);
-        $I->sendPOST('/flight-report/submit-report/?flightPlanId=1', []);
+        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=1', []);
         $I->seeResponseCodeIs(400);
         $I->seeResponseContainsJson([
             'name' => 'Bad Request',
@@ -85,7 +85,7 @@ class FlightReportSubmissionCest
     public function testUserMissingSomeFields(ApiTester $I)
     {
         $this->loginAsUser(5, $I);
-        $I->sendPOST('/flight-report/submit-report/?flightPlanId=1', [
+        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=1', [
             'pilot_comments' => 'Good flight',
         ]);
         $I->seeResponseCodeIs(400);
@@ -107,7 +107,7 @@ class FlightReportSubmissionCest
     public function testUserMissingAcarsFileDetails(ApiTester $I)
     {
         $this->loginAsUser(5, $I);
-        $I->sendPOST('/flight-report/submit-report/?flightPlanId=1', [
+        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=1', [
             'pilot_comments' => 'Good flight',
             'last_position_lat' => 38.280722,
             'last_position_lon' => -0.55235,
@@ -126,7 +126,7 @@ class FlightReportSubmissionCest
             'status' => 400
         ]);
 
-        $I->sendPOST('/flight-report/submit-report/?flightPlanId=1', [
+        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=1', [
             'pilot_comments' => 'Good flight',
             'last_position_lat' => 38.280722,
             'last_position_lon' => -0.55235,
@@ -150,7 +150,7 @@ class FlightReportSubmissionCest
     public function testUserInvalidSha256Chunk(ApiTester $I)
     {
         $this->loginAsUser(5, $I);
-        $I->sendPOST('/flight-report/submit-report/?flightPlanId=1', [
+        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=1', [
             'pilot_comments' => 'Good flight',
             'last_position_lat' => 38.280722,
             'last_position_lon' => -0.55235,
@@ -167,7 +167,7 @@ class FlightReportSubmissionCest
         $I->seeResponseContainsJson([
             'name' => 'Bad Request',
             'message' => 'Invalid data: '
-                . 'Invalid chunk data: {"sha256sum":["Sha256sum should contain 64 characters."]}',
+                . 'Invalid chunk data: {"sha256sum":["Sha256sum should contain 44 characters."]}',
             'code' => 0,
             'status' => 400
         ]);
@@ -176,7 +176,7 @@ class FlightReportSubmissionCest
     public function testUserDuplicateAcarsFiles(ApiTester $I)
     {
         $this->loginAsUser(5, $I);
-        $I->sendPOST('/flight-report/submit-report/?flightPlanId=1', [
+        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=1', [
             'pilot_comments' => 'Good flight',
             'last_position_lat' => 38.280722,
             'last_position_lon' => -0.55235,
@@ -203,7 +203,7 @@ class FlightReportSubmissionCest
     public function testUserMissingAcarsFileIds(ApiTester $I)
     {
         $this->loginAsUser(5, $I);
-        $I->sendPOST('/flight-report/submit-report/?flightPlanId=1', [
+        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=1', [
             'pilot_comments' => 'Good flight',
             'last_position_lat' => 38.280722,
             'last_position_lon' => -0.55235,
@@ -231,7 +231,7 @@ class FlightReportSubmissionCest
     public function testUserSendChunkId0InsteadOf1(ApiTester $I)
     {
         $this->loginAsUser(5, $I);
-        $I->sendPOST('/flight-report/submit-report/?flightPlanId=1', [
+        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=1', [
             'pilot_comments' => 'Good flight',
             'last_position_lat' => 38.280722,
             'last_position_lon' => -0.55235,
@@ -259,7 +259,7 @@ class FlightReportSubmissionCest
     public function testUserSendInvalidTime(ApiTester $I)
     {
         $this->loginAsUser(5, $I);
-        $I->sendPOST('/flight-report/submit-report/?flightPlanId=1', [
+        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=1', [
             'pilot_comments' => 'Good flight',
             'last_position_lat' => 38.280722,
             'last_position_lon' => -0.55235,
@@ -289,7 +289,7 @@ class FlightReportSubmissionCest
         $pilot_id = 5;
 
         $this->loginAsUser($pilot_id, $I);
-        $I->sendPOST('/flight-report/submit-report/?flightPlanId=1', $request);
+        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=1', $request);
         $I->seeResponseCodeIs(200);
         $response = $I->grabResponse();
         $data = json_decode($response, true);
@@ -333,7 +333,7 @@ class FlightReportSubmissionCest
         $I->assertEquals($flight->status, 'C');
 
         // If we try to close another time the FPL we have an error
-        $I->sendPOST('/flight-report/submit-report/?flightPlanId=1', $request);
+        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=1', $request);
         $I->seeResponseCodeIs(404);
         $I->seeResponseContainsJson([
             'name' => 'Not Found',

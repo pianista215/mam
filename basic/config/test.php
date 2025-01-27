@@ -50,6 +50,11 @@ return [
                     'class' => 'yii\rest\UrlRule',
                     'controller' => ['flight-plan'],
                 ],
+                [
+                    'prefix' => 'api/v1',
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => ['flight-report'],
+                ],
             ],
         ],
         'request' => [
