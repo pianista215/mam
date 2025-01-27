@@ -64,15 +64,15 @@ class UploadChunkCest
         ]);
     }
 
-    /*public function testChunkAlreadyUploaded(ApiTester $I)
+    public function testChunkAlreadyUploaded(ApiTester $I)
     {
-        $this->loginAsUser(1, $I);
-        $chunk = \app\models\AcarsFile::findOne(['chunk_id' => 1, 'flight_report_id' => 1]);
+        $chunk = \app\models\AcarsFile::findOne(['chunk_id' => 1, 'flight_report_id' => 2]);
         $chunk->upload_date = date('Y-m-d H:i:s');
         $chunk->save();
 
+        $this->loginAsUser(5, $I);
         $filePath = $this->getTestFilePath('1_1.tmp');
-        $I->sendPOST('/api/v1/flight-report/1/chunk/1', [], ['chunkFile' => $filePath]);
+        $I->sendPOST('/flight-report/upload-chunk/?flight_report_id=2&chunk_id=1', [], ['chunkFile' => $filePath]);
         $I->seeResponseCodeIs(409);
         $I->seeResponseContainsJson([
             'name' => 'Conflict',
@@ -80,7 +80,7 @@ class UploadChunkCest
         ]);
     }
 
-    public function testFlightClosed(ApiTester $I)
+    /*public function testFlightClosed(ApiTester $I)
     {
         $this->loginAsUser(1, $I);
         $flight = \app\models\Flight::findOne(['id' => 1]);

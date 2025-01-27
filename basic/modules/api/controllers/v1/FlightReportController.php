@@ -16,6 +16,7 @@ use app\modules\api\dto\v1\response\ReportSavedDTO;
 use yii\filters\auth\HttpBearerAuth;
 use yii\rest\Controller;
 use yii\web\BadRequestHttpException;
+use yii\web\ConflictHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\ServerErrorHttpException;
 use yii\web\Response;
