@@ -80,23 +80,35 @@ class UploadChunkCest
         ]);
     }
 
-    /*public function testFlightClosed(ApiTester $I)
+    public function testFlightClosed(ApiTester $I)
     {
-        $this->loginAsUser(1, $I);
-        $flight = \app\models\Flight::findOne(['id' => 1]);
-        $flight->status = 'C'; // Closed
-        $flight->save();
+        $this->loginAsUser(5, $I);
 
         $filePath = $this->getTestFilePath('1_1.tmp');
-        $I->sendPOST('/api/v1/flight-report/1/chunk/1', [], ['chunkFile' => $filePath]);
+        $I->sendPOST('/flight-report/upload-chunk/?flight_report_id=1&chunk_id=1', [], ['chunkFile' => $filePath]);
         $I->seeResponseCodeIs(404);
         $I->seeResponseContainsJson([
             'name' => 'Not Found',
-            'message' => 'Flight not found or not open for upload files',
+            'message' => 'Flight access denied or not available for chunk uploads.',
+        ]);
+
+        $this->loginAsUser(7, $I);
+        $I->sendPOST('/flight-report/upload-chunk/?flight_report_id=3&chunk_id=2', [], ['chunkFile' => $filePath]);
+        $I->seeResponseCodeIs(404);
+        $I->seeResponseContainsJson([
+            'name' => 'Not Found',
+            'message' => 'Flight access denied or not available for chunk uploads.',
+        ]);
+
+        $I->sendPOST('/flight-report/upload-chunk/?flight_report_id=4&chunk_id=1', [], ['chunkFile' => $filePath]);
+        $I->seeResponseCodeIs(404);
+        $I->seeResponseContainsJson([
+            'name' => 'Not Found',
+            'message' => 'Flight access denied or not available for chunk uploads.',
         ]);
     }
 
-    public function testSha256Mismatch(ApiTester $I)
+    /*public function testSha256Mismatch(ApiTester $I)
     {
         $this->loginAsUser(1, $I);
         $filePath = $this->getTestFilePath('1_invalid.tmp');
