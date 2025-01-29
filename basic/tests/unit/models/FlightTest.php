@@ -113,6 +113,7 @@ class FlightTest extends BaseUnitTest
         $this->assertArrayHasKey('departure', $model->getErrors(), 'Missing error for departure.');
         $this->assertArrayHasKey('arrival', $model->getErrors(), 'Missing error for arrival.');
         $this->assertArrayHasKey('alternative1_icao', $model->getErrors(), 'Missing error for alternative1_icao.');
+        $this->assertArrayHasKey('flight_rules', $model->getErrors(), 'Missing error for flight_rules.');
         $this->assertArrayHasKey('cruise_speed_value', $model->getErrors(), 'Missing error for cruise_speed_value.');
         $this->assertArrayHasKey('cruise_speed_unit', $model->getErrors(), 'Missing error for cruise_speed_unit.');
         $this->assertArrayHasKey('flight_level_value', $model->getErrors(), 'Missing error for flight_level_value.');
@@ -128,6 +129,7 @@ class FlightTest extends BaseUnitTest
         $model->departure = 'LEMD';
         $model->arrival = 'LEBL';
         $model->alternative1_icao = 'LEVC';
+        $model->flight_rules = 'I';
         $this->assertFalse($model->save(), 'Model should not validate with some required fields missing.');
         $this->assertArrayHasKey('code', $model->getErrors(), 'Missing error for code with partial data.');
 
@@ -155,6 +157,7 @@ class FlightTest extends BaseUnitTest
         $model->arrival = 'LEBL';
         $model->alternative1_icao = 'LEVC';
         $model->alternative1_icao = 'LEAL';
+        $model->flight_rules = 'V';
         $model->code = 'FLT001';
         $model->cruise_speed_value = '450';
         $model->cruise_speed_unit = 'N';
@@ -177,6 +180,7 @@ class FlightTest extends BaseUnitTest
         $model->departure = 'LEMD';
         $model->arrival = 'LEBL';
         $model->alternative1_icao = 'LEVC';
+        $model->flight_rules = 'Y';
         $model->code = 'FLT001';
         $model->cruise_speed_value = '450';
         $model->cruise_speed_unit = 'N';
@@ -202,6 +206,7 @@ class FlightTest extends BaseUnitTest
         $model->arrival = 'LEEE';
         $model->alternative1_icao = 'LEEC';
         $model->alternative2_icao = 'LEED';
+        $model->flight_rules = 'Z';
         $model->code = 'FLT001';
         $model->cruise_speed_value = '450';
         $model->cruise_speed_unit = 'N';
