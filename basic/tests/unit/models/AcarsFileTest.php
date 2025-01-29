@@ -107,6 +107,7 @@ class AcarsFileTest extends BaseUnitTest
             'arrival' => 'LEBL',
             'alternative1_icao' => 'LEVC',
             'alternative2_icao' => 'LEAL',
+            'flight_rules' => 'I',
             'code' => 'FLT001',
             'cruise_speed_value' => '450',
             'cruise_speed_unit' => 'N',
@@ -142,17 +143,17 @@ class AcarsFileTest extends BaseUnitTest
         // Valid
         $model->chunk_id = 1;
         $model->flight_report_id = $this->report->id;
-        $model->sha256sum = base64_decode('YTNjMjU2NGYyM2U3MThkODFkNjM4OWI3YTdkZjc3ZWE=');
+        $model->sha256sum = 'YTNjMjU2NGYyM2U3MThkODFkNjM4OWI3YTdkZjc3ZWE=';
         $this->assertTrue($model->save(), 'Model should validate with correct data.');
 
         // Wrong sha256
         $model->sha256sum = 'short';
         $this->assertFalse($model->save(), 'Model should not validate if sha256sum is too short.');
-        $this->assertArrayHasKey('sha256sum', $model->getErrors(), 'sha256sum should have a length of 32 bytes.');
+        $this->assertArrayHasKey('sha256sum', $model->getErrors(), 'sha256sum should have a length of 44 chars.');
 
-        $model->sha256sum = str_repeat('a', 33);
+        $model->sha256sum = str_repeat('a', 45);
         $this->assertFalse($model->save(), 'Model should not validate if sha256sum is too long.');
-        $this->assertArrayHasKey('sha256sum', $model->getErrors(), 'sha256sum should have a length of 32 bytes.');
+        $this->assertArrayHasKey('sha256sum', $model->getErrors(), 'sha256sum should have a length of 44 chars.');
     }
 
     public function testUniqueConstraint()
@@ -160,14 +161,14 @@ class AcarsFileTest extends BaseUnitTest
         $model1 = new AcarsFile([
             'chunk_id' => 1,
             'flight_report_id' => $this->report->id,
-            'sha256sum' => base64_decode('YTNjMjU2NGYyM2U3MThkODFkNjM4OWI3YTdkZjc3ZWE='),
+            'sha256sum' => 'YTNjMjU2NGYyM2U3MThkODFkNjM4OWI3YTdkZjc3ZWE=',
         ]);
         $this->assertTrue($model1->save(), 'First model should save successfully.');
 
         $model2 = new AcarsFile([
             'chunk_id' => 1,
             'flight_report_id' => $this->report->id,
-            'sha256sum' => base64_decode('YTNjMjU2NGYyM2U3MThUODFkNjM4OWI3YTdkZjc3ZWE='),
+            'sha256sum' => 'YTNjMjU2NGYyM2U3MThUODFkNjM4OWI3YTdkZjc3ZWE=',
         ]);
 
         $this->assertFalse($model2->save(), 'Second model collides with PK');
