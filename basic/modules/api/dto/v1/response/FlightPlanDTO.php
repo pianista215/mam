@@ -1,6 +1,6 @@
 <?php
 
-namespace app\modules\api\dto\v1;
+namespace app\modules\api\dto\v1\response;
 
 use yii\base\Model;
 use app\models\SubmittedFlightPlan;

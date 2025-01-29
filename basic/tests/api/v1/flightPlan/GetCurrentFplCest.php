@@ -2,7 +2,7 @@
 
 namespace tests\api\v1\flightPlan;
 
-use app\modules\api\dto\v1\FlightPlanDTO;
+use app\modules\api\dto\v1\response\FlightPlanDTO;
 use tests\fixtures\AuthAssignmentFixture;
 use tests\fixtures\SubmittedFlightPlanFixture;
 use \ApiTester;

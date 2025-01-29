@@ -3,7 +3,7 @@
 namespace app\modules\api\controllers\v1;
 
 use app\models\SubmittedFlightPlan;
-use app\modules\api\dto\v1\FlightPlanDTO;
+use app\modules\api\dto\v1\response\FlightPlanDTO;
 use yii\filters\auth\HttpBearerAuth;
 use yii\rest\Controller;
 use yii\web\NotFoundHttpException;

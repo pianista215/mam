@@ -135,35 +135,69 @@ CREATE TABLE `submitted_flight_plan` (
   CONSTRAINT `submitted_flightplans_routes_FK` FOREIGN KEY (`route_id`) REFERENCES `route` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `flight_report` (
+CREATE TABLE `flight` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `aircraft_name` varchar(100) NOT NULL,
   `pilot_id` int(10) unsigned NOT NULL,
-  `departure_icao` char(4) NOT NULL,
-  `arrival_icao` char(4) NOT NULL,
-  `alt1_icao` char(4) NOT NULL,
-  `alt2_icao` char(4) DEFAULT NULL,
-  `distance_nm` smallint(5) unsigned NOT NULL,
-  `duration_min` char(4) NOT NULL,
+  `aircraft_id` int(10) unsigned NOT NULL,
+  `code` varchar(10) NOT NULL,
+  `departure` char(4) NOT NULL,
+  `arrival` char(4) NOT NULL,
+  `alternative1_icao` char(4) NOT NULL,
+  `alternative2_icao` char(4) DEFAULT NULL,
   `flight_rules` char(1) NOT NULL,
-  `flight_type` char(1) NOT NULL,
-  `cruise_speed` varchar(5) NOT NULL,
-  `flight_level` varchar(5) NOT NULL,
+  `cruise_speed_value` varchar(4) NOT NULL,
+  `cruise_speed_unit` char(1) NOT NULL,
+  `flight_level_value` varchar(4) NOT NULL,
+  `flight_level_unit` varchar(3) NOT NULL,
   `route` varchar(400) NOT NULL,
   `estimated_time` char(4) NOT NULL,
   `other_information` varchar(400) NOT NULL,
   `endurance_time` char(4) NOT NULL,
-  `aircraft_type_icao` char(4) NOT NULL,
-  `flight_date` datetime NOT NULL,
-  `aircraft_registration` varchar(10) NOT NULL,
+  `report_tool` varchar(20) NOT NULL,
+  `status` char(1) NOT NULL DEFAULT 'C',
+  `creation_date` datetime NOT NULL DEFAULT current_timestamp(),
+  `network` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `flight_pilot_FK` (`pilot_id`),
+  KEY `flight_aircraft_FK` (`aircraft_id`),
+  KEY `flight_departure_FK` (`departure`),
+  KEY `flight_arrival_FK` (`arrival`),
+  KEY `flight_alt1_FK` (`alternative1_icao`),
+  KEY `flight_alt2_FK` (`alternative2_icao`),
+  CONSTRAINT `flight_aircraft_FK` FOREIGN KEY (`aircraft_id`) REFERENCES `aircraft` (`id`) ON UPDATE CASCADE,
+  CONSTRAINT `flight_alt1_FK` FOREIGN KEY (`alternative1_icao`) REFERENCES `airport` (`icao_code`) ON UPDATE CASCADE,
+  CONSTRAINT `flight_alt2_FK` FOREIGN KEY (`alternative2_icao`) REFERENCES `airport` (`icao_code`) ON UPDATE CASCADE,
+  CONSTRAINT `flight_arrival_FK` FOREIGN KEY (`arrival`) REFERENCES `airport` (`icao_code`) ON UPDATE CASCADE,
+  CONSTRAINT `flight_departure_FK` FOREIGN KEY (`departure`) REFERENCES `airport` (`icao_code`) ON UPDATE CASCADE,
+  CONSTRAINT `flight_pilot_FK` FOREIGN KEY (`pilot_id`) REFERENCES `pilot` (`id`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `flight_report` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `flight_id` bigint(20) unsigned NOT NULL,
+  `start_time` datetime DEFAULT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `flight_time_minutes` smallint(5) unsigned DEFAULT NULL,
+  `block_time_minutes` smallint(5) unsigned DEFAULT NULL,
+  `total_fuel_burn_kg` mediumint(8) unsigned DEFAULT NULL,
+  `distance_nm` mediumint(8) unsigned DEFAULT NULL,
   `pilot_comments` varchar(400) DEFAULT NULL,
   `validator_comments` varchar(400) DEFAULT NULL,
-  `zfw` int(10) unsigned NOT NULL,
-  `block_fuel` int(10) unsigned NOT NULL,
-  `initial_fuel` int(10) unsigned NOT NULL,
-  `consumed_fuel` int(10) unsigned NOT NULL,
-  `network` varchar(15) NOT NULL,
+  `initial_fuel_on_board` mediumint(8) unsigned DEFAULT NULL,
+  `zero_fuel_weight` int(10) unsigned DEFAULT NULL,
+  `crash` tinyint(1) DEFAULT NULL,
+  `sim_aircraft_name` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `flight_report_pilots_FK` (`pilot_id`),
-  CONSTRAINT `flight_report_pilots_FK` FOREIGN KEY (`pilot_id`) REFERENCES `pilot` (`id`) ON UPDATE CASCADE
+  UNIQUE KEY `flight_report_unique` (`flight_id`),
+  CONSTRAINT `flight_report_flight_FK` FOREIGN KEY (`flight_id`) REFERENCES `flight` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `acars_file` (
+  `chunk_id` tinyint(3) unsigned NOT NULL,
+  `flight_report_id` bigint(20) unsigned NOT NULL,
+  `sha256sum` char(44) NOT NULL,
+  `upload_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`flight_report_id`,`chunk_id`),
+  CONSTRAINT `acars_file_flight_report_FK` FOREIGN KEY (`flight_report_id`) REFERENCES `flight_report` (`id`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+

@@ -2,7 +2,7 @@
 
 namespace tests\api\v1\auth;
 
-use app\modules\api\dto\v1\TokenInfoDTO;
+use app\modules\api\dto\v1\response\TokenInfoDTO;
 use tests\fixtures\AuthAssignmentFixture;
 use \ApiTester;
 
