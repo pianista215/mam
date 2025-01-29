@@ -20,6 +20,7 @@ use yii\web\ConflictHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\ServerErrorHttpException;
 use yii\web\Response;
+use yii\web\UploadedFile;
 use Yii;
 
 /**
@@ -37,6 +38,8 @@ class FlightReportController extends Controller
 
         return $behaviors;
     }
+
+    // TODO: IN general we need to log all the methods in that an other controllers
 
     /**
      * Close the flight plan, create the flight, the report and prepare the acars files to be uploaded
@@ -179,7 +182,7 @@ class FlightReportController extends Controller
 
     public function actionUploadChunk($flight_report_id, $chunk_id)
     {
-        $storagePath = Config::get('chunks_storage_path', '/tmp/chunks_storage_path');
+        $storagePath = Config::get('chunks_storage_path');
 
         $transaction = Yii::$app->db->beginTransaction();
         try {
@@ -221,15 +224,16 @@ class FlightReportController extends Controller
             }
 
             $tempFilePath = $chunkFilePath . '.tmp';
-            if (!$uploadedFile->saveAs($tempFilePath)) {
-                throw new ServerErrorHttpException("Failed to save the uploaded chunk.");
+            // Problem to be fixed by yii2 and codeception (https://github.com/yiisoft/yii2/issues/14260)
+            if (!$uploadedFile->saveAs($tempFilePath, !YII_ENV_TEST)) {
+                throw new ServerErrorHttpException("Failed to save the uploaded chunk.".json_encode($uploadedFile));
             }
 
             $expectedSha256 = $chunk->sha256sum;
-            $actualSha256 = hash_file('sha256', $tempFilePath);
+            $actualSha256 = base64_encode(hash_file('sha256', $tempFilePath, true));
             if ($expectedSha256 !== $actualSha256) {
                 unlink($tempFilePath);
-                throw new BadRequestHttpException("SHA256 mismatch. Expected: $expectedSha256, Actual: $actualSha256");
+                throw new BadRequestHttpException("SHA256 mismatch. Expected: $expectedSha256, Actual: $actualSha256.");
             }
 
             rename($tempFilePath, $chunkFilePath);
@@ -244,9 +248,9 @@ class FlightReportController extends Controller
                 ->exists();
 
             if (!$pendingChunks) {
-                $flightReport->status = 'S';
-                if (!$flightReport->save()) {
-                    throw new ServerErrorHttpException('Failed to update flight report status: ' . json_encode($flightReport->getErrors()));
+                $flight->status = 'S';
+                if (!$flight->save()) {
+                    throw new ServerErrorHttpException('Failed to update flight status: ' . json_encode($flightReport->getErrors()));
                 }
             }
 

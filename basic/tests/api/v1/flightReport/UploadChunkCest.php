@@ -2,10 +2,10 @@
 
 namespace tests\api\v1\flightReport;
 
+use app\config\Config;
 use app\modules\api\dto\v1\response\FlightPlanDTO;
 use tests\fixtures\AcarsFileFixture;
 use tests\fixtures\AuthAssignmentFixture;
-
 use \ApiTester;
 
 class UploadChunkCest
@@ -26,12 +26,14 @@ class UploadChunkCest
 
     private function getTestFilePath($fileName)
     {
+        Config::set('chunks_storage_path', '/tmp/chunk_tests');
+        shell_exec("rm -rf /tmp/chunk_tests");
         return codecept_data_dir('chunks') . DIRECTORY_SEPARATOR . $fileName;
     }
 
     public function testUserUnauthenticated(ApiTester $I)
     {
-        $filePath = $this->getTestFilePath('1_1.tmp');
+        $filePath = $this->getTestFilePath('2_1.tmp');
         $I->sendPOST('/flight-report/upload-chunk/?flight_report_id=2&chunk_id=1', [], ['chunkFile' => $filePath]);
         $I->seeResponseCodeIs(401);
         $I->seeResponseContainsJson([
@@ -43,7 +45,7 @@ class UploadChunkCest
     public function testUserAuthenticatedTryingOtherUserFlightReport(ApiTester $I)
     {
         $this->loginAsUser(1, $I);
-        $filePath = $this->getTestFilePath('1_1.tmp');
+        $filePath = $this->getTestFilePath('2_1.tmp');
         $I->sendPOST('/flight-report/upload-chunk/?flight_report_id=2&chunk_id=1', [], ['chunkFile' => $filePath]);
         $I->seeResponseCodeIs(404);
         $I->seeResponseContainsJson([
@@ -55,7 +57,7 @@ class UploadChunkCest
     public function testChunkDoesNotExist(ApiTester $I)
     {
         $this->loginAsUser(5, $I);
-        $filePath = $this->getTestFilePath('1_1.tmp');
+        $filePath = $this->getTestFilePath('2_1.tmp');
         $I->sendPOST('/flight-report/upload-chunk/?flight_report_id=2&chunk_id=99', [], ['chunkFile' => $filePath]);
         $I->seeResponseCodeIs(404);
         $I->seeResponseContainsJson([
@@ -71,7 +73,7 @@ class UploadChunkCest
         $chunk->save();
 
         $this->loginAsUser(5, $I);
-        $filePath = $this->getTestFilePath('1_1.tmp');
+        $filePath = $this->getTestFilePath('2_1.tmp');
         $I->sendPOST('/flight-report/upload-chunk/?flight_report_id=2&chunk_id=1', [], ['chunkFile' => $filePath]);
         $I->seeResponseCodeIs(409);
         $I->seeResponseContainsJson([
@@ -84,7 +86,7 @@ class UploadChunkCest
     {
         $this->loginAsUser(5, $I);
 
-        $filePath = $this->getTestFilePath('1_1.tmp');
+        $filePath = $this->getTestFilePath('2_1.tmp');
         $I->sendPOST('/flight-report/upload-chunk/?flight_report_id=1&chunk_id=1', [], ['chunkFile' => $filePath]);
         $I->seeResponseCodeIs(404);
         $I->seeResponseContainsJson([
@@ -108,49 +110,50 @@ class UploadChunkCest
         ]);
     }
 
-    /*public function testSha256Mismatch(ApiTester $I)
+    public function testSha256Mismatch(ApiTester $I)
     {
-        $this->loginAsUser(1, $I);
-        $filePath = $this->getTestFilePath('1_invalid.tmp');
+        $this->loginAsUser(5, $I);
+        $filePath = $this->getTestFilePath('2_1.tmp');
 
-        $I->sendPOST('/api/v1/flight-report/1/chunk/1', [], ['chunkFile' => $filePath]);
+        $I->sendPOST('/flight-report/upload-chunk/?flight_report_id=2&chunk_id=2', [], ['chunkFile' => $filePath]);
         $I->seeResponseCodeIs(400);
         $I->seeResponseContainsJson([
             'name' => 'Bad Request',
-            'message' => 'SHA256 mismatch.',
+            'message' => 'SHA256 mismatch. Expected: PmtFqus0mL0i3oG98cmbUhXanlxWY4OL8EZ7PrWjsis=, Actual: jAZt2dCY/JiFOgRk5IKYJRJ7dWAw4PHzvOmtDaAd1Lk=.',
         ]);
     }
 
-    public function testValidChunkUpload(ApiTester $I)
+    public function testValidChunkUploadPendingChunks(ApiTester $I)
     {
-        $this->loginAsUser(1, $I);
-        $filePath = $this->getTestFilePath('1_1.tmp');
+        $this->loginAsUser(5, $I);
+        $filePath = $this->getTestFilePath('2_1.tmp');
 
-        $chunk = \app\models\AcarsFile::findOne(['chunk_id' => 1, 'flight_report_id' => 1]);
-        $chunk->sha256sum = hash_file('sha256', $filePath);
-        $chunk->save();
-
-        $I->sendPOST('/api/v1/flight-report/1/chunk/1', [], ['chunkFile' => $filePath]);
+        $I->sendPOST('/flight-report/upload-chunk/?flight_report_id=2&chunk_id=1', [], ['chunkFile' => $filePath]);
         $I->seeResponseCodeIs(200);
         $I->seeResponseContainsJson(['status' => 'success']);
+
+        $chunk = \app\models\AcarsFile::findOne(['flight_report_id' => 2,'chunk_id' => 1]);
+        $I->assertNotNull($chunk->upload_date);
+
+        $flight_report = \app\models\FlightReport::findOne(['id' => 2]);
+        $flight = \app\models\Flight::findOne(['id' => $flight_report->flight_id]);
+        $I->assertEquals('C', $flight->status);
     }
 
-    public function testAllChunksUploaded(ApiTester $I)
+    public function testValidUploadLastPendingChunk(ApiTester $I)
     {
-        $this->loginAsUser(1, $I);
+        $this->loginAsUser(5, $I);
+        $filePath = $this->getTestFilePath('5_1.tmp');
 
-        $chunks = \app\models\AcarsFile::findAll(['flight_report_id' => 1]);
-        foreach ($chunks as $chunk) {
-            $filePath = $this->getTestFilePath("1_{$chunk->chunk_id}.tmp");
-            $chunk->sha256sum = hash_file('sha256', $filePath);
-            $chunk->save();
+        $I->sendPOST('/flight-report/upload-chunk/?flight_report_id=5&chunk_id=1', [], ['chunkFile' => $filePath]);
+        $I->seeResponseCodeIs(200);
+        $I->seeResponseContainsJson(['status' => 'success']);
 
-            $I->sendPOST("/api/v1/flight-report/1/chunk/{$chunk->chunk_id}", [], ['chunkFile' => $filePath]);
-            $I->seeResponseCodeIs(200);
-            $I->seeResponseContainsJson(['status' => 'success']);
-        }
+        $chunk = \app\models\AcarsFile::findOne(['flight_report_id' => 5,'chunk_id' => 1]);
+        $I->assertNotNull($chunk->upload_date);
 
-        $flightReport = \app\models\FlightReport::findOne(1);
-        $I->assertEquals('S', $flightReport->status, 'Flight report status should be updated to "S".');
-    }*/
+        $flight_report = \app\models\FlightReport::findOne(['id' => 5]);
+        $flight = \app\models\Flight::findOne(['id' => $flight_report->flight_id]);
+        $I->assertEquals('S', $flight->status);
+    }
 }
