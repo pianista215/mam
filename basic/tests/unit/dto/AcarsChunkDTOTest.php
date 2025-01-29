@@ -13,7 +13,7 @@ class AcarsChunkDTOTest extends BaseUnitTest
     {
         $data = [
             'id' => 1,
-            'sha256' => str_repeat('a', 64),
+            'sha256sum' => str_repeat('a', 44),
         ];
 
         $chunk = new AcarsChunkDTO();
@@ -32,27 +32,27 @@ class AcarsChunkDTOTest extends BaseUnitTest
         $chunk->load($data, '');
 
         $this->assertFalse($chunk->validate(), 'Chunk without sha256 should fail validation.');
-        $this->assertArrayHasKey('sha256', $chunk->getErrors(), 'Error message for sha256 should be present.');
+        $this->assertArrayHasKey('sha256sum', $chunk->getErrors(), 'Error message for sha256 should be present.');
     }
 
     public function testChunkWithInvalidSha256Length()
     {
         $data = [
             'id' => 1,
-            'sha256' => str_repeat('a', 63),
+            'sha256sum' => str_repeat('a', 43),
         ];
 
         $chunk = new AcarsChunkDTO();
         $chunk->load($data, '');
 
         $this->assertFalse($chunk->validate(), 'Chunk with invalid sha256 length should fail validation.');
-        $this->assertArrayHasKey('sha256', $chunk->getErrors(), 'Error message for sha256 should be present.');
+        $this->assertArrayHasKey('sha256sum', $chunk->getErrors(), 'Error message for sha256 should be present.');
     }
 
     public function testChunkWithoutId()
     {
         $data = [
-            'sha256' => str_repeat('a', 64),
+            'sha256sum' => str_repeat('a', 44),
         ];
 
         $chunk = new AcarsChunkDTO();
