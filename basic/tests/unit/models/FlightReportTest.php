@@ -108,6 +108,7 @@ class FlightReportTest extends BaseUnitTest
             'arrival' => 'LEBL',
             'alternative1_icao' => 'LEVC',
             'alternative2_icao' => 'LEAL',
+            'flight_rules' => 'I',
             'code' => 'FLT001',
             'cruise_speed_value' => '450',
             'cruise_speed_unit' => 'N',
