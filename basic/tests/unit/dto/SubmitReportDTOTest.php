@@ -22,7 +22,7 @@ class SubmitReportDTOTest extends BaseUnitTest
             'start_time' => '2025-01-01 12:00:00',
             'end_time' => '2025-01-01 14:00:00',
             'chunks' => [
-                ['id' => 1, 'sha256' => str_repeat('a', 64)],
+                ['id' => 1, 'sha256sum' => str_repeat('a', 44)],
             ],
         ];
 
@@ -44,9 +44,9 @@ class SubmitReportDTOTest extends BaseUnitTest
             'start_time' => '2025-01-01 12:00:00',
             'end_time' => '2025-01-01 14:00:00',
             'chunks' => [
-                ['id' => 1, 'sha256' => str_repeat('a', 64)],
-                ['id' => 2, 'sha256' => str_repeat('b', 64)],
-                ['id' => 3, 'sha256' => str_repeat('c', 64)],
+                ['id' => 1, 'sha256sum' => str_repeat('a', 44)],
+                ['id' => 2, 'sha256sum' => str_repeat('b', 44)],
+                ['id' => 3, 'sha256sum' => str_repeat('c', 44)],
             ],
         ];
 
@@ -89,8 +89,8 @@ class SubmitReportDTOTest extends BaseUnitTest
             'start_time' => '2025-01-01 12:00:00',
             'end_time' => '2025-01-01 14:00:00',
             'chunks' => [
-                ['id' => 1, 'sha256' => str_repeat('a', 64)],
-                ['id' => 1, 'sha256' => str_repeat('b', 64)], // Duplicate ID
+                ['id' => 1, 'sha256sum' => str_repeat('a', 44)],
+                ['id' => 1, 'sha256sum' => str_repeat('b', 44)], // Duplicate ID
             ],
         ];
 
@@ -113,9 +113,9 @@ class SubmitReportDTOTest extends BaseUnitTest
             'start_time' => '2025-01-01 12:00:00',
             'end_time' => '2025-01-01 14:00:00',
             'chunks' => [
-                ['id' => 1, 'sha256' => str_repeat('a', 64)],
-                ['id' => 2, 'sha256' => str_repeat('b', 64)],
-                ['id' => 4, 'sha256' => str_repeat('c', 64)], // Missing ID 3
+                ['id' => 1, 'sha256sum' => str_repeat('a', 44)],
+                ['id' => 2, 'sha256sum' => str_repeat('b', 44)],
+                ['id' => 4, 'sha256sum' => str_repeat('c', 44)], // Missing ID 3
             ],
         ];
 
@@ -138,8 +138,8 @@ class SubmitReportDTOTest extends BaseUnitTest
             'start_time' => '2025-01-01 12:00:00',
             'end_time' => '2025-01-01 14:00:00',
             'chunks' => [
-                ['id' => 1, 'sha256' => str_repeat('a', 64)],
-                ['id' => 2, 'sha256' => 'short'], // Invalid sha256
+                ['id' => 1, 'sha256sum' => str_repeat('a', 44)],
+                ['id' => 2, 'sha256sum' => 'short'], // Invalid sha256
             ],
         ];
 
@@ -162,7 +162,7 @@ class SubmitReportDTOTest extends BaseUnitTest
             'start_time' => '2025-01-01 12:00:00',
             'end_time' => '2025-01-01 14:00:00',
             'chunks' => [
-                ['id' => 1, 'sha256' => str_repeat('a', 64)],
+                ['id' => 1, 'sha256sum' => str_repeat('a', 44)],
             ],
         ];
 
@@ -185,7 +185,7 @@ class SubmitReportDTOTest extends BaseUnitTest
             'start_time' => '2025-01-01 12:00:00',
             'end_time' => '2025-01-01 14:00:00',
             'chunks' => [
-                ['id' => 1, 'sha256' => str_repeat('a', 64)],
+                ['id' => 1, 'sha256sum' => str_repeat('a', 44)],
             ],
         ];
 
@@ -208,7 +208,7 @@ class SubmitReportDTOTest extends BaseUnitTest
             'start_time' => '01-01-2025 12:00:00', // Invalid format
             'end_time' => '2025-01-01T14:00:00', // Invalid format
             'chunks' => [
-                ['id' => 1, 'sha256' => str_repeat('a', 64)],
+                ['id' => 1, 'sha256sum' => str_repeat('a', 44)],
             ],
         ];
 
@@ -232,7 +232,7 @@ class SubmitReportDTOTest extends BaseUnitTest
             'start_time' => '2025-01-01 12:00:00',
             'end_time' => '2025-01-01 14:00:00',
             'chunks' => [
-                ['id' => 1, 'sha256' => str_repeat('a', 64)],
+                ['id' => 1, 'sha256sum' => str_repeat('a', 44)],
             ],
         ];
 
