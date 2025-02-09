@@ -53,7 +53,7 @@ class Flight extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['pilot_id', 'aircraft_id', 'code', 'departure', 'arrival', 'alternative1_icao', 'flight_rules', 'cruise_speed_value', 'cruise_speed_unit', 'flight_level_value', 'flight_level_unit', 'route', 'estimated_time', 'other_information', 'endurance_time', 'report_tool'], 'required'],
+            [['pilot_id', 'aircraft_id', 'code', 'departure', 'arrival', 'alternative1_icao', 'flight_rules', 'cruise_speed_value', 'cruise_speed_unit', 'flight_level_unit', 'route', 'estimated_time', 'other_information', 'endurance_time', 'report_tool'], 'required'],
             [['pilot_id', 'aircraft_id'], 'integer'],
             [['creation_date'], 'safe'],
             [['code'], 'string', 'max' => 10],
