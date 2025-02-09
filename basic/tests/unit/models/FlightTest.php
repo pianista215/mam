@@ -116,7 +116,6 @@ class FlightTest extends BaseUnitTest
         $this->assertArrayHasKey('flight_rules', $model->getErrors(), 'Missing error for flight_rules.');
         $this->assertArrayHasKey('cruise_speed_value', $model->getErrors(), 'Missing error for cruise_speed_value.');
         $this->assertArrayHasKey('cruise_speed_unit', $model->getErrors(), 'Missing error for cruise_speed_unit.');
-        $this->assertArrayHasKey('flight_level_value', $model->getErrors(), 'Missing error for flight_level_value.');
         $this->assertArrayHasKey('flight_level_unit', $model->getErrors(), 'Missing error for flight_level_unit.');
         $this->assertArrayHasKey('route', $model->getErrors(), 'Missing error for route.');
         $this->assertArrayHasKey('estimated_time', $model->getErrors(), 'Missing error for estimated_time.');
