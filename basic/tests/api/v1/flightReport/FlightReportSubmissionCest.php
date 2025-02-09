@@ -407,5 +407,44 @@ class FlightReportSubmissionCest
         $I->assertEquals($file->sha256sum, str_repeat('D', 44));
     }
 
+    public function testValidFlightReportSubmissionVFR(ApiTester $I)
+    {
+        $request = [
+            'pilot_comments' => 'Good flight',
+            'last_position_lat' => 38.280722,
+            'last_position_lon' => -0.55235,
+            'network' => 'IVAO',
+            'sim_aircraft_name' => 'Xplane King Air 350',
+            'report_tool' => 'Mam Acars 1.0',
+            'start_time' => '2025-02-01 11:00:00',
+            'end_time' => '2025-02-01 12:15:13',
+            'chunks' => [
+                ['id' => 1, 'sha256sum' => str_repeat('A', 44)],
+            ]
+        ];
+
+        // Check we are not having strange issues without Flight Level Unit
+        $this->loginAsUser(6, $I);
+        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=2', $request);
+        $I->seeResponseCodeIs(200);
+
+        $response = $I->grabResponse();
+        $data = json_decode($response, true);
+        $I->assertArrayHasKey('flight_report_id', $data);
+        $I->assertCount(1, $data);
+
+        $flight_report_id = $data['flight_report_id'];
+
+        $flight_report = \app\models\FlightReport::find()->where(['id' => $flight_report_id])->one();
+        $I->assertEquals($flight_report->pilot_comments, 'Good flight');
+        $I->assertEquals($flight_report->sim_aircraft_name, 'Xplane King Air 350');
+        $I->assertEquals($flight_report->start_time, '2025-02-01 11:00:00');
+        $I->assertEquals($flight_report->end_time, '2025-02-01 12:15:13');
+
+        $flight = \app\models\Flight::find()->where(['id' => $flight_report->flight_id])->one();
+        $I->assertEquals($flight->flight_level_unit, 'VFR');
+        $I->assertEquals($flight->flight_level_value, '');
+    }
+
 
 }
