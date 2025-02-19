@@ -46,15 +46,39 @@ class FlightReportController extends Controller
      */
     public function actionSubmitReport($flight_plan_id)
     {
-        $submittedFlightPlan = SubmittedFlightPlan::findOne(['pilot_id' => Yii::$app->user->identity->id]);
-        if(!$submittedFlightPlan){
-            throw new NotFoundHttpException("The user hasn't any submitted flight plan.");
-        } else if($submittedFlightPlan->id != $flight_plan_id){
-            throw new NotFoundHttpException("User flight plan and sent flight plan doesn't match.");
-        }
-
         $dto = new SubmitReportDTO();
         if ($dto->load(Yii::$app->request->post(), '') && $dto->validate()) {
+            $lastReportedFlight = Flight::find()
+                ->where([
+                    'pilot_id' => Yii::$app->user->identity->id,
+                    'status' => 'C',
+                ])
+                ->orderBy(['creation_date' => SORT_DESC])
+                ->limit(1)
+                ->one();
+
+            if ($lastReportedFlight && $lastReportedFlight->flightReport) {
+                $existingReport = $lastReportedFlight->flightReport;
+                $existingChunks = array_map(function ($chunk) {
+                    return $chunk->sha256sum;
+                }, $existingReport->acarsFiles);
+
+                $submittedChunks = array_map(function ($chunk) {
+                    return $chunk['sha256sum'];
+                }, $dto->chunks);
+
+                if (array_diff($submittedChunks, $existingChunks) === array_diff($existingChunks, $submittedChunks)) {
+                    return new ReportSavedDTO(['flight_report_id' => $existingReport->id]);
+                }
+            }
+
+            $submittedFlightPlan = SubmittedFlightPlan::findOne(['pilot_id' => Yii::$app->user->identity->id]);
+            if(!$submittedFlightPlan){
+                throw new NotFoundHttpException("The user hasn't any submitted flight plan.");
+            } else if($submittedFlightPlan->id != $flight_plan_id){
+                throw new NotFoundHttpException("User flight plan and sent flight plan doesn't match.");
+            }
+
             $transaction = Yii::$app->db->beginTransaction();
             try {
 

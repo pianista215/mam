@@ -332,16 +332,6 @@ class FlightReportSubmissionCest
         $I->assertEquals($flight->code, 'R003');
         $I->assertEquals($flight->status, 'C');
 
-        // If we try to close another time the FPL we have an error
-        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=1', $request);
-        $I->seeResponseCodeIs(404);
-        $I->seeResponseContainsJson([
-            'name' => 'Not Found',
-            'message' => 'The user hasn\'t any submitted flight plan.',
-            'code' => 0,
-            'status' => 404
-        ]);
-
         return $flight_report_id;
     }
 
@@ -444,6 +434,79 @@ class FlightReportSubmissionCest
         $flight = \app\models\Flight::find()->where(['id' => $flight_report->flight_id])->one();
         $I->assertEquals($flight->flight_level_unit, 'VFR');
         $I->assertEquals($flight->flight_level_value, '');
+    }
+
+    public function testValidFlightReportSubmissionTwice(ApiTester $I)
+    {
+        /* If the report is sent twice (bad network, we expect just to have the report id
+         * if the chunks matches with the last sent flight and the flight is in status 'C'
+         */
+        $request = [
+            'pilot_comments' => 'Good flight',
+            'last_position_lat' => 38.280722,
+            'last_position_lon' => -0.55235,
+            'network' => 'IVAO',
+            'sim_aircraft_name' => 'Xplane King Air 350',
+            'report_tool' => 'Mam Acars 1.0',
+            'start_time' => '2025-02-01 11:00:00',
+            'end_time' => '2025-02-01 12:15:13',
+            'chunks' => [
+                ['id' => 1, 'sha256sum' => str_repeat('A', 44)],
+            ]
+        ];
+
+        $flight_report_id = $this->testValidWithRequest($I, $request);
+
+        $acars_files = \app\models\AcarsFile::find()->where(['flight_report_id' => $flight_report_id])->all();
+        $I->assertCount(1, $acars_files);
+        $file = $acars_files[0];
+        $I->assertEquals($file->chunk_id, 1);
+        $I->assertEquals($file->sha256sum, str_repeat('A', 44));
+
+        $second_flight_report_id = $this->testValidWithRequest($I, $request);
+
+        $I->assertEquals($flight_report_id, $second_flight_report_id);
+    }
+
+    public function testValidFlightReportSubmissionTwiceError(ApiTester $I)
+    {
+        /* If the report is sent twice (bad network, we expect just to have the report id
+         * if the chunks matches with the last sent flight and the flight is in status 'C'
+         */
+        $request = [
+            'pilot_comments' => 'Good flight',
+            'last_position_lat' => 38.280722,
+            'last_position_lon' => -0.55235,
+            'network' => 'IVAO',
+            'sim_aircraft_name' => 'Xplane King Air 350',
+            'report_tool' => 'Mam Acars 1.0',
+            'start_time' => '2025-02-01 11:00:00',
+            'end_time' => '2025-02-01 12:15:13',
+            'chunks' => [
+                ['id' => 1, 'sha256sum' => str_repeat('A', 44)],
+            ]
+        ];
+
+        $flight_report_id = $this->testValidWithRequest($I, $request);
+
+        $acars_files = \app\models\AcarsFile::find()->where(['flight_report_id' => $flight_report_id])->all();
+        $I->assertCount(1, $acars_files);
+        $file = $acars_files[0];
+        $I->assertEquals($file->chunk_id, 1);
+        $I->assertEquals($file->sha256sum, str_repeat('A', 44));
+
+        // If we try to close another time the FPL but with other chunks we expect an error
+        $request['chunks'] = [
+            ['id' => 1, 'sha256sum' => str_repeat('B', 44)],
+        ];
+        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=1', $request);
+        $I->seeResponseCodeIs(404);
+        $I->seeResponseContainsJson([
+            'name' => 'Not Found',
+            'message' => 'The user hasn\'t any submitted flight plan.',
+            'code' => 0,
+            'status' => 404
+        ]);
     }
 
 
