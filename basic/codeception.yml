@@ -26,3 +26,4 @@ coverage:
             - controllers/*
             - commands/*
             - mail/*
+            - views/*
