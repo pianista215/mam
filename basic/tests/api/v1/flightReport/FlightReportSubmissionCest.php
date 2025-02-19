@@ -45,8 +45,21 @@ class FlightReportSubmissionCest
 
     public function testUserAuthenticatedWithoutFlightPlan(ApiTester $I)
     {
+        $validDataRequest = [
+            'pilot_comments' => 'Good flight',
+            'last_position_lat' => 38.280722,
+            'last_position_lon' => -0.55235,
+            'network' => 'IVAO',
+            'sim_aircraft_name' => 'Xplane King Air 350',
+            'report_tool' => 'Mam Acars 1.0',
+            'start_time' => '2025-02-01 11:00:00',
+            'end_time' => '2025-02-01 12:15:13',
+            'chunks' => [
+                ['id' => 1, 'sha256sum' => str_repeat('A', 44)],
+            ]
+        ];
         $this->loginAsUser(1, $I);
-        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=1');
+        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=1', $validDataRequest);
         $I->seeResponseCodeIs(404);
         $I->seeResponseContainsJson([
             'name' => 'Not Found',
@@ -59,7 +72,20 @@ class FlightReportSubmissionCest
     public function testUserTriesToSubmitReportForAnotherFlightPlan(ApiTester $I)
     {
         $this->loginAsUser(5, $I);
-        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=3');
+        $validDataRequest = [
+            'pilot_comments' => 'Good flight',
+            'last_position_lat' => 38.280722,
+            'last_position_lon' => -0.55235,
+            'network' => 'IVAO',
+            'sim_aircraft_name' => 'Xplane King Air 350',
+            'report_tool' => 'Mam Acars 1.0',
+            'start_time' => '2025-02-01 11:00:00',
+            'end_time' => '2025-02-01 12:15:13',
+            'chunks' => [
+                ['id' => 1, 'sha256sum' => str_repeat('A', 44)],
+            ]
+        ];
+        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=3', $validDataRequest);
         $I->seeResponseCodeIs(404);
         $I->seeResponseContainsJson([
             'name' => 'Not Found',
