@@ -491,7 +491,7 @@ class FlightReportSubmissionCest
 
         $second_flight_report_id = $this->testValidWithRequest($I, $request);
 
-        $I->assertEquals($flight_report_id, $second_flight_report_id);
+        $I->assertSame($flight_report_id, $second_flight_report_id);
     }
 
     public function testValidFlightReportSubmissionTwiceError(ApiTester $I)
