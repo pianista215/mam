@@ -59,7 +59,7 @@ class AuthController extends Controller
 
         $dto = TokenInfoDTO::fromModel($pilot);
 
-        $this->logInfo('New token generated for', $license);
+        $this->logInfo('Login OK', $license);
 
         return $dto;
     }
