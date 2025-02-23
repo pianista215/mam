@@ -33,7 +33,7 @@ class FlightPlanController extends Controller
     {
         $submittedFlightPlan = SubmittedFlightPlan::findOne(['pilot_id' => Yii::$app->user->identity->id]);
         if(!$submittedFlightPlan){
-            $this->logError('Flight plan not found', Yii::$app->user->identity->id);
+            $this->logError('Flight plan not found', Yii::$app->user->identity->license);
             throw new NotFoundHttpException('Flight plan not found.');
         }
 

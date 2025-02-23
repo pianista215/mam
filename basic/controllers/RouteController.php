@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\helpers\LoggerTrait;
 use app\models\Route;
 use app\models\RouteSearch;
 use yii\web\Controller;
@@ -15,6 +16,8 @@ use Yii;
  */
 class RouteController extends Controller
 {
+    use LoggerTrait;
+
     /**
      * @inheritDoc
      */
@@ -75,6 +78,7 @@ class RouteController extends Controller
 
             if ($this->request->isPost) {
                 if ($model->load($this->request->post()) && $model->save()) {
+                    $this->logInfo('Created route', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
                     return $this->redirect(['view', 'id' => $model->id]);
                 }
             } else {
@@ -102,6 +106,7 @@ class RouteController extends Controller
             $model = $this->findModel($id);
 
             if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
+                $this->logInfo('Updated route', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
                 return $this->redirect(['view', 'id' => $model->id]);
             }
 
@@ -124,7 +129,7 @@ class RouteController extends Controller
     {
         if(Yii::$app->user->can('routeCrud')){
             $this->findModel($id)->delete();
-
+            $this->logInfo('Deleted route', ['id' => $id, 'user' => Yii::$app->user->identity->license]);
             return $this->redirect(['index']);
         } else {
             throw new ForbiddenHttpException();

@@ -82,10 +82,10 @@ class FlightReportController extends Controller
 
             $submittedFlightPlan = SubmittedFlightPlan::findOne(['pilot_id' => Yii::$app->user->identity->id]);
             if(!$submittedFlightPlan){
-                $this->logError('User without submitted flight plan', Yii::$app->user->identity->id);
+                $this->logError('User without submitted flight plan', Yii::$app->user->identity->license);
                 throw new NotFoundHttpException("The user hasn't any submitted flight plan.");
             } else if($submittedFlightPlan->id != $flight_plan_id){
-                $this->logError('User flight plan and sent mismatch', ['submitted' => $submittedFlightPlan->id, 'db' => $flight_plan_id, 'user' => Yii::$app->user->identity->id]);
+                $this->logError('User flight plan and sent mismatch', ['submitted' => $submittedFlightPlan->id, 'db' => $flight_plan_id, 'user' => Yii::$app->user->identity->license]);
                 throw new NotFoundHttpException("User flight plan and sent flight plan doesn't match.");
             }
 
@@ -236,7 +236,7 @@ class FlightReportController extends Controller
                 throw new NotFoundHttpException("Flight report not found.");
             }
 
-            $flight = Flight::findOne(['id' => $flightReport->flight_id, 'pilot_id' => Yii::$app->user->id]);
+            $flight = Flight::findOne(['id' => $flightReport->flight_id, 'pilot_id' => Yii::$app->user->license]);
             if (!$flight || !$flight->isOpenForUpload()) {
                 $this->logError('Flight access denied or not available for chunk uploads', ['id' => $flight_report_id, 'flight' => $flight]);
                 throw new NotFoundHttpException("Flight access denied or not available for chunk uploads.");

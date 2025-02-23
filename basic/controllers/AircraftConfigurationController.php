@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\helpers\LoggerTrait;
 use app\models\AircraftSearch;
 use app\models\AircraftConfiguration;
 use app\models\AircraftConfigurationSearch;
@@ -17,6 +18,8 @@ use Yii;
  */
 class AircraftConfigurationController extends Controller
 {
+    use LoggerTrait;
+
     /**
      * @inheritDoc
      */
@@ -83,6 +86,7 @@ class AircraftConfigurationController extends Controller
 
             if ($this->request->isPost) {
                 if ($model->load($this->request->post()) && $model->save()) {
+                    $this->logInfo('Created aircraft config', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
                     return $this->redirect(['view', 'id' => $model->id]);
                 }
             } else {
@@ -116,6 +120,7 @@ class AircraftConfigurationController extends Controller
             $model = $this->findModel($id);
 
             if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
+                $this->logInfo('Updated aircraft config', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
                 return $this->redirect(['view', 'id' => $model->id]);
             }
 
@@ -145,7 +150,7 @@ class AircraftConfigurationController extends Controller
     {
         if(Yii::$app->user->can('aircraftTypeCrud')){
             $this->findModel($id)->delete();
-
+            $this->logInfo('Deleted aircraft config', ['id' => $id, 'user' => Yii::$app->user->identity->license]);
             return $this->redirect(['index']);
         } else {
             throw new ForbiddenHttpException();

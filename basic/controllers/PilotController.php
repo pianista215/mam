@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\helpers\LoggerTrait;
 use app\config\Config;
 use app\models\Country;
 use app\models\Pilot;
@@ -19,6 +20,7 @@ use Yii;
  */
 class PilotController extends Controller
 {
+    use LoggerTrait;
 
     // TODO: WE NEED A RESET PASSWORD ACTION ALLOWING ADMIN OR PILOT TO RESET ITS PASSWORD
 
@@ -84,6 +86,7 @@ class PilotController extends Controller
         $now = new DateTime();
 
         if ($registrationStart === false || $registrationEnd === false) {
+            $this->logError('Invalid registration dates', ['start' => $registrationStart, 'end' => $registrationEnd]);
             throw new Exception("Invalid registration dates. Contact an admin.");
         }
 
@@ -96,6 +99,7 @@ class PilotController extends Controller
 
             if($this->request->isPost){
                 if ($model->load($this->request->post()) && $model->save()) {
+                    $this->logInfo('Pilot registered', $model->email);
                     return $this->redirect(['register-thanks']);
                 }
             } else {
@@ -137,6 +141,7 @@ class PilotController extends Controller
 
             if ($this->request->isPost) {
                 if ($model->load($this->request->post()) && $model->save()) {
+                    $this->logInfo('Pilot created by admin', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
                     return $this->redirect(['view', 'id' => $model->id]);
                 }
             } else {
@@ -171,13 +176,15 @@ class PilotController extends Controller
             $model = $this->findModel($id);
 
             if(!isset($model->license)){
-                $msg = "You can't update a user that hasn't been activated. Please active the user first.";
+                $msg = "You can't update a pilot that hasn't been activated. Please active the pilot first.";
+                $this->logError('Fail trying to update non activated pilot', ['id' => $id, 'user' => Yii::$app->user->identity->license]);
                 throw new ForbiddenHttpException($msg);
             }
 
             $model->setScenario(Pilot::SCENARIO_UPDATE);
 
             if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
+                $this->logInfo('Updated pilot', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
                 return $this->redirect(['view', 'id' => $model->id]);
             }
 
@@ -207,7 +214,7 @@ class PilotController extends Controller
     {
         if(Yii::$app->user->can('userCrud')){
             $this->findModel($id)->delete();
-
+            $this->logInfo('Deleted pilot', ['id' => $id, 'user' => Yii::$app->user->identity->license]);
             return $this->redirect(['index']);
         } else {
             throw new ForbiddenHttpException();
@@ -232,7 +239,8 @@ class PilotController extends Controller
             $model = $this->findModel($id);
 
             if(isset($model->license)){
-                $msg = "The user is already activated.";
+                $msg = "The pilot is already activated.";
+                $this->logError('Pilot already activated', ['id' => $id, 'user' => Yii::$app->user->identity->license]);
                 throw new ForbiddenHttpException($msg);
             }
 
@@ -243,6 +251,7 @@ class PilotController extends Controller
                 $pilotRole = $auth->getRole('pilot');
                 $auth->assign($pilotRole, $model->id);
                 // TODO: SEND MAIL TO THE PILOT
+                $this->logInfo('Pilot activated', ['id' => $id, 'user' => Yii::$app->user->identity->license]);
                 return $this->redirect(['view', 'id' => $model->id]);
             }
             return $this->render('activate', ['model' => $model]);
