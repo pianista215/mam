@@ -119,7 +119,7 @@ class UploadChunkCest
         $I->seeResponseCodeIs(400);
         $I->seeResponseContainsJson([
             'name' => 'Bad Request',
-            'message' => 'SHA256 mismatch. Expected: PmtFqus0mL0i3oG98cmbUhXanlxWY4OL8EZ7PrWjsis=, Actual: jAZt2dCY/JiFOgRk5IKYJRJ7dWAw4PHzvOmtDaAd1Lk=.',
+            'message' => 'SHA256 mismatch. Expected: PmtFqus0mL0i3oG98cmbUhXanlxWY4OL8EZ7PrWjsis= Actual: jAZt2dCY/JiFOgRk5IKYJRJ7dWAw4PHzvOmtDaAd1Lk=',
         ]);
     }
 
