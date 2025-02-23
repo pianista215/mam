@@ -236,7 +236,7 @@ class FlightReportController extends Controller
                 throw new NotFoundHttpException("Flight report not found.");
             }
 
-            $flight = Flight::findOne(['id' => $flightReport->flight_id, 'pilot_id' => Yii::$app->user->license]);
+            $flight = Flight::findOne(['id' => $flightReport->flight_id, 'pilot_id' => Yii::$app->user->identity->license]);
             if (!$flight || !$flight->isOpenForUpload()) {
                 $this->logError('Flight access denied or not available for chunk uploads', ['id' => $flight_report_id, 'flight' => $flight]);
                 throw new NotFoundHttpException("Flight access denied or not available for chunk uploads.");
