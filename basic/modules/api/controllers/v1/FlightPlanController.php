@@ -2,6 +2,7 @@
 
 namespace app\modules\api\controllers\v1;
 
+use app\helpers\LoggerTrait;
 use app\models\SubmittedFlightPlan;
 use app\modules\api\dto\v1\response\FlightPlanDTO;
 use yii\filters\auth\HttpBearerAuth;
@@ -15,6 +16,8 @@ use Yii;
  */
 class FlightPlanController extends Controller
 {
+    use LoggerTrait;
+
     public function behaviors()
     {
         $behaviors = parent::behaviors();
@@ -30,10 +33,13 @@ class FlightPlanController extends Controller
     {
         $submittedFlightPlan = SubmittedFlightPlan::findOne(['pilot_id' => Yii::$app->user->identity->id]);
         if(!$submittedFlightPlan){
-            throw new NotFoundHttpException("Flight plan not found.");
+            $this->logError('Flight plan not found', Yii::$app->user->identity->license);
+            throw new NotFoundHttpException('Flight plan not found.');
         }
 
         $dto = FlightPlanDTO::fromModel($submittedFlightPlan);
+
+        $this->logInfo('Retrieved Current FPL', $dto);
 
         return $dto;
     }

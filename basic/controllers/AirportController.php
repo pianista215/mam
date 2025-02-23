@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\helpers\LoggerTrait;
 use app\models\Airport;
 use app\models\AirportSearch;
 use app\models\Country;
@@ -16,6 +17,8 @@ use Yii;
  */
 class AirportController extends Controller
 {
+    use LoggerTrait;
+
     /**
      * @inheritDoc
      */
@@ -76,6 +79,7 @@ class AirportController extends Controller
 
             if ($this->request->isPost) {
                 if ($model->load($this->request->post()) && $model->save()) {
+                    $this->logInfo('Created airport', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
                     return $this->redirect(['view', 'id' => $model->id]);
                 }
             } else {
@@ -110,6 +114,7 @@ class AirportController extends Controller
             $model = $this->findModel($id);
 
             if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
+                $this->logInfo('Updated airport', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
                 return $this->redirect(['view', 'id' => $model->id]);
             }
 
@@ -139,7 +144,7 @@ class AirportController extends Controller
     {
         if(Yii::$app->user->can('airportCrud')){
             $this->findModel($id)->delete();
-
+            $this->logInfo('Deleted airport', ['id' => $id, 'user' => Yii::$app->user->identity->license]);
             return $this->redirect(['index']);
         } else {
             throw new ForbiddenHttpException();

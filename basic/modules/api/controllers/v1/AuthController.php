@@ -4,6 +4,7 @@ namespace app\modules\api\controllers\v1;
 
 use app\models\Pilot;
 use app\modules\api\dto\v1\response\TokenInfoDTO;
+use app\helpers\LoggerTrait;
 use yii\rest\Controller;
 use yii\web\Response;
 use yii\web\UnauthorizedHttpException;
@@ -11,6 +12,8 @@ use Yii;
 
 class AuthController extends Controller
 {
+    use LoggerTrait;
+
     public function behaviors()
     {
         $behaviors = parent::behaviors();
@@ -39,12 +42,14 @@ class AuthController extends Controller
         $password = $request['password'] ?? null;
 
         if (!$license || !$password) {
+            $this->logError('Request without license and password', $request);
             throw new UnauthorizedHttpException('License and password are required.');
         }
 
         $pilot = Pilot::findOne(['license' => $license]);
 
         if (!$pilot || !Yii::$app->security->validatePassword($password, $pilot->password)) {
+            $this->logError('Invalid username', $license);
             throw new UnauthorizedHttpException('Invalid username or password.');
         }
 
@@ -53,6 +58,8 @@ class AuthController extends Controller
         $pilot->save(false);
 
         $dto = TokenInfoDTO::fromModel($pilot);
+
+        $this->logInfo('Login OK', $license);
 
         return $dto;
     }

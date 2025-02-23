@@ -3,6 +3,7 @@
 namespace app\modules\api\controllers\v1;
 
 use app\config\Config;
+use app\helpers\LoggerTrait;
 use app\models\AcarsFile;
 use app\models\Aircraft;
 use app\models\AirportSearch;
@@ -28,6 +29,8 @@ use Yii;
  */
 class FlightReportController extends Controller
 {
+    use LoggerTrait;
+
     public function behaviors()
     {
         $behaviors = parent::behaviors();
@@ -46,6 +49,7 @@ class FlightReportController extends Controller
      */
     public function actionSubmitReport($flight_plan_id)
     {
+        $this->logInfo('Submit report',['fp_id' => $flight_plan_id, 'body' => Yii::$app->request->bodyParams]);
         $dto = new SubmitReportDTO();
         if ($dto->load(Yii::$app->request->post(), '') && $dto->validate()) {
             $lastReportedFlight = Flight::find()
@@ -57,7 +61,10 @@ class FlightReportController extends Controller
                 ->limit(1)
                 ->one();
 
+            $this->logInfo('Checking lastReported with newReport', ['new' => $flight_plan_id, 'last' => $lastReportedFlight]);
+
             if ($lastReportedFlight && $lastReportedFlight->flightReport) {
+                $this->logInfo('Comparing chunks to see if its same flight', ['new_chunks' => $dto->chunks, 'lastReport_chunks' => $lastReportedFlight->flightReport->acarsFiles]);
                 $existingReport = $lastReportedFlight->flightReport;
                 $existingChunks = array_map(function ($chunk) {
                     return $chunk->sha256sum;
@@ -68,14 +75,17 @@ class FlightReportController extends Controller
                 }, $dto->chunks);
 
                 if (array_diff($submittedChunks, $existingChunks) === array_diff($existingChunks, $submittedChunks)) {
+                    $this->logInfo('Chunks match, return existing report_id', $existingReport->id);
                     return new ReportSavedDTO(['flight_report_id' => $existingReport->id]);
                 }
             }
 
             $submittedFlightPlan = SubmittedFlightPlan::findOne(['pilot_id' => Yii::$app->user->identity->id]);
             if(!$submittedFlightPlan){
+                $this->logError('User without submitted flight plan', Yii::$app->user->identity->license);
                 throw new NotFoundHttpException("The user hasn't any submitted flight plan.");
             } else if($submittedFlightPlan->id != $flight_plan_id){
+                $this->logError('User flight plan and sent mismatch', ['submitted' => $submittedFlightPlan->id, 'db' => $flight_plan_id, 'user' => Yii::$app->user->identity->license]);
                 throw new NotFoundHttpException("User flight plan and sent flight plan doesn't match.");
             }
 
@@ -84,17 +94,20 @@ class FlightReportController extends Controller
 
                 $flight = $this->fillFlightData($submittedFlightPlan, $dto);
                 if(!$flight->save()){
+                    $this->logError('Failed to save flight', $flight->getErrors());
                     throw new ServerErrorHttpException('Failed to save flight:'. json_encode($flight->getErrors()));
                 }
 
                 $report = $this->fillReport($flight, $dto);
                 if(!$report->save()){
+                    $this->logError('Failed to save report', $report->getErrors());
                     throw new ServerErrorHttpException('Failed to save report:'. json_encode($report->getErrors()));
                 }
 
                 $chunks = $this->fillChunks($report, $dto);
                 foreach ($chunks as $chunk) {
                     if(!$chunk->save()){
+                        $this->logError('Failed to save chunk', $chunk->getErrors());
                         throw new ServerErrorHttpException('Failed to save chunk:'. json_encode($chunk->getErrors()));
                     }
                 }
@@ -102,9 +115,11 @@ class FlightReportController extends Controller
                 $nearestAirport = AirportSearch::findNearestAirport($dto->last_position_lat, $dto->last_position_lon);
 
                 if(!$nearestAirport){
-                    throw new ServerErrorHttpException('Error finding nearest airport of'.$dto->last_position_lat.' '.$dto->last_position_lon);
+                    $this->logError('Error finding nearest airport', $dto);
+                    throw new ServerErrorHttpException('Error finding nearest airport of '.$dto->last_position_lat.' '.$dto->last_position_lon);
                 }
 
+                $this->logInfo('Moving pilot and aircraft to', $nearestAirport);
                 $this->movePilotToLocation($submittedFlightPlan->pilot_id, $nearestAirport);
                 $this->moveAircraftToLocation($submittedFlightPlan->aircraft_id, $nearestAirport);
 
@@ -119,14 +134,16 @@ class FlightReportController extends Controller
 
             } catch (\Throwable $e) {
                 $transaction->rollBack();
-                // TODO: Think logs globally, don't let the user know a lot. Better log and answer without much details
+                $this->logError('Error while processing report', ['ex' => $e, 'request' => Yii::$app->request]);
                 throw new ServerErrorHttpException('An error occurred while processing the report:'. $e->getMessage());
             }
         } else {
             $errorMessages = $dto->getFirstErrors();
             if(empty($errorMessages)) {
+                $this->logError('Invalid data. No data provided', Yii::$app->request);
                 throw new BadRequestHttpException('Invalid data. No data was provided.');
             } else {
+                $this->logError('Invalid data.', ['messages' => $errorMessages, 'request' => Yii::$app->request]);
                 throw new BadRequestHttpException('Invalid data: ' . implode(', ', $errorMessages));
             }
         }
@@ -191,6 +208,7 @@ class FlightReportController extends Controller
         $pilot = Pilot::findOne(['id' => $pilot_id]);
         $pilot->location = $airport->icao_code;
         if(!$pilot->save()){
+            $this->logError('Error moving pilot', ['pilot' => $pilot_id, 'airport' => $airport]);
             throw new ServerErrorHttpException('Error moving pilot '. $pilot_id. ' to location '. $airport->icao_code);
         }
     }
@@ -200,6 +218,7 @@ class FlightReportController extends Controller
         $aircraft = Aircraft::findOne(['id' => $aircraft_id]);
         $aircraft->location = $airport->icao_code;
         if(!$aircraft->save()){
+            $this->logError('Error moving aircraft', ['aircraft' => $aircraft, 'airport' => $airport]);
             throw new ServerErrorHttpException('Error moving aircraft '. $aircraft_id. ' to location '. $airport->icao_code);
         }
     }
@@ -213,57 +232,72 @@ class FlightReportController extends Controller
 
             $flightReport = FlightReport::findOne(['id' => $flight_report_id]);
             if (!$flightReport) {
+                $this->logError('Flight report not found', $flight_report_id);
                 throw new NotFoundHttpException("Flight report not found.");
             }
 
             $flight = Flight::findOne(['id' => $flightReport->flight_id, 'pilot_id' => Yii::$app->user->id]);
             if (!$flight || !$flight->isOpenForUpload()) {
+                $this->logError('Flight access denied or not available for chunk uploads', ['id' => $flight_report_id, 'flight' => $flight]);
                 throw new NotFoundHttpException("Flight access denied or not available for chunk uploads.");
             }
 
             $chunk = AcarsFile::findOne(['chunk_id' => $chunk_id, 'flight_report_id' => $flight_report_id]);
             if (!$chunk) {
+                $this->logError('Chunk not found', ['chunk_id' => $chunk_id, 'flight_report_id' => $flight_report_id]);
                 throw new NotFoundHttpException("Chunk not found for this flight report.");
             }
 
             if ($chunk->isUploaded()) {
-                throw new ConflictHttpException("Chunk $chunk_id already uploaded.");
+                $this->logError('Chunk already uploaded', $chunk);
+                throw new ConflictHttpException('Chunk '. $chunk_id .' already uploaded.');
             }
 
             $flightReportPath = $storagePath . DIRECTORY_SEPARATOR . $flight_report_id;
+            $this->logInfo('Report path', $flightReportPath);
             if (!file_exists($flightReportPath)) {
                 if (!mkdir($flightReportPath, 0755, true)) {
-                    throw new ServerErrorHttpException("Failed to create directory for flight report.");
+                    $this->logError('Failed to create directory', $flightReportPath);
+                    throw new ServerErrorHttpException('Failed to create directory for flight report.');
                 }
             }
 
             $chunkFilePath = $flightReportPath . DIRECTORY_SEPARATOR . $chunk_id;
+            $this->logInfo('Chunk path', $chunkFilePath);
             if (file_exists($chunkFilePath)) {
+                $this->logError('File already exists', ['file' => $chunkFilePath, 'id' => $chunk_id]);
                 throw new ConflictHttpException("Chunk $chunk_id already exists.");
             }
 
             $uploadedFile = UploadedFile::getInstanceByName('chunkFile');
             if (!$uploadedFile) {
-                throw new BadRequestHttpException("No file uploaded.");
+                $this->logError('No file uploaded');
+                throw new BadRequestHttpException('No file uploaded.');
             }
 
             $tempFilePath = $chunkFilePath . '.tmp';
+            $this->logInfo('Tmp file path', $tempFilePath);
             // Problem to be fixed by yii2 and codeception (https://github.com/yiisoft/yii2/issues/14260)
             if (!$uploadedFile->saveAs($tempFilePath, !YII_ENV_TEST)) {
-                throw new ServerErrorHttpException("Failed to save the uploaded chunk.".json_encode($uploadedFile));
+                $this->logError('Failed to save the uploaded chunk', $uploadedFile);
+                throw new ServerErrorHttpException('Failed to save the uploaded chunk.'.json_encode($uploadedFile));
             }
 
             $expectedSha256 = $chunk->sha256sum;
+            $this->logInfo('Expected sha256', $expectedSha256);
             $actualSha256 = base64_encode(hash_file('sha256', $tempFilePath, true));
+            $this->logInfo('Actual sha256', $actualSha256);
             if ($expectedSha256 !== $actualSha256) {
+                $this->logError('SHA256 mismatch', ['expected' => $expectedSha256, 'actual' => $actualSha256]);
                 unlink($tempFilePath);
-                throw new BadRequestHttpException("SHA256 mismatch. Expected: $expectedSha256, Actual: $actualSha256.");
+                throw new BadRequestHttpException('SHA256 mismatch. Expected: '.$expectedSha256. ' Actual: '.$actualSha256);
             }
 
             rename($tempFilePath, $chunkFilePath);
 
             $chunk->upload_date = date('Y-m-d H:i:s');
             if (!$chunk->save()) {
+                $this->logError('Failed to update chunk upload date', $chunk);
                 throw new ServerErrorHttpException('Failed to update chunk upload date: ' . json_encode($chunk->getErrors()));
             }
 
@@ -274,6 +308,7 @@ class FlightReportController extends Controller
             if (!$pendingChunks) {
                 $flight->status = 'S';
                 if (!$flight->save()) {
+                    $this->logError('Failed to update flight status', $flight);
                     throw new ServerErrorHttpException('Failed to update flight status: ' . json_encode($flightReport->getErrors()));
                 }
             }

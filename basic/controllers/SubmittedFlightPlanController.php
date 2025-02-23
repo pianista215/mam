@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\helpers\LoggerTrait;
 use app\models\Aircraft;
 use app\models\AircraftSearch;
 use app\models\Route;
@@ -19,6 +20,8 @@ use Yii;
  */
 class SubmittedFlightPlanController extends Controller
 {
+    use LoggerTrait;
+
     /**
      * @inheritDoc
      */
@@ -71,10 +74,12 @@ class SubmittedFlightPlanController extends Controller
         if(Yii::$app->user->can('submitFpl') && isset(Yii::$app->user->identity->location)){
             $model = $this->getCurrentFpl();
             if($model !== null){
+                $this->logInfo('Returning user current fpl (sel route)', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
                 return $this->redirect(['view', 'id' => $model->id]);
             } else {
                 $searchModel = new RouteSearch();
                 $dataProvider = $searchModel->searchWithFixedDeparture(Yii::$app->user->identity->location);
+                $this->logInfo('User selecting route', ['location' => Yii::$app->user->identity->location, 'user' => Yii::$app->user->identity->license]);
                 return $this->render('select_route', [
                     'dataProvider' => $dataProvider,
                 ]);
@@ -89,12 +94,14 @@ class SubmittedFlightPlanController extends Controller
         if(Yii::$app->user->can('submitFpl')){
             $model = $this->getCurrentFpl();
             if($model !== null){
+                $this->logInfo('Returning user current fpl (sel aircraft)', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
                 return $this->redirect(['view', 'id' => $model->id]);
             } else {
                 $route = Route::findOne(['id' => $route_id]);
                 if($this->checkRouteIsUserLocation($route)){
                     $searchModel = new AircraftSearch();
                     $dataProvider = $searchModel->searchAvailableAircraftsInLocationWithRange($route->departure, $route->distance_nm);
+                    $this->logInfo('User selecting aircraft', ['route' => $route, 'user' => Yii::$app->user->identity->license]);
                     return $this->render('select_aircraft', [
                         'dataProvider' => $dataProvider,
                         'route' => $route,
@@ -114,6 +121,7 @@ class SubmittedFlightPlanController extends Controller
             $model = $this->getCurrentFpl();
 
             if($model !== null){
+                $this->logInfo('Returning user current fpl (prepare)', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
                 return $this->redirect(['view', 'id' => $model->id]);
             } else {
                 $route = Route::findOne(['id' => $route_id]);
@@ -133,6 +141,7 @@ class SubmittedFlightPlanController extends Controller
 
                      if ($this->request->isPost) {
                         if ($model->load($this->request->post()) && $model->save()) {
+                            $this->logInfo('Created fpl', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
                             return $this->redirect(['view', 'id' => $model->id]);
                         }
                      } else {
@@ -234,6 +243,7 @@ class SubmittedFlightPlanController extends Controller
         if (Yii::$app->user->can('crudOwnFpl', ['submittedFlightPlan' => $model])) {
 
             if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
+                $this->logInfo('Updated fpl', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
                 return $this->redirect(['view', 'id' => $model->id]);
             }
 
@@ -258,6 +268,7 @@ class SubmittedFlightPlanController extends Controller
 
         if (Yii::$app->user->can('crudOwnFpl', ['submittedFlightPlan' => $model])) {
             $this->findModel($id)->delete();
+            $this->logInfo('Deleted fpl', ['id' => $id, 'user' => Yii::$app->user->identity->license]);
             return $this->redirect(['site/index']);
         } else {
             throw new ForbiddenHttpException();
