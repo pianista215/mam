@@ -66,7 +66,7 @@ class UploadChunkCest
         ]);
     }
 
-    public function testFlightProcessed(ApiTester $I)
+    public function testFlightClosedForUpload(ApiTester $I)
     {
         $this->loginAsUser(5, $I);
 
