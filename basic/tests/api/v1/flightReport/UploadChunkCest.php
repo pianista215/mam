@@ -66,23 +66,7 @@ class UploadChunkCest
         ]);
     }
 
-    public function testChunkAlreadyUploaded(ApiTester $I)
-    {
-        $chunk = \app\models\AcarsFile::findOne(['chunk_id' => 1, 'flight_report_id' => 2]);
-        $chunk->upload_date = date('Y-m-d H:i:s');
-        $chunk->save();
-
-        $this->loginAsUser(5, $I);
-        $filePath = $this->getTestFilePath('2_1.tmp');
-        $I->sendPOST('/flight-report/upload-chunk/?flight_report_id=2&chunk_id=1', [], ['chunkFile' => $filePath]);
-        $I->seeResponseCodeIs(409);
-        $I->seeResponseContainsJson([
-            'name' => 'Conflict',
-            'message' => 'Chunk 1 already uploaded.',
-        ]);
-    }
-
-    public function testFlightClosed(ApiTester $I)
+    public function testFlightClosedForUpload(ApiTester $I)
     {
         $this->loginAsUser(5, $I);
 
@@ -96,13 +80,6 @@ class UploadChunkCest
 
         $this->loginAsUser(7, $I);
         $I->sendPOST('/flight-report/upload-chunk/?flight_report_id=3&chunk_id=2', [], ['chunkFile' => $filePath]);
-        $I->seeResponseCodeIs(404);
-        $I->seeResponseContainsJson([
-            'name' => 'Not Found',
-            'message' => 'Flight access denied or not available for chunk uploads.',
-        ]);
-
-        $I->sendPOST('/flight-report/upload-chunk/?flight_report_id=4&chunk_id=1', [], ['chunkFile' => $filePath]);
         $I->seeResponseCodeIs(404);
         $I->seeResponseContainsJson([
             'name' => 'Not Found',
@@ -155,5 +132,20 @@ class UploadChunkCest
         $flight_report = \app\models\FlightReport::findOne(['id' => 5]);
         $flight = \app\models\Flight::findOne(['id' => $flight_report->flight_id]);
         $I->assertEquals('S', $flight->status);
+    }
+
+    public function ignoreUploadSameChunkIfFlightIsNotProcessed(ApiTester $I)
+    {
+        // If the flight is not processed('C' or 'S') and chunk is already uploaded ignore and return 200 for client
+        $this->loginAsUser(7, $I);
+
+        $filePath = $this->getTestFilePath('2_1.tmp');
+
+        $I->sendPOST('/flight-report/upload-chunk/?flight_report_id=4&chunk_id=1', [], ['chunkFile' => $filePath]);
+        $I->seeResponseCodeIs(200);
+        $I->seeResponseContainsJson(['status' => 'success']);
+
+        $chunk = \app\models\AcarsFile::findOne(['flight_report_id' => 4,'chunk_id' => 1]);
+        $I->assertSame('2025-01-01 02:01:05', $chunk->upload_date);
     }
 }

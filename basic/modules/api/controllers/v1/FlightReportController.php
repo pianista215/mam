@@ -227,31 +227,32 @@ class FlightReportController extends Controller
     {
         $storagePath = Config::get('chunks_storage_path');
 
+        $flightReport = FlightReport::findOne(['id' => $flight_report_id]);
+        if (!$flightReport) {
+            $this->logError('Flight report not found', $flight_report_id);
+            throw new NotFoundHttpException("Flight report not found.");
+        }
+
+        $flight = Flight::findOne(['id' => $flightReport->flight_id, 'pilot_id' => Yii::$app->user->id]);
+        if (!$flight || $flight->isProcessed()) {
+            $this->logError('Flight access denied or not available for chunk uploads', ['id' => $flight_report_id, 'flight' => $flight]);
+            throw new NotFoundHttpException("Flight access denied or not available for chunk uploads.");
+        }
+
+        // Check if chunk is already uploaded
+        $chunk = AcarsFile::findOne(['chunk_id' => $chunk_id, 'flight_report_id' => $flight_report_id]);
+        if (!$chunk) {
+            $this->logError('Chunk not found', ['chunk_id' => $chunk_id, 'flight_report_id' => $flight_report_id]);
+            throw new NotFoundHttpException("Chunk not found for this flight report.");
+        }
+
+        if ($chunk->isUploaded()) {
+            $this->logWarn('Chunk already uploaded', $chunk);
+            return ['status' => 'success'];
+        }
+
         $transaction = Yii::$app->db->beginTransaction();
         try {
-
-            $flightReport = FlightReport::findOne(['id' => $flight_report_id]);
-            if (!$flightReport) {
-                $this->logError('Flight report not found', $flight_report_id);
-                throw new NotFoundHttpException("Flight report not found.");
-            }
-
-            $flight = Flight::findOne(['id' => $flightReport->flight_id, 'pilot_id' => Yii::$app->user->id]);
-            if (!$flight || !$flight->isOpenForUpload()) {
-                $this->logError('Flight access denied or not available for chunk uploads', ['id' => $flight_report_id, 'flight' => $flight]);
-                throw new NotFoundHttpException("Flight access denied or not available for chunk uploads.");
-            }
-
-            $chunk = AcarsFile::findOne(['chunk_id' => $chunk_id, 'flight_report_id' => $flight_report_id]);
-            if (!$chunk) {
-                $this->logError('Chunk not found', ['chunk_id' => $chunk_id, 'flight_report_id' => $flight_report_id]);
-                throw new NotFoundHttpException("Chunk not found for this flight report.");
-            }
-
-            if ($chunk->isUploaded()) {
-                $this->logError('Chunk already uploaded', $chunk);
-                throw new ConflictHttpException('Chunk '. $chunk_id .' already uploaded.');
-            }
 
             $flightReportPath = $storagePath . DIRECTORY_SEPARATOR . $flight_report_id;
             $this->logInfo('Report path', $flightReportPath);

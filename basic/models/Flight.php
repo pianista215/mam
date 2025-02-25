@@ -111,8 +111,8 @@ class Flight extends \yii\db\ActiveRecord
         );
     }
 
-    public function isOpenForUpload(){
-        return $this->status === 'C';
+    public function isProcessed(){
+        return $this->status === 'V' || $this->status === 'F';
     }
 
     /**

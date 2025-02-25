@@ -66,8 +66,8 @@ return [
         'other_information' => 'DOF/20241205 REG/ECDDD OPR/XXX',
         'endurance_time' => '0500',
         'report_tool' => 'Mam Acars 1.0',
-        'status' => 'S',
-        'creation_date' => '2025-01-02 02:00:00',
+        'status' => 'V',
+        'creation_date' => '2025-01-02 01:00:00',
         'network' => 'Vatsim'
     ],
     [
@@ -89,7 +89,7 @@ return [
         'other_information' => 'DOF/20241205 REG/ECDDD OPR/XXX',
         'endurance_time' => '0500',
         'report_tool' => 'Mam Acars 1.0',
-        'status' => 'V',
+        'status' => 'S',
         'creation_date' => '2025-01-02 02:00:00',
         'network' => 'Vatsim'
     ],
