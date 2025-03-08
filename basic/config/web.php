@@ -44,8 +44,22 @@ $config = [
             'traceLevel' => YII_DEBUG ? 3 : 0,
             'targets' => [
                 [
+                    'class' => 'yii\log\FileTarget',
                     'logFile' => 'php://stdout',
-                    'levels' => ['error', 'warning', 'info'],
+                    'levels' => ['warning', 'info'],
+                    'logVars' => [],
+                    'categories' => ['mam_*'],
+                ],
+                [
+                    'class' => 'yii\log\FileTarget',
+                    'logFile' => 'php://stdout',
+                    'levels' => ['error'],
+                ],
+                [
+                    'class' => 'yii\log\FileTarget',
+                    'logFile' => 'php://stdout',
+                    'levels' => ['warning'],
+                    'except' => ['mam_*'],
                 ],
             ],
         ],
