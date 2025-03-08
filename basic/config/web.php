@@ -45,7 +45,21 @@ $config = [
             'targets' => [
                 [
                     'class' => 'yii\log\FileTarget',
-                    'levels' => ['error', 'warning'],
+                    'logFile' => 'php://stdout',
+                    'levels' => ['warning', 'info'],
+                    'logVars' => [],
+                    'categories' => ['mam_*'],
+                ],
+                [
+                    'class' => 'yii\log\FileTarget',
+                    'logFile' => 'php://stdout',
+                    'levels' => ['error'],
+                ],
+                [
+                    'class' => 'yii\log\FileTarget',
+                    'logFile' => 'php://stdout',
+                    'levels' => ['warning'],
+                    'except' => ['mam_*'],
                 ],
             ],
         ],

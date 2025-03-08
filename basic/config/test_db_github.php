@@ -6,4 +6,7 @@ return [
     'username' => 'root',
     'password' => 'root',
     'charset' => 'utf8',
+
+    'enableLogging' => false,
+    'enableProfiling' => false,
 ];

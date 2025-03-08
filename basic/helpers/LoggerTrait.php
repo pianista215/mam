@@ -39,7 +39,7 @@ trait LoggerTrait
 
         Yii::{$level}(
             $message . ' ' . print_r($safeData, true),
-            static::class . '::' . debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2)[1]['function']
+            'mam_'. static::class . '::' . debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2)[1]['function']
         );
     }
 

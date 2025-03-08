@@ -6,4 +6,7 @@ return [
     'username' => 'yii2user',
     'password' => 'yii2password',
     'charset' => 'utf8',
+
+    'enableLogging' => false,
+    'enableProfiling' => false,
 ];

@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\LoggerTrait;
 use Yii;
 use yii\base\Model;
 
@@ -13,6 +14,8 @@ use yii\base\Model;
  */
 class LoginForm extends Model
 {
+    use LoggerTrait;
+
     public $username;
     public $password;
     public $rememberMe = true;
@@ -59,9 +62,12 @@ class LoginForm extends Model
      */
     public function login()
     {
+        $this->logInfo('Trying to login user', $this->username);
         if ($this->validate()) {
+            $this->logInfo('Login OK', $this->username);
             return Yii::$app->user->login($this->getUser(), $this->rememberMe ? 3600*24*30 : 0);
         }
+        $this->logWarn('Fail login user: ', $this->username);
         return false;
     }
 

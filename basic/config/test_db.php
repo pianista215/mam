@@ -8,4 +8,7 @@ return [
     'username' => 'mam',
     'password' => 'complex-password',
     'charset' => 'utf8',
+
+    'enableLogging' => false,
+    'enableProfiling' => false,
 ];
