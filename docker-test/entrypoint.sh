@@ -12,6 +12,9 @@ mysql -e "FLUSH PRIVILEGES;"
 echo "Loading schema from /ddl.sql..."
 mysql yii2db < /ddl.sql
 
+echo "Loading config from /config.sql"
+mysql yii2db < /config.sql
+
 echo "Overwritting db conf for Yii"
 cp /db-docker.php /var/www/html/config/db.php
 
