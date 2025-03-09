@@ -20,10 +20,14 @@ COPY basic /var/www/html
 COPY docker-test/apache2-default.conf /etc/apache2/sites-available/000-default.conf
 
 COPY db-model/ddl.sql /
+COPY db-model/config.sql /
 COPY docker-test/db-docker.php /
 
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html
+RUN mkdir -p /opt/mam/chunks \
+    && chown -R www-data:www-data /var/www/html \
+    && chown -R www-data:www-data /opt/mam/chunks \
+    && chmod -R 755 /var/www/html \
+    && chmod -R 755 /opt/mam/chunks
 
 RUN a2enmod rewrite
 
