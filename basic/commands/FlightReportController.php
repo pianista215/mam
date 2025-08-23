@@ -1,6 +1,7 @@
 <?php
 namespace app\commands;
 
+use app\config\Config;
 use yii\console\Controller;
 use yii\console\ExitCode;
 
@@ -12,12 +13,41 @@ class FlightReportController extends Controller
      */
     public function actionAssembleChunks()
     {
-        $this->stdout("Assembling flight report chunks...\n");
 
-        // TODO: buscar en DB los vuelos con estado pendiente
-        // TODO: ensamblar los ficheros chunk en uno solo
-        // TODO: descomprimir si es gzip
-        // TODO: guardar fichero resultante con nombre identificable
+        $storagePath = Config::get('chunks_storage_path');
+
+        $this->stdout("Listing flights pending to analyze...\n");
+
+        $flightsPendingToAnalyze = \app\models\Flight::find()
+        ->where(['status' => 'S'])
+        ->all();
+
+        foreach ($flightsPendingToAnalyze as $flight) {
+            $this->stdout("Processing flight {$flight->id}\n");
+
+            $reportId = $flight->flightReport->id;
+
+            $flightReportPath = $storagePath . DIRECTORY_SEPARATOR . $reportId;
+            $this->stdout("Report path {$flightReportPath}\n");
+
+            // Get chunk data
+            $chunks = $flight->flightReport->acarsFiles;
+            $files = [];
+
+            foreach($chunks as $chunk) {
+                $chunk_id = $chunk->chunk_id;
+                $chunk_path = $flightReportPath . DIRECTORY_SEPARATOR . $chunk_id;
+                $this->stdout("Acars file to merge {$chunk_path}\n");
+                $files[] = $chunk_path;
+            }
+
+            // Join chunk data in the original gzip file
+
+            // Uncompress gzip
+
+            // Save json ready to process by mam-analyzer
+
+        }
 
         $this->stdout("Done.\n");
         return ExitCode::OK;
