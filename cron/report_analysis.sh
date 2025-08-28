@@ -1,27 +1,37 @@
 #!/bin/bash
 set -euo pipefail
 
-# List pending reports
-for dir in $(php /var/www/html/yii flight-report/list-pending); do
-    echo "Processing pending report $dir"
+#Configuration
+YII_BIN="/home/pianista/mios/mam/basic/yii"
+MAM_ANALYZER_HOME="/home/pianista/mios/mam-analyzer"
+
+#Process pending reports
+for dir in $("$YII_BIN" flight-report/list-pending); do
+    echo ">>> Processing pending report $dir"
 
     cd "$dir"
 
     # Clean previous inconsistent data
     rm -rf results
-    mkdir results
+    mkdir -p results
 
-    # Concat and gzip
+    # Concat and decompress
     cat $(ls * | sort -V) > results/full.gz
     gzip -d results/full.gz
 
-    # Execute mam-analyzer
-    python3 /srv/mam-analyzer/scripts/run.py results/* > results/analysis.json
+    # Execute mam-analyzer with venv
+    (
+        cd "$MAM_ANALYZER_HOME"
+        source venv/bin/activate
+        python3 scripts/run.py "$dir/results/"* > "$dir/results/analysis.json"
+        deactivate
+    )
 
-    # Import analysis
-    php /var/www/html/yii flight-report/import-report-analysis --file=results/analysis.json
+    # Importar análisis
+    "$YII_BIN" flight-report/import-report-analysis --file="$dir/results/analysis.json"
 
-    # Remove temporal data
-    rm -rf results
+    # Clean analysis data
+    #rm -rf results
 
+    echo ">>> Done $dir"
 done
