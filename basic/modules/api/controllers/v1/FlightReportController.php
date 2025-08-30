@@ -276,6 +276,8 @@ class FlightReportController extends Controller
                 throw new BadRequestHttpException('No file uploaded.');
             }
 
+            # TODO: Ensure file size is limited (for example 1MB per chunk_id and a max of chunks per report)
+
             $tempFilePath = $chunkFilePath . '.tmp';
             $this->logInfo('Tmp file path', $tempFilePath);
             // Problem to be fixed by yii2 and codeception (https://github.com/yiisoft/yii2/issues/14260)

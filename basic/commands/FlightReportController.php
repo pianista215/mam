@@ -7,24 +7,104 @@ use yii\console\ExitCode;
 
 class FlightReportController extends Controller
 {
+
+
+    protected function joinAcarsFiles($report): ?string
+    {
+        $storagePath = Config::get('chunks_storage_path');
+        $reportPath  = $storagePath . DIRECTORY_SEPARATOR . $report->id;
+        $outputFile  = $reportPath . DIRECTORY_SEPARATOR . 'concat.gz';
+
+        $chunks = $report->acarsFiles;
+
+        // Open output file (overwrite if exists)
+        $out = fopen($outputFile, 'wb');
+        if (!$out) {
+            throw new \RuntimeException("❌ Cannot open output file: $outputFile");
+        }
+
+        foreach ($chunks as $chunk) {
+            $chunkPath = $reportPath . DIRECTORY_SEPARATOR . $chunk->chunk_id;
+            if (!is_readable($chunkPath)) {
+                fclose($out);
+                throw new \RuntimeException("❌ Missing or unreadable chunk: $chunkPath");
+            }
+
+            // Append chunk contents
+            $in = fopen($chunkPath, 'rb');
+            stream_copy_to_stream($in, $out);
+            fclose($in);
+        }
+
+        fclose($out);
+
+        return $outputFile;
+    }
+
+    protected function isValidGzip($gzipFile)
+    {
+        $file = fopen($gzipFile, 'rb');
+
+        // Read first two bytes
+        $bytes = fread($file, 2);
+        fclose($file);
+
+        return $bytes === "\x1f\x8b";
+    }
+
+    protected function decompress($gzipFile, $report)
+    {
+        $storagePath = Config::get('chunks_storage_path');
+        $reportPath  = $storagePath . DIRECTORY_SEPARATOR . $report->id;
+        $outputFile  = $reportPath . DIRECTORY_SEPARATOR . 'report.json';
+
+        $gz = gzopen($gzipFile, 'rb');
+        if ($gz === false) {
+            throw new \RuntimeException("Cannot open gzip file: $gzipFile");
+        }
+
+        $out = fopen($outputFile, 'wb');
+        if ($out === false) {
+            gzclose($gz);
+            throw new \RuntimeException("Cannot create output file: $outputFile");
+        }
+
+        // Use blocks of 4KB
+        while (!gzeof($gz)) {
+            $data = gzread($gz, 4096);
+            if ($data === false) {
+                fclose($out);
+                gzclose($gz);
+                throw new \RuntimeException("Error reading gzip file: $gzipFile");
+            }
+            fwrite($out, $data);
+        }
+
+        gzclose($gz);
+        fclose($out);
+
+        return $outputFile;
+    }
+
     /**
-     * This command list the folders of the pending flight report to be analyzed
+     * Assemble pending reports acars file to be analyze by mam-analyzer
      * @return int Exit code
      */
-    public function actionListPending()
+    public function actionAssemblePendingAcars()
     {
-
-        $storagePath = Config::get('chunks_storage_path');
-
         $flightsPendingToAnalyze = \app\models\Flight::find()
         ->where(['status' => 'S'])
         ->all();
 
         foreach ($flightsPendingToAnalyze as $flight) {
-            $reportId = $flight->flightReport->id;
-
-            $flightReportPath = $storagePath . DIRECTORY_SEPARATOR . $reportId;
-            $this->stdout("{$flightReportPath}\n");
+            $report = $flight->flightReport;
+            $gzipFile = $this->joinAcarsFiles($report);
+            if(!$this->isValidGzip($gzipFile)){
+                 $this->stderr("File is not valid gzip: $gzipFile\n");
+                 return ExitCode::NOINPUT;
+            }
+            $finalPath = $this->decompress($gzipFile, $report);
+            $this->stdout("{$finalPath}\n");
         }
 
         return ExitCode::OK;
