@@ -15,7 +15,8 @@ while read -r report_json; do
     python3 "$MAM_ANALYZER_HOME/scripts/run.py" "$report_json" "$report_dir/analysis.json"
 
     echo "Generated $report_dir/analysis.json"
+    rm "$report_json"
 done < <(php "$YII_BIN" flight-report/assemble-pending-acars)
 
 # Call Yii to process all generated analysis.json
-php "$YII_BIN" flight-report/import-pending-acars-analysis
+php "$YII_BIN" flight-report/import-pending-reports-analysis
