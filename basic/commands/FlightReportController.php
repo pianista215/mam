@@ -186,12 +186,13 @@ class FlightReportController extends Controller
                 # TODO: Import global data
                 $transaction->commit();
                 $this->stdout("Analysis succesfully imported for flight ". $flight->id . "\n");
-                return ExitCode::OK;
             } catch (\Throwable $e) {
                 $transaction->rollBack();
                 $this->stderr("Failed importing analysis for flight ". $flight->id .": " . $e . "\n");
                 return ExitCode::UNSPECIFIED_ERROR;
             }
         }
+
+        return ExitCode::OK;
     }
 }
