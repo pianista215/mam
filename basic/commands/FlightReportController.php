@@ -3,6 +3,8 @@ namespace app\commands;
 
 use app\config\Config;
 use app\models\FlightPhase;
+use app\models\FlightPhaseMetric;
+use app\models\FlightPhaseMetricType;
 use app\models\FlightPhaseType;
 use yii\console\Controller;
 use yii\console\ExitCode;
@@ -115,13 +117,35 @@ class FlightReportController extends Controller
         return ExitCode::OK;
     }
 
-
-    protected function importPhase($report, $phase)
+    protected function importPhaseMetrics($phase, $phaseType, $metrics)
     {
-        if (empty($phase['name'])) {
-            throw new \RuntimeException("Phase with empty name: $phase");
+        foreach($metrics as $key => $value) {
+            $metricType = FlightPhaseMetricType::findOne(
+                ['flight_phase_type_id' => $phaseType->id, 'code' => $key]
+            );
+
+            if(!$metricType){
+                throw new \RuntimeException("Not found metric type with code: $key for phase type: " . $phaseType->id);
+            }
+
+            $phaseMetric = new FlightPhaseMetric([
+                'flight_phase_id' => $phaseType->id,
+                'metric_type_id' => $metricType->id,
+                'value' => $value,
+            ]);
+            if (!$phaseMetric->save()) {
+                throw new \Exception("Error saving PhaseMetric: " . json_encode($phaseMetric->errors));
+            }
         }
-        $phaseName = $phase['name'];
+    }
+
+
+    protected function importPhase($report, $phaseJson)
+    {
+        if (empty($phaseJson['name'])) {
+            throw new \RuntimeException("Phase with empty name: $phaseJson");
+        }
+        $phaseName = $phaseJson['name'];
 
         $phaseType = FlightPhaseType::findOne(['code' => $phaseName]);
         if(!$phaseType){
@@ -131,11 +155,16 @@ class FlightReportController extends Controller
         $phase = new FlightPhase([
             'flight_report_id' => $report->id,
             'flight_phase_type_id' => $phaseType->id,
-            'start' => $phase['start'],
-            'end' => $phase['end']
+            'start' => $phaseJson['start'],
+            'end' => $phaseJson['end']
         ]);
         if (!$phase->save()) {
             throw new \Exception("Error saving FlightPhase: " . json_encode($phase->errors));
+        }
+
+        $phaseMetrics = $phaseJson['analysis'];
+        if(!empty($phaseMetrics)) {
+            $this->importPhaseMetrics($phase, $phaseType, $phaseMetrics);
         }
         #TODO CONTINUE PROCESSING
     }

@@ -38,6 +38,7 @@ class FlightPhase extends \yii\db\ActiveRecord
             [['flight_report_id', 'flight_phase_type_id', 'start', 'end'], 'required'],
             [['flight_report_id', 'flight_phase_type_id'], 'integer'],
             [['start', 'end'], 'safe'],
+            [['flight_report_id', 'flight_phase_type_id', 'start', 'end'], 'unique', 'targetAttribute' => ['flight_report_id', 'flight_phase_type_id', 'start', 'end']],
             [['flight_phase_type_id'], 'exist', 'skipOnError' => true, 'targetClass' => FlightPhaseType::class, 'targetAttribute' => ['flight_phase_type_id' => 'id']],
             [['flight_report_id'], 'exist', 'skipOnError' => true, 'targetClass' => FlightReport::class, 'targetAttribute' => ['flight_report_id' => 'id']],
         ];

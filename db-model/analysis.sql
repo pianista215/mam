@@ -8,3 +8,9 @@ INSERT INTO flight_phase_type(`id`, `code`, `name`) VALUES (5, 'touch_go', 'Touc
 INSERT INTO flight_phase_type(`id`, `code`, `name`) VALUES (6, 'approach', 'Approach');
 INSERT INTO flight_phase_type(`id`, `code`, `name`) VALUES (7, 'final_landing', 'Landing');
 INSERT INTO flight_phase_type(`id`, `code`, `name`) VALUES (8, 'shutdown', 'Shutdown');
+
+-- Metric types
+-- Takeoff
+-- Cruise
+-- Approach
+-- Landing
