@@ -117,24 +117,39 @@ class FlightReportController extends Controller
         return ExitCode::OK;
     }
 
+
     protected function importPhaseMetrics($phase, $phaseType, $metrics)
     {
         foreach($metrics as $key => $value) {
-            $metricType = FlightPhaseMetricType::findOne(
-                ['flight_phase_type_id' => $phaseType->id, 'code' => $key]
-            );
 
-            if(!$metricType){
-                throw new \RuntimeException("Not found metric type with code: $key for phase type: " . $phaseType->id);
-            }
+            if(!empty($value)){
+                $this->stdout("Key: {$key}\n");
+                
+                if(is_array($value)){
+                    $finalValue = implode(" | ", $value);
+                } else {
+                    $finalValue = strVal($value);
+                }
 
-            $phaseMetric = new FlightPhaseMetric([
-                'flight_phase_id' => $phaseType->id,
-                'metric_type_id' => $metricType->id,
-                'value' => $value,
-            ]);
-            if (!$phaseMetric->save()) {
-                throw new \Exception("Error saving PhaseMetric: " . json_encode($phaseMetric->errors));
+                $this->stdout("Value: {$finalValue}\n");
+                $metricType = FlightPhaseMetricType::findOne(
+                    ['flight_phase_type_id' => $phaseType->id, 'code' => $key]
+                );
+
+                if(!$metricType){
+                    throw new \RuntimeException("Not found metric type with code: $key for phase type: " . $phaseType->id);
+                }
+
+                $phaseMetric = new FlightPhaseMetric([
+                    'flight_phase_id' => $phase->id,
+                    'metric_type_id' => $metricType->id,
+                    'value' => $finalValue,
+                ]);
+                if (!$phaseMetric->save()) {
+                    throw new \Exception("Error saving PhaseMetric: " . json_encode($phaseMetric->errors));
+                }
+            } else {
+                $this->stdout("Key: {$key} is empty, omitting\n");
             }
         }
     }
