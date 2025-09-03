@@ -135,7 +135,7 @@ class FlightReportController extends Controller
     {
         foreach($metrics as $key => $value) {
 
-            if(!empty($value)){
+            if ($value !== null && $value !== '' && $value !== []) {
                 $finalValue = $this->strDataValue($value);
                 $metricType = FlightPhaseMetricType::findOne(
                     ['flight_phase_type_id' => $phaseType->id, 'code' => $key]
@@ -154,7 +154,7 @@ class FlightReportController extends Controller
                     throw new \Exception("Error saving PhaseMetric: " . json_encode($phaseMetric->errors));
                 }
             } else {
-                $this->stdout("Key: {$key} is empty, omitting\n");
+                $this->stdout("Metric: {$key} is empty, omitting\n");
             }
         }
     }
@@ -162,7 +162,7 @@ class FlightReportController extends Controller
     protected function importEventChanges($event, $changes)
     {
         foreach($changes as $key => $value){
-            if(!empty($value)){
+            if ($value !== null && $value !== '' && $value !== []) {
                 $finalValue = $this->strDataValue($value);
 
                 $attrType = FlightEventAttribute::findOne(['code' => $key]);
@@ -201,11 +201,7 @@ class FlightReportController extends Controller
                 throw new \Exception("Error saving event: " . json_encode($event->errors));
             }
 
-            $this->stdout("Processing data for event ts $timestamp");
-
             $this->importEventChanges($event, $changes);
-
-            $this->stdout("Changes processed for event ts $timestamp");
         }
     }
 
