@@ -33,3 +33,26 @@ INSERT INTO flight_phase_metric_type(flight_phase_type_id, code, name) select fp
 INSERT INTO flight_phase_metric_type(flight_phase_type_id, code, name) select fp.id,'TouchGoVSFpm', 'Touch Vertical Speed' FROM flight_phase_type fp WHERE fp.code='touch_go';
 INSERT INTO flight_phase_metric_type(flight_phase_type_id, code, name) select fp.id,'TouchGoBounces', 'Touch & go bounces Fpm' FROM flight_phase_type fp WHERE fp.code='touch_go';
 INSERT INTO flight_phase_metric_type(flight_phase_type_id, code, name) select fp.id,'TouchGoGroundDistance', 'Ground distance until airborne' FROM flight_phase_type fp WHERE fp.code='touch_go';
+
+-- Event attributes
+INSERT INTO flight_event_attribute(code, name) VALUES ('Latitude', 'Latitude');
+INSERT INTO flight_event_attribute(code, name) VALUES ('Longitude', 'Longitude');
+INSERT INTO flight_event_attribute(code, name) VALUES ('onGround', 'onGround');
+INSERT INTO flight_event_attribute(code, name) VALUES ('Altitude', 'Altitude');
+INSERT INTO flight_event_attribute(code, name) VALUES ('AGLAltitude', 'Altitude AGL');
+INSERT INTO flight_event_attribute(code, name) VALUES ('Altimeter', 'Altimeter');
+INSERT INTO flight_event_attribute(code, name) VALUES ('VSFpm', 'Vertical Speed (fpm)');
+INSERT INTO flight_event_attribute(code, name) VALUES ('LandingVSFpm', 'Landing Vertical Speed (Fpm)');
+INSERT INTO flight_event_attribute(code, name) VALUES ('Heading', 'Heading');
+INSERT INTO flight_event_attribute(code, name) VALUES ('GSKnots', 'Ground Speed Knots');
+INSERT INTO flight_event_attribute(code, name) VALUES ('IASKnots', 'IAS Knots');
+INSERT INTO flight_event_attribute(code, name) VALUES ('QNHSet', 'QNH Set');
+INSERT INTO flight_event_attribute(code, name) VALUES ('Flaps', 'Flaps');
+INSERT INTO flight_event_attribute(code, name) VALUES ('Gear', 'Gear');
+INSERT INTO flight_event_attribute(code, name) VALUES ('FuelKg', 'Fuel Kg');
+INSERT INTO flight_event_attribute(code, name) VALUES ('Squawk', 'Squawk');
+INSERT INTO flight_event_attribute(code, name) VALUES ('AP', 'Autopilot');
+INSERT INTO flight_event_attribute(code, name) VALUES ('Engine 1', 'Engine 1');
+INSERT INTO flight_event_attribute(code, name) VALUES ('Engine 2', 'Engine 2');
+INSERT INTO flight_event_attribute(code, name) VALUES ('Engine 3', 'Engine 3');
+INSERT INTO flight_event_attribute(code, name) VALUES ('Engine 4', 'Engine 4');

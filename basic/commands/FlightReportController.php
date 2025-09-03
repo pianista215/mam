@@ -2,6 +2,9 @@
 namespace app\commands;
 
 use app\config\Config;
+use app\models\FlightEvent;
+use app\models\FlightEventAttribute;
+use app\models\FlightEventData;
 use app\models\FlightPhase;
 use app\models\FlightPhaseMetric;
 use app\models\FlightPhaseMetricType;
@@ -117,21 +120,23 @@ class FlightReportController extends Controller
         return ExitCode::OK;
     }
 
+    protected function strDataValue($value)
+    {
+        $result = "";
+        if(is_array($value)){
+            $result = implode(" | ", $value);
+        } else {
+            $result = strVal($value);
+        }
+        return $result;
+    }
 
     protected function importPhaseMetrics($phase, $phaseType, $metrics)
     {
         foreach($metrics as $key => $value) {
 
             if(!empty($value)){
-                $this->stdout("Key: {$key}\n");
-                
-                if(is_array($value)){
-                    $finalValue = implode(" | ", $value);
-                } else {
-                    $finalValue = strVal($value);
-                }
-
-                $this->stdout("Value: {$finalValue}\n");
+                $finalValue = $this->strDataValue($value);
                 $metricType = FlightPhaseMetricType::findOne(
                     ['flight_phase_type_id' => $phaseType->id, 'code' => $key]
                 );
@@ -153,6 +158,57 @@ class FlightReportController extends Controller
             }
         }
     }
+
+    protected function importEventChanges($event, $changes)
+    {
+        foreach($changes as $key => $value){
+            if(!empty($value)){
+                $finalValue = $this->strDataValue($value);
+
+                $attrType = FlightEventAttribute::findOne(['code' => $key]);
+
+                if(!$attrType){
+                    throw new \RuntimeException("Not found event attribute with code: $key");
+                }
+
+                $eventData = new FlightEventData([
+                    'event_id' => $event->id,
+                    'attribute_id' => $attrType->id,
+                    'value' => $finalValue,
+                ]);
+                if (!$eventData->save()) {
+                    throw new \Exception("Error saving FlightEventData: " . json_encode($eventData->errors));
+                }
+            } else {
+                $this->stdout("Ev data:: {$key} is empty, omitting\n");
+            }
+        }
+    }
+
+    protected function importPhaseEvents($phase, $events)
+    {
+        foreach($events as $eventJson) {
+
+            $timestamp = $eventJson['Timestamp'];
+            $changes = $eventJson['Changes'];
+
+            $event = new FlightEvent([
+                'phase_id' => $phase->id,
+                'timestamp' => $timestamp,
+            ]);
+
+            if (!$event->save()) {
+                throw new \Exception("Error saving event: " . json_encode($event->errors));
+            }
+
+            $this->stdout("Processing data for event ts $timestamp");
+
+            $this->importEventChanges($event, $changes);
+
+            $this->stdout("Changes processed for event ts $timestamp");
+        }
+    }
+
 
 
     protected function importPhase($report, $phaseJson)
@@ -181,7 +237,9 @@ class FlightReportController extends Controller
         if(!empty($phaseMetrics)) {
             $this->importPhaseMetrics($phase, $phaseType, $phaseMetrics);
         }
-        #TODO CONTINUE PROCESSING
+
+        $phaseEvents = $phaseJson['events'];
+        $this->importPhaseEvents($phase, $phaseEvents);
     }
 
     /**
