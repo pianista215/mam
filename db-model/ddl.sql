@@ -201,3 +201,77 @@ CREATE TABLE `acars_file` (
   CONSTRAINT `acars_file_flight_report_FK` FOREIGN KEY (`flight_report_id`) REFERENCES `flight_report` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+
+CREATE TABLE `flight_phase_type` (
+  `id` tinyint(3) unsigned NOT NULL AUTO_INCREMENT,
+  `code` varchar(32) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `flight_phase_type_unique_key` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `flight_phase` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `flight_report_id` bigint(20) unsigned NOT NULL,
+  `flight_phase_type_id` tinyint(3) unsigned NOT NULL,
+  `start` datetime NOT NULL,
+  `end` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `flight_phase_unique` (`flight_report_id`,`flight_phase_type_id`,`start`,`end`),
+  KEY `flight_phase_flight_report_FK` (`flight_report_id`),
+  KEY `flight_phase_flight_phase_type_FK` (`flight_phase_type_id`),
+  CONSTRAINT `flight_phase_flight_phase_type_FK` FOREIGN KEY (`flight_phase_type_id`) REFERENCES `flight_phase_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `flight_phase_flight_report_FK` FOREIGN KEY (`flight_report_id`) REFERENCES `flight_report` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `flight_phase_metric_type` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `flight_phase_type_id` tinyint(3) unsigned NOT NULL,
+  `code` varchar(32) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `flight_phase_metric_type_unique` (`flight_phase_type_id`,`code`),
+  CONSTRAINT `flight_phase_metric_type_flight_phase_type_FK` FOREIGN KEY (`flight_phase_type_id`) REFERENCES `flight_phase_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `flight_phase_metric` (
+  `flight_phase_id` bigint(20) unsigned NOT NULL,
+  `metric_type_id` int(10) unsigned NOT NULL,
+  `value` varchar(100) NOT NULL,
+  PRIMARY KEY (`flight_phase_id`,`metric_type_id`),
+  KEY `flight_phase_metric_flight_phase_metric_type_FK` (`metric_type_id`),
+  CONSTRAINT `flight_phase_metric_flight_phase_FK` FOREIGN KEY (`flight_phase_id`) REFERENCES `flight_phase` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `flight_phase_metric_flight_phase_metric_type_FK` FOREIGN KEY (`metric_type_id`) REFERENCES `flight_phase_metric_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `flight_event_attribute` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  `code` varchar(32) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `flight_event_attribute_unique` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `flight_event` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `phase_id` bigint(20) unsigned NOT NULL,
+  `timestamp` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `flight_event_flight_phase_FK` (`phase_id`),
+  CONSTRAINT `flight_event_flight_phase_FK` FOREIGN KEY (`phase_id`) REFERENCES `flight_phase` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `flight_event_data` (
+  `event_id` bigint(20) unsigned NOT NULL,
+  `attribute_id` int(10) unsigned NOT NULL,
+  `value` varchar(100) NOT NULL,
+  PRIMARY KEY (`event_id`,`attribute_id`),
+  KEY `flight_event_data_flight_event_attribute_FK` (`attribute_id`),
+  CONSTRAINT `flight_event_data_flight_event_FK` FOREIGN KEY (`event_id`) REFERENCES `flight_event` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `flight_event_data_flight_event_attribute_FK` FOREIGN KEY (`attribute_id`) REFERENCES `flight_event_attribute` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+
+
+

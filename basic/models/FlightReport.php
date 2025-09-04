@@ -83,7 +83,7 @@ class FlightReport extends \yii\db\ActiveRecord
      */
     public function getAcarsFiles()
     {
-        return $this->hasMany(AcarsFile::class, ['flight_report_id' => 'id']);
+        return $this->hasMany(AcarsFile::class, ['flight_report_id' => 'id'])->orderBy(['chunk_id' => SORT_ASC]);;
     }
 
     /**
