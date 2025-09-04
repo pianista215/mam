@@ -15,6 +15,9 @@ mysql yii2db < /ddl.sql
 echo "Loading config from /config.sql"
 mysql yii2db < /config.sql
 
+echo "Loading analysis attributes from /analysis.sql"
+mysql yii2db < /analysis.sql
+
 echo "Overwritting db conf for Yii"
 cp /db-docker.php /var/www/html/config/db.php
 

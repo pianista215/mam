@@ -21,6 +21,7 @@ COPY docker-test/apache2-default.conf /etc/apache2/sites-available/000-default.c
 
 COPY db-model/ddl.sql /
 COPY db-model/config.sql /
+COPY db-model/analysis.sql /
 COPY docker-test/db-docker.php /
 
 RUN mkdir -p /opt/mam/chunks \
