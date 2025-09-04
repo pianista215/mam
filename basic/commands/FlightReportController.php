@@ -281,8 +281,15 @@ class FlightReportController extends Controller
                     $this->importPhase($report, $phase);
                 }
 
+                $flight->status = 'V';
+                if (!$flight->save()) {
+                    throw new \Exception("Error updating flight status: " . json_encode($flight->errors));
+                }
+
                 # TODO: Import global data
+                
                 $transaction->commit();
+                unlink($analysis);
                 $this->stdout("Analysis succesfully imported for flight ". $flight->id . "\n");
             } catch (\Throwable $e) {
                 $transaction->rollBack();
