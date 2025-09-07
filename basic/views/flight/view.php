@@ -29,4 +29,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'pilotName' => $model->pilot->fullname,
      ]) ?>
 
+    <?= $this->render('_map_altitude', [
+            'report' => $model->flightReport,
+     ]) ?>
+
 </div>

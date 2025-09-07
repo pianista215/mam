@@ -5,6 +5,8 @@ use yii\widgets\ActiveForm;
 
 ?>
 
+<!-- TODO CHECK WHICH FIELDS CAN BE DISPLAYED IF ACARS HAS NOT BEEN PROCESSED-->
+
 <div class="container">
 
     <div class="row mb-3">

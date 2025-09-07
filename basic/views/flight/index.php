@@ -26,10 +26,10 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\SerialColumn'],
 
             'pilot.fullname',
-            'aircraft.registration',
+            'aircraft.aircraftConfiguration.aircraftType.icao_type_code',
             'departure',
             'arrival',
-            'code',
+            'creation_date',
             //'alternative1_icao',
             //'alternative2_icao',
             //'cruise_speed_value',
