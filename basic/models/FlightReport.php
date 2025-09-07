@@ -103,6 +103,6 @@ class FlightReport extends \yii\db\ActiveRecord
      */
     public function getFlightPhases()
     {
-        return $this->hasMany(FlightPhase::class, ['flight_report_id' => 'id']);
+        return $this->hasMany(FlightPhase::class, ['flight_report_id' => 'id'])->orderBy(['id' => SORT_ASC]);;
     }
 }

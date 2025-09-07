@@ -165,6 +165,10 @@ class FlightReportController extends Controller
             if ($value !== null && $value !== '' && $value !== []) {
                 $finalValue = $this->strDataValue($value);
 
+                if ($key === 'Latitude' || $key === 'Longitude') {
+                    $finalValue = str_replace(',', '.', $finalValue);
+                }
+
                 $attrType = FlightEventAttribute::findOne(['code' => $key]);
 
                 if(!$attrType){

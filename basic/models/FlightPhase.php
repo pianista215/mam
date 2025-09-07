@@ -65,7 +65,7 @@ class FlightPhase extends \yii\db\ActiveRecord
      */
     public function getFlightEvents()
     {
-        return $this->hasMany(FlightEvent::class, ['phase_id' => 'id']);
+        return $this->hasMany(FlightEvent::class, ['phase_id' => 'id'])->orderBy(['id' => SORT_ASC]);;
     }
 
     /**
