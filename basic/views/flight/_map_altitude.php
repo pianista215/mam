@@ -16,6 +16,11 @@ $this->registerJsFile(
     'https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js',
     ['position' => \yii\web\View::POS_HEAD]
 );
+
+$this->registerJsFile(
+    'https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js',
+    ['position' => \yii\web\View::POS_HEAD]
+);
 ?>
 
 <div class="container">
@@ -239,6 +244,19 @@ new Chart(ctx, {
       mode: 'index',
       intersect: false,
     },
+    plugins: {
+                zoom: {
+                    pan: {
+                        enabled: true,
+                        mode: 'x',
+                    },
+                    zoom: {
+                        wheel: { enabled: true },
+                        pinch: { enabled: true },
+                        mode: 'x',
+                    }
+                }
+            },
     scales: {
       y: {
         title: {
@@ -249,7 +267,7 @@ new Chart(ctx, {
       x: {
         title: {
           display: true,
-          text: 'Tiempo'
+          text: 'Time'
         }
       }
     }
