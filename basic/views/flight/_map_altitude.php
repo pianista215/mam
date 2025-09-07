@@ -53,6 +53,10 @@ foreach ($report->flightPhases as $phase) {
     }
 
     if (!empty($coordinates)) {
+        if (count($segments) > 0) {
+            $lastIndex = count($segments) - 1;
+            $segments[$lastIndex]['coordinates'][] = $coordinates[0];
+        }
         $segments[] = [
             'phase' => $phase->flightPhaseType->name,
             'color' => $colors[$phase->flightPhaseType->code],
