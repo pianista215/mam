@@ -12,11 +12,16 @@ $this->registerCssFile(
     ['rel' => 'stylesheet']
 );
 
+$this->registerJsFile(
+    'https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js',
+    ['position' => \yii\web\View::POS_HEAD]
+);
 ?>
 
 <div class="container">
 
     <div id="map" style="width: 100%; height: 400px;"></div>
+    <canvas id="altitudeChart" width="800" height="400"></canvas>
 
 </div>
 
@@ -32,26 +37,55 @@ $colors = array(
     'shutdown' => '#cc00cc',
     'unknown' => '#888888'
 );
+
 $segments = [];
+$altitudePoints = [];
+$groundPoints = [];
+$phaseIntervals = [];
+
 foreach ($report->flightPhases as $phase) {
+    $start = $phase->start;
+    $end   = $phase->end;
+    $color = $colors[$phase->flightPhaseType->code];
+
+    $phaseIntervals[] = [
+        'start' => $start,
+        'end'   => $end,
+        'color' => $color,
+    ];
+
     $coordinates = [];
     foreach ($phase->flightEvents as $event) {
         $lat = null;
         $lon = null;
+        $altitude = null;
+        $aglAltitude = null;
         foreach($event->flightEventDatas as $data) {
             $code = $data->attribute0->code;
             if($code == 'Latitude'){
                 $lat = (float)$data->value;
             } else if($code == 'Longitude'){
                 $lon = (float)$data->value;
+            } elseif ($code == 'Altitude') {
+                $altitude = (int)$data->value;
+            } elseif ($code == 'AGLAltitude') {
+                $aglAltitude = (int)$data->value;
             }
-            if($lat != null && $lon != null) break;
+            if($lat != null && $lon != null && $altitude != null && $aglAltitude != null) break;
         }
         if ($lat !== null && $lon !== null) {
             $coordinates[] = [$lon, $lat];
         }
+        if($altitude != null && $aglAltitude != null){
+            $timestamp = $event->timestamp;
+            $labels[] = $timestamp;
+            $altitudePoints[] = ['x' => $timestamp, 'y' => $altitude];
+            $groundAltitude = $altitude - $aglAltitude;
+            $groundPoints[] = ['x' => $timestamp, 'y' => $groundAltitude];
+        }
     }
 
+    // map
     if (!empty($coordinates)) {
         if (count($segments) > 0) {
             $lastIndex = count($segments) - 1;
@@ -61,6 +95,27 @@ foreach ($report->flightPhases as $phase) {
             'phase' => $phase->flightPhaseType->name,
             'color' => $colors[$phase->flightPhaseType->code],
             'coordinates' => $coordinates,
+        ];
+    }
+
+    // altitude
+    if (!empty($pointsAltitude)) {
+        $datasets[] = [
+            'label' => $phase->flightPhaseType->name . ' (Avión)',
+            'data' => $pointsAltitude,
+            'borderColor' => $colors[$phase->flightPhaseType->code],
+            'fill' => false,
+            'tension' => 0.1,
+        ];
+    }
+    if (!empty($pointsGround)) {
+        $datasets[] = [
+            'label' => $phase->flightPhaseType->name . ' (Terreno)',
+            'data' => $pointsGround,
+            'borderColor' => $colors[$phase->flightPhaseType->code],
+            'borderDash' => [5, 5], // línea discontinua
+            'fill' => false,
+            'tension' => 0.1,
         ];
     }
 }
@@ -128,5 +183,77 @@ $this->registerJs("
             zoom: 15
         })
     });
+");
+
+$this->registerJs("
+
+const phaseIntervals = " . json_encode($phaseIntervals) . ";
+
+const labels = " . json_encode($labels) . ";
+const altitudePoints = " . json_encode($altitudePoints) . ";
+const groundPoints = " . json_encode($groundPoints) . ";
+
+function getPhaseColor(ts) {
+  console.log(ts);
+  for (const phase of phaseIntervals) {
+    if (ts >= phase.start && ts <= phase.end) {
+      return phase.color;
+    }
+  }
+  return '#888888'; // fallback
+}
+
+const ctx = document.getElementById('altitudeChart').getContext('2d');
+new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: labels,
+    datasets: [
+    {
+            label: 'Plane',
+            data: altitudePoints,
+            segment: {
+                borderColor: ctx => {
+                    const ts = ctx.p1.raw.x;
+                    return getPhaseColor(ts);
+                }
+            },
+            borderColor: 'blue', // fallback
+            fill: false,
+            tension: 0.1,
+            pointRadius: 0,
+          },
+          {
+            label: 'Terrain',
+            data: groundPoints,
+            borderColor: 'brown',
+            fill: false,
+            tension: 0.1,
+            pointRadius: 0,
+          }
+    ]
+  },
+  options: {
+    responsive: true,
+    interaction: {
+      mode: 'index',
+      intersect: false,
+    },
+    scales: {
+      y: {
+        title: {
+          display: true,
+          text: 'Altitude'
+        }
+      },
+      x: {
+        title: {
+          display: true,
+          text: 'Tiempo'
+        }
+      }
+    }
+  }
+});
 ");
 ?>
