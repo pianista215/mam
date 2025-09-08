@@ -23,13 +23,6 @@ $this->registerJsFile(
 );
 ?>
 
-<div class="container">
-
-    <div id="map" style="width: 100%; height: 400px;"></div>
-    <canvas id="altitudeChart" width="800" height="400"></canvas>
-
-</div>
-
 <?php
 $colors = array(
     'startup' => '#00ccff',
@@ -124,7 +117,70 @@ foreach ($report->flightPhases as $phase) {
         ];
     }
 }
+?>
 
+<div class="container">
+    <div class="timeline">
+        <div class="row mb-3 d-flex align-items-stretch">
+        <?php
+        $count = 0;
+        foreach ($report->flightPhases as $phase):
+            if ($phase->flightPhaseType->code !== 'unknown'):
+                $count++;
+        ?>
+            <div class="col-md-4 timeline-item">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="card-title mb-0"><?= htmlspecialchars($phase->flightPhaseType->name) ?></h5>
+                            <div class="d-flex align-items-center">
+                                <small class="text-muted me-2">
+                                    <?= date('H:i', strtotime($phase->start)) ?> - <?= date('H:i', strtotime($phase->end)) ?>
+                                </small>
+                                <span class="phase-color" style="background-color: <?= $colors[$phase->flightPhaseType->code] ?>;"></span>
+                            </div>
+                        </div>
+                        <?php foreach ($phase->flightPhaseMetrics as $metric): ?>
+                            <p class="card-text mb-1">
+                                <?= htmlspecialchars($metric->metricType->name) . ' : ' . htmlspecialchars($metric->value) ?>
+                            </p>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
+
+            <?php if ($count % 3 === 0): ?>
+                </div>
+                <div class="row mb-3 d-flex align-items-stretch">
+            <?php endif; ?>
+
+        <?php
+            endif;
+        endforeach;
+        ?>
+        </div>
+    </div>
+</div>
+
+<style>
+.phase-color {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1px solid #333;
+    flex-shrink: 0;
+}
+</style>
+
+
+
+<div class="container">
+    <div id="map" style="width: 100%; height: 400px;"></div>
+    <canvas id="altitudeChart" width="800" height="400"></canvas>
+</div>
+
+<?php
 $this->registerJs("
     const segments = " . json_encode($segments) . ";
 
