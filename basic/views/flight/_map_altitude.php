@@ -77,7 +77,12 @@ foreach ($report->flightPhases as $phase) {
         if($altitude != null && $aglAltitude != null){
             $timestamp = $event->timestamp;
             $labels[] = $timestamp;
-            $altitudePoints[] = ['x' => $timestamp, 'y' => $altitude];
+            if($lat !== null && $lon !== null){
+                $altitudePoints[] = ['x' => $timestamp, 'y' => $altitude, 'coords' => [$lon, $lat]];
+            } else {
+                $altitudePoints[] = ['x' => $timestamp, 'y' => $altitude];
+            }
+
             $groundAltitude = $altitude - $aglAltitude;
             $groundPoints[] = ['x' => $timestamp, 'y' => $groundAltitude];
         }
@@ -176,77 +181,92 @@ foreach ($report->flightPhases as $phase) {
 
 
 <div class="container">
-    <div id="map" style="width: 100%; height: 400px;"></div>
+    <div id="map" style="width: 100%; height: 600px;"></div>
     <canvas id="altitudeChart" width="800" height="400"></canvas>
 </div>
 
 <?php
 $this->registerJs("
-    const segments = " . json_encode($segments) . ";
+const segments = " . json_encode($segments) . ";
 
-    // https://github.com/openlayers/openlayers/issues/11681
-    function splitAtDateLine(coords) {
-      const lineStrings = [];
-      let lastX = Infinity
-      let lineString;
-      for (let i = 0, ii = coords.length; i < ii; ++i) {
+// https://github.com/openlayers/openlayers/issues/11681
+function splitAtDateLine(coords) {
+    const lineStrings = [];
+    let lastX = Infinity
+    let lineString;
+    for (let i = 0, ii = coords.length; i < ii; ++i) {
         const coord = coords[i];
         const x = coord[0];
         if (Math.abs(lastX - x) > 180) { // Crossing date line will be shorter
-          if (lineString) {
-            const prevCoord = coords[i - 1];
-            const w1 = 180 - Math.abs(lastX);
-            const w2 = 180 - Math.abs(x);
-            const y = (w1 / (w1 + w2)) * (coord[1] - prevCoord[1]) + prevCoord[1];
-            if (Math.abs(lastX) !== 180) {
-              lineString.push(ol.proj.fromLonLat([lastX > 0 ? 180 : -180, y]));
+            if (lineString) {
+                const prevCoord = coords[i - 1];
+                const w1 = 180 - Math.abs(lastX);
+                const w2 = 180 - Math.abs(x);
+                const y = (w1 / (w1 + w2)) * (coord[1] - prevCoord[1]) + prevCoord[1];
+                if (Math.abs(lastX) !== 180) {
+                    lineString.push(ol.proj.fromLonLat([lastX > 0 ? 180 : -180, y]));
+                }
+                lineStrings.push(lineString = []);
+                if (Math.abs(x) !== 180) {
+                    lineString.push(ol.proj.fromLonLat([x > 0 ? 180 : -180, y]));
+                }
+            } else {
+                lineStrings.push(lineString = []);
             }
-            lineStrings.push(lineString = []);
-            if (Math.abs(x) !== 180) {
-              lineString.push(ol.proj.fromLonLat([x > 0 ? 180 : -180, y]));
-            }
-          } else {
-            lineStrings.push(lineString = []);
-          }
         }
         lastX = x;
         lineString.push(ol.proj.fromLonLat(coord));
-      }
-      return lineStrings;
     }
+    return lineStrings;
+}
 
-    const layers = segments.map(seg => {
-        const feature = new ol.Feature({
-            geometry: new ol.geom.MultiLineString(splitAtDateLine(seg.coordinates))
-        });
-        const source = new ol.source.Vector({ features: [feature] });
-        return new ol.layer.Vector({
-            source: source,
-            style: new ol.style.Style({
-                stroke: new ol.style.Stroke({
-                    color: seg.color,
-                    width: 3
-                })
-            })
-        });
+const layers = segments.map(seg => {
+    const feature = new ol.Feature({
+        geometry: new ol.geom.MultiLineString(splitAtDateLine(seg.coordinates))
     });
-
-    const map = new ol.Map({
-        target: 'map',
-        layers: [
-            new ol.layer.Tile({
-                source: new ol.source.OSM()
-            }),
-            ...layers
-        ],
-        view: new ol.View({
-            center: ol.proj.fromLonLat(segments[0].coordinates[0]),
-            zoom: 15
+    const source = new ol.source.Vector({ features: [feature] });
+    return new ol.layer.Vector({
+        source: source,
+        style: new ol.style.Style({
+            stroke: new ol.style.Stroke({
+                color: seg.color,
+                width: 3
+            })
         })
     });
-");
+});
 
-$this->registerJs("
+const pointSource = new ol.source.Vector();
+const pointLayer = new ol.layer.Vector({
+    source: pointSource,
+    style: new ol.style.Style({
+        image: new ol.style.Circle({
+            radius: 7,
+            fill: new ol.style.Fill({
+                color: 'rgba(255, 0, 0, 0.7)' // Rojo semi-transparente
+            }),
+            stroke: new ol.style.Stroke({
+                color: 'rgba(255, 0, 0, 1)',
+                width: 2
+            })
+        })
+    })
+});
+
+const map = new ol.Map({
+    target: 'map',
+    layers: [
+        new ol.layer.Tile({
+            source: new ol.source.OSM()
+        }),
+        pointLayer,
+        ...layers
+    ],
+    view: new ol.View({
+        center: ol.proj.fromLonLat(segments[0].coordinates[0]),
+        zoom: 15
+    })
+});
 
 const phaseIntervals = " . json_encode($phaseIntervals) . ";
 
@@ -255,7 +275,6 @@ const altitudePoints = " . json_encode($altitudePoints) . ";
 const groundPoints = " . json_encode($groundPoints) . ";
 
 function getPhaseColor(ts) {
-  console.log(ts);
   for (const phase of phaseIntervals) {
     if (ts >= phase.start && ts <= phase.end) {
       return phase.color;
@@ -265,7 +284,7 @@ function getPhaseColor(ts) {
 }
 
 const ctx = document.getElementById('altitudeChart').getContext('2d');
-new Chart(ctx, {
+const myChart = new Chart(ctx, {
   type: 'line',
   data: {
     labels: labels,
@@ -283,6 +302,8 @@ new Chart(ctx, {
             fill: false,
             tension: 0.1,
             pointRadius: 0,
+            hitRadius: 10,
+            pointHoverRadius: 10,
           },
           {
             label: 'Terrain',
@@ -291,10 +312,32 @@ new Chart(ctx, {
             fill: false,
             tension: 0.1,
             pointRadius: 0,
+            hitRadius: 10,
+            pointHoverRadius: 10,
           }
     ]
   },
   options: {
+    onClick: (e) => {
+        const points = myChart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
+            if (points.length) {
+                const firstPoint = points[0];
+                const coords = myChart.data.datasets[firstPoint.datasetIndex].data[firstPoint.index].coords;
+                pointSource.clear();
+                const mapCoordinates = ol.proj.fromLonLat(coords);
+
+                const pointFeature = new ol.Feature({
+                    geometry: new ol.geom.Point(mapCoordinates)
+                });
+
+                pointSource.addFeature(pointFeature);
+
+                map.getView().animate({
+                    center: ol.proj.fromLonLat(coords),
+                    duration: 1000
+                });
+            }
+    },
     responsive: true,
     interaction: {
       mode: 'index',
