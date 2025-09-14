@@ -100,26 +100,6 @@ class SiteController extends Controller
     }
 
     /**
-     * Displays contact page.
-     *
-     * @return Response|string
-     */
-    public function actionContact()
-    {
-        $model = new ContactForm();
-        if ($model->load(Yii::$app->request->post()) && $model->contact(Yii::$app->params['adminEmail'])) {
-            Yii::$app->session->setFlash('contactFormSubmitted');
-
-            return $this->refresh();
-        }
-        return $this->render('contact', [
-            'model' => $model,
-        ]);
-    }
-
-
-
-    /**
      * Displays about page.
      *
      * @return string
@@ -129,10 +109,6 @@ class SiteController extends Controller
         return $this->render('about');
     }
 
-    public function actionSay($message = 'Hello')
-    {
-        return $this->render('say', ['message' => $message]);
-    }
 
     public function actionEntry()
     {

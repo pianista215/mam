@@ -41,6 +41,7 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
     [
             ['label' => 'Home', 'url' => ['/site/index']],
             ['label' => 'Pilots', 'url' => ['/pilot/index']],
+            ['label' => 'Flights', 'url' => ['/flight/index']],
             [
                 'label' => 'Operations',
                 'items' => [
@@ -48,13 +49,6 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
                     ['label' => 'Countries', 'url' => ['/country/index']],
                     ['label' => 'Airports', 'url' => ['/airport/index']],
                     ['label' => 'Routes', 'url' => ['/route/index']],
-                ],
-            ],
-            [
-                'label' => 'Site',
-                'items' => [
-                    ['label' => 'About', 'url' => ['/site/about']],
-                    ['label' => 'Contact', 'url' => ['/site/contact']],
                 ],
             ],
         ];

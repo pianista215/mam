@@ -95,4 +95,14 @@ class FlightReport extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Flight::class, ['id' => 'flight_id']);
     }
+
+    /**
+     * Gets query for [[FlightPhases]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getFlightPhases()
+    {
+        return $this->hasMany(FlightPhase::class, ['flight_report_id' => 'id'])->orderBy(['id' => SORT_ASC]);;
+    }
 }
