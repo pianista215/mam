@@ -40,6 +40,7 @@ $segments = [];
 $altitudePoints = [];
 $groundPoints = [];
 $phaseIntervals = [];
+$labels = [];
 
 foreach ($report->flightPhases as $phase) {
     $start = $phase->start;

@@ -15,22 +15,24 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h3>Flight plan</h1>
 
-     <?= $this->render('_flight_plan', [
-            'model' => $model,
-            'aircraft' => $model->getAircraft()->one(),
-            'pilotName' => $model->pilot->fullname,
-     ]) ?>
+    <?= $this->render('_flight_plan', [
+        'model' => $model,
+        'aircraft' => $model->getAircraft()->one(),
+        'pilotName' => $model->pilot->fullname,
+    ]) ?>
 
-     <h3>Flight data</h3>
+    <h3>Flight data</h3>
 
-     <?= $this->render('_flight_data', [
-            'model' => $model,
-            'aircraft' => $model->getAircraft()->one(),
-            'pilotName' => $model->pilot->fullname,
-     ]) ?>
+    <?= $this->render('_flight_data', [
+        'model' => $model,
+        'aircraft' => $model->getAircraft()->one(),
+        'pilotName' => $model->pilot->fullname,
+    ]) ?>
 
-    <?= $this->render('_map_altitude', [
+    <?php if ($model->status === 'V' || $model->status === 'F'): ?>
+        <?= $this->render('_map_altitude', [
             'report' => $model->flightReport,
-     ]) ?>
+        ]) ?>
+    <?php endif; ?>
 
 </div>
