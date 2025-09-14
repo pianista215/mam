@@ -127,6 +127,8 @@ class AircraftController extends Controller
         if(Yii::$app->user->can('aircraftCrud')){
             $model = $this->findModel($id);
 
+            $model->setScenario(Aircraft::SCENARIO_UPDATE);
+
             if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
                 $this->logInfo('Updated aircraft', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
                 return $this->redirect(['view', 'id' => $model->id]);
@@ -145,7 +147,7 @@ class AircraftController extends Controller
 
     public function actionMove($id)
     {
-        if (Yii::$app->user->can('aircraftCrud')) {
+        if (Yii::$app->user->can('moveAircraft')) {
             $model = Aircraft::findOne($id);
             if ($model === null) {
                 throw new NotFoundHttpException('Aircraft not found.');

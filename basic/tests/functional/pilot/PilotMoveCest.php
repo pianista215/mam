@@ -39,7 +39,7 @@ class PilotMoveCest
         $I->see('Move pilot');
 
         $I->fillField('#pilot-location', 'LEMD');
-        $I->click('Move');
+        $I->click('Move', 'button');
 
         $I->seeResponseCodeIs(200);
         $I->see('Now you are at LEMD airport');
@@ -57,7 +57,7 @@ class PilotMoveCest
         $I->amOnRoute('pilot/move');
 
         $I->fillField('#pilot-location', 'XX'); // invalid
-        $I->click('Move');
+        $I->click('Move', 'button');
 
         $I->seeResponseCodeIs(200);
         $I->see('Airport (ICAO) Location should contain 4 characters');
@@ -75,7 +75,7 @@ class PilotMoveCest
         $I->amOnRoute('pilot/move');
 
         $I->fillField('#pilot-location', 'XXXX');
-        $I->click('Move');
+        $I->click('Move', 'button');
 
         $I->seeResponseCodeIs(200);
         $I->see('Airport (ICAO) Location is invalid');
