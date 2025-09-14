@@ -47,4 +47,14 @@ return [
         'user_id' => '8',
         'created_at' => time(),
     ],
+    [
+        'item_name' => 'pilot',
+        'user_id' => '9',
+        'created_at' => time(),
+    ],
+    [
+        'item_name' => 'fleetManager',
+        'user_id' => '9',
+        'created_at' => time(),
+    ],
 ];

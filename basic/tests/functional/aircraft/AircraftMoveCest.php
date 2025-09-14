@@ -41,9 +41,30 @@ class AircraftMoveCest
     /**
      * Successful aircraft move
      */
-    public function moveAircraftToNewAirport(\FunctionalTester $I)
+    public function moveAircraftToNewAirportAdmin(\FunctionalTester $I)
     {
         $I->amLoggedInAs(2); // admin with moveAircraft
+        $I->amOnRoute('aircraft/move', ['id' => 1]);
+
+        $I->seeResponseCodeIs(200);
+        $I->see('Move aircraft');
+
+        $I->fillField('#aircraft-location', 'LEBL');
+        $I->click('Move', 'button');
+
+        $I->seeResponseCodeIs(200);
+        $I->see('Aircraft has been moved to LEBL airport.');
+
+        $aircraft = Aircraft::findOne(1);
+        $I->assertEquals('LEBL', $aircraft->location);
+    }
+
+    /**
+     * Successful aircraft move
+     */
+    public function moveAircraftToNewAirportFleetMgr(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(9); // fleetMgr with moveAircraft
         $I->amOnRoute('aircraft/move', ['id' => 1]);
 
         $I->seeResponseCodeIs(200);
