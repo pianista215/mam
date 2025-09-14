@@ -17,8 +17,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
-
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
@@ -30,21 +28,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'departure',
             'arrival',
             'creation_date',
-            //'alternative1_icao',
-            //'alternative2_icao',
-            //'cruise_speed_value',
-            //'cruise_speed_unit',
-            //'flight_level_value',
-            //'flight_level_unit',
-            //'route',
-            //'estimated_time',
-            //'other_information',
-            //'endurance_time',
-            //'report_tool',
-            //'status',
-            //'creation_date',
-            //'network',
-            //'flight_rules',
             [
                 'class' => ActionColumn::className(),
                 'visibleButtons'=>[
