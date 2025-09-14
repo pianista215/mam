@@ -15,16 +15,21 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?php if(Yii::$app->user->can('aircraftCrud')) : ?>
+    <?php if(Yii::$app->user->can('aircraftCrud') || Yii::$app->user->can('moveAircraft')) : ?>
     <p>
+        <?php if(Yii::$app->user->can('aircraftCrud')) : ?>
         <?= Html::a('Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
         <?= Html::a('Delete', ['delete', 'id' => $model->id], [
-            'class' => 'btn btn-danger',
-            'data' => [
-                'confirm' => 'Are you sure you want to delete this item?',
-                'method' => 'post',
-            ],
-        ]) ?>
+                    'class' => 'btn btn-danger',
+                    'data' => [
+                        'confirm' => 'Are you sure you want to delete this item?',
+                        'method' => 'post',
+                    ],
+                ]) ?>
+        <?php endif; ?>
+        <?php if(Yii::$app->user->can('moveAircraft')) : ?>
+        <?= Html::a('Move Aircraft', ['move', 'id' => $model->id], ['class' => 'btn btn-warning']) ?>
+        <?php endif; ?>
     </p>
     <?php endif; ?>
 

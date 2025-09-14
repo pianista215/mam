@@ -7,6 +7,7 @@ use app\models\Aircraft;
 use app\models\AircraftConfiguration;
 use app\models\AircraftSearch;
 use app\models\AircraftType;
+use app\models\SubmittedFlightPlan;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
@@ -126,6 +127,8 @@ class AircraftController extends Controller
         if(Yii::$app->user->can('aircraftCrud')){
             $model = $this->findModel($id);
 
+            $model->setScenario(Aircraft::SCENARIO_UPDATE);
+
             if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
                 $this->logInfo('Updated aircraft', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
                 return $this->redirect(['view', 'id' => $model->id]);
@@ -139,6 +142,35 @@ class AircraftController extends Controller
             ]);
         } else {
             throw new ForbiddenHttpException();
+        }
+    }
+
+    public function actionMove($id)
+    {
+        if (Yii::$app->user->can('moveAircraft')) {
+            $model = Aircraft::findOne($id);
+            if ($model === null) {
+                throw new NotFoundHttpException('Aircraft not found.');
+            }
+
+            // Check if there is an active submitted flight plan for this aircraft
+            $activePlan = SubmittedFlightPlan::findOne(['aircraft_id' => $id]);
+            if ($activePlan !== null) {
+                throw new ForbiddenHttpException('You cannot change the location of an aircraft with an active submitted flight plan.');
+            }
+
+            $model->setScenario(Aircraft::SCENARIO_MOVE);
+
+            if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
+                Yii::$app->session->setFlash('success', 'Aircraft has been moved to ' . $model->location . ' airport.');
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
+
+            return $this->render('move', [
+                'model' => $model,
+            ]);
+        } else {
+            throw new ForbiddenHttpException('You do not have permission to move this aircraft.');
         }
     }
 

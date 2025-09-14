@@ -29,6 +29,16 @@ class Aircraft extends \yii\db\ActiveRecord
         return 'aircraft';
     }
 
+    const SCENARIO_UPDATE = 'update';
+    const SCENARIO_MOVE = 'MOVE';
+
+    public function scenarios(){
+        $scenarios = parent::scenarios();
+        $scenarios[self::SCENARIO_UPDATE] = ['registration', 'name', 'aircraft_configuration_id'];
+        $scenarios[self::SCENARIO_MOVE] = ['location'];
+        return $scenarios;
+    }
+
     /**
      * {@inheritdoc}
      */

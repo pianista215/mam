@@ -89,6 +89,18 @@ class AircraftIndexViewCest
 
         $I->see('Update', 'a');
         $I->see('Delete', 'a');
+        $I->see('Move Aircraft', 'a');
+    }
+
+    public function openAircraftViewAsFleetManager(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(9);
+
+        $this->checkAircraftViewCommon($I);
+
+        $I->dontSee('Update', 'a');
+        $I->dontSee('Delete', 'a');
+        $I->see('Move Aircraft', 'a');
     }
 
     public function openAircraftViewAsUser(\FunctionalTester $I)
@@ -99,6 +111,7 @@ class AircraftIndexViewCest
 
         $I->dontSee('Update', 'a');
         $I->dontSee('Delete', 'a');
+        $I->dontSee('Move Aircraft', 'a');
     }
 
     public function openAircraftViewAsVisitor(\FunctionalTester $I)
@@ -107,6 +120,7 @@ class AircraftIndexViewCest
 
         $I->dontSee('Update', 'a');
         $I->dontSee('Delete', 'a');
+        $I->dontSee('Move Aircraft', 'a');
     }
 
 

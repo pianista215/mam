@@ -56,13 +56,11 @@ class AircraftUpdateCest
 
         $I->fillField('#aircraft-registration', '');
         $I->fillField('#aircraft-name', '');
-        $I->fillField('#aircraft-location', '');
         $I->click('Save');
 
         $I->expectTo('see validations errors');
         $I->see('Registration cannot be blank.');
         $I->see('Name cannot be blank.');
-        $I->see('Location cannot be blank.');
 
         $count = \app\models\Aircraft::find()->count();
         $I->assertEquals(7, $count);
@@ -75,14 +73,13 @@ class AircraftUpdateCest
 
         $I->fillField('#aircraft-registration', 'EC-XXX');
         $I->fillField('#aircraft-name', 'Other Boeing');
-        $I->fillField('#aircraft-location', 'LEBL');
 
         $I->click('Save');
 
         $I->seeResponseCodeIs(200);
         $I->see('Other Boeing');
         $I->see('EC-XXX');
-        $I->see('LEBL');
+        $I->see('LEMD');
         $I->see('255.7');
 
         $I->see('Update', 'a');
@@ -92,7 +89,7 @@ class AircraftUpdateCest
         $I->assertNotNull($model);
         $I->assertEquals('EC-XXX', $model->registration);
         $I->assertEquals('Other Boeing', $model->name);
-        $I->assertEquals('LEBL', $model->location);
+        $I->assertEquals('LEMD', $model->location);
         $I->assertEquals(255.7, $model->hours_flown);
 
         $count = \app\models\Aircraft::find()->count();
