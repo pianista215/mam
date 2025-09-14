@@ -18,6 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php if(Yii::$app->user->can('aircraftCrud')) : ?>
     <p>
         <?= Html::a('Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
+        <?= Html::a('Move Aircraft', ['move', 'id' => $model->id], ['class' => 'btn btn-warning']) ?>
         <?= Html::a('Delete', ['delete', 'id' => $model->id], [
             'class' => 'btn btn-danger',
             'data' => [
