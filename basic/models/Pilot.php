@@ -40,11 +40,13 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     const SCENARIO_REGISTER = 'register';
     const SCENARIO_ACTIVATE = 'activate';
     const SCENARIO_UPDATE = 'update';
+    const SCENARIO_MOVE = 'MOVE';
 
     public function scenarios(){
         $scenarios = parent::scenarios();
         $scenarios[self::SCENARIO_REGISTER] = ['name', 'surname', 'email', 'city', 'country_id', 'password', 'date_of_birth', 'vatsim_id', 'ivao_id'];
         $scenarios[self::SCENARIO_ACTIVATE] = ['license'];
+        $scenarios[self::SCENARIO_MOVE] = ['location'];
         return $scenarios;
     }
 

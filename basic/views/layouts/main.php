@@ -58,6 +58,7 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
             'label' => 'Actions',
             'items' => [
                 ['label' => 'Submit FPL', 'url' => ['/submitted-flight-plan/my-fpl']],
+                ['label' => 'Move Pilot', 'url' => ['/pilot/move']],
             ],
         ];
     }

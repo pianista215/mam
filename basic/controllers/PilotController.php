@@ -7,6 +7,7 @@ use app\config\Config;
 use app\models\Country;
 use app\models\Pilot;
 use app\models\PilotSearch;
+use app\models\SubmittedFlightPlan;
 use DateTime;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
@@ -258,6 +259,33 @@ class PilotController extends Controller
         } else {
             throw new ForbiddenHttpException();
         }
+    }
+
+    public function actionMove()
+    {
+        if (Yii::$app->user->isGuest) {
+            throw new ForbiddenHttpException('You must be logged in to move your pilot.');
+        }
+
+        $userId = Yii::$app->user->id;
+        $model = $this->findModel($userId);
+
+        // Check if there is an active submitted flight plan for this pilot
+        $activePlan = SubmittedFlightPlan::findOne(['pilot_id' => $userId]);
+        if ($activePlan !== null) {
+            throw new ForbiddenHttpException('You cannot change your location with an active submitted flight plan.');
+        }
+
+        $model->setScenario(Pilot::SCENARIO_MOVE);
+
+        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
+            Yii::$app->session->setFlash('success', 'Now you are at ' . $model->location. ' airport.');
+            return $this->redirect(['view', 'id' => $model->id]);
+        }
+
+        return $this->render('move', [
+            'model' => $model,
+        ]);
     }
 
     /**
