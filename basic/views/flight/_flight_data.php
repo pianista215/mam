@@ -40,7 +40,7 @@ use yii\widgets\ActiveForm;
             <div><?= Html::input('text', 'flight_time_minutes', $model->flightReport->flight_time_minutes, ['disabled' => true, 'class' => 'form-control'])?></div>
         </div>
         <div class="col-md-3">
-            <div>Fuel (Kg)</div>
+            <div>Fuel consumed (Kg)</div>
             <div class="input-group">
                 <div><?= Html::input('text', 'cruise_speed', $model->flightReport->total_fuel_burn_kg, ['disabled' => true, 'class' => 'form-control'])?></div>
             </div>
