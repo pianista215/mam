@@ -285,13 +285,29 @@ class FlightReportController extends Controller
                     $this->importPhase($report, $phase);
                 }
 
+                if(empty($data['global'])){
+                    $this->stderr("Not global metrics in analysis: $analysis");
+                    return ExitCode::DATAERR;
+                } else {
+                    $report->flight_time_minutes = $data['global']['airborne_time_minutes'];
+                    $report->initial_fuel_on_board = $data['global']['initial_fob_kg'];
+                    $report->total_fuel_burn_kg = $data['global']['fuel_consumed_kg'];
+                    $report->distance_nm = $data['global']['distance_nm'];
+
+                    if(!empty($data['global']['block_time_minutes'])){
+                        $report->block_time_minutes = $data['global']['block_time_minutes'];
+                    }
+
+                    if (!$report->save()) {
+                        throw new \Exception("Error updating flight report: " . json_encode($report->errors));
+                    }
+                }
+
                 $flight->status = 'V';
                 if (!$flight->save()) {
                     throw new \Exception("Error updating flight status: " . json_encode($flight->errors));
                 }
 
-                # TODO: Import global data
-                
                 $transaction->commit();
                 unlink($analysis);
                 $this->stdout("Analysis succesfully imported for flight ". $flight->id . "\n");
