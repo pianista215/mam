@@ -80,7 +80,7 @@ class AircraftUpdateCest
         $I->see('Other Boeing');
         $I->see('EC-XXX');
         $I->see('LEMD');
-        $I->see('255.7');
+        $I->see('255:42');
 
         $I->see('Update', 'a');
         $I->see('Delete', 'a');

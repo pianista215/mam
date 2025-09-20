@@ -78,7 +78,7 @@ class AircraftIndexViewCest
         $I->see('Boeing 737-800 (Standard)');
         $I->see('EC-AAA');
         $I->see('LEMD');
-        $I->see('255.7');
+        $I->see('255:42');
     }
 
     public function openAircraftViewAsAdmin(\FunctionalTester $I)
