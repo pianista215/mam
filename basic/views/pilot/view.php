@@ -50,7 +50,10 @@ $this->params['breadcrumbs'][] = $this->title;
             'date_of_birth',
             'vatsim_id',
             'ivao_id',
-            'hours_flown',
+            [
+                'attribute' => 'hours_flown',
+                'format' => ['decimal', 2],
+            ],
             'location',
         ],
     ]) ?>

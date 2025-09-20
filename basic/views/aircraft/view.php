@@ -40,7 +40,10 @@ $this->params['breadcrumbs'][] = $this->title;
             'registration',
             'name',
             'location',
-            'hours_flown',
+            [
+                'attribute' => 'hours_flown',
+                'format' => ['decimal', 2],
+            ],
         ],
     ]) ?>
 
