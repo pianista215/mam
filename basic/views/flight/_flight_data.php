@@ -1,5 +1,6 @@
 <?php
 
+use app\helpers\TimeHelper;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -32,12 +33,12 @@ use yii\widgets\ActiveForm;
         <div class="col-md-3">
             <div>Block time</div>
             <div class="input-group">
-                <div><?= Html::input('text', 'block_time_minutes', $model->flightReport->block_time_minutes !== null ? gmdate("H:i", $model->flightReport->block_time_minutes * 60): '', ['disabled' => true, 'class' => 'form-control'])?></div>
+                <div><?= Html::input('text', 'block_time_minutes', TimeHelper::formatHoursMinutes($model->flightReport->block_time_minutes / 60.0), ['disabled' => true, 'class' => 'form-control'])?></div>
             </div>
         </div>
         <div class="col-md-3">
             <div>Flight Time</div>
-                <div><?= Html::input('text', 'flight_time_minutes', $model->flightReport->flight_time_minutes !== null ? gmdate("H:i", $model->flightReport->flight_time_minutes * 60) : '', ['disabled' => true, 'class' => 'form-control']) ?></div>
+                <div><?= Html::input('text', 'flight_time_minutes', TimeHelper::formatHoursMinutes($model->flightReport->flight_time_minutes / 60.0), ['disabled' => true, 'class' => 'form-control']) ?></div>
         </div>
         <div class="col-md-3">
             <div>Fuel consumption (Kg)</div>
