@@ -1,5 +1,6 @@
 <?php
 
+use app\helpers\TimeHelper;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -50,7 +51,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'date_of_birth',
             'vatsim_id',
             'ivao_id',
-            'hours_flown',
+            [
+                'attribute' => 'hours_flown',
+                'value' => function ($model) {
+                    return TimeHelper::formatHoursMinutes($model->hours_flown);
+                },
+                'format' => 'text',
+            ],
             'location',
         ],
     ]) ?>

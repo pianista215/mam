@@ -303,6 +303,20 @@ class FlightReportController extends Controller
                     }
                 }
 
+                $flight_time_hours = (float)$report->flight_time_minutes / 60.0;
+
+                $pilot = $flight->pilot;
+                $pilot->hours_flown = $pilot->hours_flown + $flight_time_hours;
+                if (!$pilot->save()) {
+                    throw new \Exception("Error updating pilot hours flown: " . json_encode($pilot->errors));
+                }
+
+                $aircraft = $flight->aircraft;
+                $aircraft->hours_flown = $aircraft->hours_flown + $flight_time_hours;
+                if (!$aircraft->save()) {
+                    throw new \Exception("Error updating aircraft hours flown: " . json_encode($aircraft->errors));
+                }
+
                 $flight->status = 'V';
                 if (!$flight->save()) {
                     throw new \Exception("Error updating flight status: " . json_encode($flight->errors));
