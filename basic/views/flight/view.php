@@ -29,9 +29,20 @@ $this->params['breadcrumbs'][] = $this->title;
         'pilotName' => $model->pilot->fullname,
     ]) ?>
 
-    <?php if ($model->status === 'V' || $model->status === 'F'): ?>
+    <?php if ($model->hasAcarsInfo()): ?>
         <?= $this->render('_map_altitude', [
             'report' => $model->flightReport,
+        ]) ?>
+    <?php endif; ?>
+
+    <?php if ($model->isPendingValidation() && Yii::$app->user->can('validate')): ?>
+        <?= $this->render('_validation_form', [
+            'model' => $model,
+            'validatorList' => $validatorList ?? [],
+        ]) ?>
+    <?php elseif ($model->isValidated()): ?>
+        <?= $this->render('_validation_view', [
+            'model' => $model,
         ]) ?>
     <?php endif; ?>
 

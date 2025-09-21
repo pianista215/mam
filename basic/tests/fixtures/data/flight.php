@@ -21,6 +21,9 @@ return [
         'endurance_time' => '0400',
         'report_tool' => 'Mam Acars 1.0',
         'status' => 'F',
+        'validator_id' => 5,
+        'validation_date' => '2025-01-02 22:00:00',
+        'validator_comments' => 'Awesome flight',
         'creation_date' => '2025-01-01 01:00:00',
         'network' => 'IVAO'
     ],

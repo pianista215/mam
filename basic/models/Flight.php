@@ -124,6 +124,28 @@ class Flight extends \yii\db\ActiveRecord
         return $this->status === 'V' || $this->status === 'F' || $this->status === 'R';
     }
 
+    public function hasAcarsInfo(){
+        return !empty($this->flight_report->flight_phases);
+    }
+
+    public function isValidated(){
+        return $this->status === 'F' || $this->status === 'R';
+    }
+
+    public function isPendingValidation(){
+        if ($this->status === 'V') {
+            return true;
+        }
+
+        if ($this->status === 'C' && $this->creation_date) {
+            $creation = new \DateTimeImmutable($this->creation_date);
+            // TODO: Make this configurable from config param
+            return $creation->modify('+72 hours') < new \DateTimeImmutable();
+        }
+
+        return false;
+    }
+
     /**
      * Gets query for [[Aircraft]].
      *
