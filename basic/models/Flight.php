@@ -28,6 +28,9 @@ use Yii;
  * @property string $status
  * @property string $creation_date
  * @property string|null $network
+ * @property string|null $validator_comments
+ * @property int|null $validator_id
+ * @property string|null $validation_date
  *
  * @property Aircraft $aircraft
  * @property Airport $alternative1Icao
@@ -36,6 +39,7 @@ use Yii;
  * @property Airport $departure0
  * @property FlightReport $flightReport
  * @property Pilot $pilot
+ * @property Pilot $validator
  */
 class Flight extends \yii\db\ActiveRecord
 {
@@ -54,13 +58,13 @@ class Flight extends \yii\db\ActiveRecord
     {
         return [
             [['pilot_id', 'aircraft_id', 'code', 'departure', 'arrival', 'alternative1_icao', 'flight_rules', 'cruise_speed_value', 'cruise_speed_unit', 'flight_level_unit', 'route', 'estimated_time', 'other_information', 'endurance_time', 'report_tool'], 'required'],
-            [['pilot_id', 'aircraft_id'], 'integer'],
-            [['creation_date'], 'safe'],
+            [['pilot_id', 'aircraft_id', 'validator_id'], 'integer'],
+            [['creation_date', 'validation_date'], 'safe'],
             [['code'], 'string', 'max' => 10],
             [['departure', 'arrival', 'alternative1_icao', 'alternative2_icao', 'cruise_speed_value', 'flight_level_value', 'estimated_time', 'endurance_time'], 'string', 'max' => 4],
             [['cruise_speed_unit', 'status', 'flight_rules'], 'string', 'max' => 1],
             [['flight_level_unit'], 'string', 'max' => 3],
-            [['route', 'other_information'], 'string', 'max' => 400],
+            [['route', 'other_information', 'validator_comments'], 'string', 'max' => 400],
             [['report_tool'], 'string', 'max' => 20],
             [['network'], 'string', 'max' => 50],
             [['aircraft_id'], 'exist', 'skipOnError' => true, 'targetClass' => Aircraft::class, 'targetAttribute' => ['aircraft_id' => 'id']],
@@ -69,6 +73,7 @@ class Flight extends \yii\db\ActiveRecord
             [['arrival'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['arrival' => 'icao_code']],
             [['departure'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['departure' => 'icao_code']],
             [['pilot_id'], 'exist', 'skipOnError' => true, 'targetClass' => Pilot::class, 'targetAttribute' => ['pilot_id' => 'id']],
+            [['validator_id'], 'exist', 'skipOnError' => true, 'targetClass' => Pilot::class, 'targetAttribute' => ['validator_id' => 'id']],
         ];
     }
 
@@ -99,6 +104,9 @@ class Flight extends \yii\db\ActiveRecord
             'status' => 'Status',
             'creation_date' => 'Creation Date',
             'network' => 'Network',
+            'validator_comments' => 'Validator Comments',
+            'validator_id' => 'Validator ID',
+            'validation_date' => 'Validation Date',
         ];
     }
 
@@ -108,11 +116,12 @@ class Flight extends \yii\db\ActiveRecord
             'S' => 'ACARS files received. Awaiting processing.',
             'V' => 'Pending validation.',
             'F' => 'Finished',
+            'R' => 'Rejected'
         );
     }
 
     public function isProcessed(){
-        return $this->status === 'V' || $this->status === 'F';
+        return $this->status === 'V' || $this->status === 'F' || $this->status === 'R';
     }
 
     /**
@@ -184,4 +193,14 @@ class Flight extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Pilot::class, ['id' => 'pilot_id']);
     }
+
+   /**
+    * Gets query for [[Validator]].
+    *
+    * @return \yii\db\ActiveQuery
+    */
+   public function getValidator()
+   {
+       return $this->hasOne(Pilot::class, ['id' => 'validator_id']);
+   }
 }
