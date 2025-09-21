@@ -157,6 +157,9 @@ CREATE TABLE `flight` (
   `status` char(1) NOT NULL DEFAULT 'C',
   `creation_date` datetime NOT NULL DEFAULT current_timestamp(),
   `network` varchar(50) DEFAULT NULL,
+  `validator_comments` varchar(400) DEFAULT NULL,
+  `validator_id` int(10) unsigned DEFAULT NULL,
+  `validation_date` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `flight_pilot_FK` (`pilot_id`),
   KEY `flight_aircraft_FK` (`aircraft_id`),
@@ -164,12 +167,14 @@ CREATE TABLE `flight` (
   KEY `flight_arrival_FK` (`arrival`),
   KEY `flight_alt1_FK` (`alternative1_icao`),
   KEY `flight_alt2_FK` (`alternative2_icao`),
+  KEY `flight_validator_FK` (`validator_id`),
   CONSTRAINT `flight_aircraft_FK` FOREIGN KEY (`aircraft_id`) REFERENCES `aircraft` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `flight_alt1_FK` FOREIGN KEY (`alternative1_icao`) REFERENCES `airport` (`icao_code`) ON UPDATE CASCADE,
   CONSTRAINT `flight_alt2_FK` FOREIGN KEY (`alternative2_icao`) REFERENCES `airport` (`icao_code`) ON UPDATE CASCADE,
   CONSTRAINT `flight_arrival_FK` FOREIGN KEY (`arrival`) REFERENCES `airport` (`icao_code`) ON UPDATE CASCADE,
   CONSTRAINT `flight_departure_FK` FOREIGN KEY (`departure`) REFERENCES `airport` (`icao_code`) ON UPDATE CASCADE,
   CONSTRAINT `flight_pilot_FK` FOREIGN KEY (`pilot_id`) REFERENCES `pilot` (`id`) ON UPDATE CASCADE
+  CONSTRAINT `flight_validator_FK` FOREIGN KEY (`validator_id`) REFERENCES `pilot` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `flight_report` (
@@ -182,7 +187,6 @@ CREATE TABLE `flight_report` (
   `total_fuel_burn_kg` mediumint(8) unsigned DEFAULT NULL,
   `distance_nm` mediumint(8) unsigned DEFAULT NULL,
   `pilot_comments` varchar(400) DEFAULT NULL,
-  `validator_comments` varchar(400) DEFAULT NULL,
   `initial_fuel_on_board` mediumint(8) unsigned DEFAULT NULL,
   `zero_fuel_weight` int(10) unsigned DEFAULT NULL,
   `crash` tinyint(1) DEFAULT NULL,
