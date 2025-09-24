@@ -118,14 +118,16 @@ class Flight extends \yii\db\ActiveRecord
         ];
     }
 
-    public static function getFlightStatus(){
-        return array(
+    public function getFullStatus(){
+        $list = [
             'C' => 'Created. Basic information received. Awaiting ACARS files to be uploaded.',
             'S' => 'ACARS files received. Awaiting processing.',
             'V' => 'Pending validation.',
             'F' => 'Finished',
             'R' => 'Rejected'
-        );
+        ];
+
+        return $list[$this->status];
     }
 
     public function isProcessed(){

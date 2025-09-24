@@ -75,7 +75,7 @@ use yii\widgets\ActiveForm;
         <div class="col-md-3">
             <div>Status</div>
             <div class="input-group">
-                <div><?= Html::input('text', 'status', $model->status, ['disabled' => true, 'class' => 'form-control'])?></div>
+                <div><?= Html::input('text', 'status', $model->fullStatus, ['disabled' => true, 'class' => 'form-control'])?></div>
             </div>
         </div>
     </div>
