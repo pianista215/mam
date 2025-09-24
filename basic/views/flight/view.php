@@ -35,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ]) ?>
     <?php endif; ?>
 
-    <?php if ($model->isPendingValidation() && Yii::$app->user->can('validate')): ?>
+    <?php if ($model->isPendingValidation() && Yii::$app->user->can('validateFlight', ['flight' => $model])): ?>
         <?= $this->render('_validation_form', [
             'model' => $model,
             'validatorList' => $validatorList ?? [],

@@ -51,6 +51,14 @@ class Flight extends \yii\db\ActiveRecord
         return 'flight';
     }
 
+    const SCENARIO_VALIDATE = 'validate';
+
+    public function scenarios(){
+        $scenarios = parent::scenarios();
+        $scenarios[self::SCENARIO_VALIDATE] = ['validator_comments'];
+        return $scenarios;
+    }
+
     /**
      * {@inheritdoc}
      */

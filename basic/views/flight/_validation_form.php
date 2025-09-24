@@ -2,9 +2,9 @@
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
-/** @var $model app\models\TuModelo */
+/** @var $model app\models\Flight */
 
-$form = ActiveForm::begin(); ?>
+$form = ActiveForm::begin(['action' => ['validate', 'id' => $model->id]]); ?>
 
 <div class="container">
 
@@ -15,7 +15,16 @@ $form = ActiveForm::begin(); ?>
     </div>
 
     <div class="form-group">
-        <?= Html::submitButton('Save validation', ['class' => 'btn btn-primary']) ?>
+        <?= Html::submitButton('Validate', [
+            'class' => 'btn btn-success',
+            'name' => 'action',
+            'value' => 'approve'
+        ]) ?>
+        <?= Html::submitButton('Reject', [
+            'class' => 'btn btn-danger',
+            'name' => 'action',
+            'value' => 'reject'
+        ]) ?>
     </div>
 
 </div>
