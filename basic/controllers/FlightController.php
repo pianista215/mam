@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\models\Flight;
 use app\models\FlightSearch;
 use yii\web\Controller;
+use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -82,6 +83,8 @@ class FlightController extends Controller
                 $model->status = 'F';
             } elseif ($action === 'reject') {
                 $model->status = 'R';
+            } else {
+                throw new BadRequestHttpException("Illegal validation action: $action");
             }
 
             if ($model->save()) {

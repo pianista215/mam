@@ -285,4 +285,37 @@ class FlightTest extends BaseUnitTest
         $this->assertFalse($flight->isPendingValidation(), 'Status F should not be pending validation');
     }
 
+    public function testFlightStatusValidation()
+    {
+        $flight = new Flight([
+            'pilot_id' => $this->pilot->id,
+            'aircraft_id' => $this->aircraft->id,
+            'departure' => 'LEMD',
+            'arrival' => 'LEBL',
+            'alternative1_icao' => 'LEVC',
+            'flight_rules' => 'I',
+            'code' => 'FLTSTATUS',
+            'cruise_speed_value' => '450',
+            'cruise_speed_unit' => 'N',
+            'flight_level_value' => '360',
+            'flight_level_unit' => 'F',
+            'route' => 'ROUTE',
+            'estimated_time' => '0200',
+            'other_information' => 'Other flight details',
+            'endurance_time' => '0500',
+            'report_tool' => 'ToolName',
+        ]);
+
+        // Valid status
+        foreach (['C', 'S', 'V', 'F', 'R'] as $status) {
+            $flight->status = $status;
+            $this->assertTrue($flight->validate(['status']), "Status $status should be valid");
+        }
+
+        // Invalid status
+        $flight->status = 'X';
+        $this->assertFalse($flight->validate(['status']), 'Invalid status should not validate');
+        $this->assertArrayHasKey('status', $flight->getErrors(), 'Missing error for invalid status');
+    }
+
 }

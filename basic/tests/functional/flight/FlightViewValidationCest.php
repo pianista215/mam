@@ -124,6 +124,32 @@ class FlightViewValidationCest
         }
     }
 
+    public function invalidActionThrowsException(FunctionalTester $I)
+    {
+        $I->amLoggedInAs(5); // IFR validator
+
+        $I->amOnRoute('flight/view', ['id' => 2]);
+        $I->seeResponseCodeIs(200);
+
+        $I->see('Validate', 'button');
+        $I->see('Reject', 'button');
+
+        // Ensure validation form is there
+        $I->seeElement('form[action*="validate"]');
+        $I->submitForm('form[action*="validate"]', [
+            'action' => 'invented',
+            'Flight[validator_comments]' => 'comment',
+        ]);
+
+        // After submit usually redirect to view; ensure we got 200
+        $I->seeResponseCodeIs(400);
+
+        $I->see('Illegal validation action: invented');
+
+        $flight = \app\models\Flight::findOne(2);
+        $I->assertEquals('V', $flight->status, "Initial status changed for flight 2");
+    }
+
     // IFR validator CANNOT validate a VFR flight
     public function ifrValidatorCannotValidateVfr(FunctionalTester $I)
     {

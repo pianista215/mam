@@ -75,6 +75,7 @@ class Flight extends \yii\db\ActiveRecord
             [['route', 'other_information', 'validator_comments'], 'string', 'max' => 400],
             [['report_tool'], 'string', 'max' => 20],
             [['network'], 'string', 'max' => 50],
+            [['status'], 'in', 'range' => ['F', 'R', 'V', 'C', 'S']],
             [['aircraft_id'], 'exist', 'skipOnError' => true, 'targetClass' => Aircraft::class, 'targetAttribute' => ['aircraft_id' => 'id']],
             [['alternative1_icao'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['alternative1_icao' => 'icao_code']],
             [['alternative2_icao'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['alternative2_icao' => 'icao_code']],
