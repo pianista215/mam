@@ -138,7 +138,6 @@ class FlightReportTest extends BaseUnitTest
             'start_time' => '2025-01-01 10:00:00',
             'end_time' => '2025-01-01 12:00:00',
             'pilot_comments' => 'Good flight.',
-            'validator_comments' => null,
             'sim_aircraft_name' => 'B738 Simulator',
         ]);
 

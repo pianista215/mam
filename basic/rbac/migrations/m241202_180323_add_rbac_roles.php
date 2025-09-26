@@ -1,5 +1,6 @@
 <?php
 
+use app\rbac\rules\FlightValidationRule;
 use app\rbac\rules\SubmittedFlightPlanOwnerRule;
 use yii\db\Migration;
 
@@ -43,6 +44,13 @@ class m241202_180323_add_rbac_roles extends Migration
         $auth->addChild($pilot, $submitFpl);
         $auth->addChild($pilot, $crudOwnFpl);
 
+        // Flight Validator rule
+        $flightValidationRule = new FlightValidationRule();
+        $auth->add($flightValidationRule);
+        $validateFlight = $auth->createPermission('validateFlight');
+        $validateFlight->ruleName = $flightValidationRule->name;
+        $auth->add($validateFlight);
+
         // VFR validator
         $validateVfrFlight = $auth->createPermission('validateVfrFlight');
         $validateVfrFlight->description = 'Validate a VFR flight';
@@ -51,6 +59,7 @@ class m241202_180323_add_rbac_roles extends Migration
         $vfrValidator = $auth->createRole('vfrValidator');
         $auth->add($vfrValidator);
         $auth->addChild($vfrValidator, $validateVfrFlight);
+        $auth->addChild($vfrValidator, $validateFlight);
 
         // IFR validator
         $validateIfrFlight = $auth->createPermission('validateIfrFlight');
@@ -60,6 +69,7 @@ class m241202_180323_add_rbac_roles extends Migration
         $ifrValidator = $auth->createRole('ifrValidator');
         $auth->add($ifrValidator);
         $auth->addChild($ifrValidator, $validateIfrFlight);
+        $auth->addChild($ifrValidator, $validateFlight);
 
         // Fleet Manager
         $moveAircraft = $auth->createPermission('moveAircraft');

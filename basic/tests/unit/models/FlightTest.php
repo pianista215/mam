@@ -223,4 +223,99 @@ class FlightTest extends BaseUnitTest
         $this->assertArrayHasKey('alternative1_icao', $model->getErrors());
         $this->assertArrayHasKey('alternative2_icao', $model->getErrors());
     }
+
+    public function testIsProcessed()
+    {
+        $flight = new Flight(['status' => 'C']);
+        $this->assertFalse($flight->isProcessed(), 'Status C should not be processed');
+
+        $flight->status = 'V';
+        $this->assertTrue($flight->isProcessed(), 'Status V should be processed');
+
+        $flight->status = 'F';
+        $this->assertTrue($flight->isProcessed(), 'Status F should be processed');
+
+        $flight->status = 'R';
+        $this->assertTrue($flight->isProcessed(), 'Status R should be processed');
+    }
+
+    public function testHasAcarsInfo()
+    {
+        $flight = new Flight();
+
+        $this->assertFalse($flight->hasAcarsInfo(), 'Flight without report should not have ACARS info');
+
+        $flight->populateRelation('flight_report', (object)['flight_phases' => null]);
+        $this->assertFalse($flight->hasAcarsInfo(), 'Flight report without phases should not have ACARS info');
+
+        $flight->populateRelation('flight_report', (object)['flight_phases' => ['phase1']]);
+        $this->assertTrue($flight->hasAcarsInfo(), 'Flight report with phases should have ACARS info');
+    }
+
+    public function testIsValidated()
+    {
+        $flight = new Flight(['status' => 'C']);
+        $this->assertFalse($flight->isValidated(), 'Status C should not be validated');
+
+        $flight->status = 'V';
+        $this->assertFalse($flight->isValidated(), 'Status V should not be validated');
+
+        $flight->status = 'F';
+        $this->assertTrue($flight->isValidated(), 'Status F should be validated');
+
+        $flight->status = 'R';
+        $this->assertTrue($flight->isValidated(), 'Status R should be validated');
+    }
+
+    public function testIsPendingValidation()
+    {
+        $flight = new Flight(['status' => 'V']);
+        $this->assertTrue($flight->isPendingValidation(), 'Status V should be pending validation');
+
+        $flight = new Flight([
+            'status' => 'C',
+            'creation_date' => (new \DateTimeImmutable())->modify('-48 hours')->format('Y-m-d H:i:s'),
+        ]);
+        $this->assertFalse($flight->isPendingValidation(), 'Status C with less than 72h should not be pending validation');
+
+        $flight->creation_date = (new \DateTimeImmutable())->modify('-80 hours')->format('Y-m-d H:i:s');
+        $this->assertTrue($flight->isPendingValidation(), 'Status C with more than 72h should be pending validation');
+
+        $flight = new Flight(['status' => 'F']);
+        $this->assertFalse($flight->isPendingValidation(), 'Status F should not be pending validation');
+    }
+
+    public function testFlightStatusValidation()
+    {
+        $flight = new Flight([
+            'pilot_id' => $this->pilot->id,
+            'aircraft_id' => $this->aircraft->id,
+            'departure' => 'LEMD',
+            'arrival' => 'LEBL',
+            'alternative1_icao' => 'LEVC',
+            'flight_rules' => 'I',
+            'code' => 'FLTSTATUS',
+            'cruise_speed_value' => '450',
+            'cruise_speed_unit' => 'N',
+            'flight_level_value' => '360',
+            'flight_level_unit' => 'F',
+            'route' => 'ROUTE',
+            'estimated_time' => '0200',
+            'other_information' => 'Other flight details',
+            'endurance_time' => '0500',
+            'report_tool' => 'ToolName',
+        ]);
+
+        // Valid status
+        foreach (['C', 'S', 'V', 'F', 'R'] as $status) {
+            $flight->status = $status;
+            $this->assertTrue($flight->validate(['status']), "Status $status should be valid");
+        }
+
+        // Invalid status
+        $flight->status = 'X';
+        $this->assertFalse($flight->validate(['status']), 'Invalid status should not validate');
+        $this->assertArrayHasKey('status', $flight->getErrors(), 'Missing error for invalid status');
+    }
+
 }

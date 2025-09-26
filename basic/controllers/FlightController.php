@@ -5,8 +5,11 @@ namespace app\controllers;
 use app\models\Flight;
 use app\models\FlightSearch;
 use yii\web\Controller;
+use yii\web\BadRequestHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use Yii;
 
 /**
  * FlightController implements the CRUD actions for Flight model.
@@ -59,6 +62,44 @@ class FlightController extends Controller
             'model' => $this->findModel($id),
         ]);
     }
+
+    /**
+     * Validate or reject a Flight
+     * @param string $id ID
+     * @return string
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    public function actionValidate($id)
+    {
+        $model = $this->findModel($id);
+
+        $model->scenario = Flight::SCENARIO_VALIDATE;;
+        if ($model->isPendingValidation() && $model->load(Yii::$app->request->post())) {
+            $model->validator_id = Yii::$app->user->id;
+            $model->validation_date = date('Y-m-d H:i:s');
+
+            $action = Yii::$app->request->post('action');
+            if ($action === 'approve') {
+                $model->status = 'F';
+            } elseif ($action === 'reject') {
+                $model->status = 'R';
+            } else {
+                throw new BadRequestHttpException("Illegal validation action: $action");
+            }
+
+            if ($model->save()) {
+                Yii::$app->session->setFlash('success', 'Flight validation finished.');
+                return $this->redirect(['view', 'id' => $model->id]);
+            } else {
+                Yii::error("Error with flight validation {$model->id}: " . json_encode($model->errors));
+                Yii::$app->session->setFlash('error', 'Error validating flight.');
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
+        } else {
+            throw new ForbiddenHttpException('You\'re not allowed to validate this flight');
+        }
+    }
+
 
     /**
      * Finds the Flight model based on its primary key value.
