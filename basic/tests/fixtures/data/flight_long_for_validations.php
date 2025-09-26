@@ -241,6 +241,9 @@ return [
         'report_tool' => 'Mam Acars',
         'status' => 'F',
         'creation_date' => date('Y-m-d H:i:s', strtotime('-3 days')),
+        'validator_id' => 5,
+        'validation_date' => date('Y-m-d H:i:s', strtotime('-3 days')),
+        'validator_comments' => 'Good flight'
     ],
 
     // Rejected
@@ -264,5 +267,54 @@ return [
         'report_tool' => 'Mam Acars',
         'status' => 'R',
         'creation_date' => date('Y-m-d H:i:s', strtotime('-3 days')),
+        'validator_id' => 4,
+        'validation_date' => date('Y-m-d H:i:s', strtotime('-3 days')),
+        'validator_comments' => 'Repeat the flight please'
+    ],
+
+    // Own flight VFR Validator
+    [
+        'id' => 12,
+        'pilot_id' => 4,
+        'aircraft_id' => 1,
+        'code' => 'RJ001',
+        'departure' => 'LEBL',
+        'arrival' => 'LEMD',
+        'alternative1_icao' => 'LEVC',
+        'flight_rules' => 'V',
+        'cruise_speed_unit' => 'N',
+        'cruise_speed_value' => '120',
+        'flight_level_unit' => 'F',
+        'flight_level_value' => '60',
+        'route' => 'DCT',
+        'estimated_time' => '0100',
+        'other_information' => 'Test',
+        'endurance_time' => '0200',
+        'report_tool' => 'Mam Acars',
+        'status' => 'V',
+        'creation_date' => date('Y-m-d H:i:s', strtotime('-3 days')),
+    ],
+
+    // Own flight IFR Validator (C > 72h)
+    [
+        'id' => 13,
+        'pilot_id' => 5,
+        'aircraft_id' => 1,
+        'code' => 'IFRC001',
+        'departure' => 'LEMD',
+        'arrival' => 'LEBL',
+        'alternative1_icao' => 'LEVC',
+        'flight_rules' => 'I',
+        'cruise_speed_unit' => 'N',
+        'cruise_speed_value' => '350',
+        'flight_level_unit' => 'F',
+        'flight_level_value' => '310',
+        'route' => 'DCT',
+        'estimated_time' => '0200',
+        'other_information' => 'Test',
+        'endurance_time' => '0400',
+        'report_tool' => 'Mam Acars',
+        'status' => 'C',
+        'creation_date' => date('Y-m-d H:i:s', strtotime('-4 days')),
     ],
 ];

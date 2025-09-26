@@ -89,4 +89,20 @@ return [
         'pilot_comments' => 'Nice flight #11',
         'sim_aircraft_name' => 'Zibo 737-800',
     ],
+[
+        'id' => 12,
+        'flight_id' => 12,
+        'start_time' => '2025-01-01 01:11:00',
+        'end_time' => '2025-01-01 01:50:15',
+        'pilot_comments' => 'Nice flight #12',
+        'sim_aircraft_name' => 'C182',
+    ],
+    [
+        'id' => 13,
+        'flight_id' => 13,
+        'start_time' => '2025-01-01 01:11:00',
+        'end_time' => '2025-01-01 01:50:15',
+        'pilot_comments' => 'Nice flight #13',
+        'sim_aircraft_name' => 'Zibo 737-800',
+    ],
 ];

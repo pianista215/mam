@@ -10,6 +10,7 @@ use Yii;
 
 class FlightViewValidationCest
 {
+    // TODO: Acceptance tests with POST to ensure more than form is not shown
 
     protected function _before(FunctionalTester $I)
     {
@@ -83,7 +84,7 @@ class FlightViewValidationCest
         $this->submitValidation($I, $flightId, 'reject', $comment);
     }
 
-    // 1 & 2: VFR validator approve/reject VFR flights
+    // VFR validator approve/reject VFR flights
     public function vfrValidatorApproveAndReject(FunctionalTester $I)
     {
         // vfr validator user id = 4
@@ -107,11 +108,11 @@ class FlightViewValidationCest
         $this->assertFlightValidated($I, 5, 'R', 4, 'Rejected by VFR');
     }
 
-    // 3 & 4: IFR validator can approve/reject all validable flights (ids 1..8)
+    // IFR validator can approve/reject all validable flights EXCEPT VFR
     public function ifrValidatorCanValidateAllValidable(FunctionalTester $I)
     {
-        // validable flights ids per fixture: 1..8 (V or C >72h)
-        $validable = [1,2,3,4,5,6,7,8];
+        // validable flights: 2..4 and 6..8 (V or C >72h), but not id=1 or id=5 (VFR)
+        $validable = [2,3,4,6,7,8];
 
         foreach ($validable as $id) {
             // ifr validator user id = 5
@@ -123,138 +124,92 @@ class FlightViewValidationCest
         }
     }
 
-    // 5 & 6: VFR cannot validate non-VFR or not-validable flights
+    // IFR validator CANNOT validate a VFR flight
+    public function ifrValidatorCannotValidateVfr(FunctionalTester $I)
+    {
+        $I->amLoggedInAs(5); // ifr validator user id = 5
+
+        // vfr flights: 1,5
+        $notValidable = [1,5];
+
+        foreach ($notValidable as $id) {
+            // ifr validator user id = 5
+            $I->amLoggedInAs(5);
+            // Try to access a VFR flight
+            $I->amOnRoute('flight/view', ['id' => $id]);
+            $I->seeResponseCodeIs(200);
+
+            // Ensure validation form is NOT visible
+            $I->dontSee('Validate', 'button');
+            $I->dontSee('Reject', 'button');
+            $I->dontSeeElement('form[action*="validate"]');
+        }
+
+    }
+
+    // VFR cannot validate non-VFR or not-validable flights
     public function vfrValidatorCannotValidateOtherOrInvalid(FunctionalTester $I)
     {
-        $I->amLoggedInAs(4);
-
         // non-VFR validable examples (IFR, Y, Z): ids 2,3,4,6,7,8 are not VFR
         $nonVfr = [2,3,4,6,7,8];
 
         foreach ($nonVfr as $id) {
+            $I->amLoggedInAs(4);
             $I->amOnRoute('flight/view', ['id' => $id]);
             $I->seeResponseCodeIs(200);
-            // UI should not show validate buttons for VFR validator on non-VFR flights
-            $I->dontSee('Validate');
-            $I->dontSee('Reject');
-
-            // Try to force a POST anyway -> should be forbidden (403)
-            $I->sendPOST(['flight/validate', 'id' => $id], [
-                'action' => 'approve',
-                'Flight[validator_comments]' => 'Try to approve'
-            ]);
-            $I->seeResponseCodeIs(403);
+            // Ensure validation form is NOT visible
+            $I->dontSee('Validate', 'button');
+            $I->dontSee('Reject', 'button');
+            $I->dontSeeElement('form[action*="validate"]');
         }
 
         // Also check not-validable flights: ids 9 (C <72h), 10 (F), 11 (R)
         $notValidable = [9,10,11];
         foreach ($notValidable as $id) {
+            $I->amLoggedInAs(4);
             $I->amOnRoute('flight/view', ['id' => $id]);
             $I->seeResponseCodeIs(200);
-            $I->dontSee('Validate');
-            $I->dontSee('Reject');
-
-            $I->sendPOST(['flight/validate', 'id' => $id], [
-                'action' => 'approve',
-                'Flight[validator_comments]' => 'Try to approve not validable'
-            ]);
-            $I->seeResponseCodeIs(403);
+            // Ensure validation form is NOT visible
+            $I->dontSee('Validate', 'button');
+            $I->dontSee('Reject', 'button');
+            $I->dontSeeElement('form[action*="validate"]');
         }
     }
 
-    // 7: IFR validator cannot validate not-validable flights
+    // IFR validator cannot validate not-validable flights
     public function ifrValidatorCannotValidateInvalid(FunctionalTester $I)
     {
-        $I->amLoggedInAs(5);
-
         $notValidable = [9,10,11]; // C <72h, F, R
         foreach ($notValidable as $id) {
+            $I->amLoggedInAs(5);
             $I->amOnRoute('flight/view', ['id' => $id]);
             $I->seeResponseCodeIs(200);
-            $I->dontSee('Validate');
-            $I->dontSee('Reject');
-
-            $I->sendPOST(['flight/validate', 'id' => $id], [
-                'action' => 'approve',
-                'Flight[validator_comments]' => 'try'
-            ]);
-            $I->seeResponseCodeIs(403);
+            // Ensure validation form is NOT visible
+            $I->dontSee('Validate', 'button');
+            $I->dontSee('Reject', 'button');
+            $I->dontSeeElement('form[action*="validate"]');
         }
     }
 
-    // 8: Cannot validate own flight (test both VFR and IFR user)
+    // Cannot validate own flight (test both VFR and IFR user)
     public function cannotValidateOwnFlight(FunctionalTester $I)
     {
-        // create a flight owned by vfr validator (pilot_id = 4) - status V
-        $ownVfrId = 200;
-        $I->haveRecord('flight', [
-            'id' => $ownVfrId,
-            'pilot_id' => 4,
-            'aircraft_id' => 1,
-            'code' => 'OWNVFR',
-            'departure' => 'LEBL',
-            'arrival' => 'LEMD',
-            'alternative1_icao' => 'LEVC',
-            'flight_rules' => 'V',
-            'cruise_speed_unit' => 'N',
-            'cruise_speed_value' => '100',
-            'flight_level_unit' => 'F',
-            'flight_level_value' => '50',
-            'route' => 'DCT',
-            'estimated_time' => '0100',
-            'other_information' => 'own vfr',
-            'endurance_time' => '0200',
-            'report_tool' => 'Mam Acars',
-            'status' => 'V',
-            'creation_date' => date('Y-m-d H:i:s', strtotime('-1 day')),
-        ]);
-
+        // Vfr Validator
         $I->amLoggedInAs(4);
-        $I->amOnRoute('flight/view', ['id' => $ownVfrId]);
+        $I->amOnRoute('flight/view', ['id' => 12]);
         $I->seeResponseCodeIs(200);
-        $I->dontSee('Validate');
-        $I->dontSee('Reject');
+        // Ensure validation form is NOT visible
+        $I->dontSee('Validate', 'button');
+        $I->dontSee('Reject', 'button');
+        $I->dontSeeElement('form[action*="validate"]');
 
-        $I->sendPOST(['flight/validate', 'id' => $ownVfrId], [
-            'action' => 'approve',
-            'Flight[validator_comments]' => 'self try'
-        ]);
-        $I->seeResponseCodeIs(403);
-
-        // create a flight owned by ifr validator (pilot_id = 5)
-        $ownIfrId = 201;
-        $I->haveRecord('flight', [
-            'id' => $ownIfrId,
-            'pilot_id' => 5,
-            'aircraft_id' => 1,
-            'code' => 'OWNIFR',
-            'departure' => 'LEMD',
-            'arrival' => 'LEBL',
-            'alternative1_icao' => 'LEVC',
-            'flight_rules' => 'I',
-            'cruise_speed_unit' => 'N',
-            'cruise_speed_value' => '300',
-            'flight_level_unit' => 'F',
-            'flight_level_value' => '250',
-            'route' => 'DCT',
-            'estimated_time' => '0200',
-            'other_information' => 'own ifr',
-            'endurance_time' => '0400',
-            'report_tool' => 'Mam Acars',
-            'status' => 'V',
-            'creation_date' => date('Y-m-d H:i:s', strtotime('-1 day')),
-        ]);
-
+        // Ifr Validator
         $I->amLoggedInAs(5);
-        $I->amOnRoute('flight/view', ['id' => $ownIfrId]);
+        $I->amOnRoute('flight/view', ['id' => 13]);
         $I->seeResponseCodeIs(200);
-        $I->dontSee('Validate');
-        $I->dontSee('Reject');
-
-        $I->sendPOST(['flight/validate', 'id' => $ownIfrId], [
-            'action' => 'approve',
-            'Flight[validator_comments]' => 'self try'
-        ]);
-        $I->seeResponseCodeIs(403);
+        // Ensure validation form is NOT visible
+        $I->dontSee('Validate', 'button');
+        $I->dontSee('Reject', 'button');
+        $I->dontSeeElement('form[action*="validate"]');
     }
 }

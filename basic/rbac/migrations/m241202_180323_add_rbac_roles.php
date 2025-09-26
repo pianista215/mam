@@ -68,7 +68,6 @@ class m241202_180323_add_rbac_roles extends Migration
 
         $ifrValidator = $auth->createRole('ifrValidator');
         $auth->add($ifrValidator);
-        $auth->addChild($ifrValidator, $validateVfrFlight);
         $auth->addChild($ifrValidator, $validateIfrFlight);
         $auth->addChild($ifrValidator, $validateFlight);
 
