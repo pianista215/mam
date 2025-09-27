@@ -136,7 +136,7 @@ class Flight extends \yii\db\ActiveRecord
     }
 
     public function hasAcarsInfo(){
-        return !empty($this->flight_report->flight_phases);
+        return !empty($this->flightReport->flightPhases);
     }
 
     public function isValidated(){
