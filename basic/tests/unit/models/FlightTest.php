@@ -245,10 +245,10 @@ class FlightTest extends BaseUnitTest
 
         $this->assertFalse($flight->hasAcarsInfo(), 'Flight without report should not have ACARS info');
 
-        $flight->populateRelation('flight_report', (object)['flight_phases' => null]);
+        $flight->populateRelation('flightReport', (object)['flightPhases' => null]);
         $this->assertFalse($flight->hasAcarsInfo(), 'Flight report without phases should not have ACARS info');
 
-        $flight->populateRelation('flight_report', (object)['flight_phases' => ['phase1']]);
+        $flight->populateRelation('flightReport', (object)['flightPhases' => ['phase1']]);
         $this->assertTrue($flight->hasAcarsInfo(), 'Flight report with phases should have ACARS info');
     }
 
