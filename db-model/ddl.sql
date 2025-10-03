@@ -284,6 +284,19 @@ CREATE TABLE `issue_type` (
   UNIQUE KEY `issue_type_unique` (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `flight_phase_issue` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `phase_id` bigint(20) unsigned NOT NULL,
+  `issue_type_id` smallint(5) unsigned NOT NULL,
+  `timestamp` datetime NOT NULL,
+  `value` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `flight_phase_issue_flight_phase_FK` (`phase_id`),
+  KEY `flight_phase_issue_issue_type_FK` (`issue_type_id`),
+  CONSTRAINT `flight_phase_issue_flight_phase_FK` FOREIGN KEY (`phase_id`) REFERENCES `flight_phase` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `flight_phase_issue_issue_type_FK` FOREIGN KEY (`issue_type_id`) REFERENCES `issue_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 
 

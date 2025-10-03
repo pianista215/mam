@@ -1,5 +1,5 @@
 -- Issues code reported by mam-analyzer
-INSERT INTO issue_type(`code`, `penalty`, `description`) VALUES ('LandingHardFpm', '20', 'Hard landing (>700 fpm)');
+INSERT INTO issue_type(`code`, `penalty`, `description`) VALUES ('LandingHardFpm', '20', 'Hard landing (<-700 fpm)');
 INSERT INTO issue_type(`code`, `penalty`, `description`) VALUES ('TaxiOverspeed', '5', 'Taxi overspeed (>25 knots)');
 INSERT INTO issue_type(`code`, `penalty`, `description`) VALUES ('AppHighVsBelow1000AGL', '10', 'High descent rate (<-1000 fpm) below 1000 AGL');
 INSERT INTO issue_type(`code`, `penalty`, `description`) VALUES ('AppHighVsBelow2000AGL', '10', 'High descent rate (<-2000 fpm) below 2000 AGL');
