@@ -275,6 +275,17 @@ CREATE TABLE `flight_event_data` (
   CONSTRAINT `flight_event_data_flight_event_attribute_FK` FOREIGN KEY (`attribute_id`) REFERENCES `flight_event_attribute` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE mam.issue_type (
+	id SMALLINT UNSIGNED auto_increment NOT NULL,
+	code varchar(80) NOT NULL,
+	penalty TINYINT UNSIGNED NULL,
+	CONSTRAINT issue_type_pk PRIMARY KEY (id),
+	CONSTRAINT issue_type_unique UNIQUE KEY (code)
+)
+ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_general_ci;
+
 
 
 
