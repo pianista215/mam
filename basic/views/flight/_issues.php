@@ -13,10 +13,15 @@ foreach ($report->flightPhases as $phase) {
     foreach ($phase->flightPhaseIssues as $issue) {
         $penalty = $issue->issueType->penalty ?? 0;
         $totalPenalty += $penalty;
+        $description = $issue->issueType->description;
+        if ($issue->value !== null && $issue->value !== '') {
+            $description .= ' (' . $issue->value . ')';
+        }
+
         $issues[] = [
             'timestamp' => $issue->timestamp,
-            'phase' => $phase->flightPhaseType->name ?? '-',
-            'description' => $issue->issueType->description ?? '-',
+            'phase' => $phase->flightPhaseType->name,
+            'description' => $description,
             'penalty' => $issue->issueType->penalty ?? '-',
         ];
     }
