@@ -278,6 +278,7 @@ CREATE TABLE `flight_event_data` (
 CREATE TABLE `issue_type` (
   `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
   `code` varchar(80) NOT NULL,
+  `description` varchar(200) NOT NULL,
   `penalty` tinyint(3) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `issue_type_unique` (`code`)
