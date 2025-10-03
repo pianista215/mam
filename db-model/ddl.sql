@@ -281,10 +281,7 @@ CREATE TABLE mam.issue_type (
 	penalty TINYINT UNSIGNED NULL,
 	CONSTRAINT issue_type_pk PRIMARY KEY (id),
 	CONSTRAINT issue_type_unique UNIQUE KEY (code)
-)
-ENGINE=InnoDB
-DEFAULT CHARSET=utf8mb4
-COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
