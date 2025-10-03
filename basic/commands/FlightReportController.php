@@ -6,9 +6,11 @@ use app\models\FlightEvent;
 use app\models\FlightEventAttribute;
 use app\models\FlightEventData;
 use app\models\FlightPhase;
+use app\models\FlightPhaseIssue;
 use app\models\FlightPhaseMetric;
 use app\models\FlightPhaseMetricType;
 use app\models\FlightPhaseType;
+use app\models\IssueType;
 use yii\console\Controller;
 use yii\console\ExitCode;
 use Yii;
@@ -131,6 +133,53 @@ class FlightReportController extends Controller
         return $result;
     }
 
+    protected function importPhaseAnalysis($phase, $phaseType, $phaseAnalysis)
+    {
+        $phaseAnalysisMetrics = $phaseAnalysis['phase_metrics'];
+        if(!empty($phaseAnalysisMetrics)){
+            $this->importPhaseMetrics($phase, $phaseType, $phaseAnalysisMetrics);
+        }
+
+        $phaseAnalysisIssues = $phaseAnalysis['issues'];
+        if(!empty($phaseAnalysisIssues)){
+            $this->importPhaseIssues($phase, $phaseType, $phaseAnalysisIssues);
+        }
+    }
+
+    protected function importPhaseIssues($phase, $phaseType, $issues)
+    {
+        foreach($issues as $issue){
+            $code = $issue['code'];
+            $timestamp = $issue['timestamp'] ?? null;
+            $value = $issue['value'] ?? null;
+
+            if($timestamp === null){
+                throw new \RuntimeException("Issue timestamp can't be null, for issue with code " . $code);
+            }
+
+            $issueType = IssueType::findOne(['code' => $code]);
+
+            if(!$issueType){
+                throw new \RuntimeException("Not found issue type with code: ".$code);
+            }
+
+            if($value !== null){
+                $value = $this->strDataValue($value);
+            }
+            $phaseIssue = new FlightPhaseIssue([
+                'phase_id' => $phase->id,
+                'issue_type_id' => $issueType->id,
+                'timestamp' => $timestamp,
+                'value' => $value
+            ]);
+
+
+            if (!$phaseIssue->save()) {
+                throw new \Exception("Error saving PhaseIssue: " . json_encode($phaseIssue->errors));
+            }
+        }
+    }
+
     protected function importPhaseMetrics($phase, $phaseType, $metrics)
     {
         foreach($metrics as $key => $value) {
@@ -233,9 +282,9 @@ class FlightReportController extends Controller
             throw new \Exception("Error saving FlightPhase: " . json_encode($phase->errors));
         }
 
-        $phaseMetrics = $phaseJson['analysis'];
-        if(!empty($phaseMetrics)) {
-            $this->importPhaseMetrics($phase, $phaseType, $phaseMetrics);
+        $phaseAnalysis = $phaseJson['analysis'];
+        if(!empty($phaseAnalysis)) {
+            $this->importPhaseAnalysis($phase, $phaseType, $phaseAnalysis);
         }
 
         $phaseEvents = $phaseJson['events'];
