@@ -6,6 +6,7 @@ use app\config\Config;
 use app\helpers\LoggerTrait;
 use app\models\AcarsFile;
 use app\models\Aircraft;
+use app\models\Airport;
 use app\models\AirportSearch;
 use app\models\Flight;
 use app\models\FlightReport;
@@ -187,7 +188,7 @@ class FlightReportController extends Controller
         return $flight;
     }
 
-    private function fillReport(Flight $flight, SubmitReportDTO $dto, Airport $landingAirport)
+    private function fillReport(Flight $flight, SubmitReportDTO $dto, ?Airport $landingAirport)
     {
         $report = new FlightReport();
         $report->flight_id = $flight->id;

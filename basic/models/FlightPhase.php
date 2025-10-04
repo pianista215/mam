@@ -66,7 +66,7 @@ class FlightPhase extends \yii\db\ActiveRecord
      */
     public function getFlightEvents()
     {
-        return $this->hasMany(FlightEvent::class, ['phase_id' => 'id'])->orderBy(['id' => SORT_ASC]);;
+        return $this->hasMany(FlightEvent::class, ['phase_id' => 'id'])->orderBy(['id' => SORT_ASC]);
     }
 
     /**
@@ -76,7 +76,7 @@ class FlightPhase extends \yii\db\ActiveRecord
      */
     public function getFlightPhaseIssues()
     {
-       return $this->hasMany(FlightPhaseIssue::class, ['phase_id' => 'id']);
+       return $this->hasMany(FlightPhaseIssue::class, ['phase_id' => 'id'])->orderBy(['timestamp' => SORT_ASC]);
     }
 
     /**

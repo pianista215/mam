@@ -379,6 +379,39 @@ class FlightReportSubmissionCest
 
         $flight_report_id = $this->testValidWithRequest($I, $request);
 
+        $flight_report = \app\models\FlightReport::find()->where(['id' => $flight_report_id])->one();
+        $I->assertEquals($flight_report->landing_airport, 'LEAL');
+
+
+        $acars_files = \app\models\AcarsFile::find()->where(['flight_report_id' => $flight_report_id])->all();
+        $I->assertCount(1, $acars_files);
+        $file = $acars_files[0];
+        $I->assertEquals($file->chunk_id, 1);
+        $I->assertEquals($file->sha256sum, str_repeat('A', 44));
+    }
+
+    public function testValidFlightReportSubmissionLandingInWater(ApiTester $I)
+    {
+        $request = [
+            'pilot_comments' => 'Good flight',
+            'last_position_lat' => 38.282220,
+            'last_position_lon' => 0.558050,
+            'network' => 'IVAO',
+            'sim_aircraft_name' => 'Xplane King Air 350',
+            'report_tool' => 'Mam Acars 1.0',
+            'start_time' => '2025-02-01 11:00:00',
+            'end_time' => '2025-02-01 12:15:13',
+            'chunks' => [
+                ['id' => 1, 'sha256sum' => str_repeat('A', 44)],
+            ]
+        ];
+
+        $flight_report_id = $this->testValidWithRequest($I, $request);
+
+        $flight_report = \app\models\FlightReport::find()->where(['id' => $flight_report_id])->one();
+        $I->assertEquals($flight_report->landing_airport, null);
+
+
         $acars_files = \app\models\AcarsFile::find()->where(['flight_report_id' => $flight_report_id])->all();
         $I->assertCount(1, $acars_files);
         $file = $acars_files[0];
