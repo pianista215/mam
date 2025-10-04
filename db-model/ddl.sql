@@ -180,6 +180,7 @@ CREATE TABLE `flight` (
 CREATE TABLE `flight_report` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `flight_id` bigint(20) unsigned NOT NULL,
+  `landing_airport` char(4) DEFAULT NULL,
   `start_time` datetime DEFAULT NULL,
   `end_time` datetime DEFAULT NULL,
   `flight_time_minutes` smallint(5) unsigned DEFAULT NULL,
@@ -193,6 +194,8 @@ CREATE TABLE `flight_report` (
   `sim_aircraft_name` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `flight_report_unique` (`flight_id`),
+  KEY `flight_report_airport_FK` (`landing_airport`),
+  CONSTRAINT `flight_report_airport_FK` FOREIGN KEY (`landing_airport`) REFERENCES `airport` (`icao_code`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `flight_report_flight_FK` FOREIGN KEY (`flight_id`) REFERENCES `flight` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

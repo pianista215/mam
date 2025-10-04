@@ -9,6 +9,7 @@ use Yii;
  *
  * @property int $id
  * @property int $flight_id
+ * @property string|null $landing_airport
  * @property string|null $start_time
  * @property string|null $end_time
  * @property int|null $flight_time_minutes
@@ -23,6 +24,8 @@ use Yii;
  *
  * @property AcarsFile[] $acarsFiles
  * @property Flight $flight
+ * @property FlightPhase[] $flightPhases
+ * @property Airport $landingAirport
  */
 class FlightReport extends \yii\db\ActiveRecord
 {
@@ -42,12 +45,14 @@ class FlightReport extends \yii\db\ActiveRecord
         return [
             [['flight_id'], 'required'],
             [['flight_id', 'flight_time_minutes', 'block_time_minutes', 'total_fuel_burn_kg', 'distance_nm', 'initial_fuel_on_board', 'zero_fuel_weight', 'crash'], 'integer'],
+            [['landing_airport'], 'string', 'max' => 4],
             [['start_time', 'end_time'], 'safe'],
             [['start_time', 'end_time'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
             [['pilot_comments', 'sim_aircraft_name'], 'trim'],
             [['pilot_comments'], 'string', 'max' => 400],
             [['sim_aircraft_name'], 'string', 'max' => 50],
             [['flight_id'], 'unique'],
+            [['landing_airport'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['landing_airport' => 'icao_code']],
             [['flight_id'], 'exist', 'skipOnError' => true, 'targetClass' => Flight::class, 'targetAttribute' => ['flight_id' => 'id']],
         ];
     }
@@ -60,6 +65,7 @@ class FlightReport extends \yii\db\ActiveRecord
         return [
             'id' => 'ID',
             'flight_id' => 'Flight ID',
+            'landing_airport' => 'Landing Airport',
             'start_time' => 'Start Time',
             'end_time' => 'End Time',
             'flight_time_minutes' => 'Flight Time Minutes',
@@ -72,6 +78,16 @@ class FlightReport extends \yii\db\ActiveRecord
             'crash' => 'Crash',
             'sim_aircraft_name' => 'Sim Aircraft Name',
         ];
+    }
+
+   /**
+    * Gets query for [[LandingAirport]].
+    *
+    * @return \yii\db\ActiveQuery
+    */
+    public function getLandingAirport()
+    {
+        return $this->hasOne(Airport::class, ['icao_code' => 'landing_airport']);
     }
 
     /**
