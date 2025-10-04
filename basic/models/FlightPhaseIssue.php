@@ -55,6 +55,35 @@ class FlightPhaseIssue extends \yii\db\ActiveRecord
         ];
     }
 
+    public function getDescription()
+    {
+        $description = '';
+        $base_description = $this->issueType->description;
+        $issue_code = $this->issueType->code;
+
+        $to_add = null;
+        $value = $this->value;
+
+        if($issue_code == 'LandingHardFpm'){
+            $to_add = $value . ' fpm';
+        } else if($issue_code == 'TaxiOverspeed'){
+            $to_add = $value. ' knots';
+        } else if($issue_code == 'AppHighVsBelow1000AGL' || $issue_code == 'AppHighVsBelow2000AGL'){
+            $parts = explode('|', $value);
+            $to_add = $parts[0]. 'fpm and ' . $parts[1]. 'AGL';
+        } else if($issue_code == 'Refueling'){
+            $to_add = $value. ' Kg';
+        } else {
+            $to_add = $value;
+        }
+
+        if ($to_add !== null && $to_add !== '') {
+            $description = $base_description. ': (' . $to_add . ')';
+        }
+
+        return $description;
+    }
+
     /**
      * Gets query for [[IssueType]].
      *

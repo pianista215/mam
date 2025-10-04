@@ -13,15 +13,11 @@ foreach ($report->flightPhases as $phase) {
     foreach ($phase->flightPhaseIssues as $issue) {
         $penalty = $issue->issueType->penalty ?? 0;
         $totalPenalty += $penalty;
-        $description = $issue->issueType->description;
-        if ($issue->value !== null && $issue->value !== '') {
-            $description .= ' (' . $issue->value . ')';
-        }
 
         $issues[] = [
             'timestamp' => $issue->timestamp,
             'phase' => $phase->flightPhaseType->name,
-            'description' => $description,
+            'description' => $issue->description,
             'penalty' => $issue->issueType->penalty ?? '-',
         ];
     }
@@ -29,19 +25,23 @@ foreach ($report->flightPhases as $phase) {
 $score = max(0, 100 - $totalPenalty);
 ?>
 
-<?php if (empty($issues)): ?>
-    <p>No issues detected for this flight.</p>
-<?php else: ?>
-    <table class="table table-bordered table-striped">
-        <thead>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Timestamp</th>
+            <th>Phase</th>
+            <th>Description</th>
+            <th>Penalty</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if (empty($issues)): ?>
             <tr>
-                <th>Timestamp</th>
-                <th>Phase</th>
-                <th>Description</th>
-                <th>Penalty</th>
+                <td colspan="4" class="text-center text-muted">
+                    No issues detected for this flight.
+                </td>
             </tr>
-        </thead>
-        <tbody>
+        <?php else: ?>
             <?php foreach ($issues as $issue): ?>
                 <tr>
                     <td><?= Yii::$app->formatter->asDatetime($issue['timestamp']) ?></td>
@@ -50,10 +50,10 @@ $score = max(0, 100 - $totalPenalty);
                     <td><?= Html::encode($issue['penalty']) ?></td>
                 </tr>
             <?php endforeach; ?>
-            <tr class="table-info">
-                <td colspan="3" class="text-end"><strong>Final Score</strong></td>
-                <td><strong><?= $score ?> / 100</strong></td>
-            </tr>
-        </tbody>
-    </table>
-<?php endif; ?>
+        <?php endif; ?>
+        <tr class="table-info">
+            <td colspan="3" class="text-end"><strong>Final Score</strong></td>
+            <td><strong><?= $score ?> / 100</strong></td>
+        </tr>
+    </tbody>
+</table>
