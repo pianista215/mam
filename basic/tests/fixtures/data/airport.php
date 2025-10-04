@@ -42,8 +42,8 @@ return [
         'country_id' => 1,
         'icao_code' => 'LEAL',
         'name' => 'Alicante',
-        'latitude' => 38.28222,
-        'longitude' => 0.55805,
+        'latitude' => 38.28398537342485,
+        'longitude' => -0.5601802763545335,
         'city' => 'Alicante',
     ],
 ];

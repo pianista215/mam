@@ -137,6 +137,7 @@ class FlightReportTest extends BaseUnitTest
             'crash' => 0,
             'start_time' => '2025-01-01 10:00:00',
             'end_time' => '2025-01-01 12:00:00',
+            'landing_airport' => 'LEVC',
             'pilot_comments' => 'Good flight.',
             'sim_aircraft_name' => 'B738 Simulator',
         ]);

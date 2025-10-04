@@ -6,6 +6,7 @@ use app\config\Config;
 use app\helpers\LoggerTrait;
 use app\models\AcarsFile;
 use app\models\Aircraft;
+use app\models\Airport;
 use app\models\AirportSearch;
 use app\models\Flight;
 use app\models\FlightReport;
@@ -98,7 +99,28 @@ class FlightReportController extends Controller
                     throw new ServerErrorHttpException('Failed to save flight:'. json_encode($flight->getErrors()));
                 }
 
-                $report = $this->fillReport($flight, $dto);
+                $nearestAirport = AirportSearch::findNearestAirport($dto->last_position_lat, $dto->last_position_lon);
+
+                if(!$nearestAirport){
+                    $this->logError('Error finding nearest airport', $dto);
+                    throw new ServerErrorHttpException('Error finding nearest airport of '.$dto->last_position_lat.' '.$dto->last_position_lon);
+                }
+
+                $distanceKm = AirportSearch::haversine($dto->last_position_lat, $dto->last_position_lon, $nearestAirport->latitude, $nearestAirport->longitude);
+
+                $landingAirport = null;
+
+                if ($distanceKm <= 8) {
+                    $landingAirport = $nearestAirport;
+                } else {
+                    $this->logInfo($dto->last_position_lat.' '.$dto->last_position_lon.' more than 8 km to the nearest airport', $nearestAirport);
+                }
+
+                $this->logInfo('Moving pilot and aircraft to', $nearestAirport);
+                $this->movePilotToLocation($submittedFlightPlan->pilot_id, $nearestAirport);
+                $this->moveAircraftToLocation($submittedFlightPlan->aircraft_id, $nearestAirport);
+
+                $report = $this->fillReport($flight, $dto, $landingAirport);
                 if(!$report->save()){
                     $this->logError('Failed to save report', $report->getErrors());
                     throw new ServerErrorHttpException('Failed to save report:'. json_encode($report->getErrors()));
@@ -112,16 +134,7 @@ class FlightReportController extends Controller
                     }
                 }
 
-                $nearestAirport = AirportSearch::findNearestAirport($dto->last_position_lat, $dto->last_position_lon);
 
-                if(!$nearestAirport){
-                    $this->logError('Error finding nearest airport', $dto);
-                    throw new ServerErrorHttpException('Error finding nearest airport of '.$dto->last_position_lat.' '.$dto->last_position_lon);
-                }
-
-                $this->logInfo('Moving pilot and aircraft to', $nearestAirport);
-                $this->movePilotToLocation($submittedFlightPlan->pilot_id, $nearestAirport);
-                $this->moveAircraftToLocation($submittedFlightPlan->aircraft_id, $nearestAirport);
 
                 $submittedFlightPlan->delete();
 
@@ -175,7 +188,7 @@ class FlightReportController extends Controller
         return $flight;
     }
 
-    private function fillReport(Flight $flight, SubmitReportDTO $dto)
+    private function fillReport(Flight $flight, SubmitReportDTO $dto, ?Airport $landingAirport)
     {
         $report = new FlightReport();
         $report->flight_id = $flight->id;
@@ -183,6 +196,10 @@ class FlightReportController extends Controller
         $report->end_time = $dto->end_time;
         $report->pilot_comments = $dto->pilot_comments;
         $report->sim_aircraft_name = $dto->sim_aircraft_name;
+
+        if($landingAirport !== null){
+            $report->landing_airport = $landingAirport->icao_code;
+        }
 
         return $report;
     }

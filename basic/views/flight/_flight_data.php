@@ -6,8 +6,6 @@ use yii\widgets\ActiveForm;
 
 ?>
 
-<!-- TODO CHECK WHICH FIELDS CAN BE DISPLAYED IF ACARS HAS NOT BEEN PROCESSED-->
-
 <div class="container">
 
     <div class="row mb-3">
@@ -20,12 +18,15 @@ use yii\widgets\ActiveForm;
             <div><?= Html::input('text', 'end_time', $model->flightReport->end_time, ['disabled' => true, 'class' => 'form-control'])?></div>
         </div>
         <div class="col-md-3">
-            <div>Network</div>
-            <div><?= Html::input('text', 'network', $model->network, ['disabled' => true, 'class' => 'form-control'])?></div>
+            <div>Landing Airport</div>
+            <?php
+            $landingAirport = $model->flightReport->landing_airport ?? 'Landed outside any known airport';
+            ?>
+            <div><?= Html::input('text', 'end_time', $landingAirport, ['disabled' => true, 'class' => 'form-control'])?></div>
         </div>
         <div class="col-md-3">
-            <div>Report Tool</div>
-            <div><?= Html::input('text', 'report_tool', $model->report_tool, ['disabled' => true, 'class' => 'form-control'])?></div>
+            <div>Network</div>
+            <div><?= Html::input('text', 'network', $model->network, ['disabled' => true, 'class' => 'form-control'])?></div>
         </div>
     </div>
 
@@ -77,6 +78,12 @@ use yii\widgets\ActiveForm;
             <div class="input-group">
                 <div><?= Html::input('text', 'status', $model->fullStatus, ['disabled' => true, 'class' => 'form-control'])?></div>
             </div>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <div>Report Tool</div>
+            <div><?= Html::input('text', 'report_tool', $model->report_tool, ['disabled' => true, 'class' => 'form-control'])?></div>
         </div>
     </div>
     <div class="row mb-3">

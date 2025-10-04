@@ -18,6 +18,9 @@ mysql yii2db < /config.sql
 echo "Loading analysis attributes from /analysis.sql"
 mysql yii2db < /analysis.sql
 
+echo "Loading issues types from /issues.sql"
+mysql yii2db < /issues.sql
+
 echo "Overwritting db conf for Yii"
 cp /db-docker.php /var/www/html/config/db.php
 

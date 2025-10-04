@@ -29,6 +29,12 @@ $this->params['breadcrumbs'][] = $this->title;
         'pilotName' => $model->pilot->fullname,
     ]) ?>
 
+    <?php if ($model->isPendingValidation() || $model->isValidated()): ?>
+        <?= $this->render('_issues', [
+            'report' => $model->flightReport,
+        ]) ?>
+    <?php endif; ?>
+
     <?php if ($model->hasAcarsInfo()): ?>
         <?= $this->render('_map_altitude', [
             'report' => $model->flightReport,

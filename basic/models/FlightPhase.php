@@ -14,6 +14,7 @@ use Yii;
  * @property string $end
  *
  * @property FlightEvent[] $flightEvents
+ * @property FlightPhaseIssue[] $flightPhaseIssues
  * @property FlightPhaseMetric[] $flightPhaseMetrics
  * @property FlightPhaseType $flightPhaseType
  * @property FlightReport $flightReport
@@ -65,7 +66,17 @@ class FlightPhase extends \yii\db\ActiveRecord
      */
     public function getFlightEvents()
     {
-        return $this->hasMany(FlightEvent::class, ['phase_id' => 'id'])->orderBy(['id' => SORT_ASC]);;
+        return $this->hasMany(FlightEvent::class, ['phase_id' => 'id'])->orderBy(['id' => SORT_ASC]);
+    }
+
+    /**
+     * Gets query for [[FlightPhaseIssues]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getFlightPhaseIssues()
+    {
+       return $this->hasMany(FlightPhaseIssue::class, ['phase_id' => 'id'])->orderBy(['timestamp' => SORT_ASC]);
     }
 
     /**
