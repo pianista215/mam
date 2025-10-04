@@ -12,3 +12,4 @@ INSERT INTO issue_type(`code`, `penalty`, `description`) VALUES ('AirborneAllEng
 -- Issues reported by mam
 INSERT INTO issue_type(`code`, `penalty`, `description`) VALUES ('LandingAirportNotPlanned', '30', 'Landed at an airport not in flight plan');
 INSERT INTO issue_type(`code`, `penalty`, `description`) VALUES ('LandingOutOfAirport', '30', 'Landing outside an airport');
+INSERT INTO issue_type(`code`, `penalty`, `description`) VALUES ('LandingAirportAlternative', NULL, 'Landed at alternative airport');

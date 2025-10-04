@@ -146,8 +146,56 @@ class FlightReportController extends Controller
         }
     }
 
+    protected function checkLandingInAirport($phase)
+    {
+        $report = $phase->flightReport;
+        $flight = $report->flight;
+
+        $landing_icao = $report->landing_airport;
+        $arrival = $flight->arrival;
+        $alt1 = $flight->alternative1_icao;
+        $alt2 = $flight->alternative2_icao;
+
+        $issue_code = null;
+        $value = null;
+
+        if($landing_icao == null){
+            // Add landing issue in middle of no where
+            $issue_code = 'LandingOutOfAirport';
+        } else {
+            if($landing_icao != $arrival){
+                // Add warning that one of the alternatives were used or if a different one was used
+                $value = $landing_icao;
+                if($landing_icao == $alt1){
+                    $issue_code = 'LandingAirportAlternative';
+                } else if($alt2 !== null && $landing_icao == $alt2){
+                    $issue_code = 'LandingAirportAlternative';
+                } else {
+                    $issue_code = 'LandingAirportNotPlanned';
+                }
+            }
+        }
+
+        if($issue_code !== null){
+            $issueType = IssueType::findOne(['code' => $issue_code]);
+            $phaseIssue = new FlightPhaseIssue([
+                'phase_id' => $phase->id,
+                'issue_type_id' => $issueType->id,
+                'timestamp' => $phase->start,
+                'value' => $value
+            ]);
+
+            if (!$phaseIssue->save()) {
+                throw new \Exception("Error saving PhaseIssue airport alternative: " . json_encode($phaseIssue->errors));
+            }
+        }
+    }
+
     protected function importPhaseIssues($phase, $phaseType, $issues)
     {
+        if($phaseType->code == 'final_landing'){
+            $this->checkLandingInAirport($phase);
+        }
         foreach($issues as $issue){
             $code = $issue['code'];
             $timestamp = $issue['timestamp'] ?? null;
