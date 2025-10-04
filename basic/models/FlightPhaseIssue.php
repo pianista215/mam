@@ -57,8 +57,8 @@ class FlightPhaseIssue extends \yii\db\ActiveRecord
 
     public function getDescription()
     {
-        $description = '';
         $base_description = $this->issueType->description;
+        $description = $base_description;
         $issue_code = $this->issueType->code;
 
         $to_add = null;
@@ -78,7 +78,7 @@ class FlightPhaseIssue extends \yii\db\ActiveRecord
         }
 
         if ($to_add !== null && $to_add !== '') {
-            $description = $base_description. ': (' . $to_add . ')';
+            $description = $description. ': (' . $to_add . ')';
         }
 
         return $description;
