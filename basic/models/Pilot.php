@@ -22,6 +22,10 @@ use Yii;
  * @property int|null $ivao_id
  * @property string|null $auth_key
  * @property string|null $access_token
+ * @property float|null $hours_flown
+ * @property string $location
+ * @property string|null $pwd_reset_token
+ * @property string|null $pwd_reset_token_created_at
  *
  * @property Country $country
  * @property FlightReport[] $flightReports
@@ -41,12 +45,15 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     const SCENARIO_ACTIVATE = 'activate';
     const SCENARIO_UPDATE = 'update';
     const SCENARIO_MOVE = 'MOVE';
+    const SCENARIO_PASSWORD_CHANGE_REQUEST = 'passwordChangeRequest';
+
 
     public function scenarios(){
         $scenarios = parent::scenarios();
         $scenarios[self::SCENARIO_REGISTER] = ['name', 'surname', 'email', 'city', 'country_id', 'password', 'date_of_birth', 'vatsim_id', 'ivao_id'];
         $scenarios[self::SCENARIO_ACTIVATE] = ['license'];
         $scenarios[self::SCENARIO_MOVE] = ['location'];
+        $scenarios[self::SCENARIO_PASSWORD_CHANGE_REQUEST] = ['pwd_reset_token', 'pwd_reset_token_created_at'];
         return $scenarios;
     }
 
@@ -57,7 +64,7 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     {
         return [
             [['name', 'surname', 'email', 'city', 'country_id', 'password', 'date_of_birth', 'location'], 'required'],
-            [['registration_date', 'date_of_birth'], 'safe'],
+            [['registration_date', 'date_of_birth', 'pwd_reset_token_created_at'], 'safe'],
             ['date_of_birth', 'date', 'format' => 'php:Y-m-d'],
             [['date_of_birth'], 'compare', 'compareValue' => date('Y-m-d'), 'operator' => '<', 'message' => 'The date of birth must be earlier than today.'],
             [['country_id', 'vatsim_id', 'ivao_id'], 'integer'],
@@ -76,6 +83,7 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
             [['password'], 'match', 'pattern'=>'/\d/', 'message' => 'Password must contain at least one numeric digit.'],
             [['password'], 'match', 'pattern'=>'/[a-zA-Z]/', 'message' => 'Password must contain at least one letter.'],
             [['location'], 'string', 'length' => 4],
+            [['pwd_reset_token'], 'string', 'length' => 255],
             [['email'], 'unique'],
             [['license'], 'unique'],
             [['location'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['location' => 'icao_code']],

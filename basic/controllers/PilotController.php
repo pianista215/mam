@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\helpers\LoggerTrait;
 use app\config\Config;
 use app\models\Country;
+use app\models\ForgotPasswordForm;
 use app\models\Pilot;
 use app\models\PilotSearch;
 use app\models\SubmittedFlightPlan;
@@ -284,6 +285,41 @@ class PilotController extends Controller
         }
 
         return $this->render('move', [
+            'model' => $model,
+        ]);
+    }
+
+    public function actionForgotPassword()
+    {
+        $model = new ForgotPasswordForm();
+
+        if($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $email = $model->email;
+            $pilot = Pilot::findOne(['email' => $email]);
+
+            if($pilot) {
+                $pilot->scenario = \app\models\Pilot::SCENARIO_PASSWORD_CHANGE_REQUEST;
+                $pilot->pwd_reset_token = Yii::$app->security->generateRandomString(255);
+                $pilot->pwd_reset_token_created_at = date('Y-m-d H:i:s');
+                if (!$pilot->save()) {
+                    Yii::error("Error with request of change password {$email}: " . json_encode($pilot->errors));
+                } else {
+                    Yii::$app->mailer
+                        ->compose('passwordResetToken', [
+                            'name' => $pilot->fullname,
+                            'token' => $pilot->pwd_reset_token,
+                        ])
+                        ->setFrom(['no-reply@tusitio.com' => 'Mam'])
+                        ->setTo($pilot->email)
+                        ->setSubject('Password Reset Request')
+                        ->send();
+                }
+            }
+
+            return $this->render('forgot-password-sent', ['email' => $email]);
+        }
+
+        return $this->render('forgot-password', [
             'model' => $model,
         ]);
     }
