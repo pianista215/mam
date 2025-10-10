@@ -2,7 +2,9 @@
 
 namespace app\models;
 
+use app\config\Config;
 use app\helpers\CustomRules;
+use app\models\traits\PasswordRulesTrait;
 use Yii;
 
 /**
@@ -33,6 +35,8 @@ use Yii;
  */
 class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 {
+    use PasswordRulesTrait;
+
     /**
      * {@inheritdoc}
      */
@@ -45,7 +49,6 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     const SCENARIO_ACTIVATE = 'activate';
     const SCENARIO_UPDATE = 'update';
     const SCENARIO_MOVE = 'MOVE';
-    const SCENARIO_PASSWORD_CHANGE_REQUEST = 'passwordChangeRequest';
 
 
     public function scenarios(){
@@ -53,7 +56,6 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
         $scenarios[self::SCENARIO_REGISTER] = ['name', 'surname', 'email', 'city', 'country_id', 'password', 'date_of_birth', 'vatsim_id', 'ivao_id'];
         $scenarios[self::SCENARIO_ACTIVATE] = ['license'];
         $scenarios[self::SCENARIO_MOVE] = ['location'];
-        $scenarios[self::SCENARIO_PASSWORD_CHANGE_REQUEST] = ['pwd_reset_token', 'pwd_reset_token_created_at'];
         return $scenarios;
     }
 
@@ -62,8 +64,8 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
      */
     public function rules()
     {
-        return [
-            [['name', 'surname', 'email', 'city', 'country_id', 'password', 'date_of_birth', 'location'], 'required'],
+        return array_merge([
+            [['name', 'surname', 'email', 'city', 'country_id', 'date_of_birth', 'location'], 'required'],
             [['registration_date', 'date_of_birth', 'pwd_reset_token_created_at'], 'safe'],
             ['date_of_birth', 'date', 'format' => 'php:Y-m-d'],
             [['date_of_birth'], 'compare', 'compareValue' => date('Y-m-d'), 'operator' => '<', 'message' => 'The date of birth must be earlier than today.'],
@@ -77,18 +79,14 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
             [['name', 'surname', 'city', 'email'], 'trim'],
             [['email'], 'string', 'max' => 80],
             [['email'], 'email'],
-            [['password'], 'string', 'max' => 255],
-            [['password'], 'string', 'min' => 8],
             [['auth_key', 'access_token'], 'string', 'max' => 32],
-            [['password'], 'match', 'pattern'=>'/\d/', 'message' => 'Password must contain at least one numeric digit.'],
-            [['password'], 'match', 'pattern'=>'/[a-zA-Z]/', 'message' => 'Password must contain at least one letter.'],
             [['location'], 'string', 'length' => 4],
             [['pwd_reset_token'], 'string', 'length' => 255],
             [['email'], 'unique'],
             [['license'], 'unique'],
             [['location'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['location' => 'icao_code']],
             [['country_id'], 'exist', 'skipOnError' => true, 'targetClass' => Country::class, 'targetAttribute' => ['country_id' => 'id']],
-        ];
+        ], $this->passwordRules());
     }
 
     /**
@@ -219,6 +217,26 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     public function validateAuthKey($authKey)
     {
         return $this->getAuthKey() === $authKey;
+    }
+
+    public function isPasswordResetTokenExpired()
+    {
+        if (empty($this->pwd_reset_token_created_at)) {
+            return true;
+        }
+
+        try {
+            $hours = Config::get('token_life_h') ?? 24;
+
+            $createdAt = new \DateTime($this->pwd_reset_token_created_at);
+            $createdAt->add(new \DateInterval('PT' . $hours . 'H'));
+            $now = new \DateTime();
+
+            return $now > $createdAt;
+        } catch (\Exception $e) {
+            Yii::error('Exception checking password reset token expired for pilot '. $this->id. ':' . $this->pwd_reset_token_created_at. ' ' .$e->getMessage());
+            return true;
+        }
     }
 
     /**

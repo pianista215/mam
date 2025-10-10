@@ -1,12 +1,14 @@
 <?php
 use yii\helpers\Html;
 
+/** @var string $id */
 /** @var string $name */
 /** @var string $token */
 
 // construct the absolute link to the reset-password endpoint
 $resetLink = Yii::$app->urlManager->createAbsoluteUrl([
-    'pilot/reset-password',
+    'pilot/change-password',
+    'id' => $id,
     'token' => $token,
 ]);
 ?>
