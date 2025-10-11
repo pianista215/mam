@@ -41,6 +41,8 @@ $altitudePoints = [];
 $groundPoints = [];
 $phaseIntervals = [];
 $labels = [];
+$allEvents = [];
+$counter = 1;
 
 foreach ($report->flightPhases as $phase) {
     $start = $phase->start;
@@ -55,6 +57,18 @@ foreach ($report->flightPhases as $phase) {
 
     $coordinates = [];
     foreach ($phase->flightEvents as $event) {
+        $eventData = [
+            'eventIndex' => $counter,
+            'id' => $event->id,
+            'timestamp' => $event->timestamp,
+            'values' => []
+        ];
+        foreach ($event->flightEventDatas as $data) {
+            $eventData['values'][$data->attribute0->code] = $data->value;
+        }
+        $allEvents[] = $eventData;
+        $counter++;
+
         $lat = null;
         $lon = null;
         $altitude = null;
@@ -184,11 +198,47 @@ foreach ($report->flightPhases as $phase) {
 <div class="container">
     <div id="map" style="width: 100%; height: 600px;"></div>
     <canvas id="altitudeChart" width="800" height="400"></canvas>
+    <div class="mt-4">
+        <h5>Raw Event Viewer</h5>
+        <div class="d-flex gap-2 mb-2">
+            <button id="prevEvent" class="btn btn-sm btn-secondary">⬅ Anterior</button>
+            <button id="nextEvent" class="btn btn-sm btn-secondary">Siguiente ➡</button>
+        </div>
+        <pre id="rawEventViewer" style="background:#111;color:#0f0;padding:10px;height:250px;overflow:auto;border:1px solid #444;"></pre>
+    </div>
 </div>
 
 <?php
 $this->registerJs("
+const rawEvents = ". json_encode($allEvents) . ";
+
+const rawEventIndexByTimestamp = {};
+rawEvents.forEach((ev, idx) => {
+    rawEventIndexByTimestamp[ev.timestamp] = idx;
+});
+
 const segments = " . json_encode($segments) . ";
+
+let currentEventIndex = 0;
+
+function showRawEvent(index) {
+    if (index < 0 || index >= rawEvents.length) return;
+    currentEventIndex = index;
+
+    const ev = rawEvents[currentEventIndex];
+    document.getElementById('rawEventViewer').textContent =
+        JSON.stringify(ev, null, 2);
+
+    triggerChartPointByTimestamp(ev.timestamp);
+}
+
+document.getElementById('prevEvent').addEventListener('click', () => {
+    showRawEvent(currentEventIndex - 1);
+});
+
+document.getElementById('nextEvent').addEventListener('click', () => {
+    showRawEvent(currentEventIndex + 1);
+});
 
 // https://github.com/openlayers/openlayers/issues/11681
 function splitAtDateLine(coords) {
@@ -337,6 +387,12 @@ const myChart = new Chart(ctx, {
                     center: ol.proj.fromLonLat(coords),
                     duration: 1000
                 });
+                const timestamp = myChart.data.labels[firstPoint.index];
+                const eventIndex = rawEventIndexByTimestamp[timestamp];
+
+                if (eventIndex !== undefined) {
+                    showRawEvent(eventIndex);
+                }
             }
     },
     responsive: true,
@@ -373,5 +429,25 @@ const myChart = new Chart(ctx, {
     }
   }
 });
+
+function triggerChartPointByTimestamp(timestamp) {
+    const labelIndex = labels.indexOf(timestamp);
+    if (labelIndex === -1) return;
+
+    myChart.setActiveElements([{ datasetIndex: 0, index: labelIndex }]);
+    myChart.tooltip.setActiveElements([{ datasetIndex: 0, index: labelIndex }], { x: 0, y: 0 });
+    myChart.update();
+
+    const firstPoint = { datasetIndex: 0, index: labelIndex };
+    const coords = myChart.data.datasets[firstPoint.datasetIndex].data[firstPoint.index].coords;
+    if (coords) {
+        pointSource.clear();
+        const mapCoordinates = ol.proj.fromLonLat(coords);
+        pointSource.addFeature(new ol.Feature(new ol.geom.Point(mapCoordinates)));
+        map.getView().animate({ center: mapCoordinates, duration: 500 });
+    }
+}
+
+showRawEvent(0);
 ");
 ?>
