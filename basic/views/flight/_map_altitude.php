@@ -201,8 +201,8 @@ foreach ($report->flightPhases as $phase) {
     <div class="mt-4">
         <h5>Raw Event Viewer</h5>
         <div class="d-flex gap-2 mb-2">
-            <button id="prevEvent" class="btn btn-sm btn-secondary">⬅ Anterior</button>
-            <button id="nextEvent" class="btn btn-sm btn-secondary">Siguiente ➡</button>
+            <button id="prevEvent" class="btn btn-sm btn-secondary">⬅ Previous</button>
+            <button id="nextEvent" class="btn btn-sm btn-secondary">Next ➡</button>
         </div>
         <pre id="rawEventViewer" style="background:#111;color:#0f0;padding:10px;height:250px;overflow:auto;border:1px solid #444;"></pre>
     </div>
