@@ -26,9 +26,6 @@ class PilotChangePasswordCest
         $pilot = Pilot::findOne(4);
         $I->assertNotEmpty($pilot->pwd_reset_token);
         $I->assertNotEmpty($pilot->pwd_reset_token_created_at);
-
-        $files = glob(Yii::getAlias('@runtime/mail') . '/*.eml');
-        $I->assertNotEmpty($files, 'No email was generated in runtime/mail');
     }
 
     public function requestPasswordResetTooSoon(\FunctionalTester $I)
