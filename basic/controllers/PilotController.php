@@ -4,11 +4,14 @@ namespace app\controllers;
 
 use app\helpers\LoggerTrait;
 use app\config\Config;
+use app\models\ChangePasswordForm;
 use app\models\Country;
+use app\models\ForgotPasswordForm;
 use app\models\Pilot;
 use app\models\PilotSearch;
 use app\models\SubmittedFlightPlan;
 use DateTime;
+use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
@@ -284,6 +287,92 @@ class PilotController extends Controller
         }
 
         return $this->render('move', [
+            'model' => $model,
+        ]);
+    }
+
+    public function actionForgotPassword()
+    {
+        $model = new ForgotPasswordForm();
+
+        if($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $email = $model->email;
+            $pilot = Pilot::findOne(['email' => $email]);
+
+            if($pilot) {
+                $now = new \DateTime();
+
+                // Only generate tokens if 15 mins has passed
+                if (!empty($pilot->pwd_reset_token_created_at)) {
+                    $tokenCreated = new \DateTimeImmutable($pilot->pwd_reset_token_created_at);
+                    $expiry = $tokenCreated->modify('+15 minutes');
+                    $now = new \DateTimeImmutable();
+
+                    if ($now < $expiry) {
+                        Yii::warning("Password reset requested too soon for pilot_id={$pilot->id}", __METHOD__);
+                        return $this->render('forgot-password-sent', ['email' => $email]);
+                    }
+                }
+
+                $pilot->pwd_reset_token = Yii::$app->security->generateRandomString(255);
+                $pilot->pwd_reset_token_created_at = date('Y-m-d H:i:s');
+                if (!$pilot->save()) {
+                    Yii::error("Error with request of change password {$email}: " . json_encode($pilot->errors));
+                } else {
+                    Yii::$app->mailer
+                        ->compose('passwordResetToken', [
+                            'id' => $pilot->id,
+                            'name' => $pilot->fullname,
+                            'token' => $pilot->pwd_reset_token,
+                        ])
+                        ->setFrom(['no-reply@tusitio.com' => 'Mam'])
+                        ->setTo($pilot->email)
+                        ->setSubject('Password Reset Request')
+                        ->send();
+                }
+            }
+
+            return $this->render('forgot-password-sent', ['email' => $email]);
+        }
+
+        return $this->render('forgot-password', [
+            'model' => $model,
+        ]);
+    }
+
+    public function actionChangePassword($id, $token)
+    {
+        $pilot = Pilot::findOne($id);
+
+        if (!$pilot || $pilot->pwd_reset_token !== $token || $pilot->isPasswordResetTokenExpired()) {
+            Yii::warning(
+                    'Password reset attempt failed for pilot_id=' . $id .
+                    ', token_prefix=' . substr($token, 0, 8) . '...',
+                );
+            throw new BadRequestHttpException('The password reset link is invalid or has expired.');
+        }
+
+        $model = new ChangePasswordForm();
+
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $pilot->password = Yii::$app->security->generatePasswordHash($model->password);
+            $pilot->pwd_reset_token = null;
+            $pilot->pwd_reset_token_created_at = null;
+            $pilot->auth_key = Yii::$app->security->generateRandomString(32);
+            $pilot->access_token = Yii::$app->security->generateRandomString(32);
+
+            if ($pilot->save()) {
+                Yii::$app->session->setFlash('success', 'Password successfully updated.');
+                return $this->redirect(['site/login']);
+            } else {
+                Yii::$app->session->setFlash('error', 'Could not change password. Please try again later.');
+                Yii::error('Failed to change new password for pilot'. $pilot->id . json_encode($pilot->errors));
+            }
+
+            Yii::$app->session->setFlash('error', 'Could not change new password. Try again later.');
+        }
+
+        return $this->render('change-password', [
             'model' => $model,
         ]);
     }

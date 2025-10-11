@@ -83,6 +83,8 @@ CREATE TABLE `pilot` (
   `access_token` char(32) DEFAULT NULL,
   `hours_flown` double unsigned DEFAULT 0,
   `location` char(4) NOT NULL,
+  `pwd_reset_token` varchar(255) DEFAULT NULL,
+  `pwd_reset_token_created_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `pilot_unique` (`email`),
   UNIQUE KEY `pilots_unique_license` (`license`),

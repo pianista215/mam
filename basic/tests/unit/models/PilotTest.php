@@ -225,4 +225,23 @@ class PilotTest extends BaseUnitTest
         $this->assertEquals($pilot->city, 'New York');
         $this->assertEquals($pilot->license, 'LIC123');
     }
+
+    public function testIsPasswordResetTokenExpired()
+    {
+        $pilot = new Pilot();
+
+        $pilot->pwd_reset_token_created_at = null;
+        $this->assertTrue($pilot->isPasswordResetTokenExpired());
+
+        $pilot->pwd_reset_token_created_at = date('Y-m-d H:i:s', strtotime('-1 hour'));
+        $this->assertFalse($pilot->isPasswordResetTokenExpired());
+
+        $hours = (int)(\app\config\Config::get('token_life_h') ?? 24);
+        $pilot->pwd_reset_token_created_at = date('Y-m-d H:i:s', strtotime('-'.($hours + 1).' hours'));
+        $this->assertTrue($pilot->isPasswordResetTokenExpired());
+
+        $pilot->pwd_reset_token_created_at = 'invalid-date';
+        $this->assertTrue($pilot->isPasswordResetTokenExpired());
+    }
+
 }
