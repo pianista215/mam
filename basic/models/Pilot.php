@@ -226,7 +226,7 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
         }
 
         try {
-            $hours = Config::get('token_life_h') ?? 24;
+            $hours = (int)(Config::get('token_life_h') ?? 24);
 
             $createdAt = new \DateTime($this->pwd_reset_token_created_at);
             $createdAt->add(new \DateInterval('PT' . $hours . 'H'));

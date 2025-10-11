@@ -344,7 +344,7 @@ class PilotController extends Controller
     {
         $pilot = Pilot::findOne($id);
 
-        if (!$pilot || $pilot->pwd_reset_token !== $token) {
+        if (!$pilot || $pilot->pwd_reset_token !== $token || $pilot->isPasswordResetTokenExpired()) {
             Yii::warning(
                     'Password reset attempt failed for pilot_id=' . $id .
                     ', token_prefix=' . substr($token, 0, 8) . '...',
