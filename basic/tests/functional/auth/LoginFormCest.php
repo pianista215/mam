@@ -2,6 +2,7 @@
 
 namespace tests\functional\auth;
 
+use tests\fixtures\PageContentFixture;
 use tests\fixtures\PilotFixture;
 
 class LoginFormCest
@@ -11,6 +12,7 @@ class LoginFormCest
         $I->amOnRoute('site/login');
         $I->haveFixtures([
             'pilot' => PilotFixture::class,
+            'page_content' => PageContentFixture::class
         ]);
     }
 
