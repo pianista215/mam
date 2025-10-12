@@ -4,8 +4,10 @@ namespace app\controllers;
 
 use app\models\ContactForm;
 use app\models\EntryForm;
+use app\models\Flight;
 use app\models\LoginForm;
 use app\models\Page;
+use app\models\Pilot;
 use Yii;
 use yii\filters\AccessControl;
 use yii\helpers\Markdown;
@@ -69,11 +71,27 @@ class SiteController extends Controller
             ->andWhere(['language' => 'en']) // TODO: Use language
             ->one();
 
-        $htmlContent = Markdown::process($content->content_md, 'gfm');
+        $bodyHtmlContent = Markdown::process($content->content_md, 'gfm');
+
+        $lastFlights = Flight::find()
+                ->with(['pilot', 'aircraft.aircraftConfiguration.aircraftType'])
+                ->orderBy(['creation_date' => SORT_DESC])
+                ->limit(5)
+                ->all();
+
+        $lastPilots = Pilot::find()
+                ->where(['not', ['license' => null]])
+                ->orderBy(['registration_date' => SORT_DESC])
+                ->limit(5)
+                ->all();
+
 
         return $this->render('index', [
-            'homeContent' => $htmlContent,
-            // TODO Add last flights, etc
+            'homeContent' => $bodyHtmlContent,
+            'lastFlights' => $lastFlights,
+            'lastPilots' => $lastPilots,
+            'flightModel' => new Flight(),
+            'pilotModel' => new Pilot(),
         ]);
     }
 

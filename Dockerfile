@@ -20,8 +20,11 @@ COPY basic /var/www/html
 COPY docker-test/apache2-default.conf /etc/apache2/sites-available/000-default.conf
 
 COPY db-model/ddl.sql /
-COPY db-model/config.sql /
 COPY db-model/analysis.sql /
+COPY db-model/config.sql /
+COPY db-model/countries.sql /
+COPY db-model/issues.sql /
+COPY db-model/pages.sql /
 COPY docker-test/db-docker.php /
 
 RUN mkdir -p /opt/mam/chunks \
