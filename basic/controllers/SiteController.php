@@ -2,12 +2,14 @@
 
 namespace app\controllers;
 
+use app\models\Aircraft;
 use app\models\ContactForm;
 use app\models\EntryForm;
 use app\models\Flight;
 use app\models\LoginForm;
 use app\models\Page;
 use app\models\Pilot;
+use app\models\Route;
 use Yii;
 use yii\filters\AccessControl;
 use yii\helpers\Markdown;
@@ -85,6 +87,11 @@ class SiteController extends Controller
                 ->limit(5)
                 ->all();
 
+        $totalPilots = Pilot::find()->count();
+        $totalAircraft = Aircraft::find()->count();
+        $totalRoutes = Route::find()->count();
+        $totalFlights = Flight::find()->count();
+
 
         return $this->render('index', [
             'homeContent' => $bodyHtmlContent,
@@ -92,6 +99,10 @@ class SiteController extends Controller
             'lastPilots' => $lastPilots,
             'flightModel' => new Flight(),
             'pilotModel' => new Pilot(),
+            'totalPilots' => $totalPilots,
+            'totalAircraft' => $totalAircraft,
+            'totalRoutes' => $totalRoutes,
+            'totalFlights' => $totalFlights
         ]);
     }
 
