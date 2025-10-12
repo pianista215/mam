@@ -1,5 +1,6 @@
 <?php
 
+use app\helpers\TimeHelper;
 use app\models\Pilot;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -31,19 +32,16 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
 
-            //'id',
             'license',
-            'name',
-            'surname',
-            'email:email',
-            //'registration_date',
-            //'city',
-            //'country_id',
-            //'password',
-            //'date_of_birth',
-            //'vatsim_id',
-            //'ivao_id',
-            'hours_flown',
+            'fullname',
+            'location',
+            [
+                            'attribute' => 'hours_flown',
+                            'value' => function ($model) {
+                                return TimeHelper::formatHoursMinutes($model->hours_flown);
+                            },
+                            'format' => 'text',
+                        ],
             [
                 'class' => ActionColumn::className(),
                 'visibleButtons'=>[

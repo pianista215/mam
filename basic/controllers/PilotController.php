@@ -53,9 +53,13 @@ class PilotController extends Controller
      */
     public function actionIndex()
     {
-        // TODO: SORT BY
         $searchModel = new PilotSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
+        $dataProvider->query->andWhere(['not', ['license' => null]]);
+
+        $dataProvider->sort->defaultOrder = [
+            'license' => SORT_ASC,
+        ];
 
         return $this->render('index', [
             'searchModel' => $searchModel,

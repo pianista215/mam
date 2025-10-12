@@ -99,6 +99,7 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
             'license' => 'License',
             'name' => 'Name',
             'surname' => 'Surname',
+            'fullname' => 'Name',
             'email' => 'Email',
             'registration_date' => 'Registration Date',
             'city' => 'City',
