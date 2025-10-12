@@ -40,6 +40,15 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
     $items =
     [
             ['label' => 'Home', 'url' => ['/site/index']],
+            [
+                'label' => 'About',
+                'items' => [
+                    ['label' => 'Staff', 'url' => ['page/view', 'code' => 'staff']],
+                    ['label' => 'Rules', 'url' => ['page/view', 'code' => 'rules']],
+                    ['label' => 'Ranks', 'url' => ['page/view', 'code' => 'ranks']],
+                    ['label' => 'School', 'url' => ['page/view', 'code' => 'school']],
+                ],
+            ],
             ['label' => 'Pilots', 'url' => ['/pilot/index']],
             ['label' => 'Flights', 'url' => ['/flight/index']],
             [
