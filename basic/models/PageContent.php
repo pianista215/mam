@@ -10,6 +10,7 @@ use Yii;
  * @property int $id
  * @property int $page_id
  * @property string $language
+ * @property string title
  * @property string $content_md
  * @property string $created_at
  * @property string $updated_at
@@ -32,11 +33,12 @@ class PageContent extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['page_id', 'language', 'content_md'], 'required'],
+            [['page_id', 'language', 'title', 'content_md'], 'required'],
             [['page_id'], 'integer'],
             [['content_md'], 'string'],
             [['created_at', 'updated_at'], 'safe'],
             [['language'], 'string', 'max' => 2],
+            [['title'], 'string', 'max' => 100],
             [['page_id', 'language'], 'unique', 'targetAttribute' => ['page_id', 'language']],
             [['page_id'], 'exist', 'skipOnError' => true, 'targetClass' => Page::class, 'targetAttribute' => ['page_id' => 'id']],
         ];
@@ -51,6 +53,7 @@ class PageContent extends \yii\db\ActiveRecord
             'id' => 'ID',
             'page_id' => 'Page ID',
             'language' => 'Language',
+            'title' => 'Title',
             'content_md' => 'Content Md',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',

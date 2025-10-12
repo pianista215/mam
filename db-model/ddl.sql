@@ -315,6 +315,7 @@ CREATE TABLE `page_content` (
   `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
   `page_id` smallint(5) unsigned NOT NULL,
   `language` char(2) NOT NULL,
+  `title` varchar(100) NOT NULL,
   `content_md` TEXT NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
