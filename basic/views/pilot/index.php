@@ -33,7 +33,8 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\SerialColumn'],
 
             'license',
-            'fullname',
+            'name',
+            'surname',
             'location',
             [
                             'attribute' => 'hours_flown',
