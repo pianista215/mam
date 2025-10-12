@@ -5,6 +5,7 @@
 /** @var string $content */
 
 $this->title = $title;
+$this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="page-content">
     <h1><?= $this->title ?></h1>
