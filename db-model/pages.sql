@@ -2,7 +2,8 @@ INSERT INTO `page` (`code`, `created_at`, `updated_at`) VALUES
 ('staff', NOW(), NOW()),
 ('rules', NOW(), NOW()),
 ('ranks', NOW(), NOW()),
-('school', NOW(), NOW());
+('school', NOW(), NOW()),
+('home', NOW(), NOW());
 
 INSERT INTO page_content (page_id, language, title, content_md, created_at, updated_at)
 VALUES (
@@ -129,5 +130,19 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 ',
     NOW(),
     NOW()
+);
+
+INSERT INTO page_content (page_id, language, title, content_md)
+VALUES (
+    (SELECT id FROM page WHERE code = 'home'),
+    'en',
+    'Welcome to Our Virtual Airline',
+    '# Welcome to MAM Virtual Airlines
+
+We are a passionate community of virtual aviation enthusiasts.
+
+
+Fly with us, improve your skills, and enjoy realistic operations in Microsoft Flight Simulator, X-Plane and Prepar3D.
+'
 );
 

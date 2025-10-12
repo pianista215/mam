@@ -2,14 +2,16 @@
 
 namespace app\controllers;
 
+use app\models\ContactForm;
+use app\models\EntryForm;
+use app\models\LoginForm;
+use app\models\Page;
 use Yii;
 use yii\filters\AccessControl;
+use yii\helpers\Markdown;
 use yii\web\Controller;
 use yii\web\Response;
 use yii\filters\VerbFilter;
-use app\models\LoginForm;
-use app\models\ContactForm;
-use app\models\EntryForm;
 
 class SiteController extends Controller
 {
@@ -62,7 +64,17 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index');
+        $homePage = Page::findOne(['code' => 'home']);
+        $content = $homePage->getPageContents()
+            ->andWhere(['language' => 'en']) // TODO: Use language
+            ->one();
+
+        $htmlContent = Markdown::process($content->content_md, 'gfm');
+
+        return $this->render('index', [
+            'homeContent' => $htmlContent,
+            // TODO Add last flights, etc
+        ]);
     }
 
     /**
