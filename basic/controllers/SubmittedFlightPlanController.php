@@ -174,8 +174,6 @@ class SubmittedFlightPlanController extends Controller
         }
     }
 
-    // TODO: REVIEW ALL THE ACTIONS FROM THIS CONTROLLER, REMOVE THE NOT NEEDED
-
     /**
      * Lists all SubmittedFlightPlan models.
      *

@@ -37,12 +37,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'surname',
             'location',
             [
-                            'attribute' => 'hours_flown',
-                            'value' => function ($model) {
-                                return TimeHelper::formatHoursMinutes($model->hours_flown);
-                            },
-                            'format' => 'text',
-                        ],
+                'attribute' => 'hours_flown',
+                'value' => function ($model) {
+                    return TimeHelper::formatHoursMinutes($model->hours_flown);
+                },
+                'format' => 'text',
+            ],
             [
                 'class' => ActionColumn::className(),
                 'visibleButtons'=>[

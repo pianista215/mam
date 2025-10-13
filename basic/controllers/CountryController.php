@@ -55,9 +55,12 @@ class CountryController extends Controller
      */
     public function actionIndex()
     {
-        // TODO: SORT BY
         $searchModel = new CountrySearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
+
+        $dataProvider->sort->defaultOrder = [
+            'name' => SORT_ASC,
+        ];
 
         return $this->render('index', [
             'searchModel' => $searchModel,

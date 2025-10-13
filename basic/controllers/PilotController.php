@@ -243,6 +243,11 @@ class PilotController extends Controller
             $searchModel = new PilotSearch();
             $dataProvider = $searchModel->search([]);
             $dataProvider->query->andWhere(['license' => null]);
+
+            $dataProvider->sort->defaultOrder = [
+                'registration_date' => SORT_ASC,
+            ];
+
             return $this->render('activate-pilots', [
                 'dataProvider' => $dataProvider,
             ]);

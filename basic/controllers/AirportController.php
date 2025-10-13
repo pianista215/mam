@@ -55,9 +55,12 @@ class AirportController extends Controller
      */
     public function actionIndex()
     {
-        // TODO: SORT BY
         $searchModel = new AirportSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
+
+        $dataProvider->sort->defaultOrder = [
+            'icao_code' => SORT_ASC,
+        ];
 
         return $this->render('index', [
             'searchModel' => $searchModel,

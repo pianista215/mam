@@ -58,9 +58,12 @@ class AircraftController extends Controller
      */
     public function actionIndex()
     {
-        // TODO: SORT BY
         $searchModel = new AircraftSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
+
+        $dataProvider->sort->defaultOrder = [
+            'registration' => SORT_ASC,
+        ];
 
         return $this->render('index', [
             'searchModel' => $searchModel,

@@ -1,5 +1,6 @@
 <?php
 
+use app\helpers\TimeHelper;
 use app\models\Aircraft;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -33,6 +34,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'registration',
             'name',
             'location',
+            [
+                'attribute' => 'hours_flown',
+                'value' => function ($model) {
+                    return TimeHelper::formatHoursMinutes($model->hours_flown);
+                },
+                'format' => 'text',
+            ],
             [
                 'class' => ActionColumn::className(),
                 'visibleButtons'=>[
