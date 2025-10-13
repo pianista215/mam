@@ -38,11 +38,9 @@ class RouteCreateCest
     public function openRouteCreateAsVisitor(\FunctionalTester $I)
     {
         $I->amOnRoute('route/create');
-        $I->seeResponseCodeIs(403);
-
-        $I->see('Forbidden');
-        $I->dontSee('Create Route');
-        $I->dontSee('Save', 'button');
+        // Check redirect
+        $I->seeCurrentUrlMatches('~login~');
+        $I->see('Login');
     }
 
     public function submitEmptyRoute(\FunctionalTester $I)
