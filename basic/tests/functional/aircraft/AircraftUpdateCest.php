@@ -40,13 +40,9 @@ class AircraftUpdateCest
     public function openAircraftUpdateAsVisitor(\FunctionalTester $I)
     {
         $I->amOnRoute('aircraft/update', [ 'id' => '1' ]);
-        $I->seeResponseCodeIs(403);
-
-        $I->see('Forbidden');
-        $I->dontSee('Update Aircraft: Boeing Name Std');
-        $I->dontSee('EC-AAA');
-
-        $I->dontSee('Save', 'button');
+        // Check redirect
+        $I->seeCurrentUrlMatches('~login~');
+        $I->see('Login');
     }
 
     public function updateEmptyAircraft(\FunctionalTester $I)
