@@ -1,0 +1,48 @@
+<?php
+return [
+    [
+        'id' => 1,
+        'page_id' => 1,
+        'language' => 'en',
+        'title' => 'Home Page',
+        'content_md' => "# Welcome\nThis is the home page.",
+        'created_at' => '2025-01-01 00:00:00',
+        'updated_at' => '2025-01-01 00:00:00',
+    ],
+    [
+        'id' => 2,
+        'page_id' => 2,
+        'language' => 'en',
+        'title' => 'Staff',
+        'content_md' => "Our staff page test content.",
+        'created_at' => '2025-01-02 00:00:00',
+        'updated_at' => '2025-01-02 00:00:00',
+    ],
+    [
+        'id' => 3,
+        'page_id' => 3,
+        'language' => 'en',
+        'title' => 'Rules',
+        'content_md' => "These are the rules page test content.",
+        'created_at' => '2025-01-03 00:00:00',
+        'updated_at' => '2025-01-03 00:00:00',
+    ],
+    [
+        'id' => 4,
+        'page_id' => 4,
+        'language' => 'en',
+        'title' => 'Ranks',
+        'content_md' => "Ranks page test content.",
+        'created_at' => '2025-01-04 00:00:00',
+        'updated_at' => '2025-01-04 00:00:00',
+    ],
+    [
+        'id' => 5,
+        'page_id' => 5,
+        'language' => 'en',
+        'title' => 'School',
+        'content_md' => "School page test content.",
+        'created_at' => '2025-01-05 00:00:00',
+        'updated_at' => '2025-01-05 00:00:00',
+    ],
+];

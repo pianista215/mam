@@ -40,13 +40,9 @@ class AircraftConfigurationUpdateCest
     public function openAircraftConfigurationUpdateAsVisitor(\FunctionalTester $I)
     {
         $I->amOnRoute('aircraft-configuration/update', [ 'id' => '1' ]);
-        $I->seeResponseCodeIs(403);
-
-        $I->see('Forbidden');
-        $I->dontSee('Update Aircraft Configuration: Boeing 737-800 (Standard)');
-        $I->dontSee('737-800');
-
-        $I->dontSee('Save', 'button');
+        // Check redirect
+        $I->seeCurrentUrlMatches('~login~');
+        $I->see('Login');
     }
 
     public function updateEmptyAircraftConfiguration(\FunctionalTester $I)

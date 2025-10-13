@@ -4,6 +4,7 @@
 /** @var string $content */
 
 use app\assets\AppAsset;
+use app\config\Config;
 use app\widgets\Alert;
 use yii\bootstrap5\Breadcrumbs;
 use yii\bootstrap5\Html;
@@ -18,6 +19,14 @@ $this->registerMetaTag(['name' => 'viewport', 'content' => 'width=device-width, 
 $this->registerMetaTag(['name' => 'description', 'content' => $this->params['meta_description'] ?? '']);
 $this->registerMetaTag(['name' => 'keywords', 'content' => $this->params['meta_keywords'] ?? '']);
 $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii::getAlias('@web/favicon.ico')]);
+$this->registerCssFile(
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css',
+    [
+        'integrity' => 'sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==',
+        'crossorigin' => 'anonymous',
+        'referrerpolicy' => 'no-referrer'
+    ]
+);
 ?>
 <?php $this->beginPage() ?>
 <!DOCTYPE html>
@@ -32,7 +41,7 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
 <header id="header">
     <?php
     NavBar::begin([
-        'brandLabel' => Yii::$app->name,
+        'brandLabel' => Config::get('airline_name'),
         'brandUrl' => Yii::$app->homeUrl,
         'options' => ['class' => 'navbar-expand-md navbar-dark bg-dark fixed-top']
     ]);
@@ -40,26 +49,53 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
     $items =
     [
             ['label' => 'Home', 'url' => ['/site/index']],
+            [
+                'label' => 'About',
+                'items' => [
+                    ['label' => 'Staff', 'url' => ['page/view', 'code' => 'staff']],
+                    ['label' => 'Rules', 'url' => ['page/view', 'code' => 'rules']],
+                    ['label' => 'Ranks', 'url' => ['page/view', 'code' => 'ranks']],
+                    ['label' => 'School', 'url' => ['page/view', 'code' => 'school']],
+                ],
+            ],
             ['label' => 'Pilots', 'url' => ['/pilot/index']],
-            ['label' => 'Flights', 'url' => ['/flight/index']],
+    ];
+
+    if (!Yii::$app->user->isGuest) {
+        $items[] =
+         ['label' => 'Flights', 'url' => ['/flight/index']];
+    }
+    $items[] =
             [
                 'label' => 'Operations',
                 'items' => [
                     ['label' => 'Aircraft Types', 'url' => ['/aircraft-type/index']],
+                    ['label' => 'Aircraft Configurations', 'url' => ['/aircraft-configuration/index']],
                     ['label' => 'Aircrafts', 'url' => ['/aircraft/index']],
                     ['label' => 'Countries', 'url' => ['/country/index']],
                     ['label' => 'Airports', 'url' => ['/airport/index']],
                     ['label' => 'Routes', 'url' => ['/route/index']],
                 ],
-            ],
-        ];
+            ];
 
     if (Yii::$app->user->can('submitFpl')) {
-        $items[] = [
+        $items[] =
+        [
             'label' => 'Actions',
             'items' => [
                 ['label' => 'Submit FPL', 'url' => ['/submitted-flight-plan/my-fpl']],
                 ['label' => 'Move Pilot', 'url' => ['/pilot/move']],
+            ],
+        ];
+    }
+
+    if (Yii::$app->user->can('validateVfrFlight') || Yii::$app->user->can('validateIfrFlight')) {
+        $items[] =
+        [
+            'label' => 'Validations',
+            'items' => [
+                ['label' => 'Validate Flights', 'url' => ['/flight/index-pending']],
+                ['label' => 'List FPLs', 'url' => ['/submitted-flight-plan/index']],
             ],
         ];
     }
@@ -69,8 +105,7 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
         $items[] = [
             'label' => 'Admin',
             'items' => [
-                ['label' => 'List FPL', 'url' => ['/submitted-flight-plan/index']],
-                ['label' => 'Validate Flight', 'url' => ['/TODOOOOOO/validate']],
+                ['label' => 'Activate Pilots', 'url' => ['/pilot/activate-pilots']],
             ],
         ];
     }
@@ -107,8 +142,21 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
 <footer id="footer" class="mt-auto py-3 bg-light">
     <div class="container">
         <div class="row text-muted">
-            <div class="col-md-6 text-center text-md-start">&copy; My Company <?= date('Y') ?></div>
-            <div class="col-md-6 text-center text-md-end"><?= Yii::powered() ?></div>
+            <div class="col-md-6 text-center text-md-start">&copy; <?= Config::get('airline_name') ?> <?= date('Y') ?></div>
+            <div class="col-md-6 text-center text-md-end">
+                Powered by <a href="https://github.com/pianista215/mam" target="_blank">Mam</a>
+            </div>
+        </div>
+        <div class="d-flex justify-content-center gap-3 mt-1 fs-4">
+            <?php if ($x = Config::get('x_url')): ?>
+                <a href="<?= $x ?>" target="_blank"><i class="fab fa-x-twitter"></i></a>
+            <?php endif; ?>
+            <?php if ($instagram = Config::get('instagram_url')): ?>
+                <a href="<?= $instagram ?>" target="_blank"><i class="fab fa-instagram"></i></a>
+            <?php endif; ?>
+            <?php if ($facebook = Config::get('facebook_url')): ?>
+                <a href="<?= $facebook ?>" target="_blank"><i class="fab fa-facebook"></i></a>
+            <?php endif; ?>
         </div>
     </div>
 </footer>

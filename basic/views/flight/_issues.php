@@ -44,7 +44,7 @@ $score = max(0, 100 - $totalPenalty);
         <?php else: ?>
             <?php foreach ($issues as $issue): ?>
                 <tr>
-                    <td><?= Yii::$app->formatter->asDatetime($issue['timestamp']) ?></td>
+                    <td><?= Html::encode($issue['timestamp']) ?></td>
                     <td><?= Html::encode($issue['phase']) ?></td>
                     <td><?= Html::encode($issue['description']) ?></td>
                     <td><?= Html::encode($issue['penalty']) ?></td>

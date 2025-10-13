@@ -23,8 +23,9 @@ class PilotMoveCest
     public function movePilotAsGuest(\FunctionalTester $I)
     {
         $I->amOnRoute('pilot/move');
-        $I->seeResponseCodeIs(403);
-        $I->see('You must be logged in to move your pilot.');
+        // Check redirect
+        $I->seeCurrentUrlMatches('~login~');
+        $I->see('Login');
     }
 
     /**

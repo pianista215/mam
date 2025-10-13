@@ -29,8 +29,12 @@ class SubmittedFlightPlanDeleteCest
     public function noOneCantDeleteOthersSubmittedFpl(\FunctionalTester $I)
     {
         // Visitor
-        $this->cantDeleteSubmittedFpl($I);
+        $I->amOnRoute('submitted-flight-plan/delete', [ 'id' => '3' ]);
+        // Check redirect
+        $I->seeCurrentUrlMatches('~login~');
+        $I->see('Login');
 
+        // Others
         $users = [1,2,3,4,5,6,8];
         $length = count($users);
 

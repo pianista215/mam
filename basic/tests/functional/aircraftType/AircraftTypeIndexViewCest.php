@@ -112,15 +112,9 @@ class AircraftTypeIndexViewCest
     public function openAircraftTypeViewAsVisitor(\FunctionalTester $I)
     {
         $I->amOnRoute('aircraft-type/view', [ 'id' => '2' ]);
-
-        $this->checkAircraftTypeViewCommon($I);
-
-        $I->dontSee('Update', 'a');
-        $I->dontSee('Delete', 'a');
-
-        $I->seeElement('a', ['title' => 'View']);
-        $I->dontSeeElement('a', ['title' => 'Update']);
-        $I->dontSeeElement('a', ['title' => 'Delete']);
+        // Check redirect
+        $I->seeCurrentUrlMatches('~login~');
+        $I->see('Login');
     }
 
 

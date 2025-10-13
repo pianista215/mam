@@ -10,6 +10,7 @@ use app\models\AircraftTypeSearch;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
+use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use Yii;
 
@@ -28,8 +29,18 @@ class AircraftTypeController extends Controller
         return array_merge(
             parent::behaviors(),
             [
+                'access' => [
+                    'class' => AccessControl::class,
+                    'only' => ['view', 'create', 'update', 'delete'],
+                    'rules' => [
+                        [
+                            'allow' => true,
+                            'roles' => ['@'],
+                        ],
+                    ],
+                ],
                 'verbs' => [
-                    'class' => VerbFilter::className(),
+                    'class' => VerbFilter::class,
                     'actions' => [
                         'delete' => ['POST'],
                     ],
@@ -45,9 +56,12 @@ class AircraftTypeController extends Controller
      */
     public function actionIndex()
     {
-        // TODO: SORT BY
         $searchModel = new AircraftTypeSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
+
+        $dataProvider->sort->defaultOrder = [
+            'icao_type_code' => SORT_ASC,
+        ];
 
         return $this->render('index', [
             'searchModel' => $searchModel,

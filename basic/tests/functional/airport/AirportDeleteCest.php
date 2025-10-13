@@ -45,9 +45,9 @@ class AirportDeleteCest
     public function deleteOnlyPostAsVisitor(\FunctionalTester $I)
     {
         $I->amOnRoute('airport/delete', [ 'id' => '1' ]);
-        $I->seeResponseCodeIs(405);
-        $count = \app\models\Airport::find()->count();
-        $I->assertEquals(5, $count);
+        // Check redirect
+        $I->seeCurrentUrlMatches('~login~');
+        $I->see('Login');
     }
 
 }

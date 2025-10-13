@@ -23,8 +23,9 @@ class AircraftMoveCest
     public function moveAircraftAsGuest(\FunctionalTester $I)
     {
         $I->amOnRoute('aircraft/move', ['id' => 1]);
-        $I->seeResponseCodeIs(403);
-        $I->see('You do not have permission to move this aircraft.');
+        // Check redirect
+        $I->seeCurrentUrlMatches('~login~');
+        $I->see('Login');
     }
 
     /**

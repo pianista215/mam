@@ -8,6 +8,7 @@ use yii\web\Controller;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
+use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use Yii;
 
@@ -24,8 +25,18 @@ class FlightController extends Controller
         return array_merge(
             parent::behaviors(),
             [
+                'access' => [
+                    'class' => AccessControl::class,
+                    'only' => ['index', 'index-pending', 'view', 'validate'],
+                    'rules' => [
+                        [
+                            'allow' => true,
+                            'roles' => ['@'],
+                        ],
+                    ],
+                ],
                 'verbs' => [
-                    'class' => VerbFilter::className(),
+                    'class' => VerbFilter::class,
                     'actions' => [
                         'delete' => ['POST'],
                     ],
@@ -43,6 +54,10 @@ class FlightController extends Controller
     {
         $searchModel = new FlightSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
+
+        $dataProvider->sort->defaultOrder = [
+            'creation_date' => SORT_DESC,
+        ];
 
         return $this->render('index', [
             'searchModel' => $searchModel,
@@ -64,6 +79,31 @@ class FlightController extends Controller
     }
 
     /**
+     * Lists all Flight pending validation
+     *
+     * @return string
+     */
+    public function actionIndexPending()
+    {
+        if (!Yii::$app->user->can('validateVfrFlight') && !Yii::$app->user->can('validateIfrFlight')) {
+            throw new ForbiddenHttpException('You\'re not allowed to validate flights.');
+        }
+
+        $searchModel = new FlightSearch();
+        $searchModel->onlyPending = true;
+        $dataProvider = $searchModel->search($this->request->queryParams);
+
+        $dataProvider->sort->defaultOrder = [
+            'creation_date' => SORT_DESC,
+        ];
+
+        return $this->render('index_pending', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    /**
      * Validate or reject a Flight
      * @param string $id ID
      * @return string
@@ -73,7 +113,11 @@ class FlightController extends Controller
     {
         $model = $this->findModel($id);
 
-        $model->scenario = Flight::SCENARIO_VALIDATE;;
+        if (!Yii::$app->user->can('validateFlight', ['flight' => $model])) {
+            throw new ForbiddenHttpException('You\'re not allowed to validate this flight.');
+        }
+
+        $model->scenario = Flight::SCENARIO_VALIDATE;
         if ($model->isPendingValidation() && $model->load(Yii::$app->request->post())) {
             $model->validator_id = Yii::$app->user->id;
             $model->validation_date = date('Y-m-d H:i:s');

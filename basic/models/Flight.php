@@ -111,6 +111,7 @@ class Flight extends \yii\db\ActiveRecord
             'endurance_time' => 'Endurance Time',
             'report_tool' => 'Report Tool',
             'status' => 'Status',
+            'fullStatus' => 'Status',
             'creation_date' => 'Creation Date',
             'network' => 'Network',
             'validator_comments' => 'Validator Comments',

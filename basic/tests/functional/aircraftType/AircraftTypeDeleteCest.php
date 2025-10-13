@@ -47,9 +47,9 @@ class AircraftTypeDeleteCest
     public function deleteOnlyPostAsVisitor(\FunctionalTester $I)
     {
         $I->amOnRoute('aircraft-type/delete', [ 'id' => '1' ]);
-        $I->seeResponseCodeIs(405);
-        $count = \app\models\AircraftType::find()->count();
-        $I->assertEquals(4, $count);
+        // Check redirect
+        $I->seeCurrentUrlMatches('~login~');
+        $I->see('Login');
     }
 
 }

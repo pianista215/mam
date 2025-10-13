@@ -1,53 +1,89 @@
 <?php
 
 /** @var yii\web\View $this */
+use app\config\Config;
 
-$this->title = 'My Yii Application';
+$this->title = Config::get('airline_name');
 ?>
 <div class="site-index">
 
     <div class="jumbotron text-center bg-transparent mt-5 mb-5">
-        <h1 class="display-4">Congratulations!</h1>
-
-        <p class="lead">You have successfully created your Yii-powered application.</p>
-
-        <p><a class="btn btn-lg btn-success" href="https://www.yiiframework.com">Get started with Yii</a></p>
+        <?= $homeContent ?>
     </div>
 
     <div class="body-content">
-
         <div class="row">
-            <div class="col-lg-4 mb-3">
-                <h2>Heading</h2>
 
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
+            <!-- Columna izquierda: tablas -->
+            <div class="col-md-8">
 
-                <p><a class="btn btn-outline-secondary" href="https://www.yiiframework.com/doc/">Yii Documentation &raquo;</a></p>
+                <!-- Latest Flights -->
+                <div class="mb-4">
+                    <h4 class="mb-3">Last flights</h4>
+                    <table class="table table-striped table-hover table-sm">
+                        <thead class="table-light">
+                        <tr>
+                            <th><?= $pilotModel->getAttributeLabel('license') ?></th>
+                            <th><?= $pilotModel->getAttributeLabel('fullname') ?></th>
+                            <th><?= $flightModel->getAttributeLabel('departure') ?></th>
+                            <th><?= $flightModel->getAttributeLabel('arrival') ?></th>
+                            <th>Aircraft</th>
+                            <th>Date</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($lastFlights as $flight): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($flight->pilot->license) ?></td>
+                                <td><?= htmlspecialchars($flight->pilot->fullname) ?></td>
+                                <td><?= htmlspecialchars($flight->departure) ?></td>
+                                <td><?= htmlspecialchars($flight->arrival) ?></td>
+                                <td><?= htmlspecialchars($flight->aircraft->aircraftConfiguration->aircraftType->icao_type_code ?? 'N/A') ?></td>
+                                <td><?= Yii::$app->formatter->asDate($flight->creation_date, 'php:d/m/Y') ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Latest registered pilots -->
+                <div class="mb-4">
+                    <h4 class="mb-3">New pilots</h4>
+                    <table class="table table-striped table-hover table-sm">
+                        <thead class="table-light">
+                        <tr>
+                            <th><?= $pilotModel->getAttributeLabel('license') ?></th>
+                            <th><?= $pilotModel->getAttributeLabel('fullname') ?></th>
+                            <th><?= $pilotModel->getAttributeLabel('registration_date') ?></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($lastPilots as $pilot): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($pilot->license) ?></td>
+                                <td><?= htmlspecialchars($pilot->fullname) ?></td>
+                                <td><?= Yii::$app->formatter->asDate($pilot->registration_date, 'php:d/m/Y') ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+
             </div>
-            <div class="col-lg-4 mb-3">
-                <h2>Heading</h2>
 
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
-
-                <p><a class="btn btn-outline-secondary" href="https://www.yiiframework.com/forum/">Yii Forum &raquo;</a></p>
+            <!-- Columna derecha: estadísticas -->
+            <div class="col-md-4">
+                <div class="card border-secondary mb-4">
+                    <div class="card-header bg-light"><strong>Statistics</strong></div>
+                    <div class="card-body">
+                        <p class="mb-2"><strong>Pilots:</strong> <span class="fw-normal"><?= number_format($totalPilots) ?></span></p>
+                        <p class="mb-2"><strong>Aircraft:</strong> <span class="fw-normal"><?= number_format($totalAircraft) ?></span></p>
+                        <p class="mb-2"><strong>Routes:</strong> <span class="fw-normal"><?= number_format($totalRoutes) ?></span></p>
+                        <p class="mb-0"><strong>Flights:</strong> <span class="fw-normal"><?= number_format($totalFlights) ?></span></p>
+                    </div>
+                </div>
             </div>
-            <div class="col-lg-4">
-                <h2>Heading</h2>
 
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
-
-                <p><a class="btn btn-outline-secondary" href="https://www.yiiframework.com/extensions/">Yii Extensions &raquo;</a></p>
-            </div>
         </div>
-
     </div>
 </div>

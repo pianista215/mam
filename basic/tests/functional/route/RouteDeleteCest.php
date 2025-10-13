@@ -47,9 +47,9 @@ class RouteDeleteCest
     public function deleteOnlyPostAsVisitor(\FunctionalTester $I)
     {
         $I->amOnRoute('route/delete', [ 'id' => '1' ]);
-        $I->seeResponseCodeIs(405);
-        $count = \app\models\Route::find()->count();
-        $I->assertEquals(3, $count);
+        // Check redirect
+        $I->seeCurrentUrlMatches('~login~');
+        $I->see('Login');
     }
 
 }

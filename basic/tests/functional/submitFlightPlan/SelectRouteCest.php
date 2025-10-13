@@ -53,15 +53,11 @@ class SelectRouteCest
         $I->dontSee('GCLP');
     }
 
-    public function cantSelectRouteIfVisiro(\FunctionalTester $I){
+    public function cantSelectRouteIfVisitor(\FunctionalTester $I){
         $I->amOnRoute('submitted-flight-plan/select-route');
-
-        $I->seeResponseCodeIs(403);
-
-        $I->see('Forbidden');
-        $I->dontSee('LEBL');
-        $I->dontSee('LEVC');
-        $I->dontSee('GCLP');
+        // Check redirect
+        $I->seeCurrentUrlMatches('~login~');
+        $I->see('Login');
     }
 
 }

@@ -93,10 +93,10 @@ class RouteIndexViewCest
 
     public function openRouteViewAsVisitor(\FunctionalTester $I)
     {
-        $this->checkAircraftConfigViewCommon($I);
-
-        $I->dontSee('Update', 'a');
-        $I->dontSee('Delete', 'a');
+        $I->amOnRoute('route/view', [ 'id' => '1' ]);
+        // Check redirect
+        $I->seeCurrentUrlMatches('~login~');
+        $I->see('Login');
     }
 
 

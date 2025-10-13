@@ -38,11 +38,9 @@ class RouteUpdateCest
     public function openRouteUpdateAsVisitor(\FunctionalTester $I)
     {
         $I->amOnRoute('route/update', [ 'id' => '1' ]);
-        $I->seeResponseCodeIs(403);
-
-        $I->see('Forbidden');
-        $I->dontSee('Update Route: R001');
-        $I->dontSee('Save', 'button');
+        // Check redirect
+        $I->seeCurrentUrlMatches('~login~');
+        $I->see('Login');
     }
 
     public function updateEmptyRoute(\FunctionalTester $I)

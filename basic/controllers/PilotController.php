@@ -15,6 +15,7 @@ use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
+use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use Yii;
 
@@ -26,8 +27,6 @@ class PilotController extends Controller
 {
     use LoggerTrait;
 
-    // TODO: WE NEED A RESET PASSWORD ACTION ALLOWING ADMIN OR PILOT TO RESET ITS PASSWORD
-
     /**
      * @inheritDoc
      */
@@ -36,8 +35,18 @@ class PilotController extends Controller
         return array_merge(
             parent::behaviors(),
             [
+                'access' => [
+                    'class' => AccessControl::class,
+                    'only' => ['view', 'create', 'update', 'delete', 'activate', 'activate-pilots', 'move'],
+                    'rules' => [
+                        [
+                            'allow' => true,
+                            'roles' => ['@'],
+                        ],
+                    ],
+                ],
                 'verbs' => [
-                    'class' => VerbFilter::className(),
+                    'class' => VerbFilter::class,
                     'actions' => [
                         'delete' => ['POST'],
                     ],
@@ -53,9 +62,13 @@ class PilotController extends Controller
      */
     public function actionIndex()
     {
-        // TODO: SORT BY
         $searchModel = new PilotSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
+        $dataProvider->query->andWhere(['not', ['license' => null]]);
+
+        $dataProvider->sort->defaultOrder = [
+            'license' => SORT_ASC,
+        ];
 
         return $this->render('index', [
             'searchModel' => $searchModel,
@@ -230,6 +243,11 @@ class PilotController extends Controller
             $searchModel = new PilotSearch();
             $dataProvider = $searchModel->search([]);
             $dataProvider->query->andWhere(['license' => null]);
+
+            $dataProvider->sort->defaultOrder = [
+                'registration_date' => SORT_ASC,
+            ];
+
             return $this->render('activate-pilots', [
                 'dataProvider' => $dataProvider,
             ]);

@@ -29,6 +29,23 @@ $this->params['breadcrumbs'][] = $this->title;
             'arrival',
             'creation_date',
             [
+                'attribute' => 'status',
+                'format' => 'raw', // Importante para permitir HTML
+                'value' => function ($model) {
+                    $icons = [
+                        'C' => '<i class="fa-solid fa-arrow-up" style="color: #6c757d;"></i>',
+                        'S' => '<i class="fa-regular fa-clock" style="color: #0d6efd;"></i>',
+                        'V' => '<i class="fa-regular fa-eye" style="color: orange;"</i>',
+                        'F' => '<i class="fa-regular fa-circle-check" style="color: green;"></i>',
+                        'R' => '<i class="fa-regular fa-circle-xmark" style="color: red;"></i>',
+                    ];
+
+                    $icon = $icons[$model->status] ?? '<i class="fa-regular fa-question-circle"></i>';
+                    return '<span title="' . htmlspecialchars($model->fullStatus) . '">' . $icon . '</span>';
+                },
+                'contentOptions' => ['style' => 'text-align:center; font-size: 18px;'], // Opcional
+            ],
+            [
                 'class' => ActionColumn::className(),
                 'visibleButtons'=>[
                     'delete'=> false,
@@ -39,6 +56,15 @@ $this->params['breadcrumbs'][] = $this->title;
                  }
             ],
         ],
+        'tableOptions' => ['class' => 'table table-striped table-bordered'],
+        'pager' => [
+                'options' => ['class' => 'pagination justify-content-center'],
+                'linkContainerOptions' => ['class' => 'page-item'],
+                'linkOptions' => ['class' => 'page-link'],
+                'disabledListItemSubTagOptions' => ['class' => 'page-link'],
+                'hideOnSinglePage' => true,
+            ],
+        'summaryOptions' => ['class' => 'text-muted']
     ]); ?>
 
 

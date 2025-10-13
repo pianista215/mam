@@ -18,11 +18,9 @@ class SubmitFplCest
     public function openPrepareFplAsVisitor(\FunctionalTester $I)
     {
         $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
-
-        $I->see('Forbidden');
-        $I->seeResponseCodeIs(403);
-        $I->dontSee('Flight Plan Submission');
-        $I->dontSee('Submit FPL', 'button');
+        // Check redirect
+        $I->seeCurrentUrlMatches('~login~');
+        $I->see('Login');
     }
 
     public function openPrepareFplAsNonActivatedUser(\FunctionalTester $I)

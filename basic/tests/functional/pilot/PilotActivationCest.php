@@ -16,11 +16,9 @@ class PilotActivationCest
 
     public function openActivatePilotsAsVisitor(\FunctionalTester $I){
         $I->amOnRoute('pilot/activate-pilots');
-        $I->seeResponseCodeIs(403);
-
-        $I->see('Forbidden');
-        $I->dontSee('Activate pilots');
-        $I->dontSee('nonactivated');
+        // Check redirect
+        $I->seeCurrentUrlMatches('~login~');
+        $I->see('Login');
     }
 
     public function openActivatePilotsAsUser(\FunctionalTester $I){

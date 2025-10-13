@@ -42,14 +42,9 @@ class CountryUpdateCest
     public function openCountryUpdateAsVisitor(\FunctionalTester $I)
     {
         $I->amOnRoute('country/update', [ 'id' => '1' ]);
-        $I->seeResponseCodeIs(403);
-
-        $I->see('Forbidden');
-        $I->dontSee('Name');
-        $I->dontSee('Spain');
-        $I->dontSee('Iso2 Code');
-        $I->dontSee('ES');
-        $I->dontSee('Save', 'button');
+        // Check redirect
+        $I->seeCurrentUrlMatches('~login~');
+        $I->see('Login');
     }
 
     public function updateEmptyCountry(\FunctionalTester $I)

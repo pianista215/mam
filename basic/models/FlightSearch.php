@@ -11,6 +11,9 @@ use app\models\Flight;
  */
 class FlightSearch extends Flight
 {
+
+    public $onlyPending = false;
+
     /**
      * {@inheritdoc}
      */
@@ -49,6 +52,18 @@ class FlightSearch extends Flight
         ]);
 
         $this->load($params);
+
+        if ($this->onlyPending) {
+            $query->andWhere([
+                'or',
+                ['status' => 'V'],
+                [
+                    'and',
+                    ['status' => 'C'],
+                    "creation_date < NOW() - INTERVAL 72 HOUR"
+                ]
+            ]);
+        }
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
