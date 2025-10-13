@@ -1,8 +1,9 @@
 <?php
 
 /** @var yii\web\View $this */
+use app\config\Config;
 
-$this->title = 'My Yii Application';
+$this->title = Config::get('airline_name');
 ?>
 <div class="site-index">
 

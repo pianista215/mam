@@ -4,6 +4,7 @@
 /** @var string $content */
 
 use app\assets\AppAsset;
+use app\config\Config;
 use app\widgets\Alert;
 use yii\bootstrap5\Breadcrumbs;
 use yii\bootstrap5\Html;
@@ -18,6 +19,14 @@ $this->registerMetaTag(['name' => 'viewport', 'content' => 'width=device-width, 
 $this->registerMetaTag(['name' => 'description', 'content' => $this->params['meta_description'] ?? '']);
 $this->registerMetaTag(['name' => 'keywords', 'content' => $this->params['meta_keywords'] ?? '']);
 $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii::getAlias('@web/favicon.ico')]);
+$this->registerCssFile(
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css',
+    [
+        'integrity' => 'sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==',
+        'crossorigin' => 'anonymous',
+        'referrerpolicy' => 'no-referrer'
+    ]
+);
 ?>
 <?php $this->beginPage() ?>
 <!DOCTYPE html>
@@ -32,7 +41,7 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
 <header id="header">
     <?php
     NavBar::begin([
-        'brandLabel' => Yii::$app->name,
+        'brandLabel' => Config::get('airline_name'),
         'brandUrl' => Yii::$app->homeUrl,
         'options' => ['class' => 'navbar-expand-md navbar-dark bg-dark fixed-top']
     ]);
@@ -133,8 +142,21 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
 <footer id="footer" class="mt-auto py-3 bg-light">
     <div class="container">
         <div class="row text-muted">
-            <div class="col-md-6 text-center text-md-start">&copy; My Company <?= date('Y') ?></div>
-            <div class="col-md-6 text-center text-md-end"><?= Yii::powered() ?></div>
+            <div class="col-md-6 text-center text-md-start">&copy; <?= Config::get('airline_name') ?> <?= date('Y') ?></div>
+            <div class="col-md-6 text-center text-md-end">
+                Powered by <a href="https://github.com/pianista215/mam" target="_blank">Mam</a>
+            </div>
+        </div>
+        <div class="d-flex justify-content-center gap-3 mt-3 fs-4">
+            <?php if ($twitter = Config::get('twitter_url')): ?>
+                <a href="<?= $twitter ?>" target="_blank"><i class="fab fa-twitter"></i></a>
+            <?php endif; ?>
+            <?php if ($instagram = Config::get('instagram_url')): ?>
+                <a href="<?= $instagram ?>" target="_blank"><i class="fab fa-instagram"></i></a>
+            <?php endif; ?>
+            <?php if ($facebook = Config::get('facebook_url')): ?>
+                <a href="<?= $facebook ?>" target="_blank"><i class="fab fa-facebook"></i></a>
+            <?php endif; ?>
         </div>
     </div>
 </footer>
