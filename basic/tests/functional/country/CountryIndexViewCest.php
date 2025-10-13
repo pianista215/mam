@@ -87,10 +87,10 @@ class CountryIndexViewCest
 
     public function openCountryViewAsVisitor(\FunctionalTester $I)
     {
-        $this->checkCountryViewCommon($I);
-
-        $I->dontSee('Update', 'a');
-        $I->dontSee('Delete', 'a');
+        $I->amOnRoute('country/view', [ 'id' => '1' ]);
+        // Check redirect
+        $I->seeCurrentUrlMatches('~login~');
+        $I->see('Login');
     }
 
 

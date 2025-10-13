@@ -46,9 +46,9 @@ class CountryDeleteCest
     public function deleteOnlyPostAsVisitor(\FunctionalTester $I)
     {
         $I->amOnRoute('country/delete', [ 'id' => '1' ]);
-        $I->seeResponseCodeIs(405);
-        $count = \app\models\Country::find()->count();
-        $I->assertEquals(1, $count);
+        // Check redirect
+        $I->seeCurrentUrlMatches('~login~');
+        $I->see('Login');
     }
 
 }
