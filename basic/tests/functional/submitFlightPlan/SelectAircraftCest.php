@@ -45,15 +45,9 @@ class SelectAircraftCest
 
     public function openSelectAircraftVisitor(\FunctionalTester $I){
         $I->amOnRoute('submitted-flight-plan/select-aircraft',[ 'route_id' => '1' ]);
-
-        $I->see('Forbidden');
-        $I->seeResponseCodeIs(403);
-        $I->dontSee('LEBL');
-        $I->dontSee('LEVC');
-        $I->dontSee('EC-BBB');
-        $I->dontSee('Boeing Name Cargo');
-        $I->dontSee('EC-UUU');
-        $I->dontSee('C172 Std');
+        // Check redirect
+        $I->seeCurrentUrlMatches('~login~');
+        $I->see('Login');
     }
 
     public function openSelectAircraftRouteValidLocationAsPilot(\FunctionalTester $I){

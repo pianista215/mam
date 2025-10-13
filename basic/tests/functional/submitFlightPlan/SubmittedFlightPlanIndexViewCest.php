@@ -43,7 +43,10 @@ class SubmittedFlightPlanIndexViewCest
 
     public function openSubmittedFlightPlanIndexAsVisitor(\FunctionalTester $I)
     {
-        $this->cantSeeSubmittedFlightPlanIndex($I);
+        $I->amOnRoute('submitted-flight-plan/index');
+        // Check redirect
+        $I->seeCurrentUrlMatches('~login~');
+        $I->see('Login');
     }
 
     public function openSubmittedFlightPlanIndexAsPilot(\FunctionalTester $I)
@@ -121,12 +124,13 @@ class SubmittedFlightPlanIndexViewCest
 
     public function openSubmittedFlightPlanViewAsVisitor(\FunctionalTester $I)
     {
-        $this->cantViewSubmittedFlightPlan($I, '1');
-        $this->cantViewSubmittedFlightPlan($I, '2');
-        $this->cantViewSubmittedFlightPlan($I, '3');
-        $this->cantViewSubmittedFlightPlan($I, '4');
+        for($id = 1; $id <= 4; $id++){
+            $I->amOnRoute('submitted-flight-plan/view',[ 'id' => $id ]);
+            // Check redirect
+            $I->seeCurrentUrlMatches('~login~');
+            $I->see('Login');
+        }
     }
-
 
 
     public function openSubmittedFlightPlanViewOwnFpl(\FunctionalTester $I)

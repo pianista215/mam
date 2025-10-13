@@ -26,8 +26,12 @@ class SubmittedFlightPlanUpdateCest
     public function noOneCantUpdateOthersSubmittedFlightPlan(\FunctionalTester $I)
     {
         // Visitor
-        $this->cantUpdateSubmittedFpl($I);
+        $I->amOnRoute('submitted-flight-plan/update', [ 'id' => '3' ]);
+        // Check redirect
+        $I->seeCurrentUrlMatches('~login~');
+        $I->see('Login');
 
+        // Others
         $users = [1,2,3,4,5,6,8];
         $length = count($users);
 
