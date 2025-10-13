@@ -12,7 +12,7 @@ class LoginFormCest
         $I->amOnRoute('site/login');
         $I->haveFixtures([
             'pilot' => PilotFixture::class,
-            'page_content' => PageContentFixture::class
+            'pageContent' => PageContentFixture::class
         ]);
     }
 
