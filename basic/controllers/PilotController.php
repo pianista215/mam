@@ -37,7 +37,7 @@ class PilotController extends Controller
             [
                 'access' => [
                     'class' => AccessControl::class,
-                    'only' => ['view', 'create', 'update', 'delete', 'activate', 'move'],
+                    'only' => ['view', 'create', 'update', 'delete', 'activate', 'activate-pilots', 'move'],
                     'rules' => [
                         [
                             'allow' => true,
