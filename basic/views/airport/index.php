@@ -34,10 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'id',
             'icao_code',
             'name',
-            'latitude',
-            'longitude',
-            //'city',
-            //'country_id',
+            'country.name',
             [
                 'class' => ActionColumn::className(),
                 'visibleButtons'=>[
