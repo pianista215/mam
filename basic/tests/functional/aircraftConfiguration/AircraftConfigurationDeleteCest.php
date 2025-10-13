@@ -47,7 +47,9 @@ class AircraftConfigurationDeleteCest
     public function deleteOnlyPostAsVisitor(\FunctionalTester $I)
     {
         $I->amOnRoute('aircraft-configuration/delete', [ 'id' => '1' ]);
-        $I->seeResponseCodeIs(405);
+        // Check redirect
+        $I->seeCurrentUrlMatches('~login~');
+        $I->see('Login');
         $count = \app\models\AircraftConfiguration::find()->count();
         $I->assertEquals(3, $count);
     }

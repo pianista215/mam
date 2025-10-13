@@ -114,16 +114,10 @@ class AircraftConfigurationIndexViewCest
 
     public function openAircraftConfigurationViewAsVisitor(\FunctionalTester $I)
     {
-        $this->checkAircraftConfigViewCommon($I);
-
-        $I->dontSee('Update', 'a');
-        $I->dontSee('Delete', 'a');
-
-        $this->checkAircraftConfigViewCommon($I);
-
-        $I->seeElement('a', ['title' => 'View']);
-        $I->dontSeeElement('a', ['title' => 'Update']);
-        $I->dontSeeElement('a', ['title' => 'Delete']);
+        $I->amOnRoute('aircraft-configuration/view', [ 'id' => '1' ]);
+        // Check redirect
+        $I->seeCurrentUrlMatches('~login~');
+        $I->see('Login');
     }
 
 
