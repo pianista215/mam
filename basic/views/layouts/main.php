@@ -50,25 +50,43 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
                 ],
             ],
             ['label' => 'Pilots', 'url' => ['/pilot/index']],
-            ['label' => 'Flights', 'url' => ['/flight/index']],
+    ];
+
+    if (!Yii::$app->user->isGuest) {
+        $items[] =
+         ['label' => 'Flights', 'url' => ['/flight/index']];
+    }
+    $items[] =
             [
                 'label' => 'Operations',
                 'items' => [
                     ['label' => 'Aircraft Types', 'url' => ['/aircraft-type/index']],
+                    ['label' => 'Aircraft Configurations', 'url' => ['/aircraft-configuration/index']],
                     ['label' => 'Aircrafts', 'url' => ['/aircraft/index']],
                     ['label' => 'Countries', 'url' => ['/country/index']],
                     ['label' => 'Airports', 'url' => ['/airport/index']],
                     ['label' => 'Routes', 'url' => ['/route/index']],
                 ],
-            ],
-        ];
+            ];
 
     if (Yii::$app->user->can('submitFpl')) {
-        $items[] = [
+        $items[] =
+        [
             'label' => 'Actions',
             'items' => [
                 ['label' => 'Submit FPL', 'url' => ['/submitted-flight-plan/my-fpl']],
                 ['label' => 'Move Pilot', 'url' => ['/pilot/move']],
+            ],
+        ];
+    }
+
+    if (Yii::$app->user->can('validateVfrFlight') || Yii::$app->user->can('validateIfrFlight')) {
+        $items[] =
+        [
+            'label' => 'Validations',
+            'items' => [
+                ['label' => 'Validate Flights', 'url' => ['/flight/index-pending']],
+                ['label' => 'List FPLs', 'url' => ['/submitted-flight-plan/index']],
             ],
         ];
     }
@@ -78,8 +96,6 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
         $items[] = [
             'label' => 'Admin',
             'items' => [
-                ['label' => 'List FPL', 'url' => ['/submitted-flight-plan/index']],
-                ['label' => 'Validate Flight', 'url' => ['/TODOOOOOO/validate']],
                 ['label' => 'Activate Pilots', 'url' => ['/pilot/activate-pilots']],
             ],
         ];

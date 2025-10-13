@@ -26,8 +26,6 @@ class PilotController extends Controller
 {
     use LoggerTrait;
 
-    // TODO: WE NEED A RESET PASSWORD ACTION ALLOWING ADMIN OR PILOT TO RESET ITS PASSWORD
-
     /**
      * @inheritDoc
      */
