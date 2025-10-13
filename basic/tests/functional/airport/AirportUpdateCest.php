@@ -40,15 +40,9 @@ class AirportUpdateCest
     public function openAirportUpdateAsVisitor(\FunctionalTester $I)
     {
         $I->amOnRoute('airport/update', [ 'id' => '1' ]);
-        $I->seeResponseCodeIs(403);
-
-        $I->see('Forbidden');
-        $I->dontSee('LEMD');
-        $I->dontSee('Madrid-Barajas');
-        $I->dontSee('Madrid');
-        $I->dontSee('40.471926');
-        $I->dontSee('-3.56264');
-        $I->dontSee('Save', 'button');
+        // Check redirect
+        $I->seeCurrentUrlMatches('~login~');
+        $I->see('Login');
     }
 
     public function updateEmptyAirport(\FunctionalTester $I)

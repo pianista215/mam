@@ -96,10 +96,10 @@ class AirportIndexViewCest
 
     public function openAirportViewAsVisitor(\FunctionalTester $I)
     {
-        $this->checkAirportViewCommon($I);
-
-        $I->dontSee('Update', 'a');
-        $I->dontSee('Delete', 'a');
+        $I->amOnRoute('airport/view', [ 'id' => '1' ]);
+        // Check redirect
+        $I->seeCurrentUrlMatches('~login~');
+        $I->see('Login');
     }
 
 

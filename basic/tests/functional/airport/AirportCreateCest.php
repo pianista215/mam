@@ -36,11 +36,9 @@ class AirportCreateCest
     public function openAirportCreateAsVisitor(\FunctionalTester $I)
     {
         $I->amOnRoute('airport/create');
-        $I->seeResponseCodeIs(403);
-
-        $I->see('Forbidden');
-        $I->dontSee('Create Airport');
-        $I->dontSee('Save', 'button');
+        // Check redirect
+        $I->seeCurrentUrlMatches('~login~');
+        $I->see('Login');
     }
 
     public function submitEmptyAirport(\FunctionalTester $I)
