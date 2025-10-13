@@ -28,6 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'departure',
             'arrival',
             'creation_date',
+            'fullStatus',
             [
                 'class' => ActionColumn::className(),
                 'visibleButtons'=>[

@@ -44,6 +44,10 @@ class FlightController extends Controller
         $searchModel = new FlightSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 
+        $dataProvider->sort->defaultOrder = [
+            'creation_date' => SORT_DESC,
+        ];
+
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
@@ -73,7 +77,11 @@ class FlightController extends Controller
     {
         $model = $this->findModel($id);
 
-        $model->scenario = Flight::SCENARIO_VALIDATE;;
+        if (!Yii::$app->user->can('validateFlight', ['flight' => $model])) {
+            throw new ForbiddenHttpException('You\'re not allowed to validate this flight.');
+        }
+
+        $model->scenario = Flight::SCENARIO_VALIDATE;
         if ($model->isPendingValidation() && $model->load(Yii::$app->request->post())) {
             $model->validator_id = Yii::$app->user->id;
             $model->validation_date = date('Y-m-d H:i:s');

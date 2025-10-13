@@ -80,6 +80,7 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
             'items' => [
                 ['label' => 'List FPL', 'url' => ['/submitted-flight-plan/index']],
                 ['label' => 'Validate Flight', 'url' => ['/TODOOOOOO/validate']],
+                ['label' => 'Activate Pilots', 'url' => ['/pilot/activate-pilots']],
             ],
         ];
     }
