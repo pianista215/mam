@@ -11,6 +11,6 @@ INSERT INTO config(`key`, `value`) VALUES ('token_life_h', '24');
 INSERT INTO config(`key`, `value`) VALUES ('airline_name', 'MamAirlines');
 
 -- Footer
-INSERT INTO config(`key`, `value`) VALUES ('twitter_url', 'https://twitter.com/');
+INSERT INTO config(`key`, `value`) VALUES ('x_url', 'https://x.com/');
 INSERT INTO config(`key`, `value`) VALUES ('instagram_url', 'https://instagram.com/');
 INSERT INTO config(`key`, `value`) VALUES ('facebook_url', 'https://facebook.com/');

@@ -13,7 +13,7 @@ return [
     ['key' => 'airline_name', 'value' => 'TestAirlines'],
 
     // Footer / Social
-    ['key' => 'twitter_url', 'value' => 'https://testtwitter.com/'],
+    ['key' => 'x_url', 'value' => 'https://testx.com/'],
     ['key' => 'instagram_url', 'value' => 'https://testinstagram.com/'],
     ['key' => 'facebook_url', 'value' => 'https://testfacebook.com/'],
 ];

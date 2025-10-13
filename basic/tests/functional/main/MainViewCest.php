@@ -25,7 +25,7 @@ class MainViewCest
         $I->seeLink('Mam', 'https://github.com/pianista215/mam');
         $I->seeLink('', 'https://testfacebook.com/');
         $I->seeLink('', 'https://testinstagram.com/');
-        $I->seeLink('', 'https://testtwitter.com/');
+        $I->seeLink('', 'https://testx.com/');
 
         // Main content loaded
         $I->see('This is the home page');

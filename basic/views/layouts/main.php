@@ -148,8 +148,8 @@ $this->registerCssFile(
             </div>
         </div>
         <div class="d-flex justify-content-center gap-3 mt-1 fs-4">
-            <?php if ($twitter = Config::get('twitter_url')): ?>
-                <a href="<?= $twitter ?>" target="_blank"><i class="fab fa-twitter"></i></a>
+            <?php if ($x = Config::get('x_url')): ?>
+                <a href="<?= $x ?>" target="_blank"><i class="fab fa-x-twitter"></i></a>
             <?php endif; ?>
             <?php if ($instagram = Config::get('instagram_url')): ?>
                 <a href="<?= $instagram ?>" target="_blank"><i class="fab fa-instagram"></i></a>
