@@ -27,7 +27,7 @@ class FlightController extends Controller
             [
                 'access' => [
                     'class' => AccessControl::class,
-                    'only' => ['index', 'indexPending', 'view', 'validate'],
+                    'only' => ['index', 'index-pending', 'view', 'validate'],
                     'rules' => [
                         [
                             'allow' => true,
@@ -85,6 +85,10 @@ class FlightController extends Controller
      */
     public function actionIndexPending()
     {
+        if (!Yii::$app->user->can('validateVfrFlight') && !Yii::$app->user->can('validateIfrFlight')) {
+            throw new ForbiddenHttpException('You\'re not allowed to validate flights.');
+        }
+
         $searchModel = new FlightSearch();
         $searchModel->onlyPending = true;
         $dataProvider = $searchModel->search($this->request->queryParams);
