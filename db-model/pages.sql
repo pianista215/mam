@@ -10,8 +10,7 @@ VALUES (
     (SELECT id FROM page WHERE code = 'staff'),
     'en',
     'Our Staff',
-'# Staff
-
+'
 Meet the team behind our virtual airline. Dedicated professionals working every day to keep our operations running smoothly.
 
 ---

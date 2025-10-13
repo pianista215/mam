@@ -147,7 +147,7 @@ $this->registerCssFile(
                 Powered by <a href="https://github.com/pianista215/mam" target="_blank">Mam</a>
             </div>
         </div>
-        <div class="d-flex justify-content-center gap-3 mt-3 fs-4">
+        <div class="d-flex justify-content-center gap-3 mt-1 fs-4">
             <?php if ($twitter = Config::get('twitter_url')): ?>
                 <a href="<?= $twitter ?>" target="_blank"><i class="fab fa-twitter"></i></a>
             <?php endif; ?>
