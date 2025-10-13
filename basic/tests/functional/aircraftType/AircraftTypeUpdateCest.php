@@ -41,14 +41,9 @@ class AircraftTypeUpdateCest
     public function openAircraftTypeUpdateAsVisitor(\FunctionalTester $I)
     {
         $I->amOnRoute('aircraft-type/update', [ 'id' => '1' ]);
-        $I->seeResponseCodeIs(403);
-
-        $I->see('Forbidden');
-        $I->dontSee('A320');
-        $I->dontSee('Airbus A320');
-        $I->dontSee('3186');
-
-        $I->dontSee('Save', 'button');
+        // Check redirect
+        $I->seeCurrentUrlMatches('~login~');
+        $I->see('Login');
     }
 
     public function updateEmptyAircraftType(\FunctionalTester $I)

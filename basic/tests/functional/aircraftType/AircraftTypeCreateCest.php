@@ -38,11 +38,9 @@ class AircraftTypeCreateCest
     public function openAircraftTypeCreateAsVisitor(\FunctionalTester $I)
     {
         $I->amOnRoute('aircraft-type/create');
-        $I->seeResponseCodeIs(403);
-
-        $I->see('Forbidden');
-        $I->dontSee('Create Aircraft Type');
-        $I->dontSee('Save', 'button');
+        // Check redirect
+        $I->seeCurrentUrlMatches('~login~');
+        $I->see('Login');
     }
 
     public function submitEmptyAircraftType(\FunctionalTester $I)
