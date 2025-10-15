@@ -45,4 +45,13 @@ return [
         'created_at' => '2025-01-05 00:00:00',
         'updated_at' => '2025-01-05 00:00:00',
     ],
+    [
+        'id' => 6,
+        'page_id' => 6,
+        'language' => 'en',
+        'title' => 'Registration Closed',
+        'content_md' => "Registration closed content.",
+        'created_at' => '2025-01-05 00:00:00',
+        'updated_at' => '2025-01-05 00:00:00',
+    ],
 ];

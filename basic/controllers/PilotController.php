@@ -7,6 +7,8 @@ use app\config\Config;
 use app\models\ChangePasswordForm;
 use app\models\Country;
 use app\models\ForgotPasswordForm;
+use app\models\Page;
+use app\models\PageContent;
 use app\models\Pilot;
 use app\models\PilotSearch;
 use app\models\SubmittedFlightPlan;
@@ -108,7 +110,14 @@ class PilotController extends Controller
         }
 
         if($now < $registrationStart || $now > $registrationEnd) {
-            return $this->render('registration_closed');
+            $page = Page::findOne(['code' => 'registration_closed']);
+            $content = $page->getPageContents()
+                ->andWhere(['language' => 'en']) // TODO: Detect language
+                ->one();
+
+            return $this->render('registration_closed', [
+                'content' => $content,
+            ]);
         } else {
             $model = new Pilot();
             $model->scenario = Pilot::SCENARIO_REGISTER;

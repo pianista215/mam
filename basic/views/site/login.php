@@ -38,8 +38,9 @@ $this->params['breadcrumbs'][] = $this->title;
             ]) ?>
 
             <div class="form-group">
-                <div>
+                <div class="d-flex gap-2">
                     <?= Html::submitButton('Login', ['class' => 'btn btn-primary', 'name' => 'login-button']) ?>
+                    <?= Html::a('Register', ['pilot/register'], ['class' => 'btn btn-outline-primary']) ?>
                 </div>
                 <br/>
                 <p>

@@ -3,6 +3,7 @@
 namespace tests\functional\pilot;
 
 use tests\fixtures\ConfigFixture;
+use tests\fixtures\PageContentFixture;
 use Yii;
 
 class PilotClosedRegistrationPastCest
@@ -14,13 +15,14 @@ class PilotClosedRegistrationPastCest
                 'class' => ConfigFixture::class,
                 'dataFile' => Yii::getAlias('@app/tests/fixtures/data/registration_config_closed_past.php'),
             ],
+            'page_content' => PageContentFixture::class,
         ];
     }
 
     public function openPilotRegistrationAndSeeRegistrationIsClosed(\FunctionalTester $I)
     {
         $I->amOnRoute('pilot/register');
-        $I->see('registration is closed');
+        $I->see('Registration closed content.');
     }
 
 }
