@@ -30,4 +30,10 @@ return [
         'created_at' => '2025-01-05 00:00:00',
         'updated_at' => '2025-01-05 00:00:00',
     ],
+    [
+        'id' => 6,
+        'code' => 'registration_closed',
+        'created_at' => '2025-01-05 00:00:00',
+        'updated_at' => '2025-01-05 00:00:00',
+    ],
 ];
