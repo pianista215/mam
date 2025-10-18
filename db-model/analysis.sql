@@ -9,6 +9,7 @@ INSERT INTO flight_phase_type(`id`, `code`, `name`) VALUES (6, 'approach', 'Appr
 INSERT INTO flight_phase_type(`id`, `code`, `name`) VALUES (7, 'final_landing', 'Landing');
 INSERT INTO flight_phase_type(`id`, `code`, `name`) VALUES (8, 'shutdown', 'Shutdown');
 INSERT INTO flight_phase_type(`id`, `code`, `name`) VALUES (9, 'unknown', 'Unknown');
+INSERT INTO flight_phase_type(`id`, `code`, `name`) VALUES (10, 'backtrack', 'Backtrack');
 
 -- Metric types
 -- Takeoff
