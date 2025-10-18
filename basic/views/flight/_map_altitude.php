@@ -33,7 +33,8 @@ $colors = array(
     'approach' => 'red',
     'final_landing' => '#ff9900',
     'shutdown' => '#cc00cc',
-    'unknown' => '#888888'
+    'unknown' => '#888888',
+    'backtrack' => 'brown'
 );
 
 $segments = [];
