@@ -1,10 +1,10 @@
-INSERT INTO `page` (`code`, `created_at`, `updated_at`) VALUES
-('staff', NOW(), NOW()),
-('rules', NOW(), NOW()),
-('ranks', NOW(), NOW()),
-('school', NOW(), NOW()),
-('home', NOW(), NOW()),
-('registration_closed', NOW(), NOW());
+INSERT INTO `page` (`code`, `public`, `created_at`, `updated_at`) VALUES
+('staff', 1, NOW(), NOW()),
+('rules', 1, NOW(), NOW()),
+('ranks', 1, NOW(), NOW()),
+('school', 1, NOW(), NOW()),
+('home', 1, NOW(), NOW()),
+('registration_closed', 1, NOW(), NOW());
 
 INSERT INTO page_content (page_id, language, title, content_md, created_at, updated_at)
 VALUES (

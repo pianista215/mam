@@ -303,8 +303,9 @@ CREATE TABLE `flight_phase_issue` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `page` (
-  `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+  `id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
   `code` varchar(50) NOT NULL,
+  `public` tinyint(1) NOT NULL DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
@@ -312,8 +313,8 @@ CREATE TABLE `page` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `page_content` (
-  `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
-  `page_id` smallint(5) unsigned NOT NULL,
+  `id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
+  `page_id` mediumint(8) unsigned NOT NULL,
   `language` char(2) NOT NULL,
   `title` varchar(100) NOT NULL,
   `content_md` TEXT NOT NULL,
