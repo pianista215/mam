@@ -31,6 +31,7 @@ use Yii;
  * @property string|null $validator_comments
  * @property int|null $validator_id
  * @property string|null $validation_date
+ * @property int|null $tour_stage_id
  *
  * @property Aircraft $aircraft
  * @property Airport $alternative1Icao
@@ -39,6 +40,7 @@ use Yii;
  * @property Airport $departure0
  * @property FlightReport $flightReport
  * @property Pilot $pilot
+ * @property TourStage $tourStage
  * @property Pilot $validator
  */
 class Flight extends \yii\db\ActiveRecord
@@ -66,7 +68,7 @@ class Flight extends \yii\db\ActiveRecord
     {
         return [
             [['pilot_id', 'aircraft_id', 'code', 'departure', 'arrival', 'alternative1_icao', 'flight_rules', 'cruise_speed_value', 'cruise_speed_unit', 'flight_level_unit', 'route', 'estimated_time', 'other_information', 'endurance_time', 'report_tool'], 'required'],
-            [['pilot_id', 'aircraft_id', 'validator_id'], 'integer'],
+            [['pilot_id', 'aircraft_id', 'validator_id', 'tour_stage_id'], 'integer'],
             [['creation_date', 'validation_date'], 'safe'],
             [['code'], 'string', 'max' => 10],
             [['departure', 'arrival', 'alternative1_icao', 'alternative2_icao', 'cruise_speed_value', 'flight_level_value', 'estimated_time', 'endurance_time'], 'string', 'max' => 4],
@@ -83,6 +85,7 @@ class Flight extends \yii\db\ActiveRecord
             [['departure'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['departure' => 'icao_code']],
             [['pilot_id'], 'exist', 'skipOnError' => true, 'targetClass' => Pilot::class, 'targetAttribute' => ['pilot_id' => 'id']],
             [['validator_id'], 'exist', 'skipOnError' => true, 'targetClass' => Pilot::class, 'targetAttribute' => ['validator_id' => 'id']],
+            [['tour_stage_id'], 'exist', 'skipOnError' => true, 'targetClass' => TourStage::class, 'targetAttribute' => ['tour_stage_id' => 'id']],
         ];
     }
 
@@ -117,6 +120,7 @@ class Flight extends \yii\db\ActiveRecord
             'validator_comments' => 'Validator Comments',
             'validator_id' => 'Validator ID',
             'validation_date' => 'Validation Date',
+            'tour_stage_id' => 'Tour Stage ID',
         ];
     }
 
@@ -236,5 +240,15 @@ class Flight extends \yii\db\ActiveRecord
    public function getValidator()
    {
        return $this->hasOne(Pilot::class, ['id' => 'validator_id']);
+   }
+   
+   /**
+    * Gets query for [[TourStage]].
+    *
+    * @return \yii\db\ActiveQuery
+    */
+   public function getTourStage()
+   {
+       return $this->hasOne(TourStage::class, ['id' => 'tour_stage_id']);
    }
 }
