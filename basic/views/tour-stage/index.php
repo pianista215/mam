@@ -35,6 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'arrival',
             'distance_nm',
             //'description',
+            //'sequence',
             [
                 'class' => ActionColumn::className(),
                 'urlCreator' => function ($action, TourStage $model, $key, $index, $column) {

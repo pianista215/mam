@@ -345,6 +345,7 @@ CREATE TABLE `tour_stage` (
   `arrival` char(4) NOT NULL,
   `distance_nm` int(10) unsigned NOT NULL,
   `description` varchar(200) DEFAULT NULL,
+  `sequence` tinyint(3) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tour_stage_tour_FK` (`tour_id`),
   KEY `tour_stage_airport_departure_FK` (`departure`),

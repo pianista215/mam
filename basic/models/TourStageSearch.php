@@ -17,7 +17,7 @@ class TourStageSearch extends TourStage
     public function rules()
     {
         return [
-            [['id', 'tour_id', 'distance_nm'], 'integer'],
+            [['id', 'tour_id', 'distance_nm', 'sequence'], 'integer'],
             [['departure', 'arrival', 'description'], 'safe'],
         ];
     }
@@ -61,6 +61,7 @@ class TourStageSearch extends TourStage
             'id' => $this->id,
             'tour_id' => $this->tour_id,
             'distance_nm' => $this->distance_nm,
+            'sequence' => $this->sequence,
         ]);
 
         $query->andFilterWhere(['like', 'departure', $this->departure])

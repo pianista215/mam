@@ -13,6 +13,7 @@ use Yii;
  * @property string $arrival
  * @property int $distance_nm
  * @property string|null $description
+ * @property int $sequence
  *
  * @property Airport $arrival0
  * @property Airport $departure0
@@ -35,8 +36,8 @@ class TourStage extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id', 'tour_id', 'departure', 'arrival', 'distance_nm'], 'required'],
-            [['id', 'tour_id', 'distance_nm'], 'integer'],
+            [['id', 'tour_id', 'departure', 'arrival', 'distance_nm', 'sequence'], 'required'],
+            [['id', 'tour_id', 'distance_nm', 'sequence'], 'integer'],
             [['departure', 'arrival'], 'string', 'max' => 4],
             [['description'], 'string', 'max' => 200],
             [['id'], 'unique'],
@@ -58,6 +59,7 @@ class TourStage extends \yii\db\ActiveRecord
             'arrival' => 'Arrival',
             'distance_nm' => 'Distance Nm',
             'description' => 'Description',
+            'sequence' => 'Sequence',
         ];
     }
 
