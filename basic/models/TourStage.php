@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\GeoUtils;
 use Yii;
 
 /**
@@ -36,12 +37,11 @@ class TourStage extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id', 'tour_id', 'departure', 'arrival', 'distance_nm', 'sequence'], 'required'],
-            [['id', 'tour_id', 'distance_nm', 'sequence'], 'integer'],
+            [['tour_id', 'departure', 'arrival', 'sequence'], 'required'],
+            [['tour_id', 'distance_nm', 'sequence'], 'integer'],
             [['departure', 'arrival'], 'string', 'max' => 4],
             [['description'], 'string', 'max' => 200],
             [['tour_id', 'sequence'], 'unique', 'targetAttribute' => ['tour_id', 'sequence']],
-            [['id'], 'unique'],
             [['arrival'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['arrival' => 'icao_code']],
             [['departure'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['departure' => 'icao_code']],
             [['tour_id'], 'exist', 'skipOnError' => true, 'targetClass' => Tour::class, 'targetAttribute' => ['tour_id' => 'id']],
@@ -106,7 +106,7 @@ class TourStage extends \yii\db\ActiveRecord
 
     public function beforeSave($insert)
     {
-        if ($insert) {
+        if (parent::beforeSave($insert)) {
             // Validate sequence is consecutive
             $maxSeq = static::find()
                 ->where(['tour_id' => $this->tour_id])
@@ -116,21 +116,24 @@ class TourStage extends \yii\db\ActiveRecord
                 $this->addError('sequence', 'The sequence number is not the next available.');
                 return false;
             }
-        } else {
-            // Prevent changing sequence once created
-            if ($this->isAttributeChanged('sequence')) {
-                $this->addError('sequence', 'The sequence number cannot be modified once the stage has been created.');
-                return false;
-            }
 
-            // Prevent changing origin or destination once created
-            if ($this->isAttributeChanged('origin') || $this->isAttributeChanged('destination')) {
-                $this->addError('origin', 'Origin and destination cannot be modified once the stage has been created.');
+            // Fill distance
+            $dep = $this->departure0;
+            $arr = $this->arrival0;
+            $this->distance_nm = GeoUtils::haversine($dep->latitude, $dep->longitude, $arr->latitude, $arr->longitude, 'nm');
+            return true;
+        } else {
+            // Get changed attributes
+            $changed = array_keys($this->getDirtyAttributes());
+
+            // Allow updating only the description field
+            if ($changed !== ['description']) {
+                $this->addError('description', 'Only the description can be modified once the stage has been created.');
                 return false;
             }
         }
 
-        return parent::beforeSave($insert);
+        return false;
     }
 
 }

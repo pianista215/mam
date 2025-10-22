@@ -339,7 +339,7 @@ CREATE TABLE `tour` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `tour_stage` (
-  `id` mediumint(8) unsigned NOT NULL,
+  `id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
   `tour_id` mediumint(8) unsigned NOT NULL,
   `departure` char(4) NOT NULL,
   `arrival` char(4) NOT NULL,
