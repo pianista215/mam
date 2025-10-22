@@ -103,4 +103,34 @@ class TourStage extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Tour::class, ['id' => 'tour_id']);
     }
+
+    public function beforeSave($insert)
+    {
+        if ($insert) {
+            // Validate sequence is consecutive
+            $maxSeq = static::find()
+                ->where(['tour_id' => $this->tour_id])
+                ->max('sequence');
+
+            if ($this->sequence != $maxSeq + 1) {
+                $this->addError('sequence', 'The sequence number is not the next available.');
+                return false;
+            }
+        } else {
+            // Prevent changing sequence once created
+            if ($this->isAttributeChanged('sequence')) {
+                $this->addError('sequence', 'The sequence number cannot be modified once the stage has been created.');
+                return false;
+            }
+
+            // Prevent changing origin or destination once created
+            if ($this->isAttributeChanged('origin') || $this->isAttributeChanged('destination')) {
+                $this->addError('origin', 'Origin and destination cannot be modified once the stage has been created.');
+                return false;
+            }
+        }
+
+        return parent::beforeSave($insert);
+    }
+
 }

@@ -3,6 +3,7 @@
 namespace app\modules\api\controllers\v1;
 
 use app\config\Config;
+use app\helpers\GeoUtils;
 use app\helpers\LoggerTrait;
 use app\models\AcarsFile;
 use app\models\Aircraft;
@@ -106,7 +107,7 @@ class FlightReportController extends Controller
                     throw new ServerErrorHttpException('Error finding nearest airport of '.$dto->last_position_lat.' '.$dto->last_position_lon);
                 }
 
-                $distanceKm = AirportSearch::haversine($dto->last_position_lat, $dto->last_position_lon, $nearestAirport->latitude, $nearestAirport->longitude);
+                $distanceKm = GeoUtils::haversine($dto->last_position_lat, $dto->last_position_lon, $nearestAirport->latitude, $nearestAirport->longitude, 'km');
 
                 $landingAirport = null;
 
