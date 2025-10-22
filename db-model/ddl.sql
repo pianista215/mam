@@ -347,7 +347,7 @@ CREATE TABLE `tour_stage` (
   `description` varchar(200) DEFAULT NULL,
   `sequence` tinyint(3) unsigned NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `tour_stage_tour_FK` (`tour_id`),
+  UNIQUE KEY `tour_stage_unique` (`tour_id`,`sequence`),
   KEY `tour_stage_airport_departure_FK` (`departure`),
   KEY `tour_stage_airport_arrival_FK` (`arrival`),
   CONSTRAINT `tour_stage_airport_arrival_FK` FOREIGN KEY (`arrival`) REFERENCES `airport` (`icao_code`) ON DELETE CASCADE ON UPDATE CASCADE,
