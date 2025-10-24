@@ -115,7 +115,10 @@ class TourStage extends \yii\db\ActiveRecord
 
     public function beforeSave($insert)
     {
-        if (parent::beforeSave($insert)) {
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+        if ($insert) {
             // Validate sequence is consecutive
             $maxSeq = static::find()
                 ->where(['tour_id' => $this->tour_id])
@@ -132,17 +135,15 @@ class TourStage extends \yii\db\ActiveRecord
             $this->distance_nm = GeoUtils::haversine($dep->latitude, $dep->longitude, $arr->latitude, $arr->longitude, 'nm');
             return true;
         } else {
-            // Get changed attributes
             $changed = array_keys($this->getDirtyAttributes());
-
-            // Allow updating only the description field
-            if ($changed !== ['description']) {
-                $this->addError('description', 'Only the description can be modified once the stage has been created.');
+            if (in_array('departure', $changed) || in_array('arrival', $changed)) {
+                $this->addError('departure', 'Departure and arrival cannot be modified once the stage is created.');
+                $this->addError('arrival', 'Departure and arrival cannot be modified once the stage is created.');
                 return false;
             }
         }
 
-        return false;
+        return true;
     }
 
 }

@@ -13,6 +13,8 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
+    <?= $form->errorSummary($model, ['class' => 'alert alert-danger']) ?>
+
     <?= $form->field($model, 'departure')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'arrival')->textInput(['maxlength' => true]) ?>

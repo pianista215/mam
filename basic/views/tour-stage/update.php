@@ -4,18 +4,26 @@ use yii\helpers\Html;
 
 /** @var yii\web\View $this */
 /** @var app\models\TourStage $model */
+/** @var app\models\Tour $tour */
 
-$this->title = 'Update Tour Stage: ' . $model->id;
-$this->params['breadcrumbs'][] = ['label' => 'Tour Stages', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->id, 'url' => ['view', 'id' => $model->id]];
-$this->params['breadcrumbs'][] = 'Update';
+$this->title = "Update Stage {$model->sequence} from Tour: " . Html::encode($tour->name);
+$this->params['breadcrumbs'][] = ['label' => 'Tours', 'url' => ['index']];
+$this->params['breadcrumbs'][] = [
+    'label' => $tour->name,
+    'url' => ['tour/view', 'id' => $tour->id],
+];
+$this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="tour-stage-update">
+<div class="tour-stage-update container mt-4">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?= $this->render('_form', [
-        'model' => $model,
-    ]) ?>
-
+    <div class="card shadow-sm mt-3">
+        <div class="card-body">
+            <?= $this->render('_form', [
+                'model' => $model,
+                'tour' => $tour,
+            ]) ?>
+        </div>
+    </div>
 </div>

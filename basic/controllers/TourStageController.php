@@ -99,14 +99,16 @@ class TourStageController extends Controller
     {
         if(Yii::$app->user->can('tourCrud')){
             $model = $this->findModel($id);
+            $tour = $model->tour;
 
             if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
                 $this->logInfo('Updated tour stage', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
-                return $this->redirect(['view', 'id' => $model->id]);
+                return $this->redirect(['tour/view', 'id' => $tour->id]);
             }
 
             return $this->render('update', [
                 'model' => $model,
+                'tour' => $tour,
             ]);
         } else {
             throw new ForbiddenHttpException();
@@ -124,13 +126,40 @@ class TourStageController extends Controller
     {
         if(Yii::$app->user->can('tourCrud')){
             $model = $this->findModel($id);
+            $tour_id = $model->tour->id;
+
             if($model->flights) {
                 Yii::$app->session->setFlash('error', 'Can\'t delete stage with flights associated.');
             } else {
-                $this->findModel($id)->delete();
-                $this->logInfo('Deleted tour stage', ['id' => $id, 'user' => Yii::$app->user->identity->license]);
+                $transaction = Yii::$app->db->beginTransaction();
+                try {
+                    // Delete the stage and reorder the later stages sequences
+                    $model->delete();
+
+                    $stages = TourStage::find()
+                        ->where(['tour_id' => $tour_id])
+                        ->andWhere(['>', 'sequence', $model->sequence])
+                        ->orderBy(['sequence' => SORT_ASC])
+                        ->all();
+
+                    foreach ($stages as $stage) {
+                        $stage->sequence -= 1;
+                        if (!$stage->save(false, ['sequence'])) { // Only update sequence
+                             $errors = $stage->getErrors();
+                             throw new \Exception('Failed to re-sequence stage #' . $stage->id . '. Errors: ' . json_encode($errors));
+                        }
+                    }
+
+                    $transaction->commit();
+                    $this->logInfo('Deleted tour stage', ['id' => $id, 'user' => Yii::$app->user->identity->license]);
+                    return $this->redirect(['tour/view', 'id' => $tour_id]);
+                } catch (\Exception $e) {
+                    $transaction->rollBack();
+                    $this->logError('Error deleting tour stage', ['id' => $id, 'user' => Yii::$app->user->identity->license, 'ex' => $e]);
+                    Yii::$app->session->setFlash('danger', 'Error deleting stage. Contact administrator');
+                    return $this->redirect(['tour/view', 'id' => $tour_id]);
+                }
             }
-            return $this->redirect(['tour/view', 'id' => $model->tour->id]);
         } else {
             throw new ForbiddenHttpException();
         }
