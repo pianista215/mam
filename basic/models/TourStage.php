@@ -41,6 +41,7 @@ class TourStage extends \yii\db\ActiveRecord
             [['tour_id', 'distance_nm', 'sequence'], 'integer'],
             [['departure', 'arrival'], 'string', 'max' => 4],
             [['description'], 'string', 'max' => 200],
+            [['description'], 'trim'],
             [['tour_id', 'sequence'], 'unique', 'targetAttribute' => ['tour_id', 'sequence']],
             [['arrival'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['arrival' => 'icao_code']],
             [['departure'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['departure' => 'icao_code']],

@@ -40,7 +40,15 @@ class TourSearch extends Tour
      */
     public function search($params)
     {
-        $query = Tour::find();
+
+        $now = new \yii\db\Expression('NOW()');
+
+        $query = Tour::find()
+            ->addSelect([
+                '{{%tour}}.*',
+                new \yii\db\Expression("IF(NOW() BETWEEN start AND end, 1, 0) AS is_active"),
+            ])
+            ->orderBy(['is_active' => SORT_DESC, 'start' => SORT_ASC]);
 
         // add conditions that should always apply here
 
@@ -51,8 +59,6 @@ class TourSearch extends Tour
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
             return $dataProvider;
         }
 

@@ -16,9 +16,9 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'description')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'start')->textInput() ?>
+    <?= $form->field($model, 'start')->input('date') ?>
 
-    <?= $form->field($model, 'end')->textInput() ?>
+    <?= $form->field($model, 'end')->input('date') ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
