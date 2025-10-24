@@ -62,6 +62,7 @@ class Tour extends \yii\db\ActiveRecord
      */
     public function getTourStages()
     {
-        return $this->hasMany(TourStage::class, ['tour_id' => 'id']);
+        return $this->hasMany(TourStage::class, ['tour_id' => 'id'])
+            ->orderBy(['sequence' => SORT_ASC]);;
     }
 }

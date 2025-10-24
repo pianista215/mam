@@ -40,6 +40,7 @@ class Route extends \yii\db\ActiveRecord
             [['code'], 'filter', 'filter' => [CustomRules::class, 'removeSpaces']],
             [['code'], 'string', 'max' => 10],
             [['departure', 'arrival'], 'string', 'length' => 4],
+            [['departure', 'arrival'], 'filter', 'filter' => 'strtoupper'],
             [['code'], 'unique'],
             [['departure', 'arrival'], 'unique', 'targetAttribute' => ['departure', 'arrival']],
             [['arrival'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['arrival' => 'icao_code']],

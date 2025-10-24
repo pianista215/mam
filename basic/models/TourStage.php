@@ -40,6 +40,7 @@ class TourStage extends \yii\db\ActiveRecord
             [['tour_id', 'departure', 'arrival', 'sequence'], 'required'],
             [['tour_id', 'distance_nm', 'sequence'], 'integer'],
             [['departure', 'arrival'], 'string', 'max' => 4],
+            [['departure', 'arrival'], 'filter', 'filter' => 'strtoupper'],
             [['description'], 'string', 'max' => 200],
             [['description'], 'trim'],
             [['tour_id', 'sequence'], 'unique', 'targetAttribute' => ['tour_id', 'sequence']],
@@ -93,6 +94,13 @@ class TourStage extends \yii\db\ActiveRecord
     public function getFlights()
     {
         return $this->hasMany(Flight::class, ['tour_stage_id' => 'id']);
+    }
+
+    public function getMyFlightsAccepted()
+    {
+        return $this->hasMany(Flight::class, ['tour_stage_id' => 'id'])
+            ->andWhere(['user_id' => Yii::$app->user->id])
+            ->andWhere(['status' => 'F']);
     }
 
     /**

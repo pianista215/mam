@@ -3,6 +3,8 @@
 namespace app\controllers;
 
 use app\helpers\LoggerTrait;
+use app\models\Page;
+use app\models\PageContent;
 use app\models\Tour;
 use app\models\TourSearch;
 use yii\web\Controller;
@@ -71,8 +73,31 @@ class TourController extends Controller
      */
     public function actionView($id)
     {
+        $model = $this->findModel($id);
+
+        $pageCode = 'tour_content_' . $model->id;
+        $page = Page::findOne(['code' => $pageCode]);
+        $pageContent = null;
+
+        if ($page !== null) {
+            $pageContent = $page->getPageContents()
+                ->andWhere(['language' => 'en']) // TODO: Use language
+                ->one();
+
+            if ($pageContent === null) {
+                // fallback
+                $pageContent = $page->getPageContents()->one();
+            }
+        }
+
+        $pageHtml = null;
+        if ($pageContent && $pageContent->content_md) {
+            $pageHtml = Markdown::process($pageContent->content_md, 'gfm');
+        }
+
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $model,
+            'pageHtml' => $pageHtml,
         ]);
     }
 

@@ -74,8 +74,8 @@ $this->registerCssFile(
                     ['label' => 'Aircrafts', 'url' => ['/aircraft/index']],
                     ['label' => 'Airports', 'url' => ['/airport/index']],
                     ['label' => 'Countries', 'url' => ['/country/index']],
-                    ['label' => 'Tours', 'url' => ['/tour/index']],
                     ['label' => 'Routes', 'url' => ['/route/index']],
+                    ['label' => 'Tours', 'url' => ['/tour/index']],
                 ],
             ];
 
