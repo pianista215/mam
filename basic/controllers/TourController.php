@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\helpers\LoggerTrait;
 use app\models\Tour;
 use app\models\TourSearch;
 use yii\web\Controller;
@@ -9,12 +10,15 @@ use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
+use Yii;
 
 /**
  * TourController implements the CRUD actions for Tour model.
  */
 class TourController extends Controller
 {
+    use LoggerTrait;
+
     /**
      * @inheritDoc
      */
@@ -84,6 +88,7 @@ class TourController extends Controller
 
             if ($this->request->isPost) {
                 if ($model->load($this->request->post()) && $model->save()) {
+                    $this->logInfo('Created tour', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
                     return $this->redirect(['view', 'id' => $model->id]);
                 }
             } else {
@@ -107,15 +112,20 @@ class TourController extends Controller
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
+        if(Yii::$app->user->can('tourCrud')){
+            $model = $this->findModel($id);
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+            if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
+                $this->logInfo('Updated tour', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
+
+            return $this->render('update', [
+                'model' => $model,
+            ]);
+        } else {
+            throw new ForbiddenHttpException();
         }
-
-        return $this->render('update', [
-            'model' => $model,
-        ]);
     }
 
     /**
@@ -127,9 +137,28 @@ class TourController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
+        if(Yii::$app->user->can('tourCrud')){
+            $model = $this->findModel($id);
 
-        return $this->redirect(['index']);
+            $hasFlights = false;
+            foreach ($model->tourStages as $stage) {
+                if ($stage->flights) {
+                    $hasFlights = true;
+                    break;
+                }
+            }
+
+            if ($hasFlights) {
+                Yii::$app->session->setFlash('error', 'Can\'t delete tour with flights associated.');
+            } else {
+                $model->delete();
+                $this->logInfo('Deleted tour', ['id' => $id, 'user' => Yii::$app->user->identity->license]);
+            }
+
+            return $this->redirect(['index']);
+        } else {
+            throw new ForbiddenHttpException();
+        }
     }
 
     /**
