@@ -334,7 +334,7 @@ CREATE TABLE `tour` (
   `name` varchar(100) NOT NULL,
   `description` varchar(200) NOT NULL,
   `start` date NOT NULL,
-  `end` datetime NOT NULL,
+  `end` date NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

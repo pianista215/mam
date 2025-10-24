@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\models\Tour;
 use app\models\TourSearch;
 use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
@@ -78,19 +79,23 @@ class TourController extends Controller
      */
     public function actionCreate()
     {
-        $model = new Tour();
+        if(Yii::$app->user->can('tourCrud')){
+            $model = new Tour();
 
-        if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'id' => $model->id]);
+            if ($this->request->isPost) {
+                if ($model->load($this->request->post()) && $model->save()) {
+                    return $this->redirect(['view', 'id' => $model->id]);
+                }
+            } else {
+                $model->loadDefaultValues();
             }
-        } else {
-            $model->loadDefaultValues();
-        }
 
-        return $this->render('create', [
-            'model' => $model,
-        ]);
+            return $this->render('create', [
+                'model' => $model,
+            ]);
+        } else {
+            throw new ForbiddenHttpException();
+        }
     }
 
     /**
