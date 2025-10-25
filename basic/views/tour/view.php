@@ -21,6 +21,8 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php if (Yii::$app->user->can('tourCrud')): ?>
             <div>
                 <?= Html::a('<i class="fa fa-edit"></i> Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
+
+                <?php if (!$model->getFlights()->exists()): ?>
                 <?= Html::a('<i class="fa fa-trash"></i> Delete', ['delete', 'id' => $model->id], [
                     'class' => 'btn btn-danger',
                     'data' => [
@@ -28,6 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'method' => 'post',
                     ],
                 ]) ?>
+                <?php endif; ?>
             </div>
         <?php endif; ?>
     </div>
@@ -60,6 +63,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     <th>#</th>
                     <th>Departure</th>
                     <th>Arrival</th>
+                    <th>Distance Nm</th>
                     <th>Description</th>
                     <th class="text-center">Status</th>
                     <th class="text-center">Actions</th>
@@ -71,6 +75,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         <td><?= Html::encode($stage->sequence) ?></td>
                         <td><?= Html::encode($stage->departure ?? '-') ?></td>
                         <td><?= Html::encode($stage->arrival ?? '-') ?></td>
+                        <td><?= Html::encode($stage->distance_nm ?? '-') ?></td>
                         <td><?= Html::encode($stage->description ?? '-') ?></td>
 
                         <td class="text-center">
@@ -92,6 +97,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     'class' => 'text-decoration-none me-2',
                                     'title' => 'Edit stage'
                                 ]) ?>
+                                <?php if (!$model->getFlights()->exists()): ?>
                                 <?= Html::a('<i class="fa fa-trash"></i>', ['tour-stage/delete', 'id' => $stage->id], [
                                     'class' => 'text-decoration-none text-danger',
                                     'data' => [
@@ -100,6 +106,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     ],
                                     'title' => 'Delete stage'
                                 ]) ?>
+                                <?php endif; ?>
                             <?php endif; ?>
                         </td>
                     </tr>
@@ -107,7 +114,7 @@ $this->params['breadcrumbs'][] = $this->title;
             </tbody>
         </table>
 
-        <?php if (Yii::$app->user->can('tourCrud')): ?>
+        <?php if (Yii::$app->user->can('tourCrud') && !$model->getFlights()->exists()): ?>
             <div class="text-end mt-2">
                 <?= Html::a('<i class="fa fa-plus"></i> Add Stage', ['tour-stage/add-stage', 'tour_id' => $model->id], [
                     'class' => 'btn btn-success',
@@ -120,7 +127,7 @@ $this->params['breadcrumbs'][] = $this->title;
             This tour has no stages yet.
         </div>
 
-        <?php if (Yii::$app->user->can('tourCrud')): ?>
+        <?php if (Yii::$app->user->can('tourCrud') && !$model->getFlights()->exists()): ?>
             <div class="text-center mt-3">
                 <?= Html::a('<i class="fa fa-plus"></i> Add First Stage', ['tour-stage/add-stage', 'tour_id' => $model->id], [
                     'class' => 'btn btn-success',

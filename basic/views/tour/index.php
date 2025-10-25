@@ -47,7 +47,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => ActionColumn::className(),
                 'visibleButtons'=>[
                     'delete'=> function($model){
-                        return Yii::$app->user->can('tourCrud');
+                        return Yii::$app->user->can('tourCrud') && !$model->getFlights()->exists();
                     },
                     'update'=> function($model){
                         return Yii::$app->user->can('tourCrud');

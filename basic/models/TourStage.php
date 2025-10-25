@@ -107,7 +107,7 @@ class TourStage extends \yii\db\ActiveRecord
     public function getMyFlightsAccepted()
     {
         return $this->hasMany(Flight::class, ['tour_stage_id' => 'id'])
-            ->andWhere(['user_id' => Yii::$app->user->id])
+            ->andWhere(['pilot_id' => Yii::$app->user->id])
             ->andWhere(['status' => 'F']);
     }
 

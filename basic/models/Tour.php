@@ -65,4 +65,13 @@ class Tour extends \yii\db\ActiveRecord
         return $this->hasMany(TourStage::class, ['tour_id' => 'id'])
             ->orderBy(['sequence' => SORT_ASC]);;
     }
+
+    /**
+     * Return the flights associated with stages of this tour
+     */
+    public function getFlights()
+    {
+        return $this->hasMany(Flight::class, ['tour_stage_id' => 'id'])
+            ->via('tourStages');
+    }
 }

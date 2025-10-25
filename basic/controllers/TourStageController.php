@@ -61,28 +61,34 @@ class TourStageController extends Controller
                 throw new NotFoundHttpException("Tour not found.");
             }
 
-            $model = new TourStage();
-            $model->tour_id = $tour->id;
-
-            $nextSequence = TourStage::find()
-                ->where(['tour_id' => $tour_id])
-                ->max('sequence');
-            $model->sequence = $nextSequence ? $nextSequence + 1 : 1;
-
-            if ($this->request->isPost) {
-                if ($model->load($this->request->post()) && $model->save()) {
-                    Yii::$app->session->setFlash('success', 'Stage added successfully.');
-                    $this->logInfo('Created tour stage', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
-                    return $this->redirect(['tour/view', 'id' => $tour_id]);
-                }
+            if ($tour->getFlights()->exists()) {
+                Yii::$app->session->setFlash('error', 'Cannot add stages to a tour that already has flown stages.');
+                return $this->redirect(['tour/view', 'id' => $tour_id]);
             } else {
-                $model->loadDefaultValues();
-            }
 
-            return $this->render('add', [
-                'model' => $model,
-                'tour' => $tour,
-            ]);
+                $model = new TourStage();
+                $model->tour_id = $tour->id;
+
+                $nextSequence = TourStage::find()
+                    ->where(['tour_id' => $tour_id])
+                    ->max('sequence');
+                $model->sequence = $nextSequence ? $nextSequence + 1 : 1;
+
+                if ($this->request->isPost) {
+                    if ($model->load($this->request->post()) && $model->save()) {
+                        Yii::$app->session->setFlash('success', 'Stage added successfully.');
+                        $this->logInfo('Created tour stage', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
+                        return $this->redirect(['tour/view', 'id' => $tour_id]);
+                    }
+                } else {
+                    $model->loadDefaultValues();
+                }
+
+                return $this->render('add', [
+                    'model' => $model,
+                    'tour' => $tour,
+                ]);
+            }
         } else {
             throw new ForbiddenHttpException();
         }
@@ -154,14 +160,13 @@ class TourStageController extends Controller
 
                     $transaction->commit();
                     $this->logInfo('Deleted tour stage', ['id' => $id, 'user' => Yii::$app->user->identity->license]);
-                    return $this->redirect(['tour/view', 'id' => $tour_id]);
                 } catch (\Exception $e) {
                     $transaction->rollBack();
                     $this->logError('Error deleting tour stage', ['id' => $id, 'user' => Yii::$app->user->identity->license, 'ex' => $e]);
                     Yii::$app->session->setFlash('danger', 'Error deleting stage. Contact administrator');
-                    return $this->redirect(['tour/view', 'id' => $tour_id]);
                 }
             }
+            return $this->redirect(['tour/view', 'id' => $tour_id]);
         } else {
             throw new ForbiddenHttpException();
         }
