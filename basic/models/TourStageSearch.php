@@ -79,7 +79,7 @@ class TourStageSearch extends TourStage
             ->where(['stage.departure' => $location])
             ->andWhere(['<=', 'tour.start', date('Y-m-d')])
             ->andWhere(['>=', 'tour.end', date('Y-m-d')])
-            ->orderBy(['tour.start' => SORT_ASC, 'tour_id' => SORT_ASC, 'sequence' => SORT_ASC]);
+            ->orderBy(['tour.name' => SORT_ASC, 'tour.start' => SORT_ASC, 'tour_id' => SORT_ASC, 'sequence' => SORT_ASC]);
 
         return $query->all();
     }

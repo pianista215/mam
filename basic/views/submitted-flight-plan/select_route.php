@@ -33,7 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <tbody>
                 <?php foreach ($tourStages as $stage): ?>
                     <tr>
-                        <td><?= Html::encode($stage->tour->name.'#'.$stage->sequence) ?></td>
+                        <td><?= Html::encode($stage->tour->name.' #'.$stage->sequence) ?></td>
                         <td><?= Html::encode($stage->departure) ?></td>
                         <td><?= Html::encode($stage->arrival) ?></td>
                         <td><?= Html::encode($stage->distance_nm) ?></td>
