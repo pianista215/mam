@@ -65,6 +65,7 @@ $this->registerCssFile(
         $items[] =
          ['label' => 'Flights', 'url' => ['/flight/index']];
     }
+    $items[] =  ['label' => 'Tours', 'url' => ['/tour/index']];
     $items[] =
             [
                 'label' => 'Operations',
@@ -75,7 +76,6 @@ $this->registerCssFile(
                     ['label' => 'Airports', 'url' => ['/airport/index']],
                     ['label' => 'Countries', 'url' => ['/country/index']],
                     ['label' => 'Routes', 'url' => ['/route/index']],
-                    ['label' => 'Tours', 'url' => ['/tour/index']],
                 ],
             ];
 
