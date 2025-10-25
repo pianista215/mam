@@ -337,6 +337,13 @@ class SubmittedFlightPlanController extends Controller
 
         if (Yii::$app->user->can('crudOwnFpl', ['submittedFlightPlan' => $model])) {
 
+            $entity = null;
+            if ($model->route_id) {
+                $entity = $model->route0;
+            } elseif ($model->tour_stage_id) {
+                $entity = $model->tourStage;
+            }
+
             if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
                 $this->logInfo('Updated fpl', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
                 return $this->redirect(['view', 'id' => $model->id]);
@@ -344,6 +351,7 @@ class SubmittedFlightPlanController extends Controller
 
             return $this->render('update', [
                 'model' => $model,
+                'entity' => $entity
             ]);
         } else {
             throw new ForbiddenHttpException();
