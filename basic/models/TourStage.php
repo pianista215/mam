@@ -31,6 +31,14 @@ class TourStage extends \yii\db\ActiveRecord
         return 'tour_stage';
     }
 
+    const SCENARIO_UPDATE = 'update';
+
+    public function scenarios(){
+        $scenarios = parent::scenarios();
+        $scenarios[self::SCENARIO_UPDATE] = ['description'];
+        return $scenarios;
+    }
+
     /**
      * {@inheritdoc}
      */

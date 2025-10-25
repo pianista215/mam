@@ -15,9 +15,15 @@ use yii\widgets\ActiveForm;
 
     <?= $form->errorSummary($model, ['class' => 'alert alert-danger']) ?>
 
-    <?= $form->field($model, 'departure')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'departure')->textInput([
+        'maxlength' => true,
+        'readonly' => !$model->isNewRecord,
+    ]) ?>
 
-    <?= $form->field($model, 'arrival')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'arrival')->textInput([
+        'maxlength' => true,
+        'readonly' => !$model->isNewRecord,
+    ]) ?>
 
     <?= $form->field($model, 'description')->textarea(['rows' => 4]) ?>
 

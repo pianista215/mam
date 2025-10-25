@@ -101,6 +101,8 @@ class TourStageController extends Controller
             $model = $this->findModel($id);
             $tour = $model->tour;
 
+            $model->setScenario(TourStage::SCENARIO_UPDATE);
+
             if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
                 $this->logInfo('Updated tour stage', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
                 return $this->redirect(['tour/view', 'id' => $tour->id]);
