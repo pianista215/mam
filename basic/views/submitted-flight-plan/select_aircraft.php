@@ -17,10 +17,11 @@ $titleLabel = ($type === 'route')
 $this->title = $titleLabel;
 $this->params['breadcrumbs'][] = $this->title;
 
-// Needed for urlCreator:
+// Needed for url-creator
 $this->params['entity_param'] = ($type === 'route')
     ? ['route_id' => $entity->id]
     : ['tour_stage_id' => $entity->id];
+$this->params['entity_type'] = $type;
 ?>
 
 <div class="submitted-flight-plan-index">
@@ -38,16 +39,24 @@ $this->params['entity_param'] = ($type === 'route')
             'registration',
             'name',
             [
-                'class' => ActionColumn::className(),
+                'class' => ActionColumn::class,
                 'template' => '{prepare-fpl}',
                 'buttons' => [
                     'prepare-fpl' => fn($url, $model) =>
                         Html::a('<span class="glyphicon" aria-hidden="true">✈︎</span>', $url),
                 ],
                 'urlCreator' => function ($action, Aircraft $model) {
+                    $view = Yii::$app->view;
+                    $type = $view->params['entity_type'] ?? 'route'; // default route
+                    $entityParam = $view->params['entity_param'];
+
+                    $actionName = $type === 'route'
+                        ? 'prepare-fpl-route'
+                        : 'prepare-fpl-tour';
+
                     return Url::toRoute(array_merge(
-                        [$action],
-                        Yii::$app->view->params['entity_param'],
+                        [$actionName],
+                        $entityParam,
                         ['aircraft_id' => $model->id]
                     ));
                 },

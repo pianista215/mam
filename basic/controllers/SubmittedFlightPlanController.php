@@ -35,7 +35,7 @@ class SubmittedFlightPlanController extends Controller
             [
                 'access' => [
                     'class' => AccessControl::class,
-                    'only' => ['select-route', 'select-aircraft', 'prepare-fpl', 'my-fpl', 'index', 'view', 'update', 'delete'],
+                    'only' => ['select-route', 'select-aircraft-route', 'select-aircraft-tour','prepare-fpl-route', 'prepare-fpl-tour', 'my-fpl', 'index', 'view', 'update', 'delete'],
                     'rules' => [
                         [
                             'allow' => true,
@@ -103,7 +103,7 @@ class SubmittedFlightPlanController extends Controller
         }
     }
 
-    public function actionSelectAircraft($route_id)
+    public function actionSelectAircraftRoute($route_id)
     {
         $route = Route::findOne(['id' => $route_id]);
         return $this->selectAircraft('route', $route);
@@ -170,52 +170,87 @@ class SubmittedFlightPlanController extends Controller
         ]);
     }
 
-    public function actionPrepareFpl($route_id, $aircraft_id)
+    public function actionPrepareFplRoute($route_id, $aircraft_id)
     {
-        if(Yii::$app->user->can('submitFpl')){
-            $model = $this->getCurrentFpl();
-
-            if($model !== null){
-                $this->logInfo('Returning user current fpl (prepare)', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
-                return $this->redirect(['view', 'id' => $model->id]);
-            } else {
-                $route = Route::findOne(['id' => $route_id]);
-                $aircraft = Aircraft::findOne(['id' => $aircraft_id]);
-                if(
-                    $this->checkRouteIsUserLocation($route) &&
-                    $this->checkAircraftIsOnLocation($aircraft, $route->departure) &&
-                    $this->checkAircraftHaveValidRange($aircraft, $route->distance_nm) &&
-                    $this->checkAircraftIsAvailable($aircraft)
-                ){
-                    $model = new SubmittedFlightPlan();
-                    $pilotName = Yii::$app->user->identity->fullName;
-
-                    $model->aircraft_id = $aircraft->id;
-                    $model->pilot_id = Yii::$app->user->identity->id;
-                    $model->route_id = $route->id;
-
-                     if ($this->request->isPost) {
-                        if ($model->load($this->request->post()) && $model->save()) {
-                            $this->logInfo('Created fpl', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
-                            return $this->redirect(['view', 'id' => $model->id]);
-                        }
-                     } else {
-                        $model->loadDefaultValues();
-                     }
-
-                    return $this->render('prepare_fpl', [
-                        'route' => $route,
-                        'aircraft' => $aircraft,
-                        'pilotName' => $pilotName,
-                        'model' => $model,
-                    ]);
-                } else {
-                    throw new ForbiddenHttpException();
-                }
-            }
-        } else {
+        if (!Yii::$app->user->can('submitFpl')) {
             throw new ForbiddenHttpException();
         }
+
+        $model = $this->getCurrentFpl();
+        if ($model !== null) {
+            $this->logInfo('Returning user current fpl (prepare route)', [
+                'model' => $model,
+                'user' => Yii::$app->user->identity->license
+            ]);
+            return $this->redirect(['view', 'id' => $model->id]);
+        }
+
+        $route = Route::findOne($route_id);
+        $aircraft = Aircraft::findOne($aircraft_id);
+
+        return $this->prepareFplGeneric($route, $aircraft, 'route');
+    }
+
+    public function actionPrepareFplTour($tour_stage_id, $aircraft_id)
+    {
+        if (!Yii::$app->user->can('submitFpl')) {
+            throw new ForbiddenHttpException();
+        }
+
+        $model = $this->getCurrentFpl();
+        if ($model !== null) {
+            $this->logInfo('Returning user current fpl (prepare stage)', [
+                'model' => $model,
+                'user' => Yii::$app->user->identity->license
+            ]);
+            return $this->redirect(['view', 'id' => $model->id]);
+        }
+
+        $stage = TourStage::findOne($tour_stage_id);
+        $aircraft = Aircraft::findOne($aircraft_id);
+
+        return $this->prepareFplGeneric($stage, $aircraft, 'stage');
+    }
+
+    protected function prepareFplGeneric($entity, $aircraft, $entityType)
+    {
+        if (!$this->checkEntityIsUserLocation($entity)
+            || !$this->checkAircraftIsOnLocation($aircraft, $entity->departure)
+            || !$this->checkAircraftHaveValidRange($aircraft, $entity->distance_nm)
+            || !$this->checkAircraftIsAvailable($aircraft)) {
+            throw new ForbiddenHttpException();
+        }
+
+        $model = new SubmittedFlightPlan();
+        $pilotName = Yii::$app->user->identity->fullName;
+
+        $model->aircraft_id = $aircraft->id;
+        $model->pilot_id = Yii::$app->user->identity->id;
+
+        if ($entityType === 'route') {
+            $model->route_id = $entity->id;
+        } elseif ($entityType === 'stage') {
+            $model->tour_stage_id = $entity->id;
+        }
+
+        if ($this->request->isPost) {
+            if ($model->load($this->request->post()) && $model->save()) {
+                $this->logInfo('Created FPL', [
+                    'model' => $model,
+                    'user' => Yii::$app->user->identity->license
+                ]);
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
+        } else {
+            $model->loadDefaultValues();
+        }
+
+        return $this->render('prepare_fpl', [
+            'model' => $model,
+            'aircraft' => $aircraft,
+            'entity' => $entity,
+            'pilotName' => $pilotName,
+        ]);
     }
 
     /**
@@ -273,9 +308,16 @@ class SubmittedFlightPlanController extends Controller
             Yii::$app->user->can('crudOwnFpl', ['submittedFlightPlan' => $model]) ||
             Yii::$app->user->can('validateVfrFlight') && $model->isVfrFlight() ||
             Yii::$app->user->can('validateIfrFlight') && $model->isIfrFlight()
-            ) {
+        ) {
+            $entity = null;
+            if ($model->route_id) {
+                $entity = $model->route0;
+            } elseif ($model->tour_stage_id) {
+                $entity = $model->tourStage;
+            }
             return $this->render('view', [
                 'model' => $model,
+                'entity' => $entity
             ]);
         } else {
             throw new ForbiddenHttpException();

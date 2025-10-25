@@ -27,9 +27,9 @@ $this->params['breadcrumbs'][] = $this->title;
             'distance_nm',
             [
                 'class' => ActionColumn::className(),
-                'template' => '{select-aircraft}',
+                'template' => '{select-aircraft-route}',
                 'buttons' => [
-                    'select-aircraft' => function ($url, $model, $key) { // <--- here you can override or create template for a button of a given name
+                    'select-aircraft-route' => function ($url, $model, $key) { // <--- here you can override or create template for a button of a given name
                         return Html::a('<span class="glyphicon glyphicon-euro" aria-hidden="true">✈︎</span>', $url);
                      }
                  ],

@@ -74,6 +74,11 @@ class TourStage extends \yii\db\ActiveRecord
         ];
     }
 
+    public function getFplDescription()
+    {
+        return 'Stage '.$this->tour->name.'#'.$this->sequence. ' ('.$this->departure.'-'.$this->arrival.')';
+    }
+
     /**
      * Gets query for [[Arrival0]].
      *

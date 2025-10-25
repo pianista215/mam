@@ -17,7 +17,7 @@ class SelectAircraftCest
 
     public function openSelectAircraftRouteNotAvailableLocation(\FunctionalTester $I){
         $I->amLoggedInAs(2);
-        $I->amOnRoute('submitted-flight-plan/select-aircraft',[ 'route_id' => '1' ]);
+        $I->amOnRoute('submitted-flight-plan/select-aircraft-route',[ 'route_id' => '1' ]);
 
         $I->see('Forbidden');
         $I->seeResponseCodeIs(403);
@@ -31,7 +31,7 @@ class SelectAircraftCest
 
     public function openSelectAircraftRouteNonActivatedPilot(\FunctionalTester $I){
         $I->amLoggedInAs(3);
-        $I->amOnRoute('submitted-flight-plan/select-aircraft',[ 'route_id' => '1' ]);
+        $I->amOnRoute('submitted-flight-plan/select-aircraft-route',[ 'route_id' => '1' ]);
 
         $I->see('Forbidden');
         $I->seeResponseCodeIs(403);
@@ -44,7 +44,7 @@ class SelectAircraftCest
     }
 
     public function openSelectAircraftVisitor(\FunctionalTester $I){
-        $I->amOnRoute('submitted-flight-plan/select-aircraft',[ 'route_id' => '1' ]);
+        $I->amOnRoute('submitted-flight-plan/select-aircraft-route',[ 'route_id' => '1' ]);
         // Check redirect
         $I->seeCurrentUrlMatches('~login~');
         $I->see('Login');
@@ -52,7 +52,7 @@ class SelectAircraftCest
 
     public function openSelectAircraftRouteValidLocationAsPilot(\FunctionalTester $I){
         $I->amLoggedInAs(1);
-        $I->amOnRoute('submitted-flight-plan/select-aircraft',[ 'route_id' => '1' ]);
+        $I->amOnRoute('submitted-flight-plan/select-aircraft-route',[ 'route_id' => '1' ]);
 
         $I->see('LEBL');
         $I->see('LEVC');
@@ -69,7 +69,7 @@ class SelectAircraftCest
 
     public function openSelectAircraftRouteFiltersPlanesBasedOnRange(\FunctionalTester $I){
         $I->amLoggedInAs(1);
-        $I->amOnRoute('submitted-flight-plan/select-aircraft',[ 'route_id' => '3' ]);
+        $I->amOnRoute('submitted-flight-plan/select-aircraft-route',[ 'route_id' => '3' ]);
 
         $I->see('LEBL');
         $I->see('GCLP');

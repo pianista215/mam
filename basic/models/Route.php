@@ -62,6 +62,11 @@ class Route extends \yii\db\ActiveRecord
         ];
     }
 
+    public function getFplDescription()
+    {
+        return 'Route '.$this->code.' ('.$this->departure.'-'.$this->arrival.')';
+    }
+
     /**
      * Gets query for [[Arrival0]].
      *
