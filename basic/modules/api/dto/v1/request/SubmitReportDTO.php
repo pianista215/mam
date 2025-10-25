@@ -23,7 +23,7 @@ class SubmitReportDTO extends Model
     public function rules()
     {
         return [
-            [['pilot_comments', 'last_position_lat', 'last_position_lon', 'network', 'sim_aircraft_name', 'start_time', 'end_time', 'chunks'], 'required'],
+            [['last_position_lat', 'last_position_lon', 'network', 'sim_aircraft_name', 'start_time', 'end_time', 'chunks'], 'required'],
             [['pilot_comments', 'network', 'sim_aircraft_name'], 'string'],
             [['last_position_lat', 'last_position_lon'], 'number'],
             [['last_position_lat'], 'compare', 'compareValue' => -90, 'operator' => '>=', 'message' => 'Latitude must be between -90 and 90.'],
