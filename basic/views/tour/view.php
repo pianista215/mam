@@ -87,7 +87,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         </td>
 
                         <td class="text-center">
-                            <?= Html::a('✈︎', ['flight/create', 'tour_stage_id' => $stage->id], [
+                            <?= Html::a('✈︎', ['submitted-flight-plan/select-aircraft-tour', 'tour_stage_id' => $stage->id], [
                                 'class' => 'text-decoration-none fs-5 me-2',
                                 'title' => 'Fly this stage again'
                             ]) ?>
