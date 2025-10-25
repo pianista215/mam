@@ -70,4 +70,17 @@ class TourStageSearch extends TourStage
 
         return $dataProvider;
     }
+
+    public function searchWithFixedDeparture($location)
+    {
+        $query = TourStage::find()
+            ->alias('stage')
+            ->joinWith('tour tour')
+            ->where(['stage.departure' => $location])
+            ->andWhere(['<=', 'tour.start', date('Y-m-d')])
+            ->andWhere(['>=', 'tour.end', date('Y-m-d')])
+            ->orderBy(['tour.start' => SORT_ASC, 'tour_id' => SORT_ASC, 'sequence' => SORT_ASC]);
+
+        return $query->all();
+    }
 }

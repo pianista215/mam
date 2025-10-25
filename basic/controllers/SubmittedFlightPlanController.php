@@ -10,6 +10,7 @@ use app\models\RouteSearch;
 use app\models\SubmittedFlightPlan;
 use app\models\SubmittedFlightPlanSearch;
 use app\models\TourStage;
+use app\models\TourStageSearch;
 use yii\web\Controller;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
@@ -91,11 +92,18 @@ class SubmittedFlightPlanController extends Controller
                 $this->logInfo('Returning user current fpl (sel route)', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
                 return $this->redirect(['view', 'id' => $model->id]);
             } else {
-                $searchModel = new RouteSearch();
-                $dataProvider = $searchModel->searchWithFixedDeparture(Yii::$app->user->identity->location);
+                $location = Yii::$app->user->identity->location;
+
+                $stageSearch = new TourStageSearch();
+                $tourStages = $stageSearch->searchWithFixedDeparture($location);
+
+                $routeSearch = new RouteSearch();
+                $routeDataProvider = $routeSearch->searchWithFixedDeparture($location, $this->request->queryParams);
+
                 $this->logInfo('User selecting route', ['location' => Yii::$app->user->identity->location, 'user' => Yii::$app->user->identity->license]);
                 return $this->render('select_route', [
-                    'dataProvider' => $dataProvider,
+                    'routeDataProvider' => $routeDataProvider,
+                    'tourStages' => $tourStages,
                 ]);
             }
         } else {

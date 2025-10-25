@@ -31,23 +31,21 @@ class RouteSearch extends Route
         return Model::scenarios();
     }
 
-    public function searchWithFixedDeparture($departure)
+    public function searchWithFixedDeparture($departure, $params = [])
     {
-        $query = Route::find()->orderBy(['departure' => SORT_ASC, 'arrival' => SORT_ASC]);
+        $query = Route::find()->where(['departure' => $departure]);
 
-        // add conditions that should always apply here
-        $this->departure = $departure;
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => [
+                'defaultOrder' => ['code' => SORT_ASC],
+                'attributes' => ['code', 'departure', 'arrival', 'distance_nm'],
+            ],
         ]);
-
-        if (!$this->validate()) {
-            // Don't return nothing if validation fails
-            $query->where('0=1');
-            return $dataProvider;
+        if ($this->validate()) {
+            $query->andFilterWhere(['like', 'code', $this->code])
+              ->andFilterWhere(['like', 'arrival', $this->arrival]);
         }
-
-        $query->andFilterWhere(['departure' => $this->departure]);
 
         return $dataProvider;
     }

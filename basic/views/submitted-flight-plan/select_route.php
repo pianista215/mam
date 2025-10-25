@@ -17,8 +17,41 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
+    <?php if (!empty($tourStages)): ?>
+        <h2>Tour Stages from <?= Html::encode(Yii::$app->user->identity->location) ?></h2>
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Tour Stage</th>
+                    <th>Departure</th>
+                    <th>Arrival</th>
+                    <th>Distance Nm</th>
+                    <th>Description</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($tourStages as $stage): ?>
+                    <tr>
+                        <td><?= Html::encode($stage->tour->name.'#'.$stage->sequence) ?></td>
+                        <td><?= Html::encode($stage->departure) ?></td>
+                        <td><?= Html::encode($stage->arrival) ?></td>
+                        <td><?= Html::encode($stage->distance_nm) ?></td>
+                        <td><?= Html::encode($stage->description) ?></td>
+                        <td>
+                            <?= Html::a('<span class="glyphicon glyphicon-euro" aria-hidden="true">✈︎</span>', [
+                                'select-aircraft-tour',
+                                'tour_stage_id' => $stage->id
+                            ]) ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    <?php endif; ?>
+
     <?= GridView::widget([
-        'dataProvider' => $dataProvider,
+        'dataProvider' => $routeDataProvider,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
             'code',

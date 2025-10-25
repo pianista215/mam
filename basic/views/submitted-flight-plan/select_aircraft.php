@@ -10,9 +10,7 @@ use yii\grid\GridView;
 /** @var app\models\Route|app\models\TourStage $entity */
 /** @var string $type */
 
-$titleLabel = ($type === 'route')
-    ? "Select aircraft ({$entity->departure}-{$entity->arrival})"
-    : "Select aircraft for stage ({$entity->departure}-{$entity->arrival})";
+$titleLabel = "Select aircraft for $entity->fplDescription";
 
 $this->title = $titleLabel;
 $this->params['breadcrumbs'][] = $this->title;
