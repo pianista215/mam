@@ -135,4 +135,32 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
         <?php endif; ?>
     <?php endif; ?>
+
+    <?php if (!empty($model->pilotTourCompletions)): ?>
+        <div class="card shadow-sm mt-5 mb-4">
+            <div class="card-body">
+                <h4 class="card-title mb-3">🏆 Hall of Fame</h4>
+
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Pilot</th>
+                            <th>Completion Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($model->pilotTourCompletions as $index => $completion): ?>
+                            <tr>
+                                <td><?= $index + 1 ?></td>
+                                <td><?= Html::encode($completion->pilot->fullname) ?></td>
+                                <td><?= Yii::$app->formatter->asDate($completion->completed_at) ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    <?php endif; ?>
+
 </div>

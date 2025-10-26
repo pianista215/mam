@@ -73,7 +73,7 @@ class TourController extends Controller
      */
     public function actionView($id)
     {
-        $model = $this->findModel($id);
+        $model = $this->findModelExtended($id);
 
         $pageCode = 'tour_content_' . $model->id;
         $page = Page::findOne(['code' => $pageCode]);
@@ -200,5 +200,22 @@ class TourController extends Controller
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    protected function findModelExtended($id)
+    {
+        $model = Tour::find()
+            ->where(['id' => $id])
+            ->with([
+                'tourStages',
+                'pilotTourCompletions.pilot',
+            ])
+            ->one();
+
+        if ($model === null) {
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
+
+        return $model;
     }
 }

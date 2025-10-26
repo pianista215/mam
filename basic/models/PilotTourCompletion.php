@@ -34,6 +34,7 @@ class PilotTourCompletion extends \yii\db\ActiveRecord
             [['pilot_id', 'tour_id', 'completed_at'], 'required'],
             [['pilot_id', 'tour_id'], 'integer'],
             [['completed_at'], 'safe'],
+            ['completed_at', 'date', 'format' => 'php:Y-m-d'],
             [['pilot_id', 'tour_id'], 'unique', 'targetAttribute' => ['pilot_id', 'tour_id']],
             [['pilot_id'], 'exist', 'skipOnError' => true, 'targetClass' => Pilot::class, 'targetAttribute' => ['pilot_id' => 'id']],
             [['tour_id'], 'exist', 'skipOnError' => true, 'targetClass' => Tour::class, 'targetAttribute' => ['tour_id' => 'id']],

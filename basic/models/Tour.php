@@ -64,7 +64,7 @@ class Tour extends \yii\db\ActiveRecord
      */
     public function getPilotTourCompletions()
     {
-        return $this->hasMany(PilotTourCompletion::class, ['tour_id' => 'id']);
+        return $this->hasMany(PilotTourCompletion::class, ['tour_id' => 'id'])->orderBy(['completed_at' => SORT_ASC]);;
     }
 
     /**
