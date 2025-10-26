@@ -32,6 +32,8 @@ use Yii;
  * @property Country $country
  * @property FlightReport[] $flightReports
  * @property SubmittedFlightplan $submittedFlightplan
+ * @property PilotTourCompletion[] $pilotTourCompletions
+ * @property Tour[] $tours
  */
 class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 {
@@ -154,6 +156,27 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     {
         return $this->hasOne(SubmittedFlightplan::class, ['pilot_id' => 'id']);
     }
+
+    /**
+     * Gets query for [[PilotTourCompletions]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPilotTourCompletions()
+    {
+        return $this->hasMany(PilotTourCompletion::class, ['pilot_id' => 'id']);
+    }
+
+    /**
+     * Gets query for [[Tours]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getTours()
+    {
+        return $this->hasMany(Tour::class, ['id' => 'tour_id'])->viaTable('pilot_tour_completion', ['pilot_id' => 'id']);
+    }
+
 
     /**
      * {@inheritdoc}

@@ -14,6 +14,8 @@ use Yii;
  * @property string $end
  *
  * @property TourStage[] $tourStages
+ * @property PilotTourCompletion[] $pilotTourCompletions
+ * @property Pilot[] $pilots
  */
 class Tour extends \yii\db\ActiveRecord
 {
@@ -54,6 +56,27 @@ class Tour extends \yii\db\ActiveRecord
             'end' => 'End',
         ];
     }
+
+    /**
+     * Gets query for [[PilotTourCompletions]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPilotTourCompletions()
+    {
+        return $this->hasMany(PilotTourCompletion::class, ['tour_id' => 'id']);
+    }
+
+    /**
+     * Gets query for [[Pilots]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPilots()
+    {
+        return $this->hasMany(Pilot::class, ['id' => 'pilot_id'])->viaTable('pilot_tour_completion', ['tour_id' => 'id']);
+    }
+
 
     /**
      * Gets query for [[TourStages]].

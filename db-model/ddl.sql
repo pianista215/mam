@@ -358,6 +358,18 @@ CREATE TABLE `tour_stage` (
   CONSTRAINT `tour_stage_tour_FK` FOREIGN KEY (`tour_id`) REFERENCES `tour` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `pilot_tour_completion` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `pilot_id` int(10) unsigned NOT NULL,
+  `tour_id` mediumint(8) unsigned NOT NULL,
+  `completed_at` date NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `pilot_tour_completion_unique` (`pilot_id`,`tour_id`),
+  KEY `pilot_tour_completion_tour_FK` (`tour_id`),
+  CONSTRAINT `pilot_tour_completion_pilot_FK` FOREIGN KEY (`pilot_id`) REFERENCES `pilot` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pilot_tour_completion_tour_FK` FOREIGN KEY (`tour_id`) REFERENCES `tour` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 
 
