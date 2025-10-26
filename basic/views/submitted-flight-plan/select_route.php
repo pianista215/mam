@@ -10,7 +10,7 @@ use yii\grid\GridView;
 /** @var app\models\SubmittedFlightPlanSearch $searchModel */
 /** @var yii\data\ActiveDataProvider $dataProvider */
 
-$this->title = 'Select route';
+$this->title = 'Select flight';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="submitted-flight-plan-index">
@@ -18,7 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <?php if (!empty($tourStages)): ?>
-        <h2>Tour Stages from <?= Html::encode(Yii::$app->user->identity->location) ?></h2>
+        <h3>Tour Stages</h3>
         <table class="table table-striped table-bordered">
             <thead>
                 <tr>
@@ -49,7 +49,7 @@ $this->params['breadcrumbs'][] = $this->title;
             </tbody>
         </table>
     <?php endif; ?>
-
+    <h3>Routes</h3>
     <?= GridView::widget([
         'dataProvider' => $routeDataProvider,
         'columns' => [
