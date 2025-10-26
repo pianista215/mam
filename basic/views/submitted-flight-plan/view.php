@@ -13,8 +13,6 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="submitted-flight-plan-view">
 
     <h1><?= Html::encode($this->title) ?></h1>
-    <h3><?= Html::encode($entity->fplDescription) ?></h3>
-    <br/>
 
     <?php if (Yii::$app->user->can('crudOwnFpl', ['submittedFlightPlan' => $model])) : ?>
     <p>
@@ -28,6 +26,10 @@ $this->params['breadcrumbs'][] = $this->title;
         ]) ?>
     </p>
     <?php endif; ?>
+
+    <?= $this->render('_fpl_header', [
+            'entity' => $entity,
+    ]) ?>
 
     <?= $this->render('_form', [
         'model' => $model,
