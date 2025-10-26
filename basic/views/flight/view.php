@@ -13,6 +13,20 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="flight-view">
 
+    <?php if (!empty($model->tourStage)): ?>
+    <div class="container mb-3">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="p-3 border rounded bg-light-subtle">
+                    <div class="fw-semibold fs-5 text-dark">
+                        <?= Html::encode($model->tourStage->fplDescription) ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <h3>Flight plan</h1>
 
     <?= $this->render('_flight_plan', [

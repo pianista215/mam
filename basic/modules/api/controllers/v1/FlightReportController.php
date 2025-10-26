@@ -186,6 +186,8 @@ class FlightReportController extends Controller
         $flight->report_tool = $dto->report_tool;
         $flight->network = $dto->network;
 
+        $flight->tour_stage_id = $submittedFpl->flight_level_unit;
+
         return $flight;
     }
 
