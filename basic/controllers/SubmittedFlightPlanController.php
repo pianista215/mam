@@ -36,7 +36,7 @@ class SubmittedFlightPlanController extends Controller
             [
                 'access' => [
                     'class' => AccessControl::class,
-                    'only' => ['select-route', 'select-aircraft-route', 'select-aircraft-tour','prepare-fpl-route', 'prepare-fpl-tour', 'my-fpl', 'index', 'view', 'update', 'delete'],
+                    'only' => ['select-flight', 'select-aircraft-route', 'select-aircraft-tour','prepare-fpl-route', 'prepare-fpl-tour', 'my-fpl', 'index', 'view', 'update', 'delete'],
                     'rules' => [
                         [
                             'allow' => true,
@@ -84,7 +84,7 @@ class SubmittedFlightPlanController extends Controller
         return SubmittedFlightPlan::findOne(['pilot_id' => Yii::$app->user->identity->id]);
     }
 
-    public function actionSelectRoute()
+    public function actionSelectFlight()
     {
         if(Yii::$app->user->can('submitFpl') && isset(Yii::$app->user->identity->location)){
             $model = $this->getCurrentFpl();
@@ -100,8 +100,8 @@ class SubmittedFlightPlanController extends Controller
                 $routeSearch = new RouteSearch();
                 $routeDataProvider = $routeSearch->searchWithFixedDeparture($location, $this->request->queryParams);
 
-                $this->logInfo('User selecting route', ['location' => Yii::$app->user->identity->location, 'user' => Yii::$app->user->identity->license]);
-                return $this->render('select_route', [
+                $this->logInfo('User selecting flight', ['location' => Yii::$app->user->identity->location, 'user' => Yii::$app->user->identity->license]);
+                return $this->render('select_flight', [
                     'routeDataProvider' => $routeDataProvider,
                     'tourStages' => $tourStages,
                 ]);
@@ -273,7 +273,7 @@ class SubmittedFlightPlanController extends Controller
         $dataProvider = $searchModel->search([]);
 
         if ($dataProvider->getTotalCount() === 0) {
-            return $this->redirect(['submitted-flight-plan/select-route']);
+            return $this->redirect(['submitted-flight-plan/select-flight']);
         } else {
             $firstId = $dataProvider->getModels()[0]->id;
             return $this->redirect(['submitted-flight-plan/view',  'id' => $firstId ]);
