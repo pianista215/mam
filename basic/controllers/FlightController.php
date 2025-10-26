@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\models\Flight;
 use app\models\FlightSearch;
+use app\models\PilotTourCompletion;
 use yii\web\Controller;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
@@ -118,7 +119,14 @@ class FlightController extends Controller
         }
 
         $model->scenario = Flight::SCENARIO_VALIDATE;
-        if ($model->isPendingValidation() && $model->load(Yii::$app->request->post())) {
+
+        if (!$model->isPendingValidation() || !$model->load(Yii::$app->request->post())) {
+            throw new ForbiddenHttpException('You\'re not allowed to validate this flight');
+        }
+
+        $transaction = Yii::$app->db->beginTransaction();
+
+        try {
             $model->validator_id = Yii::$app->user->id;
             $model->validation_date = date('Y-m-d H:i:s');
 
@@ -131,17 +139,55 @@ class FlightController extends Controller
                 throw new BadRequestHttpException("Illegal validation action: $action");
             }
 
-            if ($model->save()) {
-                Yii::$app->session->setFlash('success', 'Flight validation finished.');
-                return $this->redirect(['view', 'id' => $model->id]);
-            } else {
-                Yii::error("Error with flight validation {$model->id}: " . json_encode($model->errors));
-                Yii::$app->session->setFlash('error', 'Error validating flight.');
-                return $this->redirect(['view', 'id' => $model->id]);
+            if (!$model->save()) {
+                throw new \Exception("Error saving flight validation: " . json_encode($model->errors));
             }
-        } else {
-            throw new ForbiddenHttpException('You\'re not allowed to validate this flight');
+
+            if ($model->tour_stage_id && $model->status === 'F') {
+                $tourStage = $model->tourStage;
+                if ($tourStage && $tourStage->tour) {
+                    $tour = $tourStage->tour;
+                    $pilotId = $model->pilot_id;
+
+                    $alreadyCompleted = PilotTourCompletion::find()
+                        ->where(['tour_id' => $tour->id, 'pilot_id' => $pilotId])
+                        ->exists();
+
+                    if (!$alreadyCompleted) {
+                        $totalStages = $tour->getTourStages()->count();
+
+                        $completedStages = \app\models\Flight::find()
+                            ->where([
+                                'pilot_id' => $pilotId,
+                                'status' => 'F',
+                            ])
+                            ->andWhere(['in', 'tour_stage_id', $tour->getTourStages()->select('id')])
+                            ->count();
+
+                        if ($completedStages === $totalStages) {
+                            $completion = new PilotTourCompletion([
+                                'pilot_id' => $pilotId,
+                                'tour_id' => $tour->id,
+                                'completed_at' => date('Y-m-d'),
+                            ]);
+
+                            if (!$completion->save()) {
+                                throw new \Exception("Error saving tour completion: " . json_encode($completion->errors));
+                            }
+                        }
+                    }
+                }
+            }
+
+            $transaction->commit();
+            Yii::$app->session->setFlash('success', 'Flight validation finished.');
+        } catch (\Throwable $e) {
+            $transaction->rollBack();
+            Yii::error("Error validating flight {$model->id}: " . $e->getMessage());
+            Yii::$app->session->setFlash('error', 'Error validating flight.');
         }
+
+        return $this->redirect(['view', 'id' => $model->id]);
     }
 
 
