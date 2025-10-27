@@ -37,7 +37,7 @@ class Tour extends \yii\db\ActiveRecord
             [['name', 'description'], 'trim'],
             [['start', 'end'], 'safe'],
             [['start', 'end'], 'date', 'format' => 'php:Y-m-d'],
-            [['end'], 'compare', 'compareAttribute' => 'start', 'operator' => '>', 'message' => 'The date of end must be later than start'],
+            [['end'], 'compare', 'compareAttribute' => 'start', 'operator' => '>', 'message' => 'The date of end must be later than start.'],
             [['name'], 'string', 'max' => 100],
             [['description'], 'string', 'max' => 200],
         ];
