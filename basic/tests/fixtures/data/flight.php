@@ -25,7 +25,8 @@ return [
         'validation_date' => '2025-01-02 22:00:00',
         'validator_comments' => 'Awesome flight',
         'creation_date' => '2025-01-01 01:00:00',
-        'network' => 'IVAO'
+        'network' => 'IVAO',
+        'tour_stage_id' => 2,
     ],
     [
         'id' => 2,

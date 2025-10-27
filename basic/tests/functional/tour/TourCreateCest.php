@@ -22,6 +22,15 @@ class TourCreateCest
         $I->see('Save', 'button');
     }
 
+    public function openTourCreateAsTourMgr(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(10);
+        $I->amOnRoute('tour/create');
+
+        $I->see('Create Tour');
+        $I->see('Save', 'button');
+    }
+
     public function openTourCreateAsUser(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);

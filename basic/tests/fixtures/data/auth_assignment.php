@@ -57,4 +57,9 @@ return [
         'user_id' => '9',
         'created_at' => time(),
     ],
+    [
+        'item_name' => 'tourManager',
+        'user_id' => '10',
+        'created_at' => time(),
+    ],
 ];
