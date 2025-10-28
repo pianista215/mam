@@ -30,7 +30,7 @@ class TourStageController extends Controller
             [
                 'access' => [
                     'class' => AccessControl::class,
-                    'only' => ['create', 'update', 'delete'],
+                    'only' => ['add-stage', 'update', 'delete'],
                     'rules' => [
                         [
                             'allow' => true,

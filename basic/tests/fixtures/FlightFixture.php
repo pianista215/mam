@@ -10,6 +10,7 @@ class FlightFixture extends ActiveFixture
     public $depends = [
                         'tests\fixtures\AirportFixture',
                         'tests\fixtures\AircraftFixture',
-                        'tests\fixtures\PilotFixture'
+                        'tests\fixtures\PilotFixture',
+                        'tests\fixtures\TourStageFixture'
                         ];
 }
