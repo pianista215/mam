@@ -144,6 +144,10 @@ class SubmittedFlightPlanController extends Controller
             $distance = $entity->distance_nm;
             $label = "{$departure}-{$arrival}";
         } elseif ($type === 'stage') {
+            if(!$entity->tour->isActive()){
+                throw new ForbiddenHttpException('Tour is not active.');
+            }
+
             $departure = $entity->departure;
             $arrival = $entity->arrival;
             $distance = $entity->distance_nm;

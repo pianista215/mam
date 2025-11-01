@@ -24,9 +24,9 @@ return [
     [
         'id' => 3,
         'tour_id' => 3,
-        'departure' => 'LEMD',
-        'arrival' => 'LEVC',
-        'distance_nm' => '400',
+        'departure' => 'LEBL',
+        'arrival' => 'GCLP',
+        'distance_nm' => '1173',
         'description' => '',
         'sequence' => 2,
     ],

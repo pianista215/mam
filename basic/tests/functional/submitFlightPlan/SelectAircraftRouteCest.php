@@ -58,8 +58,11 @@ class SelectAircraftRouteCest
 
         $I->see('EC-BBB');
         $I->see('Boeing Name Cargo');
+        $I->seeElement('a[href*="/submitted-flight-plan/prepare-fpl-route?route_id=1&aircraft_id=2"]');
         $I->see('EC-UUU');
         $I->see('C172 Std');
+        $I->seeElement('a[href*="/submitted-flight-plan/prepare-fpl-route?route_id=1&aircraft_id=3"]');
+
 
         // Already reserved plane
         $I->dontSee('EC-DDD');
@@ -75,8 +78,10 @@ class SelectAircraftRouteCest
 
         $I->see('EC-BBB');
         $I->see('Boeing Name Cargo');
+        $I->seeElement('a[href*="/submitted-flight-plan/prepare-fpl-route?route_id=3&aircraft_id=2"]');
         $I->dontSee('EC-UUU');
         $I->dontSee('C172 Std');
+        $I->dontSeeElement('a[href*="/submitted-flight-plan/prepare-fpl-route?route_id=3&aircraft_id=3"]');
 
         // Already reserved plane
         $I->dontSee('EC-DDD');
