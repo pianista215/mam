@@ -188,9 +188,9 @@ class TourIndexViewCest
         $I->see('Tour Stages');
         $I->see('LEBL');
         $I->see('LEMD');
-        $I->see('LEVC');
+        $I->see('GCLP');
         $I->see('260');
-        $I->see('400');
+        $I->see('1173');
     }
 
     public function openTourPresentAlreadyFlownViewAsAdmin(\FunctionalTester $I)
