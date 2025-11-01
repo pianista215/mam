@@ -6,7 +6,7 @@ use tests\fixtures\AuthAssignmentFixture;
 use tests\fixtures\SubmittedFlightPlanFixture;
 use Yii;
 
-class SelectAircraftCest
+class SelectAircraftRouteCest
 {
     public function _fixtures(){
         return [
@@ -19,9 +19,8 @@ class SelectAircraftCest
         $I->amLoggedInAs(2);
         $I->amOnRoute('submitted-flight-plan/select-aircraft-route',[ 'route_id' => '1' ]);
 
-        $I->see('Forbidden');
+        $I->see('Forbidden: Pilot location is not at LEBL');
         $I->seeResponseCodeIs(403);
-        $I->dontSee('LEBL');
         $I->dontSee('LEVC');
         $I->dontSee('EC-BBB');
         $I->dontSee('Boeing Name Cargo');
@@ -43,7 +42,7 @@ class SelectAircraftCest
         $I->dontSee('C172 Std');
     }
 
-    public function openSelectAircraftVisitor(\FunctionalTester $I){
+    public function openSelectAircraftRouteVisitor(\FunctionalTester $I){
         $I->amOnRoute('submitted-flight-plan/select-aircraft-route',[ 'route_id' => '1' ]);
         // Check redirect
         $I->seeCurrentUrlMatches('~login~');
