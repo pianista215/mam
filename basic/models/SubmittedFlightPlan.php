@@ -71,7 +71,7 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
             [['tour_stage_id'], 'exist', 'skipOnError' => true, 'targetClass' => TourStage::class, 'targetAttribute' => ['tour_stage_id' => 'id']],
             [['pilot_id'], 'validatePilotLocation'],
             [['aircraft_id'], 'validateAircraftLocation'],
-            [['route_id', 'tour_stage_id'], 'validateRouteOrStage'],
+            [['route_id', 'tour_stage_id'], 'validateRouteOrStage', 'skipOnEmpty' => false],
         ];
     }
 

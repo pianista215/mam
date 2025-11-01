@@ -11,6 +11,8 @@ use app\models\Airport;
 use app\models\Country;
 use app\models\Pilot;
 use app\models\Route;
+use app\models\Tour;
+use app\models\TourStage;
 use app\models\SubmittedFlightPlan;
 
 
@@ -22,6 +24,7 @@ class SubmittedFlightPlanTest extends BaseUnitTest
     protected Aircraft $leblAircraft;
     protected Route $routeMadBcn;
     protected Route $routeVllBcn;
+    protected TourStage $stageMadBcn;
     protected Pilot $pilotMad;
     protected Pilot $pilot2Mad;
     protected Pilot $pilotBcn;
@@ -75,6 +78,22 @@ class SubmittedFlightPlanTest extends BaseUnitTest
             'arrival' => 'LEBL',
         ]);
         $this->routeVllBcn->save();
+
+        $tour = new Tour([
+            'name' => 'Test',
+            'description' => 'blabla',
+            'start' => date('Y-m-d', strtotime('-100 day')),
+            'end' => date('Y-m-d', strtotime('+100 day'))
+        ]);
+        $tour->save();
+
+        $this->stageMadBcn = new TourStage([
+            'tour_id' => $tour->id,
+            'departure' => 'LEMD',
+            'arrival' => 'LEBL',
+            'sequence' => 1
+        ]);
+        $this->stageMadBcn->save();
 
         $this->pilotMad = new Pilot([
             'license' => 'MAD12345',
@@ -158,7 +177,7 @@ class SubmittedFlightPlanTest extends BaseUnitTest
         $this->leblAircraft->save();
     }
 
-    public function testValidSubmittedFlightPlan()
+    public function testValidSubmittedFlightPlanWithRoute()
     {
 
         $flightPlan = new SubmittedFlightPlan([
@@ -175,6 +194,29 @@ class SubmittedFlightPlanTest extends BaseUnitTest
             'other_information' => 'PBN/A1B1D1L1O1S2 COM/TCAS DOF/20241214 REG/ECSSS EET/LECB0024 CODE/BXXXX RVR/200 OPR/XXX PER/C RMK/TCAS RMK/IFPS REROUTE ACCEPTED',
             'endurance_time' => '0500',
             'route_id' => $this->routeMadBcn->id,
+            'pilot_id' => $this->pilotMad->id,
+        ]);
+
+        $this->assertTrue($flightPlan->save());
+    }
+
+    public function testValidSubmittedFlightPlanWithTour()
+    {
+
+        $flightPlan = new SubmittedFlightPlan([
+            'aircraft_id' => $this->lemdAircraft->id,
+            'flight_rules' => 'V',
+            'alternative1_icao' => 'LEVD',
+            'alternative2_icao' => 'LEMD',
+            'cruise_speed_value' => 400,
+            'cruise_speed_unit' => 'N',
+            'flight_level_value' => 350,
+            'flight_level_unit' => 'F',
+            'route' => 'NAND UM871 MINGU/N0419F320 UM871 GODOX',
+            'estimated_time' => '0031',
+            'other_information' => 'PBN/A1B1D1L1O1S2 COM/TCAS DOF/20241214 REG/ECSSS EET/LECB0024 CODE/BXXXX RVR/200 OPR/XXX PER/C RMK/TCAS RMK/IFPS REROUTE ACCEPTED',
+            'endurance_time' => '0500',
+            'tour_stage_id' => $this->stageMadBcn->id,
             'pilot_id' => $this->pilotMad->id,
         ]);
 
@@ -340,9 +382,34 @@ class SubmittedFlightPlanTest extends BaseUnitTest
         $this->assertArrayHasKey('other_information', $flightPlan->errors);
         $this->assertArrayHasKey('endurance_time', $flightPlan->errors);
         $this->assertArrayHasKey('route_id', $flightPlan->errors);
+        $this->assertArrayHasKey('tour_stage_id', $flightPlan->errors);
         $this->assertArrayHasKey('pilot_id', $flightPlan->errors);
         $this->assertArrayHasKey('cruise_speed_unit', $flightPlan->errors);
         $this->assertArrayHasKey('flight_level_unit', $flightPlan->errors);
+    }
+
+    public function testInvalidSubmittedFlightPlanRouteAndTour()
+    {
+        $flightPlan = new SubmittedFlightPlan([
+            'aircraft_id' => $this->lemdAircraft->id,
+            'flight_rules' => 'V',
+            'alternative1_icao' => 'LEVD',
+            'cruise_speed_value' => 400,
+            'cruise_speed_unit' => 'N',
+            'flight_level_value' => 350,
+            'flight_level_unit' => 'F',
+            'route' => 'NAND UM871 MINGU/N0419F320 UM871 GODOX',
+            'estimated_time' => '0031',
+            'other_information' => 'PBN/A1B1D1L1O1S2 COM/TCAS DOF/20241214 REG/ECSSS EET/LECB0024 CODE/BXXXX RVR/200 OPR/XXX PER/C RMK/TCAS RMK/IFPS REROUTE ACCEPTED',
+            'endurance_time' => '0500',
+            'route_id' => $this->routeMadBcn->id,
+            'tour_stage_id' => $this->stageMadBcn->id,
+            'pilot_id' => $this->pilotMad->id,
+        ]);
+
+        $this->assertFalse($flightPlan->save());
+        $this->assertArrayHasKey('route_id', $flightPlan->errors);
+        $this->assertArrayHasKey('tour_stage_id', $flightPlan->errors);
     }
 
     public function testNegativeValuesNotAllowed()
