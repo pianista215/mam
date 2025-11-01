@@ -6,7 +6,7 @@ use tests\fixtures\AuthAssignmentFixture;
 use tests\fixtures\SubmittedFlightPlanFixture;
 use Yii;
 
-class SubmitFplCest
+class SubmitFplRouteCest
 {
     public function _fixtures(){
         return [
@@ -15,18 +15,18 @@ class SubmitFplCest
         ];
     }
 
-    public function openPrepareFplAsVisitor(\FunctionalTester $I)
+    public function openPrepareFplRouteAsVisitor(\FunctionalTester $I)
     {
-        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-route', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
         // Check redirect
         $I->seeCurrentUrlMatches('~login~');
         $I->see('Login');
     }
 
-    public function openPrepareFplAsNonActivatedUser(\FunctionalTester $I)
+    public function openPrepareFplRouteAsNonActivatedUser(\FunctionalTester $I)
     {
         $I->amLoggedInAs(3);
-        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-route', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
 
         $I->see('Forbidden');
         $I->seeResponseCodeIs(403);
@@ -37,7 +37,7 @@ class SubmitFplCest
     public function openPrepareFplRouteDepartureDifferentFromUserLocation(\FunctionalTester $I)
     {
         $I->amLoggedInAs(2);
-        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-route', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
 
         $I->see('Forbidden');
         $I->seeResponseCodeIs(403);
@@ -45,10 +45,10 @@ class SubmitFplCest
         $I->dontSee('Submit FPL', 'button');
     }
 
-    public function openPrepareFplAircraftInDifferentLocation(\FunctionalTester $I)
+    public function openPrepareFplRouteAircraftInDifferentLocation(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
-        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '1', 'aircraft_id' => '1' ]);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-route', [ 'route_id' => '1', 'aircraft_id' => '1' ]);
 
         $I->see('Forbidden');
         $I->seeResponseCodeIs(403);
@@ -56,10 +56,10 @@ class SubmitFplCest
         $I->dontSee('Submit FPL', 'button');
     }
 
-    public function openPrepareFplAircraftBadRangeForRoute(\FunctionalTester $I)
+    public function openPrepareFplRouteAircraftBadRangeForRoute(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
-        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '3', 'aircraft_id' => '3' ]);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-route', [ 'route_id' => '3', 'aircraft_id' => '3' ]);
 
         $I->see('Forbidden');
         $I->seeResponseCodeIs(403);
@@ -67,10 +67,10 @@ class SubmitFplCest
         $I->dontSee('Submit FPL', 'button');
     }
 
-    public function openPrepareFplAircraftValidButAlreadyReserved(\FunctionalTester $I)
+    public function openPrepareFplRouteAircraftValidButAlreadyReserved(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
-        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '3', 'aircraft_id' => '4' ]);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-route', [ 'route_id' => '3', 'aircraft_id' => '4' ]);
 
         $I->see('Forbidden');
         $I->seeResponseCodeIs(403);
@@ -78,10 +78,10 @@ class SubmitFplCest
         $I->dontSee('Submit FPL', 'button');
     }
 
-    public function openPrepareFplButAlreadyHaveOneSubmitted(\FunctionalTester $I)
+    public function openPrepareFplRouteButAlreadyHaveOneSubmitted(\FunctionalTester $I)
     {
         $I->amLoggedInAs(5);
-        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '3', 'aircraft_id' => '4' ]);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-route', [ 'route_id' => '3', 'aircraft_id' => '4' ]);
 
         $I->seeResponseCodeIs(200);
         $I->seeInCurrentUrl('submitted-flight-plan/view');
@@ -89,10 +89,10 @@ class SubmitFplCest
         $I->dontSee('Submit FPL', 'button');
     }
 
-    public function openPrepareFplAircraftValidRangeForRoute(\FunctionalTester $I)
+    public function openPrepareFplRouteAircraftValidRangeForRoute(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
-        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-route', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
 
         $I->see('Flight Plan Submission');
         $I->seeInField('input[name=aircraftRegistration]', 'EC-UUU');
@@ -103,10 +103,10 @@ class SubmitFplCest
         $I->see('Submit FPL', 'button');
     }
 
-    public function openPrepareFplEmptyFields(\FunctionalTester $I)
+    public function openPrepareFplRouteEmptyFields(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
-        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '3', 'aircraft_id' => '2' ]);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-route', [ 'route_id' => '3', 'aircraft_id' => '2' ]);
 
         $I->see('Flight Plan Submission');
         $I->seeInField('input[name=aircraftRegistration]', 'EC-BBB');
@@ -130,10 +130,10 @@ class SubmitFplCest
         $I->assertEquals(4, $count);
     }
 
-    public function openPrepareFplInvalidAlternatives(\FunctionalTester $I)
+    public function openPrepareFplRouteInvalidAlternatives(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
-        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '3', 'aircraft_id' => '2' ]);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-route', [ 'route_id' => '3', 'aircraft_id' => '2' ]);
 
         $I->see('Flight Plan Submission');
         $I->seeInField('input[name=aircraftRegistration]', 'EC-BBB');
@@ -171,10 +171,10 @@ class SubmitFplCest
         $I->assertEquals(4, $count);
     }
 
-    public function openPrepareFplInvalidIntegerFields(\FunctionalTester $I)
+    public function openPrepareFplRouteInvalidIntegerFields(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
-        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '3', 'aircraft_id' => '2' ]);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-route', [ 'route_id' => '3', 'aircraft_id' => '2' ]);
 
         $I->see('Flight Plan Submission');
         $I->seeInField('input[name=aircraftRegistration]', 'EC-BBB');
@@ -207,10 +207,10 @@ class SubmitFplCest
         $I->assertEquals(4, $count);
     }
 
-    public function openPrepareFplValidVFRPlan(\FunctionalTester $I)
+    public function openPrepareFplRouteValidVFRPlan(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
-        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-route', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
 
         $I->see('Flight Plan Submission');
         $I->seeInField('input[name=aircraftRegistration]', 'EC-UUU');
@@ -264,6 +264,7 @@ class SubmitFplCest
         $I->assertNotNull($model);
         $I->assertEquals(3, $model->aircraft_id);
         $I->assertEquals(1, $model->route_id);
+        $I->assertEquals(null, $model->tour_stage_id);
         $I->assertEquals('V', $model->flight_rules);
         $I->assertEquals('K', $model->cruise_speed_unit);
         $I->assertEquals('100', $model->cruise_speed_value);
@@ -280,10 +281,10 @@ class SubmitFplCest
         $I->assertEquals(5, $count);
     }
 
-    public function openPrepareFplValidIFRPlan(\FunctionalTester $I)
+    public function openPrepareFplRouteValidIFRPlan(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
-        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '3', 'aircraft_id' => '2' ]);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-route', [ 'route_id' => '3', 'aircraft_id' => '2' ]);
 
         $I->see('Flight Plan Submission');
         $I->seeInField('input[name=aircraftRegistration]', 'EC-BBB');
@@ -333,6 +334,7 @@ class SubmitFplCest
         $I->assertNotNull($model);
         $I->assertEquals(2, $model->aircraft_id);
         $I->assertEquals(3, $model->route_id);
+        $I->assertEquals(null, $model->tour_stage_id);
         $I->assertEquals('I', $model->flight_rules);
         $I->assertEquals('N', $model->cruise_speed_unit);
         $I->assertEquals('350', $model->cruise_speed_value);
@@ -349,10 +351,10 @@ class SubmitFplCest
         $I->assertEquals(5, $count);
     }
 
-    public function openPrepareFplValidIFRToVFRPlan(\FunctionalTester $I)
+    public function openPrepareFplRouteValidIFRToVFRPlan(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
-        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-route', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
 
         $I->see('Flight Plan Submission');
         $I->seeInField('input[name=aircraftRegistration]', 'EC-UUU');
@@ -406,6 +408,7 @@ class SubmitFplCest
         $I->assertNotNull($model);
         $I->assertEquals(3, $model->aircraft_id);
         $I->assertEquals(1, $model->route_id);
+        $I->assertEquals(null, $model->tour_stage_id);
         $I->assertEquals('Y', $model->flight_rules);
         $I->assertEquals('N', $model->cruise_speed_unit);
         $I->assertEquals('110', $model->cruise_speed_value);
@@ -422,10 +425,10 @@ class SubmitFplCest
         $I->assertEquals(5, $count);
     }
 
-    public function openPrepareFplValidVFRToIFRPlan(\FunctionalTester $I)
+    public function openPrepareFplRouteValidVFRToIFRPlan(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
-        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-route', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
 
         $I->see('Flight Plan Submission');
         $I->seeInField('input[name=aircraftRegistration]', 'EC-UUU');
@@ -479,6 +482,7 @@ class SubmitFplCest
         $I->assertNotNull($model);
         $I->assertEquals(3, $model->aircraft_id);
         $I->assertEquals(1, $model->route_id);
+        $I->assertEquals(null, $model->tour_stage_id);
         $I->assertEquals('Z', $model->flight_rules);
         $I->assertEquals('M', $model->cruise_speed_unit);
         $I->assertEquals('020', $model->cruise_speed_value);
