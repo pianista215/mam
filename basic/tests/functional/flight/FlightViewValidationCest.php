@@ -124,7 +124,7 @@ class FlightViewValidationCest
         }
     }
 
-    public function invalidActionThrowsException(FunctionalTester $I)
+    public function invalidAction(FunctionalTester $I)
     {
         $I->amLoggedInAs(5); // IFR validator
 
@@ -141,10 +141,9 @@ class FlightViewValidationCest
             'Flight[validator_comments]' => 'comment',
         ]);
 
-        // After submit usually redirect to view; ensure we got 200
-        $I->seeResponseCodeIs(400);
+        $I->seeResponseCodeIs(200);
 
-        $I->see('Illegal validation action: invented');
+        $I->see('Error validating flight.');
 
         $flight = \app\models\Flight::findOne(2);
         $I->assertEquals('V', $flight->status, "Initial status changed for flight 2");
@@ -237,5 +236,102 @@ class FlightViewValidationCest
         $I->dontSee('Validate', 'button');
         $I->dontSee('Reject', 'button');
         $I->dontSeeElement('form[action*="validate"]');
+    }
+
+    public function validationTourNotCompletedWithThisFlight(FunctionalTester $I)
+    {
+        $I->amLoggedInAs(4);
+        $I->amOnRoute('flight/view', ['id' => 1]);
+        $I->seeResponseCodeIs(200);
+        $I->submitForm('form[action*="validate"]', [
+            'action' => 'approve',
+            'Flight[validator_comments]' => 'One stage more for complete',
+        ]);
+        $I->seeResponseCodeIs(200);
+        $countFirst = \app\models\PilotTourCompletion::find()->count();
+        $I->assertEquals(0, $countFirst);
+    }
+
+    public function validationCompletedWithAllFlights(FunctionalTester $I)
+    {
+        $I->amLoggedInAs(4);
+        $I->amOnRoute('flight/view', ['id' => 1]);
+        $I->seeResponseCodeIs(200);
+        $I->submitForm('form[action*="validate"]', [
+            'action' => 'approve',
+            'Flight[validator_comments]' => 'One stage more for complete',
+        ]);
+        $I->seeResponseCodeIs(200);
+        $countFirst = \app\models\PilotTourCompletion::find(['tour_id' => '3'])->count();
+        $I->assertEquals(0, $countFirst);
+
+        $I->amLoggedInAs(5);
+        $I->amOnRoute('flight/view', ['id' => 2]);
+        $I->seeResponseCodeIs(200);
+        $I->submitForm('form[action*="validate"]', [
+            'action' => 'approve',
+            'Flight[validator_comments]' => 'Congratulations you have a tour completed',
+        ]);
+        $I->seeResponseCodeIs(200);
+        $countSecond = \app\models\PilotTourCompletion::find(['tour_id' => '3'])->count();
+        $I->assertEquals(1, $countSecond);
+
+        $tour_completed = \app\models\PilotTourCompletion::find(['tour_id' => '3'])->one();
+        $I->assertEquals(1, $tour_completed->pilot_id);
+        $I->assertEquals(3, $tour_completed->tour_id);
+        $I->assertEquals(date('Y-m-d'), $tour_completed->completed_at);
+
+        $I->amOnRoute('tour/view', ['id' => 3]);
+        $I->see('John Doe');
+    }
+
+    public function validationIgnoreIfTourIsAlreadyCompleted(FunctionalTester $I)
+    {
+        $I->amLoggedInAs(4);
+        $I->amOnRoute('flight/view', ['id' => 1]);
+        $I->seeResponseCodeIs(200);
+        $I->submitForm('form[action*="validate"]', [
+            'action' => 'approve',
+            'Flight[validator_comments]' => 'One stage more for complete',
+        ]);
+        $I->seeResponseCodeIs(200);
+        $countFirst = \app\models\PilotTourCompletion::find(['tour_id' => '3'])->count();
+        $I->assertEquals(0, $countFirst);
+
+        $I->amLoggedInAs(5);
+        $I->amOnRoute('flight/view', ['id' => 2]);
+        $I->seeResponseCodeIs(200);
+        $I->submitForm('form[action*="validate"]', [
+            'action' => 'approve',
+            'Flight[validator_comments]' => 'Congratulations you have a tour completed',
+        ]);
+        $I->seeResponseCodeIs(200);
+        $countSecond = \app\models\PilotTourCompletion::find(['tour_id' => '3'])->count();
+        $I->assertEquals(1, $countSecond);
+
+        $tour_completed = \app\models\PilotTourCompletion::find(['tour_id' => '3'])->one();
+        $I->assertEquals(1, $tour_completed->pilot_id);
+        $I->assertEquals(3, $tour_completed->tour_id);
+        $I->assertEquals(date('Y-m-d'), $tour_completed->completed_at);
+
+        $I->amOnRoute('tour/view', ['id' => 3]);
+        $I->see('John Doe');
+
+        $tour_completed->completed_at = date('2020-01-10');
+        $tour_completed->save(false);
+
+        $I->amOnRoute('flight/view', ['id' => 3]);
+        $I->seeResponseCodeIs(200);
+        $I->submitForm('form[action*="validate"]', [
+            'action' => 'approve',
+            'Flight[validator_comments]' => 'Congratulations you have a tour completed',
+        ]);
+        $I->seeResponseCodeIs(200);
+
+        $countThird = \app\models\PilotTourCompletion::find(['tour_id' => '3'])->count();
+        $I->assertEquals(1, $countThird);
+        $I->assertEquals(1, $tour_completed->pilot_id);
+        $I->assertEquals(3, $tour_completed->tour_id);
+        $I->assertEquals('2020-01-10', $tour_completed->completed_at);
     }
 }
