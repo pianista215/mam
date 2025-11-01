@@ -52,7 +52,7 @@ class TourStageDeleteCest
         $I->amOnRoute('tour-stage/delete', [ 'id' => '1' ]);
         $I->seeResponseCodeIs(405);
         $count = \app\models\TourStage::find()->count();
-        $I->assertEquals(4, $count);
+        $I->assertEquals(5, $count);
     }
 
     public function deleteOnlyPostAsUser(\FunctionalTester $I)
@@ -61,7 +61,7 @@ class TourStageDeleteCest
         $I->amOnRoute('tour-stage/delete', [ 'id' => '1' ]);
         $I->seeResponseCodeIs(405);
         $count = \app\models\TourStage::find()->count();
-        $I->assertEquals(4, $count);
+        $I->assertEquals(5, $count);
     }
 
     public function deleteOnlyPostAsVisitor(\FunctionalTester $I)

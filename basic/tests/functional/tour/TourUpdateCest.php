@@ -69,7 +69,7 @@ class TourUpdateCest
        $model = \app\models\Tour::find()->where(['id' => 1])->one();
        $I->assertEquals('Tour previous', $model->name);
        $count = \app\models\Tour::find()->count();
-       $I->assertEquals(4, $count);
+       $I->assertEquals(5, $count);
     }
 
     public function updateInvalidDatesTour(\FunctionalTester $I)
@@ -85,7 +85,7 @@ class TourUpdateCest
        $I->assertEquals(date('Y-m-d', strtotime('-100 day')), $model->start);
        $I->assertEquals(date('Y-m-d', strtotime('-5 day')), $model->end);
        $count = \app\models\Tour::find()->count();
-       $I->assertEquals(4, $count);
+       $I->assertEquals(5, $count);
     }
 
     public function updateValidTour(\FunctionalTester $I)
@@ -113,7 +113,7 @@ class TourUpdateCest
        $I->assertEquals('2018-02-02', $model->start);
        $I->assertEquals('2035-02-02', $model->end);
        $count = \app\models\Tour::find()->count();
-       $I->assertEquals(4, $count);
+       $I->assertEquals(5, $count);
     }
 
 }

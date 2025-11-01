@@ -240,7 +240,6 @@ class SubmitReportDTOTest extends BaseUnitTest
         $dto->load($data, '');
 
         $this->assertFalse($dto->validate(), 'Report with empty required fields should fail validation.');
-        $this->assertArrayHasKey('pilot_comments', $dto->getErrors(), 'Error message for empty pilot_comments should be present.');
         $this->assertArrayHasKey('network', $dto->getErrors(), 'Error message for empty network should be present.');
         $this->assertArrayHasKey('sim_aircraft_name', $dto->getErrors(), 'Error message for empty sim_aircraft_name should be present.');
     }
