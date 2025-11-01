@@ -174,8 +174,8 @@ CREATE TABLE `submitted_flight_plan` (
   CONSTRAINT `submitted_flightplan_airport_alt2_FK` FOREIGN KEY (`alternative2_icao`) REFERENCES `airport` (`icao_code`) ON UPDATE CASCADE,
   CONSTRAINT `submitted_flightplans_aircraft_reserved_FK` FOREIGN KEY (`aircraft_id`) REFERENCES `aircraft` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `submitted_flightplans_pilots_FK` FOREIGN KEY (`pilot_id`) REFERENCES `pilot` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `submitted_flightplans_routes_FK` FOREIGN KEY (`route_id`) REFERENCES `route` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-  CONSTRAINT `submitted_flightplans_tour_stage_FK` FOREIGN KEY (`tour_stage_id`) REFERENCES `tour_stage` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `submitted_flightplans_routes_FK` FOREIGN KEY (`route_id`) REFERENCES `route` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `submitted_flightplans_tour_stage_FK` FOREIGN KEY (`tour_stage_id`) REFERENCES `tour_stage` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `flight` (
