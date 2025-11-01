@@ -128,7 +128,7 @@ return [
         'password' => Yii::$app->security->generatePasswordHash('otherid10!'),
         'access_token' => Yii::$app->security->generateRandomString(32),
         'city' => 'Valladolid',
-        'location' => 'LEBL',
+        'location' => 'LEAL',
         'date_of_birth' => '1972-08-23',
     ],
 ];
