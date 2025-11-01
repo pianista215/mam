@@ -242,6 +242,9 @@ class SubmittedFlightPlanController extends Controller
         if ($entityType === 'route') {
             $model->route_id = $entity->id;
         } elseif ($entityType === 'stage') {
+            if(!$entity->tour->isActive()){
+                throw new ForbiddenHttpException('Tour is not active.');
+            }
             $model->tour_stage_id = $entity->id;
         }
 
