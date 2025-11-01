@@ -8,7 +8,7 @@ return [
         'departure' => 'LEBL',
         'arrival' => 'LEMD',
         'distance_nm' => '260',
-        'description' => '',
+        'description' => 'Desc',
         'sequence' => 1,
     ],
     // Tour actual reported

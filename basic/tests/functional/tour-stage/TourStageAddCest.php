@@ -26,7 +26,7 @@ class TourStageAddCest
         $I->see('Save Stage', 'button');
     }
 
-    public function openTourCreateAsTourMgr(\FunctionalTester $I)
+    public function openTourStageAddAsTourMgr(\FunctionalTester $I)
     {
         $I->amLoggedInAs(10);
         $I->amOnRoute('tour-stage/add-stage', ['tour_id' => '1']);
@@ -36,7 +36,7 @@ class TourStageAddCest
         $I->see('Save Stage', 'button');
     }
 
-    public function openTourCreateAsUser(\FunctionalTester $I)
+    public function openTourStageAddAsUser(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
         $I->amOnRoute('tour-stage/add-stage', ['tour_id' => '1']);
@@ -47,7 +47,7 @@ class TourStageAddCest
         $I->dontSee('Save Stage', 'button');
     }
 
-    public function openTourCreateAsVisitor(\FunctionalTester $I)
+    public function openTourStageAddAsVisitor(\FunctionalTester $I)
     {
         $I->amOnRoute('tour-stage/add-stage', ['tour_id' => '1']);
         // Check redirect
@@ -98,6 +98,7 @@ class TourStageAddCest
         $I->assertEquals('LEVC', $model->departure);
         $I->assertEquals('GCLP', $model->arrival);
         $I->assertEquals('Ex Description', $model->description);
+        $I->assertEquals(1015, $model->distance_nm);
         $I->assertEquals(2, $model->sequence);
         $I->assertEquals(1, $model->tour_id);
     }

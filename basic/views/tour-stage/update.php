@@ -7,7 +7,7 @@ use yii\helpers\Html;
 /** @var app\models\Tour $tour */
 
 $this->title = "Update Stage {$model->sequence} from Tour: " . Html::encode($tour->name);
-$this->params['breadcrumbs'][] = ['label' => 'Tours', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Tours', 'url' => ['tour/index']];
 $this->params['breadcrumbs'][] = [
     'label' => $tour->name,
     'url' => ['tour/view', 'id' => $tour->id],
