@@ -87,10 +87,12 @@ $this->params['breadcrumbs'][] = $this->title;
                         </td>
 
                         <td class="text-center">
-                            <?= Html::a('✈︎', ['submitted-flight-plan/select-aircraft-tour', 'tour_stage_id' => $stage->id], [
-                                'class' => 'text-decoration-none fs-5 me-2',
-                                'title' => 'Fly this stage again'
-                            ]) ?>
+                            <?php if ($model->isActive()): ?>
+                                <?= Html::a('✈︎', ['submitted-flight-plan/select-aircraft-tour', 'tour_stage_id' => $stage->id], [
+                                    'class' => 'text-decoration-none fs-5 me-2',
+                                    'title' => 'Fly stage'
+                                ]) ?>
+                            <?php endif; ?>
 
                             <?php if (Yii::$app->user->can('tourCrud')): ?>
                                 <?= Html::a('<i class="fa fa-pencil"></i>', ['tour-stage/update', 'id' => $stage->id], [

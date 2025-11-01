@@ -57,6 +57,16 @@ class Tour extends \yii\db\ActiveRecord
         ];
     }
 
+    public function isActive(): bool
+    {
+        $today = new \DateTimeImmutable('today');
+        $start = new \DateTimeImmutable($this->start);
+        $end   = new \DateTimeImmutable($this->end);
+
+        return $today >= $start && $today <= $end;
+    }
+
+
     /**
      * Gets query for [[PilotTourCompletions]].
      *
