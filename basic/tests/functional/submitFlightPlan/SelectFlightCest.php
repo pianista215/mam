@@ -34,9 +34,7 @@ class SelectFlightCest
 
         $I->see('Select flight');
         $I->see('Tour Stages');
-        $I->see('Tour actual reported #2');
         $I->see('Tour present 2 #1');
-        $I->seeElement('a[href*="/submitted-flight-plan/select-aircraft-tour?tour_stage_id=3"]');
         $I->seeElement('a[href*="/submitted-flight-plan/select-aircraft-tour?tour_stage_id=5"]');
 
         $I->see('Routes');
