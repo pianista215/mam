@@ -40,5 +40,15 @@ return [
         'description' => '',
         'sequence' => 1,
     ],
+    // Tour started not reported
+    [
+        'id' => 5,
+        'tour_id' => 5,
+        'departure' => 'LEMD',
+        'arrival' => 'LEVC',
+        'distance_nm' => '400',
+        'description' => '',
+        'sequence' => 1,
+    ],
 
 ];

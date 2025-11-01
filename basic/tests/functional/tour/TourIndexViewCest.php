@@ -19,11 +19,12 @@ class TourIndexViewCest
         $I->amOnRoute('tour/index');
 
         $I->see('Tours');
-        $I->see('Showing 1-4 of 4 items.');
+        $I->see('Showing 1-5 of 5 items.');
         $I->see('Tour previous');
         $I->see('Tour actual empty');
         $I->see('Tour actual reported');
         $I->see('Tour not started');
+        $I->see('Tour present 2');
     }
 
     public function openTourIndexAsAdmin(\FunctionalTester $I)
@@ -133,6 +134,52 @@ class TourIndexViewCest
         $I->see('Login');
     }
 
+    private function checkTourPresentEmptyViewCommon(\FunctionalTester $I) {
+        $I->amOnRoute('tour/view', [ 'id' => '2' ]);
+
+        $I->see('Tour actual empty');
+        $I->see('Tour actual without flights associated');
+        $I->see('This tour has no stages yet.');
+    }
+
+    public function openTourPresentEmptyViewAsAdmin(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(2);
+
+        $this->checkTourPresentEmptyViewCommon($I);
+
+        $I->see('Update', 'a');
+        $I->see('Delete', 'a');
+    }
+
+    public function openTourPresentEmptyViewAsTourMgr(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(10);
+
+        $this->checkTourPresentEmptyViewCommon($I);
+
+        $I->see('Update', 'a');
+        $I->see('Delete', 'a');
+    }
+
+    public function openTourPresentEmptyViewAsUser(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(1);
+
+        $this->checkTourPresentEmptyViewCommon($I);
+
+        $I->dontSee('Update', 'a');
+        $I->dontSee('Delete', 'a');
+    }
+
+    public function openTourPresentEmptyViewAsVisitor(\FunctionalTester $I)
+    {
+        $I->amOnRoute('tour/view', [ 'id' => '2' ]);
+        // Check redirect
+        $I->seeCurrentUrlMatches('~login~');
+        $I->see('Login');
+    }
+
     private function checkTourPresentAlreadyFlownViewCommon(\FunctionalTester $I) {
         $I->amOnRoute('tour/view', [ 'id' => '3' ]);
 
@@ -221,6 +268,71 @@ class TourIndexViewCest
     public function openTourPresentAlreadyFlownViewAsVisitor(\FunctionalTester $I)
     {
         $I->amOnRoute('tour/view', [ 'id' => '3' ]);
+        // Check redirect
+        $I->seeCurrentUrlMatches('~login~');
+        $I->see('Login');
+    }
+
+    private function checkTourPresentNotFlownViewCommon(\FunctionalTester $I) {
+        $I->amOnRoute('tour/view', [ 'id' => '5' ]);
+
+        $I->see('Tour present 2');
+        $I->see('Tour without flights reported');
+        $I->see('Tour Stages');
+        $I->see('LEMD');
+        $I->see('LEVC');
+        $I->see('400');
+    }
+
+    public function openTourPresentNotFlownViewAsAdmin(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(2);
+
+        $this->checkTourPresentNotFlownViewCommon($I);
+
+        $I->see('Update', 'a');
+        $I->see('Delete', 'a');
+
+        $I->seeElement('a[href*="/submitted-flight-plan/select-aircraft-tour?tour_stage_id=5"]');
+        $I->seeElement('a[href*="/tour-stage/update?id=5"]');
+        $I->seeElement('a[href*="/tour-stage/delete?id=5"]');
+        $I->dontSeeElement('i.fa-regular.fa-circle-check[title="Completed"]');
+    }
+
+    public function openTourPresentNotFlownViewAsTourMgr(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(10);
+
+        $this->checkTourPresentNotFlownViewCommon($I);
+
+        $I->see('Update', 'a');
+        $I->see('Delete', 'a');
+
+        $I->seeElement('a[href*="/submitted-flight-plan/select-aircraft-tour?tour_stage_id=5"]');
+        $I->seeElement('a[href*="/tour-stage/update?id=5"]');
+        $I->seeElement('a[href*="/tour-stage/delete?id=5"]');
+        $I->dontSeeElement('i.fa-regular.fa-circle-check[title="Completed"]');
+    }
+
+    public function openTourPresentNotFlownViewAsUser(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(1);
+
+        $this->checkTourPresentNotFlownViewCommon($I);
+
+        $I->dontSee('Update', 'a');
+        $I->dontSee('Delete', 'a');
+
+        $I->seeElement('a[href*="/submitted-flight-plan/select-aircraft-tour?tour_stage_id=5"]');
+        $I->dontSeeElement('a[href*="/tour-stage/update?id=5"]');
+        $I->dontSeeElement('a[href*="/tour-stage/delete?id=5"]');
+        $I->dontSeeElement('i.fa-regular.fa-circle-check[title="Completed"]');
+    }
+
+
+    public function openTourPresentNotFlownViewAsVisitor(\FunctionalTester $I)
+    {
+        $I->amOnRoute('tour/view', [ 'id' => '5' ]);
         // Check redirect
         $I->seeCurrentUrlMatches('~login~');
         $I->see('Login');

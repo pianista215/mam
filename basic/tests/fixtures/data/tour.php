@@ -29,5 +29,12 @@ return [
         'start' => date('Y-m-d', strtotime('+100 day')),
         'end' => date('Y-m-d', strtotime('+300 day')),
     ],
+    [
+        'id' => 5,
+        'name' => 'Tour present 2',
+        'description' => 'Tour without flights reported',
+        'start' => date('Y-m-d', strtotime('-100 day')),
+        'end' => date('Y-m-d', strtotime('+300 day')),
+    ],
 
 ];
