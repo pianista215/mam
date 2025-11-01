@@ -161,6 +161,7 @@ class TourIndexViewCest
         $I->seeElement('a[href*="/submitted-flight-plan/select-aircraft-tour?tour_stage_id=3"]');
         $I->seeElement('a[href*="/tour-stage/update?id=3"]');
         $I->seeElement('a[href*="/tour-stage/update?id=3"]');
+        $I->dontSeeElement('i.fa-regular.fa-circle-check[title="Completed"]');
     }
 
     public function openTourPresentAlreadyFlownViewAsTourMgr(\FunctionalTester $I)
@@ -178,6 +179,7 @@ class TourIndexViewCest
         $I->seeElement('a[href*="/submitted-flight-plan/select-aircraft-tour?tour_stage_id=3"]');
         $I->seeElement('a[href*="/tour-stage/update?id=3"]');
         $I->seeElement('a[href*="/tour-stage/update?id=3"]');
+        $I->dontSeeElement('i.fa-regular.fa-circle-check[title="Completed"]');
     }
 
     public function openTourPresentAlreadyFlownViewAsUser(\FunctionalTester $I)
@@ -195,6 +197,25 @@ class TourIndexViewCest
         $I->seeElement('a[href*="/submitted-flight-plan/select-aircraft-tour?tour_stage_id=3"]');
         $I->dontSeeElement('a[href*="/tour-stage/update?id=3"]');
         $I->dontSeeElement('a[href*="/tour-stage/update?id=3"]');
+        $I->dontSeeElement('i.fa-regular.fa-circle-check[title="Completed"]');
+    }
+
+    public function openTourPresentAlreadyFlownViewAsUserAlreadyFlown(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(5);
+
+        $this->checkTourPresentAlreadyFlownViewCommon($I);
+
+        $I->dontSee('Update', 'a');
+        $I->dontSee('Delete', 'a');
+
+        $I->seeElement('a[href*="/submitted-flight-plan/select-aircraft-tour?tour_stage_id=2"]');
+        $I->dontSeeElement('a[href*="/tour-stage/update?id=2"]');
+        $I->dontSeeElement('a[href*="/tour-stage/update?id=2"]');
+        $I->seeElement('a[href*="/submitted-flight-plan/select-aircraft-tour?tour_stage_id=3"]');
+        $I->dontSeeElement('a[href*="/tour-stage/update?id=3"]');
+        $I->dontSeeElement('a[href*="/tour-stage/update?id=3"]');
+        $I->seeElement('i.fa-regular.fa-circle-check[title="Completed"]');
     }
 
     public function openTourPresentAlreadyFlownViewAsVisitor(\FunctionalTester $I)
