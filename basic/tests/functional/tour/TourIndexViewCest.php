@@ -94,7 +94,7 @@ class TourIndexViewCest
 
         $I->dontSeeElement('a[href*="/submitted-flight-plan/select-aircraft-tour?tour_stage_id=1"]');
         $I->seeElement('a[href*="/tour-stage/update?id=1"]');
-        $I->seeElement('a[href*="/tour-stage/update?id=1"]');
+        $I->seeElement('a[href*="/tour-stage/delete?id=1"]');
     }
 
     public function openTourPastViewAsTourMgr(\FunctionalTester $I)
@@ -108,7 +108,7 @@ class TourIndexViewCest
 
         $I->dontSeeElement('a[href*="/submitted-flight-plan/select-aircraft-tour?tour_stage_id=1"]');
         $I->seeElement('a[href*="/tour-stage/update?id=1"]');
-        $I->seeElement('a[href*="/tour-stage/update?id=1"]');
+        $I->seeElement('a[href*="/tour-stage/delete?id=1"]');
     }
 
     public function openTourPastViewAsUser(\FunctionalTester $I)
@@ -122,7 +122,7 @@ class TourIndexViewCest
 
         $I->dontSeeElement('a[href*="/submitted-flight-plan/select-aircraft-tour?tour_stage_id=1"]');
         $I->dontSeeElement('a[href*="/tour-stage/update?id=1"]');
-        $I->dontSeeElement('a[href*="/tour-stage/update?id=1"]');
+        $I->dontSeeElement('a[href*="/tour-stage/delete?id=1"]');
     }
 
     public function openTourPastViewAsVisitor(\FunctionalTester $I)
@@ -157,10 +157,10 @@ class TourIndexViewCest
 
         $I->seeElement('a[href*="/submitted-flight-plan/select-aircraft-tour?tour_stage_id=2"]');
         $I->seeElement('a[href*="/tour-stage/update?id=2"]');
-        $I->seeElement('a[href*="/tour-stage/update?id=2"]');
+        $I->dontSeeElement('a[href*="/tour-stage/delete?id=2"]');
         $I->seeElement('a[href*="/submitted-flight-plan/select-aircraft-tour?tour_stage_id=3"]');
         $I->seeElement('a[href*="/tour-stage/update?id=3"]');
-        $I->seeElement('a[href*="/tour-stage/update?id=3"]');
+        $I->dontSeeElement('a[href*="/tour-stage/delete?id=3"]');
         $I->dontSeeElement('i.fa-regular.fa-circle-check[title="Completed"]');
     }
 
@@ -175,10 +175,10 @@ class TourIndexViewCest
 
         $I->seeElement('a[href*="/submitted-flight-plan/select-aircraft-tour?tour_stage_id=2"]');
         $I->seeElement('a[href*="/tour-stage/update?id=2"]');
-        $I->seeElement('a[href*="/tour-stage/update?id=2"]');
+        $I->dontSeeElement('a[href*="/tour-stage/delete?id=2"]');
         $I->seeElement('a[href*="/submitted-flight-plan/select-aircraft-tour?tour_stage_id=3"]');
         $I->seeElement('a[href*="/tour-stage/update?id=3"]');
-        $I->seeElement('a[href*="/tour-stage/update?id=3"]');
+        $I->dontSeeElement('a[href*="/tour-stage/delete?id=3"]');
         $I->dontSeeElement('i.fa-regular.fa-circle-check[title="Completed"]');
     }
 
@@ -193,10 +193,10 @@ class TourIndexViewCest
 
         $I->seeElement('a[href*="/submitted-flight-plan/select-aircraft-tour?tour_stage_id=2"]');
         $I->dontSeeElement('a[href*="/tour-stage/update?id=2"]');
-        $I->dontSeeElement('a[href*="/tour-stage/update?id=2"]');
+        $I->dontSeeElement('a[href*="/tour-stage/delete?id=2"]');
         $I->seeElement('a[href*="/submitted-flight-plan/select-aircraft-tour?tour_stage_id=3"]');
         $I->dontSeeElement('a[href*="/tour-stage/update?id=3"]');
-        $I->dontSeeElement('a[href*="/tour-stage/update?id=3"]');
+        $I->dontSeeElement('a[href*="/tour-stage/delete?id=3"]');
         $I->dontSeeElement('i.fa-regular.fa-circle-check[title="Completed"]');
     }
 
@@ -211,10 +211,10 @@ class TourIndexViewCest
 
         $I->seeElement('a[href*="/submitted-flight-plan/select-aircraft-tour?tour_stage_id=2"]');
         $I->dontSeeElement('a[href*="/tour-stage/update?id=2"]');
-        $I->dontSeeElement('a[href*="/tour-stage/update?id=2"]');
+        $I->dontSeeElement('a[href*="/tour-stage/delete?id=2"]');
         $I->seeElement('a[href*="/submitted-flight-plan/select-aircraft-tour?tour_stage_id=3"]');
         $I->dontSeeElement('a[href*="/tour-stage/update?id=3"]');
-        $I->dontSeeElement('a[href*="/tour-stage/update?id=3"]');
+        $I->dontSeeElement('a[href*="/tour-stage/delete?id=3"]');
         $I->seeElement('i.fa-regular.fa-circle-check[title="Completed"]');
     }
 
@@ -226,5 +226,65 @@ class TourIndexViewCest
         $I->see('Login');
     }
 
+    private function checkTourFutureViewCommon(\FunctionalTester $I) {
+        $I->amOnRoute('tour/view', [ 'id' => '4' ]);
+
+        $I->see('Tour not started');
+        $I->see('Tour that will start in the future');
+        $I->see('Tour Stages');
+        $I->see('LEMD');
+        $I->see('LEVC');
+        $I->see('400');
+    }
+
+    public function openTourFutureViewAsAdmin(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(2);
+
+        $this->checkTourFutureViewCommon($I);
+
+        $I->see('Update', 'a');
+        $I->see('Delete', 'a');
+
+        $I->dontSeeElement('a[href*="/submitted-flight-plan/select-aircraft-tour?tour_stage_id=4"]');
+        $I->seeElement('a[href*="/tour-stage/update?id=4"]');
+        $I->seeElement('a[href*="/tour-stage/delete?id=4"]');
+    }
+
+    public function openTourFutureViewAsTourMgr(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(10);
+
+        $this->checkTourFutureViewCommon($I);
+
+        $I->see('Update', 'a');
+        $I->see('Delete', 'a');
+
+        $I->dontSeeElement('a[href*="/submitted-flight-plan/select-aircraft-tour?tour_stage_id=4"]');
+        $I->seeElement('a[href*="/tour-stage/update?id=4"]');
+        $I->seeElement('a[href*="/tour-stage/delete?id=4"]');
+    }
+
+    public function openTourFutureViewAsUser(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(1);
+
+        $this->checkTourFutureViewCommon($I);
+
+        $I->dontSee('Update', 'a');
+        $I->dontSee('Delete', 'a');
+
+        $I->dontSeeElement('a[href*="/submitted-flight-plan/select-aircraft-tour?tour_stage_id=4"]');
+        $I->dontSeeElement('a[href*="/tour-stage/update?id=4"]');
+        $I->dontSeeElement('a[href*="/tour-stage/delete?id=4"]');
+    }
+
+    public function openTourFutureViewAsVisitor(\FunctionalTester $I)
+    {
+        $I->amOnRoute('tour/view', [ 'id' => '4' ]);
+        // Check redirect
+        $I->seeCurrentUrlMatches('~login~');
+        $I->see('Login');
+    }
 
 }
