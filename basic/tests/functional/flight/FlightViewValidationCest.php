@@ -223,6 +223,7 @@ class FlightViewValidationCest
         $I->amLoggedInAs(4);
         $I->amOnRoute('flight/view', ['id' => 12]);
         $I->seeResponseCodeIs(200);
+        $I->see('Route RJ001');
         // Ensure validation form is NOT visible
         $I->dontSee('Validate', 'button');
         $I->dontSee('Reject', 'button');
@@ -232,6 +233,7 @@ class FlightViewValidationCest
         $I->amLoggedInAs(5);
         $I->amOnRoute('flight/view', ['id' => 13]);
         $I->seeResponseCodeIs(200);
+        $I->see('Route IFRC001');
         // Ensure validation form is NOT visible
         $I->dontSee('Validate', 'button');
         $I->dontSee('Reject', 'button');
