@@ -9,6 +9,7 @@ class SubmittedFlightPlanFixture extends ActiveFixture
     public $modelClass = 'app\models\SubmittedFlightPlan';
     public $depends = [
                         'tests\fixtures\AircraftFixture',
-                        'tests\fixtures\RouteFixture'
+                        'tests\fixtures\RouteFixture',
+                        'tests\fixtures\TourStageFixture',
                         ];
 }

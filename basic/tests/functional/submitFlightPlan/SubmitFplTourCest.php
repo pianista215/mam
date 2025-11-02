@@ -149,6 +149,7 @@ class SubmitFplTourCest
         $I->amOnRoute('submitted-flight-plan/prepare-fpl-tour', [ 'tour_stage_id' => '3', 'aircraft_id' => '2' ]);
 
         $I->see('Flight Plan Submission');
+        $I->see('Stage Tour actual reported #2 (LEBL-GCLP)');
         $I->seeInField('input[name=aircraftRegistration]', 'EC-BBB');
         $I->seeInField('input[name=aircraftType]', 'B738');
         $I->seeInField('input[name=departure]', 'LEBL');
@@ -190,6 +191,7 @@ class SubmitFplTourCest
         $I->amOnRoute('submitted-flight-plan/prepare-fpl-tour', [ 'tour_stage_id' => '3', 'aircraft_id' => '2' ]);
 
         $I->see('Flight Plan Submission');
+        $I->see('Stage Tour actual reported #2 (LEBL-GCLP)');
         $I->seeInField('input[name=aircraftRegistration]', 'EC-BBB');
         $I->seeInField('input[name=aircraftType]', 'B738');
         $I->seeInField('input[name=departure]', 'LEBL');
@@ -226,6 +228,7 @@ class SubmitFplTourCest
         $I->amOnRoute('submitted-flight-plan/prepare-fpl-tour', [ 'tour_stage_id' => '2', 'aircraft_id' => '3' ]);
 
         $I->see('Flight Plan Submission');
+        $I->see('Stage Tour actual reported #1 (LEBL-LEMD)');
         $I->seeInField('input[name=aircraftRegistration]', 'EC-UUU');
         $I->seeInField('input[name=aircraftType]', 'C172');
         $I->seeInField('input[name=departure]', 'LEBL');
@@ -300,6 +303,7 @@ class SubmitFplTourCest
         $I->amOnRoute('submitted-flight-plan/prepare-fpl-tour', [ 'tour_stage_id' => '3', 'aircraft_id' => '2' ]);
 
         $I->see('Flight Plan Submission');
+        $I->see('Stage Tour actual reported #2 (LEBL-GCLP)');
         $I->seeInField('input[name=aircraftRegistration]', 'EC-BBB');
         $I->seeInField('input[name=aircraftType]', 'B738');
         $I->seeInField('input[name=departure]', 'LEBL');
@@ -370,6 +374,7 @@ class SubmitFplTourCest
         $I->amOnRoute('submitted-flight-plan/prepare-fpl-tour', [ 'tour_stage_id' => '2', 'aircraft_id' => '3' ]);
 
         $I->see('Flight Plan Submission');
+        $I->see('Stage Tour actual reported #1 (LEBL-LEMD)');
         $I->seeInField('input[name=aircraftRegistration]', 'EC-UUU');
         $I->seeInField('input[name=aircraftType]', 'C172');
         $I->seeInField('input[name=departure]', 'LEBL');
@@ -444,6 +449,7 @@ class SubmitFplTourCest
         $I->amOnRoute('submitted-flight-plan/prepare-fpl-tour', [ 'tour_stage_id' => '2', 'aircraft_id' => '3' ]);
 
         $I->see('Flight Plan Submission');
+        $I->see('Stage Tour actual reported #1 (LEBL-LEMD)');
         $I->seeInField('input[name=aircraftRegistration]', 'EC-UUU');
         $I->seeInField('input[name=aircraftType]', 'C172');
         $I->seeInField('input[name=departure]', 'LEBL');

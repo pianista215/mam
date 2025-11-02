@@ -213,6 +213,7 @@ class SubmitFplRouteCest
         $I->amOnRoute('submitted-flight-plan/prepare-fpl-route', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
 
         $I->see('Flight Plan Submission');
+        $I->see('Route R001 (LEBL-LEVC)');
         $I->seeInField('input[name=aircraftRegistration]', 'EC-UUU');
         $I->seeInField('input[name=aircraftType]', 'C172');
         $I->seeInField('input[name=departure]', 'LEBL');
@@ -287,6 +288,7 @@ class SubmitFplRouteCest
         $I->amOnRoute('submitted-flight-plan/prepare-fpl-route', [ 'route_id' => '3', 'aircraft_id' => '2' ]);
 
         $I->see('Flight Plan Submission');
+        $I->see('Route R003 (LEBL-GCLP)');
         $I->seeInField('input[name=aircraftRegistration]', 'EC-BBB');
         $I->seeInField('input[name=aircraftType]', 'B738');
         $I->seeInField('input[name=departure]', 'LEBL');
@@ -357,6 +359,7 @@ class SubmitFplRouteCest
         $I->amOnRoute('submitted-flight-plan/prepare-fpl-route', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
 
         $I->see('Flight Plan Submission');
+        $I->see('Route R001 (LEBL-LEVC)');
         $I->seeInField('input[name=aircraftRegistration]', 'EC-UUU');
         $I->seeInField('input[name=aircraftType]', 'C172');
         $I->seeInField('input[name=departure]', 'LEBL');
@@ -431,6 +434,7 @@ class SubmitFplRouteCest
         $I->amOnRoute('submitted-flight-plan/prepare-fpl-route', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
 
         $I->see('Flight Plan Submission');
+        $I->see('Route R001 (LEBL-LEVC)');
         $I->seeInField('input[name=aircraftRegistration]', 'EC-UUU');
         $I->seeInField('input[name=aircraftType]', 'C172');
         $I->seeInField('input[name=departure]', 'LEBL');
