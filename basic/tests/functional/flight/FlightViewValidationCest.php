@@ -243,6 +243,7 @@ class FlightViewValidationCest
         $I->amLoggedInAs(4);
         $I->amOnRoute('flight/view', ['id' => 1]);
         $I->seeResponseCodeIs(200);
+        $I->see('Stage Tour actual reported #1 (LEBL-LEMD)');
         $I->submitForm('form[action*="validate"]', [
             'action' => 'approve',
             'Flight[validator_comments]' => 'One stage more for complete',
@@ -257,6 +258,7 @@ class FlightViewValidationCest
         $I->amLoggedInAs(4);
         $I->amOnRoute('flight/view', ['id' => 1]);
         $I->seeResponseCodeIs(200);
+        $I->see('Stage Tour actual reported #1 (LEBL-LEMD)');
         $I->submitForm('form[action*="validate"]', [
             'action' => 'approve',
             'Flight[validator_comments]' => 'One stage more for complete',
@@ -268,6 +270,7 @@ class FlightViewValidationCest
         $I->amLoggedInAs(5);
         $I->amOnRoute('flight/view', ['id' => 2]);
         $I->seeResponseCodeIs(200);
+        $I->see('Stage Tour actual reported #2 (LEBL-GCLP)');
         $I->submitForm('form[action*="validate"]', [
             'action' => 'approve',
             'Flight[validator_comments]' => 'Congratulations you have a tour completed',
@@ -290,6 +293,7 @@ class FlightViewValidationCest
         $I->amLoggedInAs(4);
         $I->amOnRoute('flight/view', ['id' => 1]);
         $I->seeResponseCodeIs(200);
+        $I->see('Stage Tour actual reported #1 (LEBL-LEMD)');
         $I->submitForm('form[action*="validate"]', [
             'action' => 'approve',
             'Flight[validator_comments]' => 'One stage more for complete',
@@ -300,6 +304,7 @@ class FlightViewValidationCest
 
         $I->amLoggedInAs(5);
         $I->amOnRoute('flight/view', ['id' => 2]);
+        $I->see('Stage Tour actual reported #2 (LEBL-GCLP)');
         $I->seeResponseCodeIs(200);
         $I->submitForm('form[action*="validate"]', [
             'action' => 'approve',
@@ -315,6 +320,7 @@ class FlightViewValidationCest
         $I->assertEquals(date('Y-m-d'), $tour_completed->completed_at);
 
         $I->amOnRoute('tour/view', ['id' => 3]);
+        $I->seeResponseCodeIs(200);
         $I->see('John Doe');
 
         $tour_completed->completed_at = date('2020-01-10');
@@ -322,6 +328,7 @@ class FlightViewValidationCest
 
         $I->amOnRoute('flight/view', ['id' => 3]);
         $I->seeResponseCodeIs(200);
+        $I->see('Stage Tour actual reported #2 (LEBL-GCLP)');
         $I->submitForm('form[action*="validate"]', [
             'action' => 'approve',
             'Flight[validator_comments]' => 'Congratulations you have a tour completed',
