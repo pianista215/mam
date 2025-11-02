@@ -65,6 +65,7 @@ $this->registerCssFile(
         $items[] =
          ['label' => 'Flights', 'url' => ['/flight/index']];
     }
+    $items[] =  ['label' => 'Tours', 'url' => ['/tour/index']];
     $items[] =
             [
                 'label' => 'Operations',
@@ -72,8 +73,8 @@ $this->registerCssFile(
                     ['label' => 'Aircraft Types', 'url' => ['/aircraft-type/index']],
                     ['label' => 'Aircraft Configurations', 'url' => ['/aircraft-configuration/index']],
                     ['label' => 'Aircrafts', 'url' => ['/aircraft/index']],
-                    ['label' => 'Countries', 'url' => ['/country/index']],
                     ['label' => 'Airports', 'url' => ['/airport/index']],
+                    ['label' => 'Countries', 'url' => ['/country/index']],
                     ['label' => 'Routes', 'url' => ['/route/index']],
                 ],
             ];

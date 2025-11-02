@@ -357,6 +357,7 @@ class FlightReportSubmissionCest
         $I->assertEquals($flight->endurance_time, '0400');
         $I->assertEquals($flight->code, 'R003');
         $I->assertEquals($flight->status, 'C');
+        $I->assertEquals(null, $flight->tour_stage_id);
 
         return $flight_report_id;
     }
@@ -493,6 +494,7 @@ class FlightReportSubmissionCest
         $flight = \app\models\Flight::find()->where(['id' => $flight_report->flight_id])->one();
         $I->assertEquals($flight->flight_level_unit, 'VFR');
         $I->assertEquals($flight->flight_level_value, '');
+        $I->assertEquals(null, $flight->tour_stage_id);
     }
 
     public function testValidFlightReportSubmissionTwice(ApiTester $I)
@@ -566,6 +568,49 @@ class FlightReportSubmissionCest
             'code' => 0,
             'status' => 404
         ]);
+    }
+
+    public function testValidFlightReportSubmissionTour(ApiTester $I)
+    {
+        $request = [
+            'pilot_comments' => 'Good stage',
+            'last_position_lat' => 38.280722,
+            'last_position_lon' => -0.55235,
+            'network' => 'IVAO',
+            'sim_aircraft_name' => 'Xplane King Air 350',
+            'report_tool' => 'Mam Acars 1.0',
+            'start_time' => '2025-02-01 11:00:00',
+            'end_time' => '2025-02-01 12:15:13',
+            'chunks' => [
+                ['id' => 1, 'sha256sum' => str_repeat('A', 44)],
+            ]
+        ];
+
+        // Check tour_stage_id is propagated to flight and data is filled
+        $this->loginAsUser(8, $I);
+        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=4', $request);
+        $I->seeResponseCodeIs(200);
+
+        $response = $I->grabResponse();
+        $data = json_decode($response, true);
+        $I->assertArrayHasKey('flight_report_id', $data);
+        $I->assertCount(1, $data);
+
+        $flight_report_id = $data['flight_report_id'];
+
+        $flight_report = \app\models\FlightReport::find()->where(['id' => $flight_report_id])->one();
+        $I->assertEquals($flight_report->pilot_comments, 'Good stage');
+        $I->assertEquals($flight_report->sim_aircraft_name, 'Xplane King Air 350');
+        $I->assertEquals($flight_report->start_time, '2025-02-01 11:00:00');
+        $I->assertEquals($flight_report->end_time, '2025-02-01 12:15:13');
+
+        $flight = \app\models\Flight::find()->where(['id' => $flight_report->flight_id])->one();
+        $I->assertEquals($flight->flight_level_unit, 'F');
+        $I->assertEquals($flight->flight_level_value, '320');
+        $I->assertEquals(2, $flight->tour_stage_id);
+        $I->assertEquals('TAR1', $flight->code);
+        $I->assertEquals('LEBL', $flight->departure);
+        $I->assertEquals('LEMD', $flight->arrival);
     }
 
 

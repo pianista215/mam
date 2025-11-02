@@ -27,10 +27,14 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
     <?php endif; ?>
 
+    <?= $this->render('_fpl_header', [
+            'entity' => $entity,
+    ]) ?>
+
     <?= $this->render('_form', [
         'model' => $model,
-        'aircraft' => $model->getAircraft()->one(),
-        'route' => $model->getRoute0()->one(),
+        'aircraft' => $model->aircraft,
+        'entity' => $entity,
         'pilotName' => $model->pilot->fullname,
         'mode' => 'view',
     ]) ?>

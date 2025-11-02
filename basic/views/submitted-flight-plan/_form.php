@@ -36,7 +36,7 @@ use yii\widgets\ActiveForm;
     <div class="row mb-3">
         <div class="col-md-4">
             <div>Departure Aerodrome</div>
-            <div><?= Html::input('text', 'departure', $route->departure, ['disabled' => true, 'class' => 'form-control'])?></div>
+            <div><?= Html::input('text', 'departure', $entity->departure, ['disabled' => true, 'class' => 'form-control'])?></div>
         </div>
         <div class="col-md-4">
             <div>Cruising speed</div>
@@ -61,7 +61,7 @@ use yii\widgets\ActiveForm;
     <div class="row mb-3">
         <div class="col-md-3">
             <div>Destination Aerodrome</div>
-            <div><?= Html::input('text', 'destination', $route->arrival, ['disabled' => true, 'class' => 'form-control'])?></div>
+            <div><?= Html::input('text', 'destination', $entity->arrival, ['disabled' => true, 'class' => 'form-control'])?></div>
         </div>
         <div class="col-md-3">
             <div><?= $form->field($model, 'estimated_time')->textInput(['maxlength' => true, 'class' => 'form-control', 'readonly' => ($mode == 'view')])?></div>

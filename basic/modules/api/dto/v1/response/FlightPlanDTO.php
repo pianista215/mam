@@ -21,15 +21,26 @@ class FlightPlanDTO extends Model
     {
         $dto = new self();
         $dto->id = $model->id;
+        $departure = null;
+        $arrival = null;
 
-        $route = $model->route0;
-        $dep = $route->departure0;
+        if(!empty($model->tour_stage_id)){
+            $stage = $model->tourStage;
+            $departure = $stage->departure0;
+            $arrival = $stage->arrival0;
+        } else {
+            $route = $model->route0;
+            $departure = $route->departure0;
+            $arrival = $route->arrival0;
+        }
 
-        $dto->departure_icao = $dep->icao_code;
-        $dto->departure_latitude = $dep->latitude;
-        $dto->departure_longitude = $dep->longitude;
+        $dto->departure_icao = $departure->icao_code;
+        $dto->departure_latitude = $departure->latitude;
+        $dto->departure_longitude = $departure->longitude;
 
-        $dto->arrival_icao = $route->arrival0->icao_code;
+        $dto->arrival_icao = $arrival->icao_code;
+
+
         $dto->alt1_icao = $model->alternative1_icao;
         $dto->alt2_icao = $model->alternative2_icao;
 

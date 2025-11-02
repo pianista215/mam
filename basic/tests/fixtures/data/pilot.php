@@ -118,4 +118,17 @@ return [
         'location' => 'LEBL',
         'date_of_birth' => '1979-08-23',
     ],
+    [
+        'id' => 10,
+        'country_id' => 1,
+        'license' => 'TM1234',
+        'name' => 'Tour',
+        'surname' => 'Mgr',
+        'email' => 'id10@example.com',
+        'password' => Yii::$app->security->generatePasswordHash('otherid10!'),
+        'access_token' => Yii::$app->security->generateRandomString(32),
+        'city' => 'Valladolid',
+        'location' => 'LEAL',
+        'date_of_birth' => '1972-08-23',
+    ],
 ];

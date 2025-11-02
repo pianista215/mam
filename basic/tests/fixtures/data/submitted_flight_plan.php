@@ -52,7 +52,7 @@ return [
     [
         'id' => 4,
         'aircraft_id' => 7,
-        'route_id' => 3,
+        'tour_stage_id' => 2,
         'pilot_id' => 8,
         'flight_rules' => 'Z',
         'alternative1_icao' => 'LEMD',

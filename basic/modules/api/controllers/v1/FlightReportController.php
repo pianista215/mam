@@ -3,6 +3,7 @@
 namespace app\modules\api\controllers\v1;
 
 use app\config\Config;
+use app\helpers\GeoUtils;
 use app\helpers\LoggerTrait;
 use app\models\AcarsFile;
 use app\models\Aircraft;
@@ -106,7 +107,7 @@ class FlightReportController extends Controller
                     throw new ServerErrorHttpException('Error finding nearest airport of '.$dto->last_position_lat.' '.$dto->last_position_lon);
                 }
 
-                $distanceKm = AirportSearch::haversine($dto->last_position_lat, $dto->last_position_lon, $nearestAirport->latitude, $nearestAirport->longitude);
+                $distanceKm = GeoUtils::haversine($dto->last_position_lat, $dto->last_position_lon, $nearestAirport->latitude, $nearestAirport->longitude, 'km');
 
                 $landingAirport = null;
 
@@ -162,14 +163,36 @@ class FlightReportController extends Controller
         }
     }
 
+    private function generateTourStageCode($stage)
+    {
+        $name = $stage->tour->name;
+        $words = preg_split('/\s+/', trim($name));
+
+        $initials = '';
+        foreach ($words as $word) {
+            $initials .= mb_strtoupper(mb_substr($word, 0, 1));
+        }
+        // Take 8 chars (code limit is 10)
+        $initials = mb_substr($initials, 0, 8);
+        return $initials . $stage->sequence;
+    }
+
     private function fillFlightData(SubmittedFlightPlan $submittedFpl, SubmitReportDTO $dto)
     {
         $flight = new Flight();
         $flight->pilot_id = $submittedFpl->pilot_id;
         $flight->aircraft_id = $submittedFpl->aircraft_id;
-        $flight->code = $submittedFpl->route0->code;
-        $flight->departure = $submittedFpl->route0->departure;
-        $flight->arrival = $submittedFpl->route0->arrival;
+        if(!empty($submittedFpl->tour_stage_id)){
+            $flight->tour_stage_id = $submittedFpl->tour_stage_id;
+            $flight->code = $this->generateTourStageCode($submittedFpl->tourStage);
+            $flight->departure = $submittedFpl->tourStage->departure;
+            $flight->arrival = $submittedFpl->tourStage->arrival;
+        } else {
+            $flight->code = $submittedFpl->route0->code;
+            $flight->departure = $submittedFpl->route0->departure;
+            $flight->arrival = $submittedFpl->route0->arrival;
+        }
+
         $flight->alternative1_icao = $submittedFpl->alternative1_icao;
         $flight->alternative2_icao = $submittedFpl->alternative2_icao;
         $flight->flight_rules = $submittedFpl->flight_rules;

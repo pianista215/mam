@@ -11,11 +11,14 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="submitted-flight-plan-create">
 
     <h1><?= Html::encode($this->title) ?></h1>
+    <?= $this->render('_fpl_header', [
+            'entity' => $entity,
+    ]) ?>
 
     <?= $this->render('_form', [
         'model' => $model,
         'aircraft' => $aircraft,
-        'route' => $route,
+        'entity' => $entity,
         'pilotName' => $pilotName,
         'mode' => 'prepare',
     ]) ?>

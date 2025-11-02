@@ -4,29 +4,31 @@ namespace tests\functional\submitFlightPlan;
 
 use tests\fixtures\AuthAssignmentFixture;
 use tests\fixtures\SubmittedFlightPlanFixture;
+use tests\fixtures\TourStageFixture;
 use Yii;
 
-class SubmitFplCest
+class SubmitFplTourCest
 {
     public function _fixtures(){
         return [
             'authAssignment' => AuthAssignmentFixture::class,
             'submittedFlightPlan' => SubmittedFlightPlanFixture::class,
+            'tourStage' => TourStageFixture::class,
         ];
     }
 
-    public function openPrepareFplAsVisitor(\FunctionalTester $I)
+    public function openPrepareFplTourAsVisitor(\FunctionalTester $I)
     {
-        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-tour', [ 'tour_stage_id' => '2', 'aircraft_id' => '3' ]);
         // Check redirect
         $I->seeCurrentUrlMatches('~login~');
         $I->see('Login');
     }
 
-    public function openPrepareFplAsNonActivatedUser(\FunctionalTester $I)
+    public function openPrepareFplTourAsNonActivatedUser(\FunctionalTester $I)
     {
         $I->amLoggedInAs(3);
-        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-tour', [ 'tour_stage_id' => '2', 'aircraft_id' => '3' ]);
 
         $I->see('Forbidden');
         $I->seeResponseCodeIs(403);
@@ -34,10 +36,10 @@ class SubmitFplCest
         $I->dontSee('Submit FPL', 'button');
     }
 
-    public function openPrepareFplRouteDepartureDifferentFromUserLocation(\FunctionalTester $I)
+    public function openPrepareFplTourDepartureDifferentFromUserLocation(\FunctionalTester $I)
     {
         $I->amLoggedInAs(2);
-        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-tour', [ 'tour_stage_id' => '2', 'aircraft_id' => '3' ]);
 
         $I->see('Forbidden');
         $I->seeResponseCodeIs(403);
@@ -45,10 +47,10 @@ class SubmitFplCest
         $I->dontSee('Submit FPL', 'button');
     }
 
-    public function openPrepareFplAircraftInDifferentLocation(\FunctionalTester $I)
+    public function openPrepareFplTourAircraftInDifferentLocation(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
-        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '1', 'aircraft_id' => '1' ]);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-tour', [ 'tour_stage_id' => '2', 'aircraft_id' => '1' ]);
 
         $I->see('Forbidden');
         $I->seeResponseCodeIs(403);
@@ -56,10 +58,10 @@ class SubmitFplCest
         $I->dontSee('Submit FPL', 'button');
     }
 
-    public function openPrepareFplAircraftBadRangeForRoute(\FunctionalTester $I)
+    public function openPrepareFplTourAircraftBadRangeForRoute(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
-        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '3', 'aircraft_id' => '3' ]);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-tour', [ 'tour_stage_id' => '3', 'aircraft_id' => '3' ]);
 
         $I->see('Forbidden');
         $I->seeResponseCodeIs(403);
@@ -67,10 +69,10 @@ class SubmitFplCest
         $I->dontSee('Submit FPL', 'button');
     }
 
-    public function openPrepareFplAircraftValidButAlreadyReserved(\FunctionalTester $I)
+    public function openPrepareFplTourAircraftValidButAlreadyReserved(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
-        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '3', 'aircraft_id' => '4' ]);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-tour', [ 'tour_stage_id' => '3', 'aircraft_id' => '4' ]);
 
         $I->see('Forbidden');
         $I->seeResponseCodeIs(403);
@@ -78,10 +80,21 @@ class SubmitFplCest
         $I->dontSee('Submit FPL', 'button');
     }
 
-    public function openPrepareFplButAlreadyHaveOneSubmitted(\FunctionalTester $I)
+    public function openPrepareFplTourInactive(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(1);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-tour', [ 'tour_stage_id' => '1', 'aircraft_id' => '2' ]);
+
+        $I->see('Forbidden: Tour is not active.');
+        $I->seeResponseCodeIs(403);
+        $I->dontSee('Flight Plan Submission');
+        $I->dontSee('Submit FPL', 'button');
+    }
+
+    public function openPrepareFplTourButAlreadyHaveOneSubmitted(\FunctionalTester $I)
     {
         $I->amLoggedInAs(5);
-        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '3', 'aircraft_id' => '4' ]);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-tour', [ 'tour_stage_id' => '3', 'aircraft_id' => '4' ]);
 
         $I->seeResponseCodeIs(200);
         $I->seeInCurrentUrl('submitted-flight-plan/view');
@@ -89,24 +102,24 @@ class SubmitFplCest
         $I->dontSee('Submit FPL', 'button');
     }
 
-    public function openPrepareFplAircraftValidRangeForRoute(\FunctionalTester $I)
+    public function openPrepareFplTourAircraftValidRangeForRoute(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
-        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-tour', [ 'tour_stage_id' => '2', 'aircraft_id' => '3' ]);
 
         $I->see('Flight Plan Submission');
         $I->seeInField('input[name=aircraftRegistration]', 'EC-UUU');
         $I->seeInField('input[name=aircraftType]', 'C172');
         $I->seeInField('input[name=departure]', 'LEBL');
-        $I->seeInField('input[name=destination]', 'LEVC');
+        $I->seeInField('input[name=destination]', 'LEMD');
         $I->seeInField('input[name=pilot]', 'John Doe');
         $I->see('Submit FPL', 'button');
     }
 
-    public function openPrepareFplEmptyFields(\FunctionalTester $I)
+    public function openPrepareFplTourEmptyFields(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
-        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '3', 'aircraft_id' => '2' ]);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-tour', [ 'tour_stage_id' => '3', 'aircraft_id' => '2' ]);
 
         $I->see('Flight Plan Submission');
         $I->seeInField('input[name=aircraftRegistration]', 'EC-BBB');
@@ -130,12 +143,13 @@ class SubmitFplCest
         $I->assertEquals(4, $count);
     }
 
-    public function openPrepareFplInvalidAlternatives(\FunctionalTester $I)
+    public function openPrepareFplTourInvalidAlternatives(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
-        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '3', 'aircraft_id' => '2' ]);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-tour', [ 'tour_stage_id' => '3', 'aircraft_id' => '2' ]);
 
         $I->see('Flight Plan Submission');
+        $I->see('Stage Tour actual reported #2 (LEBL-GCLP)');
         $I->seeInField('input[name=aircraftRegistration]', 'EC-BBB');
         $I->seeInField('input[name=aircraftType]', 'B738');
         $I->seeInField('input[name=departure]', 'LEBL');
@@ -171,12 +185,13 @@ class SubmitFplCest
         $I->assertEquals(4, $count);
     }
 
-    public function openPrepareFplInvalidIntegerFields(\FunctionalTester $I)
+    public function openPrepareFplTourInvalidIntegerFields(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
-        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '3', 'aircraft_id' => '2' ]);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-tour', [ 'tour_stage_id' => '3', 'aircraft_id' => '2' ]);
 
         $I->see('Flight Plan Submission');
+        $I->see('Stage Tour actual reported #2 (LEBL-GCLP)');
         $I->seeInField('input[name=aircraftRegistration]', 'EC-BBB');
         $I->seeInField('input[name=aircraftType]', 'B738');
         $I->seeInField('input[name=departure]', 'LEBL');
@@ -207,16 +222,17 @@ class SubmitFplCest
         $I->assertEquals(4, $count);
     }
 
-    public function openPrepareFplValidVFRPlan(\FunctionalTester $I)
+    public function openPrepareFplTourValidVFRPlan(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
-        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-tour', [ 'tour_stage_id' => '2', 'aircraft_id' => '3' ]);
 
         $I->see('Flight Plan Submission');
+        $I->see('Stage Tour actual reported #1 (LEBL-LEMD)');
         $I->seeInField('input[name=aircraftRegistration]', 'EC-UUU');
         $I->seeInField('input[name=aircraftType]', 'C172');
         $I->seeInField('input[name=departure]', 'LEBL');
-        $I->seeInField('input[name=destination]', 'LEVC');
+        $I->seeInField('input[name=destination]', 'LEMD');
         $I->seeInField('input[name=pilot]', 'John Doe');
         $I->see('Submit FPL', 'button');
 
@@ -250,7 +266,7 @@ class SubmitFplCest
 
         $I->seeInField('textarea[name="SubmittedFlightPlan[route]"]', 'S // N');
 
-        $I->seeInField('input[name="destination"]', 'LEVC');
+        $I->seeInField('input[name="destination"]', 'LEMD');
         $I->seeInField('input[name="SubmittedFlightPlan[estimated_time]"]', '0130');
         $I->seeInField('input[name="SubmittedFlightPlan[alternative1_icao]"]', 'LEAL');
         $I->seeInField('input[name="SubmittedFlightPlan[alternative2_icao]"]', 'LEBL');
@@ -263,7 +279,8 @@ class SubmitFplCest
         $model = \app\models\SubmittedFlightPlan::find()->where(['pilot_id' => '1'])->one();
         $I->assertNotNull($model);
         $I->assertEquals(3, $model->aircraft_id);
-        $I->assertEquals(1, $model->route_id);
+        $I->assertEquals(null, $model->route_id);
+        $I->assertEquals(2, $model->tour_stage_id);
         $I->assertEquals('V', $model->flight_rules);
         $I->assertEquals('K', $model->cruise_speed_unit);
         $I->assertEquals('100', $model->cruise_speed_value);
@@ -280,12 +297,13 @@ class SubmitFplCest
         $I->assertEquals(5, $count);
     }
 
-    public function openPrepareFplValidIFRPlan(\FunctionalTester $I)
+    public function openPrepareFplTourValidIFRPlan(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
-        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '3', 'aircraft_id' => '2' ]);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-tour', [ 'tour_stage_id' => '3', 'aircraft_id' => '2' ]);
 
         $I->see('Flight Plan Submission');
+        $I->see('Stage Tour actual reported #2 (LEBL-GCLP)');
         $I->seeInField('input[name=aircraftRegistration]', 'EC-BBB');
         $I->seeInField('input[name=aircraftType]', 'B738');
         $I->seeInField('input[name=departure]', 'LEBL');
@@ -332,7 +350,8 @@ class SubmitFplCest
         $model = \app\models\SubmittedFlightPlan::find()->where(['pilot_id' => '1'])->one();
         $I->assertNotNull($model);
         $I->assertEquals(2, $model->aircraft_id);
-        $I->assertEquals(3, $model->route_id);
+        $I->assertEquals(null, $model->route_id);
+        $I->assertEquals(3, $model->tour_stage_id);
         $I->assertEquals('I', $model->flight_rules);
         $I->assertEquals('N', $model->cruise_speed_unit);
         $I->assertEquals('350', $model->cruise_speed_value);
@@ -349,16 +368,17 @@ class SubmitFplCest
         $I->assertEquals(5, $count);
     }
 
-    public function openPrepareFplValidIFRToVFRPlan(\FunctionalTester $I)
+    public function openPrepareFplTourValidIFRToVFRPlan(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
-        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-tour', [ 'tour_stage_id' => '2', 'aircraft_id' => '3' ]);
 
         $I->see('Flight Plan Submission');
+        $I->see('Stage Tour actual reported #1 (LEBL-LEMD)');
         $I->seeInField('input[name=aircraftRegistration]', 'EC-UUU');
         $I->seeInField('input[name=aircraftType]', 'C172');
         $I->seeInField('input[name=departure]', 'LEBL');
-        $I->seeInField('input[name=destination]', 'LEVC');
+        $I->seeInField('input[name=destination]', 'LEMD');
         $I->seeInField('input[name=pilot]', 'John Doe');
         $I->see('Submit FPL', 'button');
 
@@ -392,7 +412,7 @@ class SubmitFplCest
 
         $I->seeInField('textarea[name="SubmittedFlightPlan[route]"]', 'LOTOS VFR');
 
-        $I->seeInField('input[name="destination"]', 'LEVC');
+        $I->seeInField('input[name="destination"]', 'LEMD');
         $I->seeInField('input[name="SubmittedFlightPlan[estimated_time]"]', '0132');
         $I->seeInField('input[name="SubmittedFlightPlan[alternative1_icao]"]', 'LEAL');
         $I->seeInField('input[name="SubmittedFlightPlan[alternative2_icao]"]', '');
@@ -405,7 +425,8 @@ class SubmitFplCest
         $model = \app\models\SubmittedFlightPlan::find()->where(['pilot_id' => '1'])->one();
         $I->assertNotNull($model);
         $I->assertEquals(3, $model->aircraft_id);
-        $I->assertEquals(1, $model->route_id);
+        $I->assertEquals(null, $model->route_id);
+        $I->assertEquals(2, $model->tour_stage_id);
         $I->assertEquals('Y', $model->flight_rules);
         $I->assertEquals('N', $model->cruise_speed_unit);
         $I->assertEquals('110', $model->cruise_speed_value);
@@ -422,16 +443,17 @@ class SubmitFplCest
         $I->assertEquals(5, $count);
     }
 
-    public function openPrepareFplValidVFRToIFRPlan(\FunctionalTester $I)
+    public function openPrepareFplTourValidVFRToIFRPlan(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
-        $I->amOnRoute('submitted-flight-plan/prepare-fpl', [ 'route_id' => '1', 'aircraft_id' => '3' ]);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-tour', [ 'tour_stage_id' => '2', 'aircraft_id' => '3' ]);
 
         $I->see('Flight Plan Submission');
+        $I->see('Stage Tour actual reported #1 (LEBL-LEMD)');
         $I->seeInField('input[name=aircraftRegistration]', 'EC-UUU');
         $I->seeInField('input[name=aircraftType]', 'C172');
         $I->seeInField('input[name=departure]', 'LEBL');
-        $I->seeInField('input[name=destination]', 'LEVC');
+        $I->seeInField('input[name=destination]', 'LEMD');
         $I->seeInField('input[name=pilot]', 'John Doe');
         $I->see('Submit FPL', 'button');
 
@@ -465,7 +487,7 @@ class SubmitFplCest
 
         $I->seeInField('textarea[name="SubmittedFlightPlan[route]"]', 'DCT LOTOS M985 SOPET');
 
-        $I->seeInField('input[name="destination"]', 'LEVC');
+        $I->seeInField('input[name="destination"]', 'LEMD');
         $I->seeInField('input[name="SubmittedFlightPlan[estimated_time]"]', '0140');
         $I->seeInField('input[name="SubmittedFlightPlan[alternative1_icao]"]', 'LEAL');
         $I->seeInField('input[name="SubmittedFlightPlan[alternative2_icao]"]', 'LEBL');
@@ -478,7 +500,8 @@ class SubmitFplCest
         $model = \app\models\SubmittedFlightPlan::find()->where(['pilot_id' => '1'])->one();
         $I->assertNotNull($model);
         $I->assertEquals(3, $model->aircraft_id);
-        $I->assertEquals(1, $model->route_id);
+        $I->assertEquals(null, $model->route_id);
+        $I->assertEquals(2, $model->tour_stage_id);
         $I->assertEquals('Z', $model->flight_rules);
         $I->assertEquals('M', $model->cruise_speed_unit);
         $I->assertEquals('020', $model->cruise_speed_value);

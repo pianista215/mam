@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\helpers\CustomRules;
+use app\helpers\GeoUtils;
 use Yii;
 
 /**
@@ -39,6 +40,7 @@ class Route extends \yii\db\ActiveRecord
             [['code'], 'filter', 'filter' => [CustomRules::class, 'removeSpaces']],
             [['code'], 'string', 'max' => 10],
             [['departure', 'arrival'], 'string', 'length' => 4],
+            [['departure', 'arrival'], 'filter', 'filter' => 'strtoupper'],
             [['code'], 'unique'],
             [['departure', 'arrival'], 'unique', 'targetAttribute' => ['departure', 'arrival']],
             [['arrival'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['arrival' => 'icao_code']],
@@ -58,6 +60,11 @@ class Route extends \yii\db\ActiveRecord
             'arrival' => 'Arrival',
             'distance_nm' => 'Distance Nm',
         ];
+    }
+
+    public function getFplDescription()
+    {
+        return 'Route '.$this->code.' ('.$this->departure.'-'.$this->arrival.')';
     }
 
     /**
@@ -90,20 +97,6 @@ class Route extends \yii\db\ActiveRecord
         return $this->hasMany(SubmittedFlightplan::class, ['route_id' => 'id']);
     }
 
-    /**
-     * Calculate the distance between twi points in NM (https://gist.github.com/teachmeter/3014803)
-     * TODO: Better as static function outside here????
-     */
-    protected function distanceBetween($lat1, $lon1, $lat2, $lon2)
-    {
-        $theta = $lon1 - $lon2;
-        $dist = sin(deg2rad($lat1)) * sin(deg2rad($lat2)) +  cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * cos(deg2rad($theta));
-        $dist = acos($dist);
-        $dist = rad2deg($dist);
-        $miles = $dist * 60 * 1.1515;
-        return $miles * 0.8684;
-    }
-
     public function beforeSave($insert)
     {
         if (parent::beforeSave($insert)) {
@@ -112,7 +105,7 @@ class Route extends \yii\db\ActiveRecord
             }
             $dep = $this->departure0;
             $arr = $this->arrival0;
-            $this->distance_nm = $this->distanceBetween($dep->latitude, $dep->longitude, $arr->latitude, $arr->longitude);
+            $this->distance_nm = GeoUtils::haversine($dep->latitude, $dep->longitude, $arr->latitude, $arr->longitude, 'nm');
             return true;
         }
         return false;

@@ -181,7 +181,7 @@ class SubmittedFlightPlanIndexViewCest
         $I->seeInField('input[name=aircraftRegistration]', 'EC-FOS');
         $I->seeInField('input[name=aircraftType]', 'B738');
         $I->seeInField('input[name=departure]', 'LEBL');
-        $I->seeInField('input[name=destination]', 'GCLP');
+        $I->seeInField('input[name=destination]', 'LEMD');
         $I->seeInField('input[name=pilot]', 'Other Ifr School');
         $I->seeInField('textarea[name="SubmittedFlightPlan[route]"]', 'DCT EXAMPLE L444 EXAMPLE2');
         $I->seeInField('select[name="SubmittedFlightPlan[flight_rules]"]', 'Z - VFR/IFR (VFR changing to IFR)');
@@ -201,7 +201,7 @@ class SubmittedFlightPlanIndexViewCest
         $I->seeInField('input[name=aircraftRegistration]', 'EC-FOS');
         $I->seeInField('input[name=aircraftType]', 'B738');
         $I->seeInField('input[name=departure]', 'LEBL');
-        $I->seeInField('input[name=destination]', 'GCLP');
+        $I->seeInField('input[name=destination]', 'LEMD');
         $I->seeInField('input[name=pilot]', 'Other Ifr School');
         $I->seeInField('textarea[name="SubmittedFlightPlan[route]"]', 'DCT EXAMPLE L444 EXAMPLE2');
         $I->seeInField('select[name="SubmittedFlightPlan[flight_rules]"]', 'Z - VFR/IFR (VFR changing to IFR)');

@@ -80,6 +80,7 @@ class RouteCreateCest
        $I->assertNotNull($model);
        $I->assertEquals('LEMD', $model->departure);
        $I->assertEquals('LEVC', $model->arrival);
+       $I->assertEquals(153, $model->distance_nm);
 
        $count = \app\models\Route::find()->count();
        $I->assertEquals(4, $count);

@@ -83,6 +83,15 @@ class GetCurrentFplCest
         $submittedFpl = \app\models\SubmittedFlightPlan::find()->where(['pilot_id' => $id])->one();
         $dto = FlightPlanDTO::fromModel($submittedFpl);
 
+        $I->assertNotNull($dto->id);
+        $I->assertNotNull($dto->departure_icao);
+        $I->assertNotNull($dto->departure_latitude);
+        $I->assertNotNull($dto->departure_longitude);
+        $I->assertNotNull($dto->arrival_icao);
+        $I->assertNotNull($dto->alt1_icao);
+        $I->assertNotNull($dto->aircraft_type_icao);
+        $I->assertNotNull($dto->aircraft_reg);
+
         $I->seeResponseContainsJson($dto->toArray());
     }
 

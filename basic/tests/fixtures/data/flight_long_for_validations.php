@@ -26,6 +26,7 @@ return [
         'report_tool' => 'Mam Acars',
         'status' => 'V',
         'creation_date' => date('Y-m-d H:i:s', strtotime('-1 day')),
+        'tour_stage_id' => 2,
     ],
 
     // IFR flight, status V
@@ -49,6 +50,7 @@ return [
         'report_tool' => 'Mam Acars',
         'status' => 'V',
         'creation_date' => date('Y-m-d H:i:s', strtotime('-1 day')),
+        'tour_stage_id' => 3,
     ],
 
     // Y flight, status V
@@ -72,6 +74,7 @@ return [
         'report_tool' => 'Mam Acars',
         'status' => 'V',
         'creation_date' => date('Y-m-d H:i:s', strtotime('-1 day')),
+        'tour_stage_id' => 3,
     ],
 
     // Z flight, status V
