@@ -162,7 +162,7 @@ class FlightController extends Controller
                                 'status' => 'F',
                             ])
                             ->andWhere(['in', 'tour_stage_id', $tour->getTourStages()->select('id')])
-                            ->count();
+                            ->count('DISTINCT tour_stage_id');
 
                         if ($completedStages === $totalStages) {
                             $completion = new PilotTourCompletion([
