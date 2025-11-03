@@ -290,6 +290,32 @@ class FlightViewValidationCest
         $I->see('John Doe');
     }
 
+    public function validationNotCompletedIfOneFlightIsRepeated(FunctionalTester $I)
+    {
+        $I->amLoggedInAs(5);
+        $I->amOnRoute('flight/view', ['id' => 2]);
+        $I->seeResponseCodeIs(200);
+        $I->see('Stage Tour actual reported #2 (LEBL-GCLP)');
+        $I->submitForm('form[action*="validate"]', [
+            'action' => 'approve',
+            'Flight[validator_comments]' => 'One stage more for complete',
+        ]);
+        $I->seeResponseCodeIs(200);
+        $countFirst = \app\models\PilotTourCompletion::find(['tour_id' => '3'])->count();
+        $I->assertEquals(0, $countFirst);
+
+        $I->amOnRoute('flight/view', ['id' => 3]);
+        $I->seeResponseCodeIs(200);
+        $I->see('Stage Tour actual reported #2 (LEBL-GCLP)');
+        $I->submitForm('form[action*="validate"]', [
+            'action' => 'approve',
+            'Flight[validator_comments]' => 'Stage repeated',
+        ]);
+        $I->seeResponseCodeIs(200);
+        $countSecond = \app\models\PilotTourCompletion::find(['tour_id' => '3'])->count();
+        $I->assertEquals(0, $countSecond);
+    }
+
     public function validationIgnoreIfTourIsAlreadyCompleted(FunctionalTester $I)
     {
         $I->amLoggedInAs(4);
