@@ -40,12 +40,13 @@ class RankSearch extends Rank
      */
     public function search($params)
     {
-        $query = Rank::find();
+        $query = Rank::find()->orderBy(['position' => SORT_ASC]);
 
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => false,
         ]);
 
         $this->load($params);
