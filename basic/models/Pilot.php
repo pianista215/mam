@@ -28,11 +28,13 @@ use Yii;
  * @property string $location
  * @property string|null $pwd_reset_token
  * @property string|null $pwd_reset_token_created_at
+ * @property int|null $rank_id
  *
  * @property Country $country
  * @property FlightReport[] $flightReports
  * @property SubmittedFlightplan $submittedFlightplan
  * @property PilotTourCompletion[] $pilotTourCompletions
+ * @property Rank $rank
  * @property Tour[] $tours
  */
 class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
@@ -71,7 +73,7 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
             [['registration_date', 'date_of_birth', 'pwd_reset_token_created_at'], 'safe'],
             ['date_of_birth', 'date', 'format' => 'php:Y-m-d'],
             [['date_of_birth'], 'compare', 'compareValue' => date('Y-m-d'), 'operator' => '<', 'message' => 'The date of birth must be earlier than today.'],
-            [['country_id', 'vatsim_id', 'ivao_id'], 'integer'],
+            [['country_id', 'vatsim_id', 'ivao_id', 'rank_id'], 'integer'],
             [['hours_flown'], 'number'],
             [['license'], 'filter', 'filter' => [CustomRules::class, 'removeSpaces']],
             [['license'], 'string', 'max' => 8],
@@ -87,6 +89,7 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
             [['email'], 'unique'],
             [['license'], 'unique'],
             [['location'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['location' => 'icao_code']],
+            [['rank_id'], 'exist', 'skipOnError' => true, 'targetClass' => Rank::class, 'targetAttribute' => ['rank_id' => 'id']],
             [['country_id'], 'exist', 'skipOnError' => true, 'targetClass' => Country::class, 'targetAttribute' => ['country_id' => 'id']],
         ], $this->passwordRules());
     }
@@ -114,6 +117,7 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
             'access_token' => 'Access Token',
             'hours_flown' => 'Hours Flown',
             'location' => 'Location',
+            'rank_id' => 'Rank ID',
         ];
     }
 
@@ -165,6 +169,16 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     public function getPilotTourCompletions()
     {
         return $this->hasMany(PilotTourCompletion::class, ['pilot_id' => 'id']);
+    }
+
+    /**
+     * Gets query for [[Rank]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getRank()
+    {
+        return $this->hasOne(Rank::class, ['id' => 'rank_id']);
     }
 
     /**
