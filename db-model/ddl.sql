@@ -14,7 +14,7 @@ CREATE TABLE `country` (
   `iso2_code` char(2) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `countries_unique` (`iso2_code`)
-) ENGINE=InnoDB AUTO_INCREMENT=261 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `airport` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -37,7 +37,7 @@ CREATE TABLE `aircraft_type` (
   `max_nm_range` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `aircraft_types_unique` (`icao_type_code`)
-) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `aircraft_configuration` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -64,7 +64,16 @@ CREATE TABLE `aircraft` (
   KEY `aircrafts_airports_FK` (`location`),
   CONSTRAINT `aircraft_aircraft_configuration_FK` FOREIGN KEY (`aircraft_configuration_id`) REFERENCES `aircraft_configuration` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `aircrafts_airports_FK` FOREIGN KEY (`location`) REFERENCES `airport` (`icao_code`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=88 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `rank` (
+  `id` tinyint(3) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `position` tinyint(3) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `rank_name_unique` (`name`),
+  UNIQUE KEY `rank_position_unique` (`position`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `pilot` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -85,14 +94,17 @@ CREATE TABLE `pilot` (
   `location` char(4) NOT NULL,
   `pwd_reset_token` varchar(255) DEFAULT NULL,
   `pwd_reset_token_created_at` datetime DEFAULT NULL,
+  `rank_id` tinyint(3) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `pilot_unique` (`email`),
   UNIQUE KEY `pilots_unique_license` (`license`),
   KEY `pilots_countries_FK` (`country_id`),
   KEY `pilot_airport_FK` (`location`),
+  KEY `pilot_rank_FK` (`rank_id`),
   CONSTRAINT `pilot_airport_FK` FOREIGN KEY (`location`) REFERENCES `airport` (`icao_code`) ON UPDATE CASCADE,
+  CONSTRAINT `pilot_rank_FK` FOREIGN KEY (`rank_id`) REFERENCES `rank` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `pilots_countries_FK` FOREIGN KEY (`country_id`) REFERENCES `country` (`id`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `route` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
