@@ -85,21 +85,6 @@ class m241202_180323_add_rbac_roles extends Migration
         $auth->addChild($fleetManager, $moveAircraft);
         $auth->addChild($fleetManager, $cancelAircraftReservation);
 
-        // Certifier
-        $issueLicense = $auth->createPermission('issueLicense');
-        $issueLicense->description = 'Issues or renew a license to a pilot';
-        $auth->add($issueLicense);
-
-        // Needed???
-        $validateLicenseFlight = $auth->createPermission('validateLicenseFlight');
-        $validateLicenseFlight->description = 'Validate a flight required to obtain a license';
-        $auth->add($validateLicenseFlight);
-
-        $certifier = $auth->createRole('certifier');
-        $auth->add($certifier);
-        $auth->addChild($certifier, $issueLicense);
-        $auth->addChild($certifier, $validateLicenseFlight);
-
         // Route Manager
         $routeCrud = $auth->createPermission('routeCrud');
         $routeCrud->description = 'Can create, delete or modify routes';
@@ -147,6 +132,10 @@ class m241202_180323_add_rbac_roles extends Migration
         $roleAssignment->description = 'Can assign or remove roles to other users';
         $auth->add($roleAssignment);
 
+        $rankCrud = $auth->createPermission('rankCrud');
+        $rankCrud->description = 'Can create, delete or modify ranks';
+        $auth->add($rankCrud);
+
         $admin = $auth->createRole('admin');
         $auth->add($admin);
         $auth->addChild($admin, $userCrud);
@@ -155,11 +144,11 @@ class m241202_180323_add_rbac_roles extends Migration
         $auth->addChild($admin, $airportCrud);
         $auth->addChild($admin, $countryCrud);
         $auth->addChild($admin, $roleAssignment);
+        $auth->addChild($admin, $rankCrud);
         $auth->addChild($admin, $pilot);
         $auth->addChild($admin, $vfrValidator);
         $auth->addChild($admin, $ifrValidator);
         $auth->addChild($admin, $fleetManager);
-        $auth->addChild($admin, $certifier);
         $auth->addChild($admin, $routeManager);
         $auth->addChild($admin, $tourManager);
     }

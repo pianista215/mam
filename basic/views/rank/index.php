@@ -16,7 +16,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="rank-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-    <?php if(Yii::$app->user->can('issueLicense')) : ?>
+    <?php if(Yii::$app->user->can('rankCrud')) : ?>
     <p>
         <?= Html::a('Create Rank', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
@@ -33,10 +33,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => ActionColumn::className(),
                 'visibleButtons'=>[
                     'delete'=> function($model){
-                        return Yii::$app->user->can('issueLicense');
+                        return Yii::$app->user->can('rankCrud');
                     },
                     'update'=> function($model){
-                        return Yii::$app->user->can('issueLicense');
+                        return Yii::$app->user->can('rankCrud');
                     },
                 ],
                 'urlCreator' => function ($action, Rank $model, $key, $index, $column) {

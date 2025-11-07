@@ -80,7 +80,7 @@ class RankController extends Controller
      */
     public function actionCreate()
     {
-        if(Yii::$app->user->can('issueLicense')){
+        if(Yii::$app->user->can('rankCrud')){
             $model = new Rank();
 
             if ($this->request->isPost) {
@@ -89,6 +89,7 @@ class RankController extends Controller
                 }
             } else {
                 $model->loadDefaultValues();
+                $model->position = Rank::find()->count() + 1;
             }
 
             return $this->render('create', [
@@ -108,7 +109,7 @@ class RankController extends Controller
      */
     public function actionUpdate($id)
     {
-        if(Yii::$app->user->can('issueLicense')){
+        if(Yii::$app->user->can('rankCrud')){
             $model = $this->findModel($id);
 
             if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
@@ -132,7 +133,7 @@ class RankController extends Controller
      */
     public function actionDelete($id)
     {
-        if(Yii::$app->user->can('issueLicense')){
+        if(Yii::$app->user->can('rankCrud')){
             $this->findModel($id)->delete();
 
             return $this->redirect(['index']);
