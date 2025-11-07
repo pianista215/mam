@@ -35,6 +35,11 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'location')->textInput(['maxlength' => true]) ?>
 
+    <?= $form->field($model, 'rank_id')->dropdownList(
+            $ranks,
+            ['prompt'=>'Select Rank']
+        ); ?>
+
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>

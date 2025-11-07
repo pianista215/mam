@@ -35,9 +35,20 @@ $this->params['breadcrumbs'][] = $this->title;
             'license',
             'name',
             'surname',
+            [
+                'label' => 'Rank',
+                'value' => function ($model) {
+                    $rank = $model->rank->name ?? null;
+                    return $rank !== null
+                        ? $rank
+                        : '-';
+                },
+                'format' => 'text',
+            ],
             'location',
             [
                 'attribute' => 'hours_flown',
+                'filter' => false,
                 'value' => function ($model) {
                     return TimeHelper::formatHoursMinutes($model->hours_flown);
                 },
