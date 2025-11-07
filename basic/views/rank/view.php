@@ -1,5 +1,6 @@
 <?php
 
+use app\helpers\TimeHelper;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\data\ArrayDataProvider;
@@ -60,24 +61,22 @@ $this->params['breadcrumbs'][] = $this->title;
             'summary' => false,
             'columns' => [
                 ['class' => 'yii\grid\SerialColumn'],
+                'license',
                 [
                     'attribute' => 'name',
                     'label' => 'Pilot Name',
                     'value' => fn($pilot) => Html::a(
-                        Html::encode($pilot->name),
+                        Html::encode($pilot->fullname),
                         ['pilot/view', 'id' => $pilot->id],
                         ['class' => 'text-decoration-none']
                     ),
                     'format' => 'raw',
                 ],
                 [
-                    'attribute' => 'callsign',
-                    'label' => 'Callsign',
-                ],
-                [
-                    'attribute' => 'hours',
-                    'label' => 'Flight Hours',
-                    'value' => fn($pilot) => number_format($pilot->hours ?? 0, 1) . ' h',
+                    'label' => 'Hours Flown',
+                    'value' => function ($model) {
+                        return TimeHelper::formatHoursMinutes($model->hours_flown);
+                    },
                 ],
             ],
             'tableOptions' => ['class' => 'table table-striped table-bordered align-middle mb-0'],
