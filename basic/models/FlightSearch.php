@@ -99,4 +99,29 @@ class FlightSearch extends Flight
 
         return $dataProvider;
     }
+
+    public function searchForPilot($pilotId, $params)
+    {
+        $query = Flight::find()->where(['pilot_id' => $pilotId]);
+
+        $dataProvider = new \yii\data\ActiveDataProvider([
+            'query' => $query,
+            'sort' => ['defaultOrder' => ['creation_date' => SORT_DESC]],
+            'pagination' => ['pageSize' => 10],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            return $dataProvider;
+        }
+
+        $query->andFilterWhere(['like', 'departure', $this->departure])
+              ->andFilterWhere(['like', 'arrival', $this->arrival])
+              //->andFilterWhere(['like', 'aircraft', $this->aircraft_id])
+              ->andFilterWhere(['>=', 'creation_date', $this->creation_date]);
+
+        return $dataProvider;
+    }
+
 }

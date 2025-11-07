@@ -132,6 +132,16 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     }
 
     /**
+     * Gets query for [[Flights]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getFlights()
+    {
+        return $this->hasMany(Flight::class, ['pilot_id' => 'id']);
+    }
+
+    /**
      * Gets query for [[FlightReports]].
      *
      * @return \yii\db\ActiveQuery

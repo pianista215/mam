@@ -7,6 +7,7 @@ use app\config\Config;
 use app\models\ChangePasswordForm;
 use app\models\Country;
 use app\models\ForgotPasswordForm;
+use app\models\FlightSearch;
 use app\models\Page;
 use app\models\PageContent;
 use app\models\Pilot;
@@ -86,8 +87,14 @@ class PilotController extends Controller
      */
     public function actionView($id)
     {
+        $model = $this->findModel($id);
+        $flightSearch = new FlightSearch();
+        $flightsProvider = $flightSearch->searchForPilot($model->id, Yii::$app->request->queryParams);
+
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $model,
+            'flightSearch' => $flightSearch,
+            'flightsProvider' => $flightsProvider,
         ]);
     }
 
