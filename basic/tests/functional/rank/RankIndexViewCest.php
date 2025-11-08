@@ -1,97 +1,96 @@
 <?php
 
-namespace tests\functional\route;
+namespace tests\functional\rank;
 
 use tests\fixtures\AuthAssignmentFixture;
-use tests\fixtures\RouteFixture;
 use Yii;
 
-class RouteIndexViewCest
+class RankIndexViewCest
 {
     public function _fixtures(){
         return [
             'authAssignment' => AuthAssignmentFixture::class,
-            'route' => RouteFixture::class,
         ];
     }
 
-    private function checkRouteIndexCommon(\FunctionalTester $I){
-        $I->amOnRoute('route/index');
+    private function checkRankIndexCommon(\FunctionalTester $I){
+        $I->amOnRoute('rank/index');
 
-        $I->see('Routes');
+        $I->see('Ranks');
         $I->see('Showing 1-3 of 3 items.');
-        $I->see('LEBL');
-        $I->see('LEVC');
-        $I->see('GCLP');
-        $I->see('R001');
-        $I->see('R002');
-        $I->see('R003');
+        $I->see('Rank 1');
+        $I->see('Rank 2');
+        $I->see('Rank 3');
     }
 
-    public function openRouteIndexAsAdmin(\FunctionalTester $I)
+    public function openRankIndexAsAdmin(\FunctionalTester $I)
     {
         $I->amLoggedInAs(2);
 
-        $this->checkRouteIndexCommon($I);
+        $this->checkRankIndexCommon($I);
 
-        $I->see('Create Route', 'a');
+        $I->see('Create Rank', 'a');
         $I->seeElement('a', ['title' => 'View']);
         $I->seeElement('a', ['title' => 'Update']);
         $I->seeElement('a', ['title' => 'Delete']);
     }
 
-    public function openRouteIndexAsUser(\FunctionalTester $I)
+    public function openRankIndexAsUser(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
 
-        $this->checkRouteIndexCommon($I);
+        $this->checkRankIndexCommon($I);
 
-        $I->dontSee('Create Route', 'a');
+        $I->dontSee('Create Rank', 'a');
         $I->seeElement('a', ['title' => 'View']);
         $I->dontSeeElement('a', ['title' => 'Update']);
         $I->dontSeeElement('a', ['title' => 'Delete']);
     }
 
-    public function openRouteIndexAsVisitor(\FunctionalTester $I)
+    public function openRankIndexAsVisitor(\FunctionalTester $I)
     {
-        $this->checkRouteIndexCommon($I);
+        $this->checkRankIndexCommon($I);
 
-        $I->dontSee('Create Route', 'a');
+        $I->dontSee('Create Rank', 'a');
         $I->seeElement('a', ['title' => 'View']);
         $I->dontSeeElement('a', ['title' => 'Update']);
         $I->dontSeeElement('a', ['title' => 'Delete']);
     }
 
-    private function checkAircraftConfigViewCommon(\FunctionalTester $I) {
-        $I->amOnRoute('route/view', [ 'id' => '1' ]);
+    private function checkRankViewCommon(\FunctionalTester $I) {
+        $I->amOnRoute('rank/view', [ 'id' => '1' ]);
 
-        $I->see('LEBL');
-        $I->see('LEVC');
-        $I->see('R001');
-        $I->see('165');
+        $I->see('Rank 1');
+        $I->see('Pilots with this rank');
+        $I->see('AB1234');
+        $I->see('John Doe');
+        $I->see('AB5678');
+        $I->see('Ifr School');
+        $I->see('AB6789');
+        $I->see('Other Ifr School');
     }
 
-    public function openRouteViewAsAdmin(\FunctionalTester $I)
+    public function openRankViewAsAdmin(\FunctionalTester $I)
     {
         $I->amLoggedInAs(2);
 
-        $this->checkAircraftConfigViewCommon($I);
+        $this->checkRankViewCommon($I);
 
         $I->see('Update', 'a');
         $I->see('Delete', 'a');
     }
 
-    public function openRouteViewAsUser(\FunctionalTester $I)
+    public function openRankViewAsUser(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
 
-        $this->checkAircraftConfigViewCommon($I);
+        $this->checkRankViewCommon($I);
 
         $I->dontSee('Update', 'a');
         $I->dontSee('Delete', 'a');
     }
 
-    public function openRouteViewAsVisitor(\FunctionalTester $I)
+    public function openRankViewAsVisitor(\FunctionalTester $I)
     {
         $I->amOnRoute('route/view', [ 'id' => '1' ]);
         // Check redirect

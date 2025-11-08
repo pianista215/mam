@@ -13,6 +13,7 @@ return [
         'city' => 'Madrid',
         'location' => 'LEBL',
         'date_of_birth' => '1990-01-01',
+        'rank_id' => 1,
     ],
     [
         'id' => 2,
@@ -26,6 +27,7 @@ return [
         'city' => 'Valladolid',
         'location' => 'LEMD',
         'date_of_birth' => '1980-01-01',
+        'rank_id' => 3,
     ],
     [
         'id' => 3,
@@ -91,6 +93,7 @@ return [
         'city' => 'Valladolid',
         'location' => 'LEBL',
         'date_of_birth' => '1979-05-21',
+        'rank_id' => 1,
     ],
     [
         'id' => 8,
@@ -104,6 +107,7 @@ return [
         'city' => 'Valladolid',
         'location' => 'LEBL',
         'date_of_birth' => '1979-05-21',
+        'rank_id' => 1,
     ],
     [
         'id' => 9,
@@ -117,6 +121,7 @@ return [
         'city' => 'Valladolid',
         'location' => 'LEBL',
         'date_of_birth' => '1979-08-23',
+        'rank_id' => 2,
     ],
     [
         'id' => 10,

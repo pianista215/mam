@@ -1,95 +1,91 @@
 <?php
 
-namespace tests\functional\route;
+namespace tests\functional\rank;
 
 use tests\fixtures\AuthAssignmentFixture;
-use tests\fixtures\RouteFixture;
 use Yii;
 
-class RouteUpdateCest
+class RankUpdateCest
 {
     public function _fixtures(){
         return [
             'authAssignment' => AuthAssignmentFixture::class,
-            'route' => RouteFixture::class,
         ];
     }
 
-    public function openRouteUpdateAsAdmin(\FunctionalTester $I)
+    public function openRankUpdateAsAdmin(\FunctionalTester $I)
     {
         $I->amLoggedInAs(2);
-        $I->amOnRoute('route/update', [ 'id' => '1' ]);
+        $I->amOnRoute('rank/update', [ 'id' => '1' ]);
 
-        $I->see('Update Route: R001');
+        $I->see('Update Rank: Rank 1');
         $I->see('Save', 'button');
     }
 
-    public function openRouteUpdateAsUser(\FunctionalTester $I)
+    public function openRankUpdateAsUser(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
-        $I->amOnRoute('route/update', [ 'id' => '1' ]);
+        $I->amOnRoute('rank/update', [ 'id' => '1' ]);
         $I->seeResponseCodeIs(403);
 
         $I->see('Forbidden');
-        $I->dontSee('Update Route: R001');
+        $I->dontSee('Update Rank: Rank 1');
         $I->dontSee('Save', 'button');
     }
 
-    public function openRouteUpdateAsVisitor(\FunctionalTester $I)
+    public function openRankUpdateAsVisitor(\FunctionalTester $I)
     {
-        $I->amOnRoute('route/update', [ 'id' => '1' ]);
+        $I->amOnRoute('rank/update', [ 'id' => '1' ]);
         // Check redirect
         $I->seeCurrentUrlMatches('~login~');
         $I->see('Login');
     }
 
-    public function updateEmptyRoute(\FunctionalTester $I)
+    public function updateEmptyRank(\FunctionalTester $I)
     {
        $I->amLoggedInAs(2);
-       $I->amOnRoute('route/update', [ 'id' => '1' ]);
+       $I->amOnRoute('rank/update', [ 'id' => '1' ]);
 
-       $I->fillField('#route-code','');
-       $I->fillField('#route-departure','');
-       $I->fillField('#route-arrival','');
+       $I->fillField('#rank-name','');
+       $I->fillField('#rank-position','');
        $I->click('Save');
 
        $I->expectTo('see validations errors');
-       $I->expectTo('see validations errors');
-       $I->see('Code cannot be blank.');
-       $I->see('Departure cannot be blank.');
-       $I->see('Arrival cannot be blank.');
+       $I->see('Name cannot be blank.');
+       $I->see('Position cannot be blank.');
 
-       $count = \app\models\Route::find()->count();
+       $count = \app\models\Rank::find()->count();
        $I->assertEquals(3, $count);
     }
 
-    public function updateValidRoute(\FunctionalTester $I)
+    public function updateValidRank(\FunctionalTester $I)
     {
        $I->amLoggedInAs(2);
-       $I->amOnRoute('route/update', [ 'id' => '1' ]);
+       $I->amOnRoute('rank/update', [ 'id' => '1' ]);
 
-       $I->fillField('#route-code','N001');
-       $I->fillField('#route-departure','LEBL');
-       $I->fillField('#route-arrival','LEMD');
+       $I->fillField('#rank-name', 'Other Rank');
+       $I->fillField('#rank-position', '5');
        $I->click('Save');
 
        $I->seeResponseCodeIs(200);
-       $I->see('N001');
-       $I->see('LEBL');
-       $I->see('LEMD');
-       $I->see('260');
+       $I->see('Other Rank');
+       $I->see('Pilots with this rank');
+       $I->see('AB1234');
+       $I->see('John Doe');
+       $I->see('AB5678');
+       $I->see('Ifr School');
+       $I->see('AB6789');
+       $I->see('Other Ifr School');
 
        $I->see('Update', 'a');
        $I->see('Delete', 'a');
 
-       $model = \app\models\Route::find()->where(['code' => 'N001'])->one();
+       $model = \app\models\Rank::find()->where(['position' => 5])->one();
        $I->assertNotNull($model);
-       $I->assertEquals('N001', $model->code);
-       $I->assertEquals('LEBL', $model->departure);
-       $I->assertEquals('LEMD', $model->arrival);
-       $I->assertEquals(260, $model->distance_nm);
+       $I->assertEquals('Other Rank', $model->name);
+       $I->assertEquals(5, $model->position);
 
-       $count = \app\models\Route::find()->count();
+       $count = \app\models\Rank::find()->count();
        $I->assertEquals(3, $count);
     }
 

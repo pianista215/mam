@@ -1,9 +1,8 @@
 <?php
 
-namespace tests\functional\route;
+namespace tests\functional\rank;
 
 use tests\fixtures\AuthAssignmentFixture;
-use tests\fixtures\PilotFixture;
 use Yii;
 
 class RankDeleteCest
@@ -14,7 +13,6 @@ class RankDeleteCest
     public function _fixtures(){
         return [
             'authAssignment' => AuthAssignmentFixture::class,
-            'pilot' => PilotFixture::class,
         ];
     }
 
