@@ -13,6 +13,7 @@ return [
         'city' => 'Madrid',
         'location' => 'LEBL',
         'date_of_birth' => '1990-01-01',
+        'registration_date' => '2020-02-02',
         'rank_id' => 1,
     ],
     [
@@ -27,6 +28,7 @@ return [
         'city' => 'Valladolid',
         'location' => 'LEMD',
         'date_of_birth' => '1980-01-01',
+        'registration_date' => '2020-02-05',
         'rank_id' => 3,
     ],
     [
@@ -41,6 +43,7 @@ return [
         'city' => 'Valladolid',
         'location' => 'LEBL',
         'date_of_birth' => '1980-01-01',
+        'registration_date' => '2020-02-10',
     ],
     [
         'id' => 4,
@@ -54,6 +57,7 @@ return [
         'city' => 'Valladolid',
         'location' => 'LEBL',
         'date_of_birth' => '1980-11-01',
+        'registration_date' => '2023-05-02',
     ],
     [
         'id' => 5,
@@ -67,6 +71,8 @@ return [
         'city' => 'Valladolid',
         'location' => 'LEBL',
         'date_of_birth' => '1979-03-21',
+        'registration_date' => '2020-07-12',
+        'rank_id' => 2,
     ],
     [
         'id' => 6,
@@ -80,6 +86,7 @@ return [
         'city' => 'Valladolid',
         'location' => 'LEBL',
         'date_of_birth' => '1979-03-23',
+        'registration_date' => '2024-12-03',
     ],
     [
         'id' => 7,
@@ -93,6 +100,7 @@ return [
         'city' => 'Valladolid',
         'location' => 'LEBL',
         'date_of_birth' => '1979-05-21',
+        'registration_date' => '2020-03-02',
         'rank_id' => 1,
     ],
     [
@@ -107,6 +115,7 @@ return [
         'city' => 'Valladolid',
         'location' => 'LEBL',
         'date_of_birth' => '1979-05-21',
+        'registration_date' => '2020-08-02',
         'rank_id' => 1,
     ],
     [
@@ -121,6 +130,7 @@ return [
         'city' => 'Valladolid',
         'location' => 'LEBL',
         'date_of_birth' => '1979-08-23',
+        'registration_date' => '2023-02-02',
         'rank_id' => 2,
     ],
     [
@@ -135,5 +145,6 @@ return [
         'city' => 'Valladolid',
         'location' => 'LEAL',
         'date_of_birth' => '1972-08-23',
+        'registration_date' => '2024-12-02',
     ],
 ];
