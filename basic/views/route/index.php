@@ -16,7 +16,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="route-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-    <?php if(Yii::$app->user->can('issueLicense')) : ?>
+    <?php if(Yii::$app->user->can('routeCrud')) : ?>
     <p>
         <?= Html::a('Create Route', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
