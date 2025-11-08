@@ -62,7 +62,7 @@ class RouteIndexViewCest
         $I->dontSeeElement('a', ['title' => 'Delete']);
     }
 
-    private function checkAircraftConfigViewCommon(\FunctionalTester $I) {
+    private function checkRouteViewCommon(\FunctionalTester $I) {
         $I->amOnRoute('route/view', [ 'id' => '1' ]);
 
         $I->see('LEBL');
@@ -75,7 +75,7 @@ class RouteIndexViewCest
     {
         $I->amLoggedInAs(2);
 
-        $this->checkAircraftConfigViewCommon($I);
+        $this->checkRouteViewCommon($I);
 
         $I->see('Update', 'a');
         $I->see('Delete', 'a');
@@ -85,7 +85,7 @@ class RouteIndexViewCest
     {
         $I->amLoggedInAs(1);
 
-        $this->checkAircraftConfigViewCommon($I);
+        $this->checkRouteViewCommon($I);
 
         $I->dontSee('Update', 'a');
         $I->dontSee('Delete', 'a');

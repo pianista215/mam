@@ -7,5 +7,8 @@ use yii\test\ActiveFixture;
 class PilotFixture extends ActiveFixture
 {
     public $modelClass = 'app\models\Pilot';
-    public $depends = ['tests\fixtures\AirportFixture'];
+    public $depends = [
+                        'tests\fixtures\AirportFixture',
+                        'tests\fixtures\RankFixture',
+                        ];
 }

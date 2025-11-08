@@ -7,10 +7,12 @@ use app\config\Config;
 use app\models\ChangePasswordForm;
 use app\models\Country;
 use app\models\ForgotPasswordForm;
+use app\models\FlightSearch;
 use app\models\Page;
 use app\models\PageContent;
 use app\models\Pilot;
 use app\models\PilotSearch;
+use app\models\Rank;
 use app\models\SubmittedFlightPlan;
 use DateTime;
 use yii\web\BadRequestHttpException;
@@ -86,8 +88,14 @@ class PilotController extends Controller
      */
     public function actionView($id)
     {
+        $model = $this->findModel($id);
+        $flightSearch = new FlightSearch();
+        $flightsProvider = $flightSearch->searchForPilot($model->id, Yii::$app->request->queryParams);
+
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $model,
+            'flightSearch' => $flightSearch,
+            'flightsProvider' => $flightsProvider,
         ]);
     }
 
@@ -180,9 +188,16 @@ class PilotController extends Controller
                 ->orderBy(['name' => SORT_ASC])
                 ->column();
 
+            $ranks = Rank::find()
+                ->select(['name'])
+                ->indexBy('id')
+                ->orderBy(['position' => SORT_ASC])
+                ->column();
+
             return $this->render('create', [
                 'model' => $model,
                 'countries' => $countries,
+                'ranks' => $ranks,
             ]);
         } else {
             throw new ForbiddenHttpException();
@@ -220,9 +235,16 @@ class PilotController extends Controller
                 ->orderBy(['name' => SORT_ASC])
                 ->column();
 
+            $ranks = Rank::find()
+                ->select(['name'])
+                ->indexBy('id')
+                ->orderBy(['position' => SORT_ASC])
+                ->column();
+
             return $this->render('update', [
                 'model' => $model,
                 'countries' => $countries,
+                'ranks' => $ranks,
             ]);
         } else {
             throw new ForbiddenHttpException();
