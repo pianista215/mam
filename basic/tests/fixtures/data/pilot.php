@@ -15,6 +15,7 @@ return [
         'date_of_birth' => '1990-01-01',
         'registration_date' => '2020-02-02',
         'rank_id' => 1,
+        'hours_flown' => 10.5,
     ],
     [
         'id' => 2,
@@ -30,6 +31,7 @@ return [
         'date_of_birth' => '1980-01-01',
         'registration_date' => '2020-02-05',
         'rank_id' => 3,
+        'hours_flown' => 100.5,
     ],
     [
         'id' => 3,
@@ -44,6 +46,7 @@ return [
         'location' => 'LEBL',
         'date_of_birth' => '1980-01-01',
         'registration_date' => '2020-02-10',
+        'hours_flown' => 0,
     ],
     [
         'id' => 4,
@@ -58,6 +61,7 @@ return [
         'location' => 'LEBL',
         'date_of_birth' => '1980-11-01',
         'registration_date' => '2023-05-02',
+        'hours_flown' => 20.3,
     ],
     [
         'id' => 5,
@@ -73,6 +77,7 @@ return [
         'date_of_birth' => '1979-03-21',
         'registration_date' => '2020-07-12',
         'rank_id' => 2,
+        'hours_flown' => 40.7,
     ],
     [
         'id' => 6,
@@ -87,6 +92,7 @@ return [
         'location' => 'LEBL',
         'date_of_birth' => '1979-03-23',
         'registration_date' => '2024-12-03',
+        'hours_flown' => 5.1,
     ],
     [
         'id' => 7,
@@ -102,6 +108,7 @@ return [
         'date_of_birth' => '1979-05-21',
         'registration_date' => '2020-03-02',
         'rank_id' => 1,
+        'hours_flown' => 12.5,
     ],
     [
         'id' => 8,
@@ -117,6 +124,7 @@ return [
         'date_of_birth' => '1979-05-21',
         'registration_date' => '2020-08-02',
         'rank_id' => 1,
+        'hours_flown' => 13.3,
     ],
     [
         'id' => 9,
@@ -132,6 +140,7 @@ return [
         'date_of_birth' => '1979-08-23',
         'registration_date' => '2023-02-02',
         'rank_id' => 2,
+        'hours_flown' => 13.5,
     ],
     [
         'id' => 10,
@@ -146,5 +155,6 @@ return [
         'location' => 'LEAL',
         'date_of_birth' => '1972-08-23',
         'registration_date' => '2024-12-02',
+        'hours_flown' => 9.5,
     ],
 ];
