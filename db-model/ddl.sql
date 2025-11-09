@@ -382,6 +382,17 @@ CREATE TABLE `page_content` (
   CONSTRAINT `page_content_page_FK` FOREIGN KEY (`page_id`) REFERENCES `page` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `image` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `type` varchar(100) NOT NULL,
+  `related_id` bigint(20) unsigned NOT NULL,
+  `element` smallint(5) unsigned DEFAULT 0,
+  `filename` varchar(255) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `image_unique_type_rel_elem` (`type`, `related_id`, `element`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
