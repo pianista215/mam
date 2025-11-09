@@ -53,6 +53,7 @@ class Aircraft extends \yii\db\ActiveRecord
             [['name'], 'string', 'max' => 20],
             [['name'], 'trim'],
             [['location'], 'string', 'length' => 4],
+            [['location'], 'filter', 'filter' => 'strtoupper'],
             [['registration'], 'unique'],
             [['name'], 'unique'],
             [['aircraft_configuration_id'], 'exist', 'skipOnError' => true, 'targetClass' => AircraftConfiguration::class, 'targetAttribute' => ['aircraft_configuration_id' => 'id']],

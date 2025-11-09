@@ -85,6 +85,7 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
             [['email'], 'email'],
             [['auth_key', 'access_token'], 'string', 'max' => 32],
             [['location'], 'string', 'length' => 4],
+            [['location'], 'filter', 'filter' => 'strtoupper'],
             [['pwd_reset_token'], 'string', 'length' => 255],
             [['email'], 'unique'],
             [['license'], 'unique'],
