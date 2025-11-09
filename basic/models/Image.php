@@ -44,6 +44,7 @@ class Image extends \yii\db\ActiveRecord
             [['type', 'related_id', 'element'], 'unique', 'targetAttribute' => ['type', 'related_id', 'element']],
 
             ['type', 'in', 'range' => array_keys(self::getAllowedTypes())],
+            ['element', 'validateElement'],
             ['related_id', 'validateRelatedExists'],
 
             [['uploadFile'], 'file', 'skipOnEmpty' => false, 'extensions' => 'png, jpg, jpeg', 'checkExtensionByMimeType' => true],
@@ -63,18 +64,26 @@ class Image extends \yii\db\ActiveRecord
         ];
     }
 
-    public static function getPlaceholder(string $type): string
+    public static function getPlaceholder(string $type): ?string
     {
         $placeholders = [
-            'rank_icon' => '@web/images/placeholders/rank_icon.png',
-            'pilot_profile' => '@web/images/placeholders/pilot_profile.png',
-            'tour_image' => '@web/images/placeholders/tour_image.png',
-            'country_icon' => '@web/images/placeholders/country_icon.png',
-            'aircraftType_image' => '@web/images/placeholders/aircraftType_image.png',
+            'rank_icon' => '@app/web/images/placeholders/rank_icon.png',
+            'pilot_profile' => '@app/web/images/placeholders/pilot_profile.png',
+            'tour_image' => '@app/web/images/placeholders/tour_image.png',
+            'country_icon' => '@app/web/images/placeholders/country_icon.png',
+            'aircraftType_image' => '@app/web/images/placeholders/aircraftType_image.png',
         ];
 
-        return Yii::getAlias($placeholders[$type] ?? '@web/images/placeholders/default.png');
+        return $placeholders[$type] ?? null;
     }
+
+    public function validateElement($attribute, $params)
+    {
+        if ($this->type !== 'page' && $this->$attribute != 0) {
+            $this->addError($attribute, "Attribute 'element' must be 0 for type '{$this->type}'.");
+        }
+    }
+
 
     public function validateRelatedExists($attribute, $params)
     {

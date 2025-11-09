@@ -2,17 +2,23 @@
 
 namespace app\controllers;
 
+use app\helpers\LoggerTrait;
 use app\models\Image;
 use app\models\ImageSearch;
+use yii\helpers\FileHelper;
 use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use Yii;
 
 /**
  * ImageController implements the CRUD actions for Image model.
  */
 class ImageController extends Controller
 {
+    use LoggerTrait;
+
     /**
      * @inheritDoc
      */
@@ -47,16 +53,51 @@ class ImageController extends Controller
         ]);
     }
 
-    /**
-     * Displays a single Image model.
-     * @param string $id ID
-     * @return string
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionView($id)
+    public function actionView($type, $related_id, $element = 0)
     {
-        return $this->render('view', [
-            'model' => $this->findModel($id),
+        // TODO: UNAI METER RBAC Y AÑADE LOGS
+        /*if (!Yii::$app->user->can('viewImage', ['type' => $type, 'related_id' => $related_id])) {
+            throw new ForbiddenHttpException();
+        }*/
+
+        $image = Image::findOne([
+            'type' => $type,
+            'related_id' => $related_id,
+            'element' => $element,
+        ]);
+
+        $filePath = null;
+        $mimeType = 'image/png'; // Placeholders default
+
+        if ($image) {
+            $storagePath = Yii::$app->config->get('images_storage_path');
+            $candidate = "{$storagePath}/{$image->filename}";
+            if (is_file($candidate)) {
+                $filePath = $candidate;
+                $mimeType = FileHelper::getMimeType($candidate);
+            }
+        }
+
+        if (!$filePath) {
+            $placeholder = Image::getPlaceholder($type);
+
+            if ($placeholder === null) {
+                throw new NotFoundHttpException();
+            }
+
+            $candidate = Yii::getAlias($placeholder);
+            if (is_file($candidate)) {
+                $filePath = $candidate;
+                $mimeType = FileHelper::getMimeType($candidate);
+            } else {
+                throw new NotFoundHttpException();
+            }
+        }
+
+        return Yii::$app->response->sendFile($filePath, null, [
+            'inline' => true,
+            'mimeType' => $mimeType,
+            'cacheControlHeader' => 'public, max-age=86400',
         ]);
     }
 

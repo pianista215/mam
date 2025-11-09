@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\helpers\LoggerTrait;
 use app\models\Flight;
 use app\models\FlightSearch;
 use app\models\PilotTourCompletion;
@@ -18,6 +19,8 @@ use Yii;
  */
 class FlightController extends Controller
 {
+    use LoggerTrait;
+
     /**
      * @inheritDoc
      */
@@ -183,7 +186,7 @@ class FlightController extends Controller
             Yii::$app->session->setFlash('success', 'Flight validation finished.');
         } catch (\Throwable $e) {
             $transaction->rollBack();
-            Yii::error("Error validating flight {$model->id}: " . $e->getMessage());
+            $this->logError('Error validating flight', ['model' => $model, 'user' => Yii::$app->user->identity->license, 'ex' => $e]);
             Yii::$app->session->setFlash('error', 'Error validating flight.');
         }
 
