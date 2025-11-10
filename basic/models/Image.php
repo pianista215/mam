@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\config\Config;
 use yii\web\UploadedFile;
 use Yii;
 
@@ -50,6 +51,11 @@ class Image extends \yii\db\ActiveRecord
             [['uploadFile'], 'file', 'skipOnEmpty' => false, 'extensions' => 'png, jpg, jpeg', 'checkExtensionByMimeType' => true],
             ['uploadFile', 'validateImageDimensions'],
         ];
+    }
+
+    public function getPath()
+    {
+        return Config::get('images_storage_path').'/'.$this->filename;
     }
 
     public static function getAllowedTypes(): array

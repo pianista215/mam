@@ -9,6 +9,7 @@ use yii\helpers\FileHelper;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
+use yii\web\UploadedFile;
 use yii\filters\VerbFilter;
 use Yii;
 
@@ -66,12 +67,12 @@ class ImageController extends Controller
             'element' => $element,
         ]);
 
+        // TODO: Simplificar porque hay mucho is_file que sobra
         $filePath = null;
         $mimeType = 'image/png'; // Placeholders default
 
         if ($image) {
-            $storagePath = Yii::$app->config->get('images_storage_path');
-            $candidate = "{$storagePath}/{$image->filename}";
+            $candidate = $image->path;
             if (is_file($candidate)) {
                 $filePath = $candidate;
                 $mimeType = FileHelper::getMimeType($candidate);
@@ -100,6 +101,82 @@ class ImageController extends Controller
             'cacheControlHeader' => 'public, max-age=86400',
         ]);
     }
+
+    public function actionUpload($type, $related_id, $element = 0)
+    {
+        /*if (!Yii::$app->user->can('uploadImage', ['type' => $type, 'related_id' => $related_id])) {
+            throw new ForbiddenHttpException();
+        }*/
+
+        $image = Image::findOne([
+            'type' => $type,
+            'related_id' => $related_id,
+            'element' => $element,
+        ]);
+
+        $oldFile = $image ? $image->path : null;
+
+        $image = $image ?? new Image([
+            'type' => $type,
+            'related_id' => $related_id,
+            'element' => $element,
+        ]);
+
+        if (Yii::$app->request->isPost) {
+            $uploadedFile = UploadedFile::getInstanceByName('croppedImage');
+            if ($uploadedFile) {
+                $newFilename = Yii::$app->security->generateRandomString() . '.' . $uploadedFile->extension;
+
+                $image->filename = $newFilename;
+
+                if ($uploadedFile->saveAs($image->path)){
+                    if($image->save()) {
+                        if($oldFile !== null){
+                            // Delete the old version
+                            unlink($oldFile);
+                        }
+                        Yii::$app->session->setFlash('success', 'Image correctly uploaded.');
+                        $this->logInfo('Image uploaded', ['image' => $image, 'user' => Yii::$app->user->identity->license]);
+                        return $this->redirect(Yii::$app->request->referrer ?: Url::to(['/site/index']));
+                    } else {
+                        // Delete the new image uploaded
+                        unlink($image->path);
+                        Yii::$app->session->setFlash('error', 'Error saving image information.');
+                        $this->logError(
+                            'Error saving uploaded file',
+                            [
+                                'errors' => $image->getErrors(),
+                                'user' => Yii::$app->user->identity->license
+                            ]
+                        );
+                    }
+                } else {
+                    $this->logError(
+                        'Error saving uploaded file',
+                        [
+                            'image' => $image,
+                            'user' => Yii::$app->user->identity->license
+                        ]
+                    );
+                    Yii::$app->session->setFlash('error', 'Error saving uploaded file.');
+                }
+
+            } else {
+                $this->logError(
+                    'Uploaded file not found',
+                    [
+                        'request' => Yii::$app->request,
+                        'user' => Yii::$app->user->identity->license
+                    ]);
+                Yii::$app->session->setFlash('error', "Can't find image");
+            }
+        }
+
+        return $this->render('upload', [
+            'image' => $image,
+        ]);
+    }
+
 
     /**
      * Creates a new Image model.
