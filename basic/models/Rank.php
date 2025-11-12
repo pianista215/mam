@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\models\traits\ImageDescriptable;
 use Yii;
 
 /**
@@ -15,6 +16,13 @@ use Yii;
  */
 class Rank extends \yii\db\ActiveRecord
 {
+    use ImageDescriptable;
+
+    public function getImageDescription(): string
+    {
+        return "rank: {$this->name}";
+    }
+
     /**
      * {@inheritdoc}
      */

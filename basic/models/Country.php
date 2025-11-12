@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\models\traits\ImageDescriptable;
 use Yii;
 
 /**
@@ -16,6 +17,13 @@ use Yii;
  */
 class Country extends \yii\db\ActiveRecord
 {
+    use ImageDescriptable;
+
+    public function getImageDescription(): string
+    {
+        return "country: {$this->name}";
+    }
+
     /**
      * {@inheritdoc}
      */

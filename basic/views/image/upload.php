@@ -3,17 +3,25 @@ use yii\helpers\Url;
 use yii\helpers\Html;
 
 /** @var $image app\models\Image */
+/** @var description string */
 
-$this->title = 'Upload image';
+$this->title = 'Uploading image for '.$description;
 $uploadUrl = Url::to(['image/upload', 'type' => $image->type, 'related_id' => $image->related_id, 'element' => $image->element]);
 $viewUrl = Url::to(['image/view', 'type' => $image->type, 'related_id' => $image->related_id, 'element' => $image->element]);
+
+$allowedTypes = \app\models\Image::getAllowedTypes();
+$typeSettings = $allowedTypes[$image->type] ?? [];
+$displayWidth = $typeSettings['width'] ?? 400;
+$displayHeight = $typeSettings['height'] ?? 300;
 ?>
 
 <div class="image-upload">
     <h2><?= Html::encode($this->title) ?></h2>
 
-    <div style="width: 400px; max-width: 100%; margin: 0 auto;">
-        <img id="image-to-crop" src="<?= Html::encode($viewUrl) ?>" alt="Actual image" style="max-width:100%; display:block; margin:0 auto;">
+    <div style="width: <?= $displayWidth ?>px; height: <?= $displayHeight ?>px; margin: 0 auto;">
+        <img id="image-to-crop" src="<?= Html::encode($viewUrl) ?>"
+             alt="Actual image"
+             style="width: 100%; height: 100%; display:block; margin:0 auto;">
     </div>
 
     <div style="display:flex; flex-direction:column; align-items:center; margin-top:1rem;">

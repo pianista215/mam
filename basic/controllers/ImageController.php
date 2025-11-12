@@ -54,7 +54,7 @@ class ImageController extends Controller
         ]);
     }
 
-    public function actionView($type, $related_id, $element = 0)
+    public function actionView(string $type, int $related_id, int $element = 0)
     {
         // TODO: UNAI METER RBAC Y AÑADE LOGS
         /*if (!Yii::$app->user->can('viewImage', ['type' => $type, 'related_id' => $related_id])) {
@@ -102,7 +102,7 @@ class ImageController extends Controller
         ]);
     }
 
-    public function actionUpload($type, $related_id, $element = 0)
+    public function actionUpload(string $type, int $related_id, int $element = 0)
     {
         /*if (!Yii::$app->user->can('uploadImage', ['type' => $type, 'related_id' => $related_id])) {
             throw new ForbiddenHttpException();
@@ -121,6 +121,12 @@ class ImageController extends Controller
             'related_id' => $related_id,
             'element' => $element,
         ]);
+
+        $relatedModel = $image->getRelatedModel();
+
+        if ($relatedModel === null || !$image->isValidElement()) {
+            throw new NotFoundHttpException('Element does not exist.');
+        }
 
         if (Yii::$app->request->isPost) {
             $uploadedFile = UploadedFile::getInstanceByName('croppedImage');
@@ -174,6 +180,7 @@ class ImageController extends Controller
 
         return $this->render('upload', [
             'image' => $image,
+            'description' => $relatedModel->getImageDescription(),
         ]);
     }
 

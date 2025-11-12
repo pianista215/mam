@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\config\Config;
 use app\helpers\CustomRules;
+use app\models\traits\ImageDescriptable;
 use app\models\traits\PasswordRulesTrait;
 use Yii;
 
@@ -39,7 +40,13 @@ use Yii;
  */
 class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 {
+    use ImageDescriptable;
     use PasswordRulesTrait;
+
+    public function getImageDescription(): string
+    {
+        return "pilot: {$this->fullname}";
+    }
 
     /**
      * {@inheritdoc}

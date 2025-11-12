@@ -55,7 +55,8 @@ class Image extends \yii\db\ActiveRecord
 
     public function getPath()
     {
-        return Config::get('images_storage_path').'/'.$this->filename;
+        // TODO: AÑADE EL TIPO!!!!!!
+        return Config::get('images_storage_path').'/'.$this->type.'/'.$this->filename;
     }
 
     public static function getAllowedTypes(): array
@@ -81,6 +82,10 @@ class Image extends \yii\db\ActiveRecord
         ];
 
         return $placeholders[$type] ?? null;
+    }
+
+    public function isValidElement() {
+        return $this->type === 'page' || $this->element === 0;
     }
 
     public function validateElement($attribute, $params)
@@ -109,6 +114,23 @@ class Image extends \yii\db\ActiveRecord
         if (!$relatedClass::find()->where(['id' => $this->related_id])->exists()) {
             $this->addError($attribute, "The element (ID {$this->related_id}) doesn't exist in {$relatedClass}.");
         }
+    }
+
+    public function getRelatedModel()
+    {
+        $types = self::getAllowedTypes();
+
+        if (!isset($types[$this->type])) {
+            return null;
+        }
+
+        $relatedClass = $types[$this->type]['relatedModel'] ?? null;
+
+        if (!$relatedClass || !class_exists($relatedClass)) {
+            return null;
+        }
+
+        return $relatedClass::findOne($this->related_id);
     }
 
 
