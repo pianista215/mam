@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\config\Config;
+use yii\helpers\Url;
 use yii\web\UploadedFile;
 use Yii;
 
@@ -55,7 +56,6 @@ class Image extends \yii\db\ActiveRecord
 
     public function getPath()
     {
-        // TODO: AÑADE EL TIPO!!!!!!
         return Config::get('images_storage_path').'/'.$this->type.'/'.$this->filename;
     }
 
@@ -153,6 +153,26 @@ class Image extends \yii\db\ActiveRecord
             $this->addError($attribute, "Image must be {$expectedW}x{$expectedH}px (actual: {$width}x{$height}).");
         }
     }
+
+    public function getCallbackUrl(): string
+    {
+        $types = self::getAllowedTypes();
+
+        if (!isset($types[$this->type])) {
+            return Url::to(['/site/index']);
+        }
+
+        $relatedClass = $types[$this->type]['relatedModel'] ?? null;
+        if (!$relatedClass) {
+            return Url::to(['/site/index']);
+        }
+
+        $shortName = strtolower((new \ReflectionClass($relatedClass))->getShortName());
+        $controllerId = $shortName;
+
+        return Url::to(["/{$controllerId}/view", 'id' => $this->related_id]);
+    }
+
 
 
 

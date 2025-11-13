@@ -143,7 +143,7 @@ class ImageController extends Controller
                         }
                         Yii::$app->session->setFlash('success', 'Image correctly uploaded.');
                         $this->logInfo('Image uploaded', ['image' => $image, 'user' => Yii::$app->user->identity->license]);
-                        return $this->redirect(Yii::$app->request->referrer ?: Url::to(['/site/index']));
+                        return $this->redirect($image->getCallbackUrl());
                     } else {
                         // Delete the new image uploaded
                         unlink($image->path);

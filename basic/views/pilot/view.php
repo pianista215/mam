@@ -1,6 +1,7 @@
 <?php
 
 use app\helpers\TimeHelper;
+use app\helpers\ImageMam;
 use yii\helpers\Html;
 use yii\grid\GridView;
 
@@ -42,6 +43,10 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="me-4 text-center" style="min-width: 100px;">
                 <div class="fw-semibold mb-1"><?= $model->rank ? Html::encode($model->rank->name) : 'No rank' ?></div>
             </div>
+
+        <div class="pilot-profile">
+            <?= ImageMam::render('pilot_profile', $model->id) ?>
+        </div>
 
             <div class="flex-fill">
                 <dl class="row mb-0">
