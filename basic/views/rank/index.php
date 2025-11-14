@@ -1,6 +1,7 @@
 <?php
 
 use app\helpers\ImageMam;
+use app\models\Image;
 use app\models\Rank;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -33,7 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label' => '',
                 'format' => 'raw',
                 'value' => fn($model) => ImageMam::render('rank_icon', $model->id, 0),
-                'contentOptions' => ['style' => 'width: 60px;'],
+                'contentOptions' => ['style' => 'width: '.Image::getAllowedTypes()['rank_icon']['width'].'px;'],
             ],
             'name',
             [
