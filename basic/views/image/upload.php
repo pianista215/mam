@@ -5,12 +5,21 @@ use yii\helpers\Html;
 /** @var $image app\models\Image */
 /** @var description string */
 
-$this->title = 'Uploading image for '.$description;
-$uploadUrl = Url::to(['image/upload', 'type' => $image->type, 'related_id' => $image->related_id, 'element' => $image->element]);
-$viewUrl = Url::to(['image/view', 'type' => $image->type, 'related_id' => $image->related_id, 'element' => $image->element]);
+$this->title = 'Uploading image for ' . $description;
+$uploadUrl = Url::to([
+    'image/upload',
+    'type' => $image->type,
+    'related_id' => $image->related_id,
+    'element' => $image->element,
+]);
+$viewUrl = Url::to([
+    'image/view',
+    'type' => $image->type,
+    'related_id' => $image->related_id,
+    'element' => $image->element,
+]);
 
-$allowedTypes = \app\models\Image::getAllowedTypes();
-$typeSettings = $allowedTypes[$image->type] ?? [];
+$typeSettings = \app\models\Image::getAllowedTypes()[$image->type] ?? [];
 $displayWidth = $typeSettings['width'] ?? 400;
 $displayHeight = $typeSettings['height'] ?? 300;
 ?>
@@ -18,10 +27,10 @@ $displayHeight = $typeSettings['height'] ?? 300;
 <div class="image-upload">
     <h2><?= Html::encode($this->title) ?></h2>
 
-    <div style="width: <?= $displayWidth ?>px; height: <?= $displayHeight ?>px; margin: 0 auto;">
+    <div style="max-width: 100%; width: 80%; margin: 0 auto;">
         <img id="image-to-crop" src="<?= Html::encode($viewUrl) ?>"
              alt="Actual image"
-             style="width: 100%; height: 100%; display:block; margin:0 auto;">
+             style="max-width:100%; height:auto; display:block; margin:0 auto;">
     </div>
 
     <div style="display:flex; flex-direction:column; align-items:center; margin-top:1rem;">
@@ -29,7 +38,6 @@ $displayHeight = $typeSettings['height'] ?? 300;
         <button id="uploadBtn" class="btn btn-primary">Upload image</button>
     </div>
 </div>
-
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet"/>
@@ -41,6 +49,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const button = document.getElementById('uploadBtn');
     let cropper = null;
 
+    const targetWidth = <?= $displayWidth ?>;
+    const targetHeight = <?= $displayHeight ?>;
+    const aspectRatio = targetWidth / targetHeight;
+
     input.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (!file) return;
@@ -51,11 +63,11 @@ document.addEventListener('DOMContentLoaded', function() {
             if (cropper) cropper.destroy();
 
             cropper = new Cropper(image, {
-                aspectRatio: getAspectRatio('<?= $image->type ?>'),
                 viewMode: 1,
                 dragMode: 'move',
                 background: false,
-                autoCropArea: 1
+                autoCropArea: 1,
+                aspectRatio: aspectRatio
             });
         };
         reader.readAsDataURL(file);
@@ -67,12 +79,14 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        cropper.getCroppedCanvas().toBlob(async (blob) => {
+        cropper.getCroppedCanvas({
+            width: targetWidth,
+            height: targetHeight
+        }).toBlob(async (blob) => {
             const formData = new FormData();
             formData.append('croppedImage', blob, 'crop.png');
             const csrfParam = document.querySelector('meta[name="csrf-param"]').getAttribute('content');
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
             formData.append(csrfParam, csrfToken);
 
             const response = await fetch('<?= $uploadUrl ?>', {
@@ -87,16 +101,5 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }, 'image/png');
     });
-
-    function getAspectRatio(type) {
-        switch (type) {
-            case 'rank_icon': return 87 / 38;
-            case 'pilot_profile': return 3 / 4;
-            case 'tour_image': return 16 / 9;
-            case 'country_icon': return 2 / 1;
-            case 'aircraftType_image': return 4 / 3;
-            default: return NaN;
-        }
-    }
 });
 </script>

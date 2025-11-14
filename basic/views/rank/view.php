@@ -16,7 +16,17 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="rank-view container py-3">
 
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="mb-0"><?= Html::encode($this->title) ?></h1>
+        <div class="card-body d-flex align-items-center">
+
+            <div class="me-3">
+                <?= \app\helpers\ImageMam::render('rank_icon', $model->id, 0) ?>
+            </div>
+
+            <div>
+                <h4 class="card-title mb-0"><?= Html::encode($model->name) ?></h4>
+            </div>
+
+        </div>
 
         <?php if (Yii::$app->user->can('rankCrud')): ?>
             <div>
@@ -31,22 +41,6 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
         <?php endif; ?>
     </div>
-
-    <!-- Prepare for Rank image
-    <div class="card mb-4">
-        <div class="card-body d-flex align-items-center">
-                <div class="me-3">
-                <img src="<?= Yii::getAlias('@web/images/ranks/placeholder.png') ?>"
-                     alt="Rank image"
-                     class="img-fluid rounded"
-                     style="max-width: 100px;">
-            </div>
-
-            <div>
-                <h4 class="card-title mb-0"><?= Html::encode($model->name) ?></h4>
-            </div>
-        </div>
-    </div> -->
 
     <h4>Pilots with this rank</h4>
 

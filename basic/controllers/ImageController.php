@@ -132,7 +132,6 @@ class ImageController extends Controller
             $uploadedFile = UploadedFile::getInstanceByName('croppedImage');
             if ($uploadedFile) {
                 $newFilename = Yii::$app->security->generateRandomString() . '.' . $uploadedFile->extension;
-
                 $image->filename = $newFilename;
 
                 if ($uploadedFile->saveAs($image->path)){

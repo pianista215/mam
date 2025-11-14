@@ -48,9 +48,7 @@ class Image extends \yii\db\ActiveRecord
             ['type', 'in', 'range' => array_keys(self::getAllowedTypes())],
             ['element', 'validateElement'],
             ['related_id', 'validateRelatedExists'],
-
-            [['uploadFile'], 'file', 'skipOnEmpty' => false, 'extensions' => 'png, jpg, jpeg', 'checkExtensionByMimeType' => true],
-            ['uploadFile', 'validateImageDimensions'],
+            ['filename', 'validateImage']
         ];
     }
 
@@ -133,6 +131,47 @@ class Image extends \yii\db\ActiveRecord
         return $relatedClass::findOne($this->related_id);
     }
 
+    public function validateImage($attribute, $params)
+    {
+        $filePath = $this->getPath();
+
+        if (!$filePath || !is_file($filePath)) {
+            $this->addError($attribute, 'File does not exist.');
+            return;
+        }
+
+        // Extension
+        $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+        if (!in_array($ext, ['png', 'jpg', 'jpeg'])) {
+            $this->addError($attribute, 'Invalid file extension. Allowed: png, jpg, jpeg.');
+            return;
+        }
+
+        // MIME
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime = finfo_file($finfo, $filePath);
+        finfo_close($finfo);
+
+        if (!in_array($mime, ['image/png', 'image/jpeg'])) {
+            $this->addError($attribute, 'Invalid MIME type.');
+            return;
+        }
+
+        [$width, $height] = getimagesize($filePath);
+
+        $types = self::getAllowedTypes();
+        if (!isset($types[$this->type])) {
+            return; // Some images haven't restrictions
+        }
+
+        $expectedW = $types[$this->type]['width'];
+        $expectedH = $types[$this->type]['height'];
+
+        if ($expectedW && $expectedH && ($width != $expectedW || $height != $expectedH)) {
+            $this->addError($attribute, "Image must be {$expectedW}x{$expectedH}px (actual: {$width}x{$height}).");
+        }
+    }
+
 
     public function validateImageDimensions($attribute, $params)
     {
@@ -172,9 +211,6 @@ class Image extends \yii\db\ActiveRecord
 
         return Url::to(["/{$controllerId}/view", 'id' => $this->related_id]);
     }
-
-
-
 
     /**
      * {@inheritdoc}
