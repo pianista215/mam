@@ -104,9 +104,6 @@ class ImageController extends Controller
 
     public function actionUpload(string $type, int $related_id, int $element = 0)
     {
-        /*if (!Yii::$app->user->can('uploadImage', ['type' => $type, 'related_id' => $related_id])) {
-            throw new ForbiddenHttpException();
-        }*/
 
         $image = Image::findOne([
             'type' => $type,
@@ -121,6 +118,10 @@ class ImageController extends Controller
             'related_id' => $related_id,
             'element' => $element,
         ]);
+
+        if (!Yii::$app->user->can('uploadImage', ['image' => $image])) {
+            throw new ForbiddenHttpException();
+        }
 
         $relatedModel = $image->getRelatedModel();
 

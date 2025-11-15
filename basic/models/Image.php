@@ -57,6 +57,26 @@ class Image extends \yii\db\ActiveRecord
         return Config::get('images_storage_path').'/'.$this->type.'/'.$this->filename;
     }
 
+    public function getUrl(): string
+    {
+        return Url::to([
+            'image/view',
+            'type' => $this->type,
+            'related_id' => $this->related_id,
+            'element' => $this->element,
+        ]);
+    }
+
+    public function getUploadUrl(): string
+    {
+        return Url::to([
+            'image/upload',
+            'type' => $this->type,
+            'related_id' => $this->related_id,
+            'element' => $this->element,
+        ]);
+    }
+
     public static function getAllowedTypes(): array
     {
         return [
