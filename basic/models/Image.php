@@ -84,7 +84,7 @@ class Image extends \yii\db\ActiveRecord
             'pilot_profile'     => ['width' => 200, 'height' => 250, 'relatedModel' => Pilot::class],
             'tour_image'        => ['width' => 1200, 'height' => 400, 'relatedModel' => Tour::class],
             'country_icon'      => ['width' => 44, 'height' => 22, 'relatedModel' => Country::class],
-            'aircraftType_image'=> ['width' => 1200, 'height' => 600, 'relatedModel' => AircraftType::class],
+            'aircraftType_image'=> ['width' => 1200, 'height' => 400, 'relatedModel' => AircraftType::class],
             'page'              => ['width' => null, 'height' => null, 'relatedModel' => Page::class],
         ];
     }
@@ -226,11 +226,14 @@ class Image extends \yii\db\ActiveRecord
             return Url::to(['/site/index']);
         }
 
-        $shortName = strtolower((new \ReflectionClass($relatedClass))->getShortName());
-        $controllerId = $shortName;
+        $shortName = (new \ReflectionClass($relatedClass))->getShortName();
+
+        // Camel case -> Kebab-case
+        $controllerId = strtolower(preg_replace('/(?<!^)[A-Z]/', '-$0', $shortName));
 
         return Url::to(["/{$controllerId}/view", 'id' => $this->related_id]);
     }
+
 
     /**
      * {@inheritdoc}
