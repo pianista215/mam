@@ -38,49 +38,60 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php endif; ?>
     </div>
 
-    <div class="card mb-4 shadow-sm">
-        <div class="card-body d-flex flex-wrap align-items-start">
-            <div class="me-4 text-center" style="min-width: 100px;">
-                <div class="fw-semibold mb-1"><?= $model->rank ? Html::encode($model->rank->name) : 'No rank' ?></div>
-            </div>
-
-        <div class="pilot-profile">
+<div class="card mb-4 shadow-sm">
+    <div class="card-body d-flex align-items-start">
+        <div class="pilot-photo me-4" style="min-width: 150px; text-align:center;">
             <?= ImageMam::render('pilot_profile', $model->id) ?>
         </div>
 
-            <div class="flex-fill">
-                <dl class="row mb-0">
-                    <dt class="col-sm-3">License</dt>
-                    <dd class="col-sm-9"><?= Html::encode($model->license ?? '(none)') ?></dd>
+        <div class="pilot-data flex-fill me-4">
+            <dl class="row mb-0">
+                <dt class="col-sm-4">License</dt>
+                <dd class="col-sm-8"><?= Html::encode($model->license ?? '(none)') ?></dd>
 
-                    <dt class="col-sm-3">Name</dt>
-                    <dd class="col-sm-9"><?= Html::encode($model->name) ?></dd>
+                <dt class="col-sm-4">Name</dt>
+                <dd class="col-sm-8"><?= Html::encode($model->name) ?></dd>
 
-                    <dt class="col-sm-3">Surname</dt>
-                    <dd class="col-sm-9"><?= Html::encode($model->surname) ?></dd>
+                <dt class="col-sm-4">Surname</dt>
+                <dd class="col-sm-8"><?= Html::encode($model->surname) ?></dd>
 
-                    <dt class="col-sm-3">Registration date</dt>
-                    <dd class="col-sm-9"><?= Html::encode($model->registration_date) ?></dd>
+                <dt class="col-sm-4">Registration date</dt>
+                <dd class="col-sm-8"><?= Html::encode($model->registration_date) ?></dd>
 
-                    <?php if (!empty($model->vatsim_id)): ?>
-                        <dt class="col-sm-3">VATSIM ID</dt>
-                        <dd class="col-sm-9"><?= Html::encode($model->vatsim_id) ?></dd>
-                    <?php endif; ?>
+                <?php if (!empty($model->vatsim_id)): ?>
+                    <dt class="col-sm-4">VATSIM ID</dt>
+                    <dd class="col-sm-8"><?= Html::encode($model->vatsim_id) ?></dd>
+                <?php endif; ?>
 
-                    <?php if (!empty($model->ivao_id)): ?>
-                        <dt class="col-sm-3">IVAO ID</dt>
-                        <dd class="col-sm-9"><?= Html::encode($model->ivao_id) ?></dd>
-                    <?php endif; ?>
+                <?php if (!empty($model->ivao_id)): ?>
+                    <dt class="col-sm-4">IVAO ID</dt>
+                    <dd class="col-sm-8"><?= Html::encode($model->ivao_id) ?></dd>
+                <?php endif; ?>
 
-                    <dt class="col-sm-3">Hours flown</dt>
-                    <dd class="col-sm-9"><?= Html::encode(TimeHelper::formatHoursMinutes($model->hours_flown)) ?></dd>
+                <dt class="col-sm-4">Hours flown</dt>
+                <dd class="col-sm-8"><?= Html::encode(TimeHelper::formatHoursMinutes($model->hours_flown)) ?></dd>
 
-                    <dt class="col-sm-3">Location</dt>
-                    <dd class="col-sm-9"><?= Html::encode($model->location ?? '') ?></dd>
-                </dl>
-            </div>
+                <dt class="col-sm-4">Location</dt>
+                <dd class="col-sm-8"><?= Html::encode($model->location ?? '') ?></dd>
+            </dl>
+        </div>
+
+        <div class="pilot-rank text-center" style="min-width: 120px;">
+            <?php if ($model->rank): ?>
+                <div class="rank-image mb-1">
+                    <?= ImageMam::render('rank_icon', $model->rank->id, 0, ['class' => 'img-fluid']) ?>
+                </div>
+                <div class="rank-name fw-semibold"><?= Html::encode($model->rank->name) ?></div>
+            <?php else: ?>
+                <div class="text-muted fst-italic">No rank</div>
+            <?php endif; ?>
         </div>
     </div>
+</div>
+
+
+
+
 
     <h4 class="mb-3">Recent flights</h4>
 
