@@ -1,5 +1,6 @@
 <?php
 
+use app\helpers\ImageMam;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
@@ -16,23 +17,31 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <div class="tour-view container mt-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="mb-0"><?= Html::encode($this->title) ?></h1>
-        <?php if (Yii::$app->user->can('tourCrud')): ?>
-            <div>
-                <?= Html::a('<i class="fa fa-edit"></i> Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
+    <div class="tour-header mb-4 text-center">
+        <?= ImageMam::render('tour_image', $model->id, 0, [
+            'class' => 'img-fluid rounded shadow-sm mx-auto d-block',
+            'style' => 'max-height:400px; object-fit:cover;'
+        ]) ?>
 
-                <?php if (!$model->getFlights()->exists()): ?>
-                <?= Html::a('<i class="fa fa-trash"></i> Delete', ['delete', 'id' => $model->id], [
-                    'class' => 'btn btn-danger',
-                    'data' => [
-                        'confirm' => 'Are you sure you want to delete this tour?',
-                        'method' => 'post',
-                    ],
-                ]) ?>
-                <?php endif; ?>
-            </div>
-        <?php endif; ?>
+        <div class="d-flex justify-content-between align-items-center mt-3 mb-2">
+            <h1 class="mb-0"><?= Html::encode($this->title) ?></h1>
+
+            <?php if (Yii::$app->user->can('tourCrud')): ?>
+                <div>
+                    <?= Html::a('<i class="fa fa-edit"></i> Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary me-2']) ?>
+
+                    <?php if (!$model->getFlights()->exists()): ?>
+                        <?= Html::a('<i class="fa fa-trash"></i> Delete', ['delete', 'id' => $model->id], [
+                            'class' => 'btn btn-danger',
+                            'data' => [
+                                'confirm' => 'Are you sure you want to delete this tour?',
+                                'method' => 'post',
+                            ],
+                        ]) ?>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
+        </div>
     </div>
 
     <div class="card shadow-sm mb-4">
