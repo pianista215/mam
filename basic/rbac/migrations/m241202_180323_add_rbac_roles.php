@@ -1,10 +1,10 @@
 <?php
 
+use app\rbac\rules\ImageUploadRule;
 use app\rbac\rules\FlightValidationRule;
 use app\rbac\rules\SubmittedFlightPlanOwnerRule;
 use yii\db\Migration;
 
-// TODO: CHECK IF USE RBAC BASE FOR MIGRATIONS BEFORE THAT OR PROVIDE DIRECTLY SQL
 /**
  * Class m241202_180323_add_rbac_roles
  */
@@ -31,6 +31,14 @@ class m241202_180323_add_rbac_roles extends Migration
         $submitFpl->description = 'Submit a flight plan';
         $auth->add($submitFpl);
 
+        // Image upload rule
+        $imageUploadRule = new ImageUploadRule();
+        $auth->add($imageUploadRule);
+        $uploadImage = $auth->createPermission('uploadImage');
+        $uploadImage->ruleName = $imageUploadRule->name;
+        $auth->add($uploadImage);
+
+        // Owner Fpl Rule
         $ownerFplRule = new SubmittedFlightPlanOwnerRule();
         $auth->add($ownerFplRule);
         $crudOwnFpl = $auth->createPermission('crudOwnFpl');
@@ -43,6 +51,8 @@ class m241202_180323_add_rbac_roles extends Migration
         $auth->addChild($pilot, $reportFlight);
         $auth->addChild($pilot, $submitFpl);
         $auth->addChild($pilot, $crudOwnFpl);
+        // All active pilots inherint this rule, so all "potentially" can upload images
+        $auth->addChild($pilot, $uploadImage);
 
         // Flight Validator rule
         $flightValidationRule = new FlightValidationRule();
