@@ -40,7 +40,7 @@ class ImageUploadRule extends Rule
             case 'aircraftType_image':
                 return Yii::$app->user->can('aircraftTypeCrud');
 
-            case 'page':
+            case 'page_image':
                 return Yii::$app->authManager->getAssignment('admin', $userId) !== null;
 
             case 'pilot_profile':

@@ -96,7 +96,7 @@ class Image extends \yii\db\ActiveRecord
             'tour_image'        => ['width' => 1200, 'height' => 400, 'relatedModel' => Tour::class],
             'country_icon'      => ['width' => 44, 'height' => 22, 'relatedModel' => Country::class],
             'aircraftType_image'=> ['width' => 1200, 'height' => 400, 'relatedModel' => AircraftType::class],
-            'page'              => ['width' => null, 'height' => null, 'relatedModel' => Page::class],
+            'page_image'        => ['width' => null, 'height' => null, 'relatedModel' => Page::class],
         ];
     }
 
@@ -114,12 +114,12 @@ class Image extends \yii\db\ActiveRecord
     }
 
     public function isValidElement() {
-        return $this->type === 'page' || $this->element === 0;
+        return $this->type === 'page_image' || $this->element === 0;
     }
 
     public function validateElement($attribute, $params)
     {
-        if ($this->type !== 'page' && $this->$attribute != 0) {
+        if ($this->type !== 'page_image' && $this->$attribute != 0) {
             $this->addError($attribute, "Attribute 'element' must be 0 for type '{$this->type}'.");
         }
     }

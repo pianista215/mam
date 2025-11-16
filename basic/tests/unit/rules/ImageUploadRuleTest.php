@@ -212,7 +212,7 @@ class ImageUploadRuleTest extends BaseUnitTest
         $pilot = $this->createPilot(11);
         $this->login($pilot);
 
-        $img = $this->img('page', 1);
+        $img = $this->img('page_image', 1);
 
         $this->assertFalse(Yii::$app->user->can('imageUpload', ['image' => $img]));
     }
@@ -227,7 +227,7 @@ class ImageUploadRuleTest extends BaseUnitTest
             11
         );
 
-        $img = $this->img('page', 1);
+        $img = $this->img('page_image', 1);
 
         $this->assertTrue(Yii::$app->user->can('imageUpload', ['image' => $img]));
     }
