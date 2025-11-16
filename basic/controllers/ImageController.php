@@ -45,21 +45,29 @@ class ImageController extends Controller
      */
     public function actionIndex()
     {
+        if(!Yii::$app->user->can('imageCrud')){
+            throw new ForbiddenHttpException();
+        }
         $searchModel = new ImageSearch();
-        $dataProvider = $searchModel->search($this->request->queryParams);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        // Build dropdown
+        $types = [];
+        foreach (Image::getAllowedTypes() as $key => $info) {
+            $types[$key] = $info['label'] ?? $key;
+        }
 
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'types' => $types,
         ]);
     }
 
+
+
     public function actionView(string $type, int $related_id, int $element = 0)
     {
-        // TODO: UNAI METER RBAC Y AÑADE LOGS
-        /*if (!Yii::$app->user->can('viewImage', ['type' => $type, 'related_id' => $related_id])) {
-            throw new ForbiddenHttpException();
-        }*/
 
         $image = Image::findOne([
             'type' => $type,
@@ -67,7 +75,24 @@ class ImageController extends Controller
             'element' => $element,
         ]);
 
-        // TODO: Simplificar porque hay mucho is_file que sobra
+        if (Yii::$app->user->isGuest) {
+            if ($type === 'pilot_profile') {
+                throw new ForbiddenHttpException();
+            }
+
+            if ($type === 'page') {
+                if ($image === null) {
+                    throw new ForbiddenHttpException();
+                }
+
+                $page = $image->getRelatedModel();
+
+                if (!$page || !$page->public) {
+                    throw new ForbiddenHttpException();
+                }
+            }
+        }
+
         $filePath = null;
         $mimeType = 'image/png'; // Placeholders default
 
@@ -184,49 +209,6 @@ class ImageController extends Controller
         ]);
     }
 
-
-    /**
-     * Creates a new Image model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return string|\yii\web\Response
-     */
-    public function actionCreate()
-    {
-        $model = new Image();
-
-        if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'id' => $model->id]);
-            }
-        } else {
-            $model->loadDefaultValues();
-        }
-
-        return $this->render('create', [
-            'model' => $model,
-        ]);
-    }
-
-    /**
-     * Updates an existing Image model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param string $id ID
-     * @return string|\yii\web\Response
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionUpdate($id)
-    {
-        $model = $this->findModel($id);
-
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
-        }
-
-        return $this->render('update', [
-            'model' => $model,
-        ]);
-    }
-
     /**
      * Deletes an existing Image model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
@@ -236,9 +218,16 @@ class ImageController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
+        if(!Yii::$app->user->can('imageCrud')){
+            throw new ForbiddenHttpException();
+        }
+        $image = $this->findModel($id);
 
-        return $this->redirect(['index']);
+        $type = $image->type;
+
+        $image->delete();
+
+        return $this->redirect(['index', 'ImageSearch[type]' => $type]);
     }
 
     /**

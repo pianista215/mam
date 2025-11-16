@@ -21,9 +21,6 @@ use Yii;
 class Image extends \yii\db\ActiveRecord
 {
 
-    /** @var UploadedFile|null */
-    public $uploadFile;
-
     /**
      * {@inheritdoc}
      */
