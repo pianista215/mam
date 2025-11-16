@@ -2,8 +2,10 @@
 
 namespace tests\unit\models;
 
+use app\config\Config;
 use app\models\Airport;
 use app\models\Country;
+use app\models\Image;
 use app\models\Pilot;
 use tests\unit\BaseUnitTest;
 use Yii;
@@ -243,5 +245,54 @@ class PilotTest extends BaseUnitTest
         $pilot->pwd_reset_token_created_at = 'invalid-date';
         $this->assertTrue($pilot->isPasswordResetTokenExpired());
     }
+
+    public function testPilotImageIsDeletedOnPilotDelete()
+    {
+        Config::set('images_storage_path', '/tmp');
+
+        $pilot = new Pilot([
+            'name' => 'John',
+            'surname' => 'Doe',
+            'email' => 'john.doe@example.com',
+            'country_id' => 1,
+            'city' => 'Madrid',
+            'location' => 'LEVD',
+            'password' => 'SecurePass123!',
+            'license' => 'LIC999',
+            'date_of_birth' => '1980-01-01',
+        ]);
+
+        $this->assertTrue($pilot->save());
+
+        $dir = '/tmp/pilot_profile';
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
+
+        $source = Yii::getAlias(Image::getPlaceHolder('pilot_profile'));
+        $target = $dir . '/testfile.jpg';
+
+        copy($source, $target);
+
+        $this->assertFileExists($target);
+
+        $image = new Image([
+            'type' => 'pilot_profile',
+            'related_id' => $pilot->id,
+            'filename' => 'testfile.jpg',
+        ]);
+        $this->assertTrue($image->save());
+
+        $pilot->delete();
+
+        $deletedImage = Image::findOne([
+            'type' => 'pilot_profile',
+            'related_id' => $pilot->id,
+        ]);
+
+        $this->assertNull($deletedImage, 'Image must be deleted when pilot was deleted');
+        $this->assertFileDoesNotExist($target);
+    }
+
 
 }

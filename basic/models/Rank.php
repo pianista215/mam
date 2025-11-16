@@ -2,7 +2,7 @@
 
 namespace app\models;
 
-use app\models\traits\ImageDescriptable;
+use app\models\traits\ImageRelated;
 use Yii;
 
 /**
@@ -16,7 +16,7 @@ use Yii;
  */
 class Rank extends \yii\db\ActiveRecord
 {
-    use ImageDescriptable;
+    use ImageRelated;
 
     public function getImageDescription(): string
     {

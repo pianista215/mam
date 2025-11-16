@@ -2,8 +2,11 @@
 
 namespace tests\unit\models;
 
+use app\config\Config;
+use app\models\Image;
 use app\models\Rank;
 use tests\unit\BaseUnitTest;
+use Yii;
 
 class RankTest extends BaseUnitTest
 {
@@ -73,5 +76,46 @@ class RankTest extends BaseUnitTest
 
         $this->assertFalse($rank->save());
         $this->assertArrayHasKey('position', $rank->errors);
+    }
+
+    public function testRankIconIsDeletedOnRankDelete()
+    {
+        Config::set('images_storage_path', '/tmp');
+
+        $rank = new Rank([
+            'name' => 'Captain',
+            'position' => 1,
+        ]);
+
+        $this->assertTrue($rank->save());
+
+        $dir = '/tmp/rank_icon';
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
+
+        $source = Yii::getAlias(Image::getPlaceHolder('rank_icon'));
+        $target = $dir . '/testfile.jpg';
+
+        copy($source, $target);
+
+        $this->assertFileExists($target);
+
+        $image = new Image([
+            'type' => 'rank_icon',
+            'related_id' => $rank->id,
+            'filename' => 'testfile.jpg',
+        ]);
+        $this->assertTrue($image->save());
+
+        $rank->delete();
+
+        $deletedImage = Image::findOne([
+            'type' => 'rank_icon',
+            'related_id' => $rank->id,
+        ]);
+
+        $this->assertNull($deletedImage, 'Image must be deleted when rank was deleted');
+        $this->assertFileDoesNotExist($target);
     }
 }

@@ -28,6 +28,7 @@ abstract class BaseUnitTest extends \Codeception\Test\Unit
         Yii::$app->db->createCommand()->delete('country')->execute();
         Yii::$app->db->createCommand()->delete('aircraft_configuration')->execute();
         Yii::$app->db->createCommand()->delete('aircraft_type')->execute();
+        Yii::$app->db->createCommand()->delete('rank')->execute();
     }
 
 }
