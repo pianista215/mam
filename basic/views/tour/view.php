@@ -82,8 +82,27 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?php foreach ($model->tourStages as $stage): ?>
                     <tr>
                         <td><?= Html::encode($stage->sequence) ?></td>
-                        <td><?= Html::encode($stage->departure ?? '-') ?></td>
-                        <td><?= Html::encode($stage->arrival ?? '-') ?></td>
+                        <td>
+                            <div style="display:flex; align-items:center; white-space:nowrap;">
+                                <span style="display:inline-block; width:44px;">
+                                    <?= Html::encode($stage->departure ?? '-') ?>
+                                </span>
+                                <span style="margin-left:5px; display:flex; align-items:center;">
+                                    <?= ImageMam::render('country_icon', $stage->departure0->country_id) ?>
+                                </span>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div style="display:flex; align-items:center; white-space:nowrap;">
+                                <span style="display:inline-block; width:44px;">
+                                    <?= Html::encode($stage->arrival ?? '-') ?>
+                                </span>
+                                <span style="margin-left:5px; display:flex; align-items:center;">
+                                    <?= ImageMam::render('country_icon', $stage->arrival0->country_id) ?>
+                                </span>
+                            </div>
+                        </td>
                         <td><?= Html::encode($stage->distance_nm ?? '-') ?></td>
                         <td><?= Html::encode($stage->description ?? '-') ?></td>
 
