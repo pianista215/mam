@@ -1,5 +1,6 @@
 <?php
 
+use app\helpers\ImageMam;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -27,6 +28,10 @@ $this->params['breadcrumbs'][] = $this->title;
         ]) ?>
     </p>
     <?php endif; ?>
+
+    <div style="text-align:center; margin-bottom:15px;">
+        <?= ImageMam::render('country_icon', $model->id) ?>
+    </div>
 
     <?= DetailView::widget([
         'model' => $model,

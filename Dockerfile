@@ -40,7 +40,7 @@ RUN mkdir -p /opt/mam/chunks \
     && chmod -R 755 /var/www/html \
     && chmod -R 755 /opt/mam/chunks
 
-COPY initial_flags/*.png /opt/mam/images/country_icon/
+COPY initial_flags /tmp/initial_flags
 
 RUN a2enmod rewrite
 

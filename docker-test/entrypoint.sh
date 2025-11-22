@@ -39,6 +39,9 @@ php /var/www/html/yii migrate-rbac --interactive=0
 echo "Custom-rbac migrations"
 php /var/www/html/yii migrate-custom-rbac --interactive=0
 
+echo "Load flags"
+php /var/www/html/yii flags-load/load /tmp/initial_flags/
+
 # Load test fixtures
 php /var/www/html/yii fixture "AuthAssignment, SubmittedFlightPlan" --namespace='tests\fixtures' --interactive=0
 
