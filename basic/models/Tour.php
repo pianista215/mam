@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\models\traits\ImageRelated;
 use Yii;
 
 /**
@@ -19,6 +20,13 @@ use Yii;
  */
 class Tour extends \yii\db\ActiveRecord
 {
+    use ImageRelated;
+
+    public function getImageDescription(): string
+    {
+        return "tour: {$this->name}";
+    }
+
     /**
      * {@inheritdoc}
      */

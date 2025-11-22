@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\helpers\CustomRules;
+use app\models\traits\ImageRelated;
 use Yii;
 
 /**
@@ -17,6 +18,13 @@ use Yii;
  */
 class AircraftType extends \yii\db\ActiveRecord
 {
+    use ImageRelated;
+
+    public function getImageDescription(): string
+    {
+        return "aircraft type: {$this->name}";
+    }
+
     /**
      * {@inheritdoc}
      */

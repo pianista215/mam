@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\models\traits\ImageRelated;
 use Yii;
 
 /**
@@ -17,6 +18,8 @@ use Yii;
  */
 class Page extends \yii\db\ActiveRecord
 {
+    use ImageRelated;
+
     /**
      * {@inheritdoc}
      */

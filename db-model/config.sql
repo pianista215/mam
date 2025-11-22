@@ -5,6 +5,7 @@ INSERT INTO config(`key`, `value`) VALUES ('registration_start_location', 'LEVD'
 
 -- Settings
 INSERT INTO config(`key`, `value`) VALUES ('chunks_storage_path', '/opt/mam/chunks');
+INSERT INTO config(`key`, `value`) VALUES ('images_storage_path', '/opt/mam/images');
 INSERT INTO config(`key`, `value`) VALUES ('token_life_h', '24');
 
 -- Global config

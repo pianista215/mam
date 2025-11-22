@@ -1,5 +1,6 @@
 <?php
 
+use app\helpers\ImageMam;
 use app\models\Country;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -16,13 +17,12 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="country-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-    <?php if(Yii::$app->user->can('userCrud')) : ?>
-    <p>
-        <?= Html::a('Create Country', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
-    <?php endif; ?>
 
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php if(Yii::$app->user->can('userCrud')) : ?>
+        <p>
+            <?= Html::a('Create Country', ['create'], ['class' => 'btn btn-success']) ?>
+        </p>
+    <?php endif; ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -30,8 +30,20 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
 
+            [
+                'label' => 'Flag',
+                'format' => 'raw',
+                'value' => function ($model) {
+                    $img = ImageMam::render('country_icon', $model->id);
+                    return Html::tag('div', $img, ['style' => 'text-align:center;']);
+                },
+                'contentOptions' => ['style' => 'width:70px; text-align:center; vertical-align:middle;'],
+                'headerOptions'  => ['style' => 'text-align:center;'],
+            ],
+
             'name',
             'iso2_code',
+
             [
                 'class' => ActionColumn::className(),
                 'visibleButtons'=>[
@@ -44,19 +56,18 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
                 'urlCreator' => function ($action, Country $model, $key, $index, $column) {
                     return Url::toRoute([$action, 'id' => $model->id]);
-                 }
+                }
             ],
         ],
         'tableOptions' => ['class' => 'table table-striped table-bordered'],
         'pager' => [
-                'options' => ['class' => 'pagination justify-content-center'],
-                'linkContainerOptions' => ['class' => 'page-item'],
-                'linkOptions' => ['class' => 'page-link'],
-                'disabledListItemSubTagOptions' => ['class' => 'page-link'],
-                'hideOnSinglePage' => true,
-            ],
+            'options' => ['class' => 'pagination justify-content-center'],
+            'linkContainerOptions' => ['class' => 'page-item'],
+            'linkOptions' => ['class' => 'page-link'],
+            'disabledListItemSubTagOptions' => ['class' => 'page-link'],
+            'hideOnSinglePage' => true,
+        ],
         'summaryOptions' => ['class' => 'text-muted']
     ]); ?>
-
 
 </div>

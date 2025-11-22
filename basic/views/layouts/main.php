@@ -108,6 +108,7 @@ $this->registerCssFile(
             'label' => 'Admin',
             'items' => [
                 ['label' => 'Activate Pilots', 'url' => ['/pilot/activate-pilots']],
+                ['label' => 'Manage Images', 'url' => ['/image/index']],
             ],
         ];
     }

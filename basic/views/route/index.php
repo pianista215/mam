@@ -1,5 +1,6 @@
 <?php
 
+use app\helpers\ImageMam;
 use app\models\Route;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -29,15 +30,59 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
+            [
+                'class' => 'yii\grid\SerialColumn',
+                'contentOptions' => ['style' => 'vertical-align:middle'],
+                ],
 
-            //'id',
-            'code',
-            'departure',
-            'arrival',
-            'distance_nm',
+            [
+                'attribute' => 'code',
+                'contentOptions' => ['style' => 'vertical-align:middle'],
+            ],
+
+            [
+                'attribute' => 'departure',
+                'label' => 'Departure',
+                'format' => 'raw',
+                'value' => function($model) {
+                    return Html::tag('div',
+                        Html::tag('span', Html::encode($model->departure), [
+                            'style'=>'display:inline-block; width:44px; text-align:left;'
+                        ]) .
+                        Html::tag('span', ImageMam::render('country_icon', $model->departure0->country->id), [
+                            'style' => 'display:inline-block; vertical-align:middle; margin-left:5px;'
+                        ]),
+                        ['style'=>'white-space:nowrap;']
+                    );
+                },
+                'contentOptions' => ['style' => 'vertical-align:middle; text-align:left;'],
+            ],
+            [
+                'attribute' => 'arrival',
+                'label' => 'Arrival',
+                'format' => 'raw',
+                'value' => function($model) {
+                     return Html::tag('div',
+                         Html::tag('span', Html::encode($model->arrival), [
+                             'style'=>'display:inline-block; width:44px; text-align:left;'
+                         ]) .
+                         Html::tag('span', ImageMam::render('country_icon', $model->arrival0->country->id), [
+                             'style' => 'display:inline-block; vertical-align:middle; margin-left:5px;'
+                         ]),
+                         ['style'=>'white-space:nowrap;']
+                     );
+                },
+                'contentOptions' => ['style' => 'vertical-align:middle; text-align:left;'],
+            ],
+
+            [
+                'attribute' => 'distance_nm',
+                'contentOptions' => ['style' => 'vertical-align:middle'],
+            ],
+
             [
                 'class' => ActionColumn::className(),
+                'contentOptions' => ['style' => 'vertical-align:middle'],
                 'visibleButtons'=>[
                     'delete'=> function($model){
                         return Yii::$app->user->can('routeCrud');
@@ -61,6 +106,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         'summaryOptions' => ['class' => 'text-muted']
     ]); ?>
+
 
 
 </div>

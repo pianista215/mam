@@ -2,8 +2,11 @@
 
 namespace tests\unit\models;
 
+use app\config\Config;
 use app\models\AircraftType;
+use app\models\Image;
 use tests\unit\BaseUnitTest;
+use Yii;
 
 class AircraftTypeTest extends BaseUnitTest
 {
@@ -70,5 +73,47 @@ class AircraftTypeTest extends BaseUnitTest
 
         $this->assertFalse($aircraftType2->save());
         $this->assertArrayHasKey('icao_type_code', $aircraftType2->errors);
+    }
+
+    public function testAircraftTypeImageIsDeletedOnAircrafTypeDelete()
+    {
+        Config::set('images_storage_path', '/tmp');
+
+        $aircraftType = new AircraftType([
+            'icao_type_code' => 'B738',
+            'name' => 'Boeing 737-800',
+            'max_nm_range' => 2900,
+        ]);
+
+        $this->assertTrue($aircraftType->save());
+
+        $dir = '/tmp/aircraftType_image';
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
+
+        $source = Yii::getAlias(Image::getPlaceHolder('aircraftType_image'));
+        $target = $dir . '/testfile.jpg';
+
+        copy($source, $target);
+
+        $this->assertFileExists($target);
+
+        $image = new Image([
+            'type' => 'aircraftType_image',
+            'related_id' => $aircraftType->id,
+            'filename' => 'testfile.jpg',
+        ]);
+        $this->assertTrue($image->save());
+
+        $aircraftType->delete();
+
+        $deletedImage = Image::findOne([
+            'type' => 'aircraftType_image',
+            'related_id' => $aircraftType->id,
+        ]);
+
+        $this->assertNull($deletedImage, 'Image must be deleted when aircraftType was deleted');
+        $this->assertFileDoesNotExist($target);
     }
 }
