@@ -40,6 +40,30 @@ class ImageIndexCest
         $I->see('Delete');
     }
 
+    public function filterImageIndexByTypeViaUrl(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(2);
+
+        $I->amOnRoute('image/index', [
+            'ImageSearch[type]' => 'tour_image',
+        ]);
+
+        $I->seeResponseCodeIs(200);
+        $I->see('Images');
+
+        $I->see('tour_image', 'td');
+
+        $otherTypes = ['rank_icon', 'pilot_profile', 'country_icon', 'aircraftType_image', 'page_image'];
+        foreach ($otherTypes as $type) {
+            $I->dontSee($type, 'td');
+        }
+
+        $I->see('Replace');
+        $I->see('Delete');
+    }
+
+
+
     public function openImageIndexAsUser(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
