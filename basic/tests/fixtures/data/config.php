@@ -7,6 +7,7 @@ return [
 
     // Settings
     ['key' => 'chunks_storage_path', 'value' => '/opt/mam/chunks'],
+    ['key' => 'images_storage_path', 'value' => '/opt/mam/images'],
     ['key' => 'token_life_h', 'value' => '24'],
 
     // Global config
