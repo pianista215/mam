@@ -37,7 +37,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     $img = ImageMam::render('country_icon', $model->id);
                     return Html::tag('div', $img, ['style' => 'text-align:center;']);
                 },
-                'contentOptions' => ['style' => 'width:50px; text-align:center; vertical-align:middle;'],
+                'contentOptions' => ['style' => 'width:70px; text-align:center; vertical-align:middle;'],
                 'headerOptions'  => ['style' => 'text-align:center;'],
             ],
 
