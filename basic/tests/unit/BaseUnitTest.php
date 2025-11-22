@@ -31,6 +31,7 @@ abstract class BaseUnitTest extends \Codeception\Test\Unit
         Yii::$app->db->createCommand()->delete('rank')->execute();
         Yii::$app->db->createCommand()->delete('page')->execute();
         Yii::$app->db->createCommand()->delete('page_content')->execute();
+        Yii::$app->db->createCommand()->delete('image')->execute();
     }
 
 }

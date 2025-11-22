@@ -31,7 +31,7 @@ class ImageController extends Controller
             [
                 'access' => [
                     'class' => AccessControl::class,
-                    'only' => ['index', 'update', 'delete'],
+                    'only' => ['index', 'upload', 'delete'],
                     'rules' => [
                         [
                             'allow' => true,

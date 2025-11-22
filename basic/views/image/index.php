@@ -16,10 +16,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <div class="mb-3">
-        <?= Html::a('Create Image', ['create'], ['class' => 'btn btn-success']) ?>
-    </div>
-
     <!-- Dropdown filter -->
     <div class="mb-3">
         <form method="get" action="">
@@ -94,6 +90,15 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
         ],
+        'tableOptions' => ['class' => 'table table-striped table-bordered'],
+        'pager' => [
+                'options' => ['class' => 'pagination justify-content-center'],
+                'linkContainerOptions' => ['class' => 'page-item'],
+                'linkOptions' => ['class' => 'page-link'],
+                'disabledListItemSubTagOptions' => ['class' => 'page-link'],
+                'hideOnSinglePage' => true,
+            ],
+        'summaryOptions' => ['class' => 'text-muted']
     ]); ?>
 
 </div>
