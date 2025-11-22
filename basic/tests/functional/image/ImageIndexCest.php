@@ -62,8 +62,6 @@ class ImageIndexCest
         $I->see('Delete');
     }
 
-
-
     public function openImageIndexAsUser(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
