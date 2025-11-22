@@ -91,7 +91,7 @@ class Image extends \yii\db\ActiveRecord
             'rank_icon'         => ['width' => 174, 'height' => 76, 'relatedModel' => Rank::class],
             'pilot_profile'     => ['width' => 200, 'height' => 250, 'relatedModel' => Pilot::class],
             'tour_image'        => ['width' => 1200, 'height' => 400, 'relatedModel' => Tour::class],
-            'country_icon'      => ['width' => 44, 'height' => 22, 'relatedModel' => Country::class],
+            'country_icon'      => ['width' => 44, 'height' => 33, 'relatedModel' => Country::class],
             'aircraftType_image'=> ['width' => 1200, 'height' => 400, 'relatedModel' => AircraftType::class],
             'page_image'        => ['width' => null, 'height' => null, 'relatedModel' => Page::class],
         ];

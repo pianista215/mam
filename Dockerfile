@@ -28,10 +28,19 @@ COPY db-model/pages.sql /
 COPY docker-test/db-docker.php /
 
 RUN mkdir -p /opt/mam/chunks \
+    && mkdir -p /opt/mam/images/rank_icon \
+    && mkdir -p /opt/mam/images/pilot_profile \
+    && mkdir -p /opt/mam/images/tour_image \
+    && mkdir -p /opt/mam/images/country_icon \
+    && mkdir -p /opt/mam/images/aircraftType_image \
+    && mkdir -p /opt/mam/images/page_image \
     && chown -R www-data:www-data /var/www/html \
     && chown -R www-data:www-data /opt/mam/chunks \
+    && chown -R www-data:www-data /opt/mam/images \
     && chmod -R 755 /var/www/html \
     && chmod -R 755 /opt/mam/chunks
+
+COPY initial_flags/*.png /opt/mam/images/country_icon/
 
 RUN a2enmod rewrite
 
