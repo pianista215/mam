@@ -52,6 +52,23 @@ jobs:
           php basic/yii migrate-rbac --interactive=0
           php basic/yii migrate-custom-rbac --interactive=0
 
+      - name: Extract and Check i18n Messages
+        run: |
+          cd basic
+
+          echo "🔍 Extracting messages..."
+          php yii message config/message.php
+
+          echo "🔎 Checking for untranslated strings..."
+          # Looking for keys => ''
+          if grep -n -E "\=\>\s*''[,}]" messages/es/app.php > /dev/null; then
+            echo "❌ There are untranslated strings in messages/es/app.php"
+            grep -n -E "\=\>\s*''[,}]" messages/es/app.php
+            exit 1
+          fi
+
+          echo "✅ No untranslated strings found."   
+
       - name: Run Tests
         env:
           CONFIG_PATH: ${{ env.CONFIG_PATH }}
