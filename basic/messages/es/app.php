@@ -45,6 +45,7 @@ return [
     'Ranks' => 'Rangos',
     'Routes' => 'Rutas',
     'Rules' => 'Reglamentación',
+    'Save' => 'Guardar',
     'School' => 'Escuela',
     'Staff' => 'Staff',
     'Submit FPL' => 'Enviar FPL',
