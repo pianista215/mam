@@ -55,10 +55,10 @@ class AircraftType extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'icao_type_code' => 'Icao Type Code',
-            'name' => 'Name',
-            'max_nm_range' => 'Max Nm Range',
+            'id' => Yii::t('app', 'ID'),
+            'icao_type_code' => Yii::t('app', 'Icao Type Code'),
+            'name' => Yii::t('app', 'Name'),
+            'max_nm_range' => Yii::t('app', 'Max Range (NM)'),
         ];
     }
 
