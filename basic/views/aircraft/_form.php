@@ -14,7 +14,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'aircraft_configuration_id')->dropdownList(
         $aircraftConfigurations,
-        ['prompt'=>'Select Aircraft Configuration']
+        ['prompt'=>Yii::t('app', 'Select Aircraft Configuration')]
         ); ?>
 
     <?= $form->field($model, 'registration')->textInput(['maxlength' => true]) ?>

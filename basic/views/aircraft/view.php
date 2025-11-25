@@ -37,7 +37,10 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
-            'aircraftConfiguration.fullname',
+            [
+                'attribute' =>'aircraftConfiguration.fullname',
+                'label' => Yii::t('app', 'Aircraft Configuration'),
+            ],
             'registration',
             'name',
             'location',

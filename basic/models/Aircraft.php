@@ -67,12 +67,12 @@ class Aircraft extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'aircraft_configuration_id' => 'Aircraft Configuration ID',
-            'registration' => 'Registration',
-            'name' => 'Name',
-            'location' => 'Location',
-            'hours_flown' => 'Hours Flown',
+            'id' => Yii::t('app', 'ID'),
+            'aircraft_configuration_id' => Yii::t('app', 'Aircraft Configuration'),
+            'registration' => Yii::t('app', 'Registration'),
+            'name' => Yii::t('app', 'Name'),
+            'location' => Yii::t('app', 'Location'),
+            'hours_flown' => Yii::t('app', 'Hours Flown'),
         ];
     }
 
