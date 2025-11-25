@@ -58,11 +58,13 @@ return [
     'Save' => 'Guardar',
     'School' => 'Escuela',
     'Select Aircraft Configuration' => 'Seleccione una Configuración de Aeronave',
+    'Select Aircraft Type' => 'Seleccione un Tipo de Aeronave',
     'Staff' => 'Staff',
     'Submit FPL' => 'Enviar FPL',
     'Tours' => 'Tours',
     'Update' => 'Modificar',
     'Update Aircraft' => 'Modificar Aeronave',
+    'Update Aircraft Configuration' => 'Modificar Configuración de Aeronave',
     'Validate Flights' => 'Validación de Vuelos',
     'Validations' => 'Validaciones',
 ];
