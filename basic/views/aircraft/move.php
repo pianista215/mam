@@ -5,8 +5,8 @@ use yii\widgets\ActiveForm;
 /** @var yii\web\View $this */
 /** @var app\models\Aircraft $model */
 
-$this->title = 'Move Aircraft';
-$this->params['breadcrumbs'][] = ['label' => 'Aircrafts', 'url' => ['index']];
+$this->title = Yii::t('app', 'Move Aircraft');
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Aircrafts'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->registration, 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -14,7 +14,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <p>Please enter the ICAO code of the airport to move this aircraft.</p>
+    <p><?= Yii::t('app', 'Please enter the ICAO code of the airport to move this aircraft.')?></p>
 
     <?php $form = ActiveForm::begin(); ?>
 
@@ -23,10 +23,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'maxlength' => 4,
                 'placeholder' => 'Example: LEMD'
             ])
-            ->label('Airport (ICAO)') ?>
+            ->label(Yii::t('app', 'Airport (ICAO)')) ?>
 
         <div class="form-group">
-            <?= Html::submitButton('Move', ['class' => 'btn btn-primary']) ?>
+            <?= Html::submitButton(Yii::t('app', 'Move'), ['class' => 'btn btn-primary']) ?>
         </div>
 
     <?php ActiveForm::end(); ?>

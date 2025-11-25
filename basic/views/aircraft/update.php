@@ -5,10 +5,10 @@ use yii\helpers\Html;
 /** @var yii\web\View $this */
 /** @var app\models\Aircraft $model */
 
-$this->title = 'Update Aircraft: ' . $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Aircrafts', 'url' => ['index']];
+$this->title = Yii::t('app', 'Update Aircraft') . ': ' . $model->name;
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Aircrafts'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'id' => $model->id]];
-$this->params['breadcrumbs'][] = 'Update';
+$this->params['breadcrumbs'][] = Yii::t('app', 'Update');
 ?>
 <div class="aircraft-update">
 
