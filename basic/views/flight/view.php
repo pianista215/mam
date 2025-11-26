@@ -7,7 +7,7 @@ use yii\widgets\DetailView;
 /** @var app\models\Flight $model */
 
 $this->title = $model->id;
-$this->params['breadcrumbs'][] = ['label' => 'Flights', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Flights'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
@@ -21,7 +21,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         <?php if (!empty($model->tourStage)): ?>
                         <?= Html::encode($model->tourStage->fplDescription) ?>
                         <?php else: ?>
-                        <?= Html::encode('Route '.$model->code) ?>
+                        <?= Html::encode(Yii::t('app', 'Route').' '.$model->code) ?>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -29,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
     </div>
 
-    <h3>Flight plan</h1>
+    <h3><?=Yii::t('app', 'Flight plan')?></h1>
 
     <?= $this->render('_flight_plan', [
         'model' => $model,
@@ -37,7 +37,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'pilotName' => $model->pilot->fullname,
     ]) ?>
 
-    <h3>Flight data</h3>
+    <h3><?=Yii::t('app', 'Flight data')?></h3>
 
     <?= $this->render('_flight_data', [
         'model' => $model,
