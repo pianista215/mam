@@ -16,7 +16,7 @@ $this->registerCssFile(
 );
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Airports', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Airports'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
@@ -26,11 +26,11 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php if(Yii::$app->user->can('airportCrud')) : ?>
     <p>
-        <?= Html::a('Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('Delete', ['delete', 'id' => $model->id], [
+        <?= Html::a(Yii::t('app', 'Update'), ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
+        <?= Html::a(Yii::t('app', 'Delete'), ['delete', 'id' => $model->id], [
             'class' => 'btn btn-danger',
             'data' => [
-                'confirm' => 'Are you sure you want to delete this item?',
+                'confirm' => Yii::t('app', 'Are you sure you want to delete this item?'),
                 'method' => 'post',
             ],
         ]) ?>
@@ -40,7 +40,6 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
-            'id',
             'icao_code',
             'name',
             'latitude',
@@ -51,7 +50,7 @@ $this->params['breadcrumbs'][] = $this->title;
     ]) ?>
 
     <div class="airport-map mt-4">
-        <h4>Airport Location</h4>
+        <h4><?=Yii::t('app', 'Airport Location')?></h4>
         <div id="map" style="width: 100%; height: 500px;"></div>
     </div>
 

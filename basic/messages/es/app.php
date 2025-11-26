@@ -27,6 +27,7 @@ return [
     'Aircraft Types' => 'Tipos de Aeronaves',
     'Aircrafts' => 'Aeronaves',
     'Airport (ICAO)' => 'Aeropuerto (ICAO)',
+    'Airport Location' => 'Localización del Aeropuerto',
     'Airports' => 'Aeropuertos',
     'Are you sure you want to delete this item?' => '¿Estás seguro de que deseas eliminar este elemento?',
     'Cargo Capacity' => 'Capacidad de Cargo',
@@ -69,6 +70,7 @@ return [
     'School' => 'Escuela',
     'Select Aircraft Configuration' => 'Seleccione una Configuración de Aeronave',
     'Select Aircraft Type' => 'Seleccione un Tipo de Aeronave',
+    'Select Country' => 'Seleccione un País',
     'Staff' => 'Staff',
     'Submit FPL' => 'Enviar FPL',
     'Tours' => 'Tours',
@@ -76,6 +78,7 @@ return [
     'Update Aircraft' => 'Modificar Aeronave',
     'Update Aircraft Configuration' => 'Modificar Configuración de Aeronave',
     'Update Aircraft Type' => 'Modificar Tipo de Aeronave',
+    'Update Airport' => 'Modificar Aeropuerto',
     'Validate Flights' => 'Validación de Vuelos',
     'Validations' => 'Validaciones',
 ];
