@@ -63,13 +63,13 @@ class Airport extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'icao_code' => 'Icao Code',
-            'name' => 'Name',
-            'latitude' => 'Latitude',
-            'longitude' => 'Longitude',
-            'city' => 'City',
-            'country_id' => 'Country ID',
+            'id' => Yii::t('app', 'ID'),
+            'icao_code' => Yii::t('app', 'Icao Code'),
+            'name' => Yii::t('app', 'Name'),
+            'latitude' => Yii::t('app', 'Latitude'),
+            'longitude' => Yii::t('app', 'Longitude'),
+            'city' => Yii::t('app', 'City'),
+            'country_id' => Yii::t('app', 'Country'),
         ];
     }
 

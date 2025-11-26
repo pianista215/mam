@@ -10,7 +10,7 @@ use yii\grid\GridView;
 /** @var app\models\AirportSearch $searchModel */
 /** @var yii\data\ActiveDataProvider $dataProvider */
 
-$this->title = 'Airports';
+$this->title = Yii::t('app', 'Airports');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="airport-index">
@@ -19,7 +19,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php if(Yii::$app->user->can('userCrud')) : ?>
     <p>
-        <?= Html::a('Create Airport', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a(Yii::t('app', 'Create Airport'), ['create'], ['class' => 'btn btn-success']) ?>
     </p>
     <?php endif; ?>
 
@@ -34,7 +34,10 @@ $this->params['breadcrumbs'][] = $this->title;
             //'id',
             'icao_code',
             'name',
-            'country.name',
+            [
+                'attribute' => 'country.name',
+                'label' => Yii::t('app', 'Country'),
+            ],
             [
                 'class' => ActionColumn::className(),
                 'visibleButtons'=>[
