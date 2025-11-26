@@ -11,7 +11,7 @@ use yii\grid\GridView;
 /** @var app\models\CountrySearch $searchModel */
 /** @var yii\data\ActiveDataProvider $dataProvider */
 
-$this->title = 'Countries';
+$this->title = Yii::t('app', 'Countries');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="country-index">
@@ -20,7 +20,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php if(Yii::$app->user->can('userCrud')) : ?>
         <p>
-            <?= Html::a('Create Country', ['create'], ['class' => 'btn btn-success']) ?>
+            <?= Html::a(Yii::t('app', 'Create Country'), ['create'], ['class' => 'btn btn-success']) ?>
         </p>
     <?php endif; ?>
 
@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\SerialColumn'],
 
             [
-                'label' => 'Flag',
+                'label' => Yii::t('app', 'Flag'),
                 'format' => 'raw',
                 'value' => function ($model) {
                     $img = ImageMam::render('country_icon', $model->id);
