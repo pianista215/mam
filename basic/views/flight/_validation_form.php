@@ -15,12 +15,12 @@ $form = ActiveForm::begin(['action' => ['validate', 'id' => $model->id]]); ?>
     </div>
 
     <div class="form-group">
-        <?= Html::submitButton('Validate', [
+        <?= Html::submitButton(Yii::t('app', 'Validate'), [
             'class' => 'btn btn-success',
             'name' => 'action',
             'value' => 'approve'
         ]) ?>
-        <?= Html::submitButton('Reject', [
+        <?= Html::submitButton(Yii::t('app', 'Reject'), [
             'class' => 'btn btn-danger',
             'name' => 'action',
             'value' => 'reject'

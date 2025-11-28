@@ -200,10 +200,10 @@ foreach ($report->flightPhases as $phase) {
     <div id="map" style="width: 100%; height: 600px;"></div>
     <canvas id="altitudeChart" width="800" height="400"></canvas>
     <div class="mt-4">
-        <h5>Raw Event Viewer</h5>
+        <h5><?=Yii::t('app', 'Raw Event Viewer')?></h5>
         <div class="d-flex gap-2 mb-2">
-            <button id="prevEvent" class="btn btn-sm btn-secondary">⬅ Previous</button>
-            <button id="nextEvent" class="btn btn-sm btn-secondary">Next ➡</button>
+            <button id="prevEvent" class="btn btn-sm btn-secondary">⬅ <?=Yii::t('app', 'Previous')?></button>
+            <button id="nextEvent" class="btn btn-sm btn-secondary"><?=Yii::t('app', 'Next')?> ➡</button>
         </div>
         <pre id="rawEventViewer" style="background:#111;color:#0f0;padding:10px;height:250px;overflow:auto;border:1px solid #444;"></pre>
     </div>

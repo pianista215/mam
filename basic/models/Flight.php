@@ -94,13 +94,14 @@ class Flight extends \yii\db\ActiveRecord
      */
     public function attributeLabels()
     {
+        // TODO: Use attribute labels in all the forms instead of string literals
         return [
             'id' => 'ID',
             'pilot_id' => 'Pilot ID',
             'aircraft_id' => 'Aircraft ID',
             'code' => 'Code',
-            'departure' => 'Departure',
-            'arrival' => 'Arrival',
+            'departure' => Yii::t('app', 'Departure'),
+            'arrival' => Yii::t('app', 'Arrival'),
             'alternative1_icao' => 'Alternative1 Icao',
             'alternative2_icao' => 'Alternative2 Icao',
             'flight_rules' => 'Flight Rules',
@@ -113,11 +114,11 @@ class Flight extends \yii\db\ActiveRecord
             'other_information' => 'Other Information',
             'endurance_time' => 'Endurance Time',
             'report_tool' => 'Report Tool',
-            'status' => 'Status',
-            'fullStatus' => 'Status',
-            'creation_date' => 'Creation Date',
+            'status' => Yii::t('app', 'Status'),
+            'fullStatus' => Yii::t('app', 'Status'),
+            'creation_date' => Yii::t('app', 'Creation Date'),
             'network' => 'Network',
-            'validator_comments' => 'Validator Comments',
+            'validator_comments' => Yii::t('app', 'Validator Comments'),
             'validator_id' => 'Validator ID',
             'validation_date' => 'Validation Date',
             'tour_stage_id' => 'Tour Stage ID',
@@ -126,11 +127,11 @@ class Flight extends \yii\db\ActiveRecord
 
     public function getFullStatus(){
         $list = [
-            'C' => 'Created. Basic information received. Awaiting ACARS files to be uploaded.',
-            'S' => 'ACARS files received. Awaiting processing.',
-            'V' => 'Pending validation.',
-            'F' => 'Finished',
-            'R' => 'Rejected'
+            'C' => Yii::t('app', 'Created. Basic information received. Awaiting ACARS files to be uploaded.'),
+            'S' => Yii::t('app', 'ACARS files received. Awaiting processing.'),
+            'V' => Yii::t('app', 'Pending validation.'),
+            'F' => Yii::t('app', 'Finished'),
+            'R' => Yii::t('app', 'Rejected')
         ];
 
         return $list[$this->status];

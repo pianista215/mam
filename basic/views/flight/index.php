@@ -10,7 +10,7 @@ use yii\grid\GridView;
 /** @var app\models\FlightSearch $searchModel */
 /** @var yii\data\ActiveDataProvider $dataProvider */
 
-$this->title = 'Flights';
+$this->title = Yii::t('app', 'Flights');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="flight-index">
@@ -30,7 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'creation_date',
             [
                 'attribute' => 'status',
-                'format' => 'raw', // Importante para permitir HTML
+                'format' => 'raw', //Important for allow html
                 'value' => function ($model) {
                     $icons = [
                         'C' => '<i class="fa-solid fa-arrow-up" style="color: #6c757d;"></i>',
