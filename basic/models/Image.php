@@ -249,13 +249,13 @@ class Image extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'type' => 'Type',
-            'related_id' => 'Related ID',
-            'element' => 'Element',
-            'filename' => 'Filename',
-            'created_at' => 'Created At',
-            'updated_at' => 'Updated At',
+            'id' => Yii::t('app', 'ID'),
+            'type' => Yii::t('app', 'Type'),
+            'related_id' => Yii::t('app', 'Related ID'),
+            'element' => Yii::t('app', 'Element'),
+            'filename' => Yii::t('app', 'Filename'),
+            'created_at' => Yii::t('app', 'Created At'),
+            'updated_at' => Yii::t('app', 'Updated At'),
         ];
     }
 }

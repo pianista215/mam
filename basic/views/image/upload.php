@@ -5,7 +5,7 @@ use yii\helpers\Html;
 /** @var $image app\models\Image */
 /** @var description string */
 
-$this->title = 'Uploading image for ' . $description;
+$this->title = Yii::t('app', 'Uploading image for') . ' ' . $description;
 $uploadUrl = Url::to([
     'image/upload',
     'type' => $image->type,
@@ -35,7 +35,7 @@ $displayHeight = $typeSettings['height'] ?? 300;
 
     <div style="display:flex; flex-direction:column; align-items:center; margin-top:1rem;">
         <input type="file" id="imageInput" accept="image/*" class="form-control mb-2" style="max-width:250px;">
-        <button id="uploadBtn" class="btn btn-primary">Upload image</button>
+        <button id="uploadBtn" class="btn btn-primary"><?=Yii::t('app', 'Upload image')?></button>
     </div>
 </div>
 
