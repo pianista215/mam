@@ -14,12 +14,10 @@ $this->title = Config::get('airline_name');
     <div class="body-content">
         <div class="row">
 
-            <!-- Columna izquierda: tablas -->
             <div class="col-md-8">
 
-                <!-- Latest Flights -->
                 <div class="mb-4">
-                    <h4 class="mb-3">Last flights</h4>
+                    <h4 class="mb-3"><?=Yii::t('app', 'Last flights')?></h4>
                     <table class="table table-striped table-hover table-sm">
                         <thead class="table-light">
                         <tr>
@@ -27,8 +25,8 @@ $this->title = Config::get('airline_name');
                             <th><?= $pilotModel->getAttributeLabel('fullname') ?></th>
                             <th><?= $flightModel->getAttributeLabel('departure') ?></th>
                             <th><?= $flightModel->getAttributeLabel('arrival') ?></th>
-                            <th>Aircraft</th>
-                            <th>Date</th>
+                            <th><?=Yii::t('app', 'Aircraft')?></th>
+                            <th><?=Yii::t('app', 'Date')?></th>
                         </tr>
                         </thead>
                         <tbody>
@@ -46,9 +44,8 @@ $this->title = Config::get('airline_name');
                     </table>
                 </div>
 
-                <!-- Latest registered pilots -->
                 <div class="mb-4">
-                    <h4 class="mb-3">New pilots</h4>
+                    <h4 class="mb-3"><?=Yii::t('app', 'New pilots')?></h4>
                     <table class="table table-striped table-hover table-sm">
                         <thead class="table-light">
                         <tr>
@@ -71,15 +68,14 @@ $this->title = Config::get('airline_name');
 
             </div>
 
-            <!-- Columna derecha: estadísticas -->
             <div class="col-md-4">
                 <div class="card border-secondary mb-4">
-                    <div class="card-header bg-light"><strong>Statistics</strong></div>
+                    <div class="card-header bg-light"><strong><?=Yii::t('app', 'Statistics')?></strong></div>
                     <div class="card-body">
-                        <p class="mb-2"><strong>Pilots:</strong> <span class="fw-normal"><?= number_format($totalPilots) ?></span></p>
-                        <p class="mb-2"><strong>Aircraft:</strong> <span class="fw-normal"><?= number_format($totalAircraft) ?></span></p>
-                        <p class="mb-2"><strong>Routes:</strong> <span class="fw-normal"><?= number_format($totalRoutes) ?></span></p>
-                        <p class="mb-0"><strong>Flights:</strong> <span class="fw-normal"><?= number_format($totalFlights) ?></span></p>
+                        <p class="mb-2"><strong><?=Yii::t('app', 'Pilots')?>:</strong> <span class="fw-normal"><?= number_format($totalPilots) ?></span></p>
+                        <p class="mb-2"><strong><?=Yii::t('app', 'Aircrafts')?>:</strong> <span class="fw-normal"><?= number_format($totalAircraft) ?></span></p>
+                        <p class="mb-2"><strong><?=Yii::t('app', 'Routes')?>:</strong> <span class="fw-normal"><?= number_format($totalRoutes) ?></span></p>
+                        <p class="mb-0"><strong><?=Yii::t('app', 'Flights')?>:</strong> <span class="fw-normal"><?= number_format($totalFlights) ?></span></p>
                     </div>
                 </div>
             </div>
