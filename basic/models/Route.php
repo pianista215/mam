@@ -64,7 +64,7 @@ class Route extends \yii\db\ActiveRecord
 
     public function getFplDescription()
     {
-        return 'Route '.$this->code.' ('.$this->departure.'-'.$this->arrival.')';
+        return Yii::t('app', 'Route') . ' '.$this->code.' ('.$this->departure.'-'.$this->arrival.')';
     }
 
     /**

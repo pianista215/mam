@@ -89,22 +89,22 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'aircraft_id' => 'Aircraft ID',
-            'flight_rules' => 'Flight Rules',
-            'alternative1_icao' => 'Altn Aerodrome',
-            'alternative2_icao' => '2nd Altn Aerodrome',
-            'cruise_speed_unit' => 'Cruise Speed Unit',
-            'cruise_speed_value' => 'Cruise Speed Value',
-            'flight_level_unit' => 'Flight Level Unit',
-            'flight_level_value' => 'Flight Level Value',
-            'route' => 'Route',
-            'estimated_time' => 'Total EET',
-            'other_information' => 'Other Information',
-            'endurance_time' => 'Endurance',
-            'route_id' => 'Route ID',
-            'pilot_id' => 'Pilot ID',
-            'tour_stage_id' => 'Tour Stage ID',
+            'id' => Yii::t('app', 'ID'),
+            'aircraft_id' => Yii::t('app', 'Aircraft'),
+            'flight_rules' => Yii::t('app', 'Flight Rules'),
+            'alternative1_icao' => Yii::t('app', 'Alternative 1'),
+            'alternative2_icao' => Yii::t('app', 'Alternative 2'),
+            'cruise_speed_unit' => Yii::t('app', 'Cruise Speed Unit'),
+            'cruise_speed_value' => Yii::t('app', 'Cruise Speed Value'),
+            'flight_level_unit' => Yii::t('app', 'Flight Level Unit'),
+            'flight_level_value' => Yii::t('app', 'Flight Level Value'),
+            'route' => Yii::t('app', 'Route'),
+            'estimated_time' => Yii::t('app', 'Total EET'),
+            'other_information' => Yii::t('app', 'Other Information'),
+            'endurance_time' => Yii::t('app', 'Endurance'),
+            'route_id' => Yii::t('app', 'Route'),
+            'pilot_id' => Yii::t('app', 'Pilot'),
+            'tour_stage_id' => Yii::t('app', 'Tour Stage'),
         ];
     }
 
@@ -137,11 +137,11 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
     public function validateFlightLevel($attribute, $params){
         if($this->flight_level_unit == 'VFR'){
             if(!empty($this->flight_level_value)){
-                $this->addError('flight_level_value', 'If VFR is selected flight level should be empty');
+                $this->addError('flight_level_value', Yii::t('app', 'If VFR is selected flight level should be empty'));
             }
         } else {
             if(!isset($this->flight_level_value) || empty($this->flight_level_value)){
-                $this->addError('flight_level_value', 'Flight Level Value cannot be blank if VFR is not selected.');
+                $this->addError('flight_level_value', Yii::t('app', 'Flight Level Value cannot be blank if VFR is not selected.'));
             }
         }
     }
@@ -149,11 +149,11 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
     public function validatePilotLocation($attribute, $params){
         if($this->tour_stage_id !== null){
             if ($this->tourStage->departure != $this->pilot->location) {
-                $this->addError($attribute, 'The pilot is not in the correct location.');
+                $this->addError($attribute, Yii::t('app', 'The pilot is not in the correct location.'));
             }
         } else {
             if ($this->route0->departure != $this->pilot->location) {
-                $this->addError($attribute, 'The pilot is not in the correct location.');
+                $this->addError($attribute, Yii::t('app', 'The pilot is not in the correct location.'));
             }
         }
     }
@@ -162,11 +162,11 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
     {
         if($this->tour_stage_id !== null){
             if ($this->tourStage->departure != $this->aircraft->location) {
-                $this->addError($attribute, 'The aircraft is not in the correct location.');
+                $this->addError($attribute, Yii::t('app', 'The aircraft is not in the correct location.'));
             }
         } else {
             if ($this->route0->departure != $this->aircraft->location) {
-                $this->addError($attribute, 'The aircraft is not in the correct location.');
+                $this->addError($attribute, Yii::t('app', 'The aircraft is not in the correct location.'));
             }
         }
     }
@@ -174,13 +174,13 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
     public function validateRouteOrStage($attribute, $params)
     {
         if (empty($this->route_id) && empty($this->tour_stage_id)) {
-            $this->addError('route_id', 'There are no route or tour stage associated.');
-            $this->addError('tour_stage_id', 'There are no route or tour stage associated.');
+            $this->addError('route_id', Yii::t('app', 'There are no route or tour stage associated.'));
+            $this->addError('tour_stage_id', Yii::t('app', 'There are no route or tour stage associated.'));
         }
 
         if (!empty($this->route_id) && !empty($this->tour_stage_id)) {
-            $this->addError('route_id', 'Only route or tour staged can be associated, not both.');
-            $this->addError('tour_stage_id', 'Only route or tour staged can be associated, not both.');
+            $this->addError('route_id', Yii::t('app', 'Only route or tour staged can be associated, not both.'));
+            $this->addError('tour_stage_id', Yii::t('app', 'Only route or tour staged can be associated, not both.'));
         }
     }
 
