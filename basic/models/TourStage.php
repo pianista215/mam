@@ -64,13 +64,13 @@ class TourStage extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'tour_id' => 'Tour ID',
-            'departure' => 'Departure',
-            'arrival' => 'Arrival',
-            'distance_nm' => 'Distance Nm',
-            'description' => 'Description',
-            'sequence' => 'Sequence',
+            'id' => Yii::t('app', 'ID'),
+            'tour_id' => Yii::t('app', 'Tour'),
+            'departure' => Yii::t('app', 'Departure'),
+            'arrival' => Yii::t('app', 'Arrival'),
+            'distance_nm' => Yii::t('app', 'Distance NM'),
+            'description' => Yii::t('app', 'Description'),
+            'sequence' => Yii::t('app', 'Sequence'),
         ];
     }
 

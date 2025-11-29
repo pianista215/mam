@@ -6,7 +6,7 @@ use yii\helpers\Html;
 /** @var app\models\TourStage $model */
 /** @var app\models\Tour $tour */
 
-$this->title = "Add Stage {$model->sequence} to Tour: " . Html::encode($tour->name);
+$this->title = Yii::t('app', 'Add Stage') . ' ' . $model->sequence . ' ' . Yii::t('app', 'to Tour') . ': ' . Html::encode($tour->name);
 $this->params['breadcrumbs'][] = ['label' => 'Tours', 'url' => ['tour/index']];
 $this->params['breadcrumbs'][] = [
     'label' => $tour->name,
