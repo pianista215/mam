@@ -152,6 +152,8 @@ return [
     'Other Information' => 'Otra Información',
     'Password' => 'Contraseña',
     'Password Reset Email Sent' => 'Email de reset de contraseña enviado',
+    'Password must contain at least one letter.' => 'La contraseña debe contener al menos una letra.',
+    'Password must contain at least one numeric digit.' => 'La contraseña debe contener al menos un número.',
     'Pax Capacity' => 'Capacidad de Pasajeros',
     'Penalty' => 'Penalización',
     'Pending Flights for validation' => 'Vuelos pendientes de validar',
