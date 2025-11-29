@@ -10,7 +10,7 @@ use yii\grid\GridView;
 /** @var app\models\SubmittedFlightPlanSearch $searchModel */
 /** @var yii\data\ActiveDataProvider $dataProvider */
 
-$this->title = 'Submitted Flight Plans';
+$this->title = Yii::t('app', 'Submitted Flight Plans');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="submitted-flight-plan-index">
