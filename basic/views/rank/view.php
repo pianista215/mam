@@ -9,7 +9,7 @@ use yii\data\ArrayDataProvider;
 /** @var app\models\Rank $model */
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Ranks', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Ranks'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
@@ -30,11 +30,11 @@ $this->params['breadcrumbs'][] = $this->title;
 
         <?php if (Yii::$app->user->can('rankCrud')): ?>
             <div>
-                <?= Html::a('Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary me-2']) ?>
-                <?= Html::a('Delete', ['delete', 'id' => $model->id], [
+                <?= Html::a(Yii::t('app', 'Update'), ['update', 'id' => $model->id], ['class' => 'btn btn-primary me-2']) ?>
+                <?= Html::a(Yii::t('app', 'Delete'), ['delete', 'id' => $model->id], [
                     'class' => 'btn btn-danger',
                     'data' => [
-                        'confirm' => 'Are you sure you want to delete this rank?',
+                        'confirm' => Yii::t('app', 'Are you sure you want to delete this item?'),
                         'method' => 'post',
                     ],
                 ]) ?>
@@ -42,10 +42,10 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php endif; ?>
     </div>
 
-    <h4>Pilots with this rank</h4>
+    <h4><?=Yii::t('app', 'Pilots with this rank')?></h4>
 
     <?php if (empty($model->pilots)): ?>
-        <p class="text-muted fst-italic">No pilots currently have this rank.</p>
+        <p class="text-muted fst-italic"><?=Yii::t('app', 'No pilots currently have this rank.')?></p>
     <?php else: ?>
         <?= GridView::widget([
             'dataProvider' => new ArrayDataProvider([
@@ -58,7 +58,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'license',
                 [
                     'attribute' => 'name',
-                    'label' => 'Pilot Name',
+                    'label' => Yii::t('app', 'Name'),
                     'value' => fn($pilot) => Html::a(
                         Html::encode($pilot->fullname),
                         ['pilot/view', 'id' => $pilot->id],
@@ -67,7 +67,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'format' => 'raw',
                 ],
                 [
-                    'label' => 'Hours Flown',
+                    'label' => Yii::t('app', 'Hours Flown'),
                     'value' => function ($model) {
                         return TimeHelper::formatHoursMinutes($model->hours_flown);
                     },
