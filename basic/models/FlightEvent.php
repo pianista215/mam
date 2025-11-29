@@ -44,9 +44,9 @@ class FlightEvent extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'phase_id' => 'Phase ID',
-            'timestamp' => 'Timestamp',
+            'id' => Yii::t('app', 'ID'),
+            'phase_id' => Yii::t('app', 'Phase'),
+            'timestamp' => Yii::t('app', 'Timestamp'),
         ];
     }
 
