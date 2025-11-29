@@ -9,7 +9,7 @@ use yii\helpers\Url;
 /** @var string|null $pageHtml */
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Tours', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Tours'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 
 \yii\web\YiiAsset::register($this);
@@ -28,13 +28,13 @@ $this->params['breadcrumbs'][] = $this->title;
 
             <?php if (Yii::$app->user->can('tourCrud')): ?>
                 <div>
-                    <?= Html::a('<i class="fa fa-edit"></i> Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary me-2']) ?>
+                    <?= Html::a(Yii::t('app', 'Update'), ['update', 'id' => $model->id], ['class' => 'btn btn-primary me-2']) ?>
 
                     <?php if (!$model->getFlights()->exists()): ?>
-                        <?= Html::a('<i class="fa fa-trash"></i> Delete', ['delete', 'id' => $model->id], [
+                        <?= Html::a(Yii::t('app', 'Delete'), ['delete', 'id' => $model->id], [
                             'class' => 'btn btn-danger',
                             'data' => [
-                                'confirm' => 'Are you sure you want to delete this tour?',
+                                'confirm' => Yii::t('app', 'Are you sure you want to delete this item?'),
                                 'method' => 'post',
                             ],
                         ]) ?>
@@ -47,8 +47,8 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="card shadow-sm mb-4">
         <div class="card-body">
             <p class="text-muted mb-1">
-                <strong>Start:</strong> <?= Yii::$app->formatter->asDate($model->start) ?> &nbsp; | &nbsp;
-                <strong>End:</strong> <?= Yii::$app->formatter->asDate($model->end) ?>
+                <strong><?=Yii::t('app', 'Start')?>:</strong> <?= Yii::$app->formatter->asDate($model->start) ?> &nbsp; | &nbsp;
+                <strong><?=Yii::t('app', 'End')?>:</strong> <?= Yii::$app->formatter->asDate($model->end) ?>
             </p>
 
             <hr>
@@ -63,19 +63,19 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
     </div>
 
-    <h3 class="mt-4 mb-3">Tour Stages</h3>
+    <h3 class="mt-4 mb-3"><?=Yii::t('app', 'Tour Stages')?></h3>
 
     <?php if (!empty($model->tourStages)): ?>
         <table class="table table-hover align-middle">
             <thead class="table-light">
                 <tr>
                     <th>#</th>
-                    <th>Departure</th>
-                    <th>Arrival</th>
-                    <th>Distance Nm</th>
-                    <th>Description</th>
-                    <th class="text-center">Status</th>
-                    <th class="text-center">Actions</th>
+                    <th><?=Yii::t('app', 'Departure')?></th>
+                    <th><?=Yii::t('app', 'Arrival')?></th>
+                    <th><?=Yii::t('app', 'Distance NM')?></th>
+                    <th><?=Yii::t('app', 'Description')?></th>
+                    <th class="text-center"><?=Yii::t('app', 'Status')?></th>
+                    <th class="text-center"><?=Yii::t('app', 'Actions')?></th>
                 </tr>
             </thead>
             <tbody>
@@ -118,23 +118,23 @@ $this->params['breadcrumbs'][] = $this->title;
                             <?php if ($model->isActive()): ?>
                                 <?= Html::a('✈︎', ['submitted-flight-plan/select-aircraft-tour', 'tour_stage_id' => $stage->id], [
                                     'class' => 'text-decoration-none fs-5 me-2',
-                                    'title' => 'Fly stage'
+                                    'title' => Yii::t('app', 'Fly stage')
                                 ]) ?>
                             <?php endif; ?>
 
                             <?php if (Yii::$app->user->can('tourCrud')): ?>
                                 <?= Html::a('<i class="fa fa-pencil"></i>', ['tour-stage/update', 'id' => $stage->id], [
                                     'class' => 'text-decoration-none me-2',
-                                    'title' => 'Edit stage'
+                                    'title' => Yii::t('app', 'Edit stage')
                                 ]) ?>
                                 <?php if (!$model->getFlights()->exists()): ?>
                                 <?= Html::a('<i class="fa fa-trash"></i>', ['tour-stage/delete', 'id' => $stage->id], [
                                     'class' => 'text-decoration-none text-danger',
                                     'data' => [
-                                        'confirm' => 'Are you sure you want to delete this stage?',
+                                        'confirm' => Yii::t('app', 'Are you sure you want to delete this item?'),
                                         'method' => 'post',
                                     ],
-                                    'title' => 'Delete stage'
+                                    'title' => Yii::t('app', 'Delete stage')
                                 ]) ?>
                                 <?php endif; ?>
                             <?php endif; ?>
@@ -146,7 +146,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         <?php if (Yii::$app->user->can('tourCrud') && !$model->getFlights()->exists()): ?>
             <div class="text-end mt-2">
-                <?= Html::a('<i class="fa fa-plus"></i> Add Stage', ['tour-stage/add-stage', 'tour_id' => $model->id], [
+                <?= Html::a('<i class="fa fa-plus"></i> '.Yii::t('app', 'Add Stage'), ['tour-stage/add-stage', 'tour_id' => $model->id], [
                     'class' => 'btn btn-success',
                 ]) ?>
             </div>
@@ -154,12 +154,12 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php else: ?>
         <div class="alert alert-secondary text-center">
-            This tour has no stages yet.
+            <?=Yii::t('app', 'This tour has no stages yet.')?>
         </div>
 
         <?php if (Yii::$app->user->can('tourCrud') && !$model->getFlights()->exists()): ?>
             <div class="text-center mt-3">
-                <?= Html::a('<i class="fa fa-plus"></i> Add First Stage', ['tour-stage/add-stage', 'tour_id' => $model->id], [
+                <?= Html::a('<i class="fa fa-plus"></i> '. Yii::t('app', 'Add First Stage'), ['tour-stage/add-stage', 'tour_id' => $model->id], [
                     'class' => 'btn btn-success',
                 ]) ?>
             </div>
@@ -169,14 +169,14 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php if (!empty($model->pilotTourCompletions)): ?>
         <div class="card shadow-sm mt-5 mb-4">
             <div class="card-body">
-                <h4 class="card-title mb-3">🏆 Hall of Fame</h4>
+                <h4 class="card-title mb-3">🏆 <?=Yii::t('app', 'Hall of Fame')?></h4>
 
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
                             <th>#</th>
-                            <th>Pilot</th>
-                            <th>Completion Date</th>
+                            <th><?=Yii::t('app', 'Pilot')?></th>
+                            <th><?=Yii::t('app', 'Completion Date')?></th>
                         </tr>
                     </thead>
                     <tbody>

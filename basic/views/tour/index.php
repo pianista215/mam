@@ -10,7 +10,7 @@ use yii\grid\GridView;
 /** @var app\models\TourSearch $searchModel */
 /** @var yii\data\ActiveDataProvider $dataProvider */
 
-$this->title = 'Tours';
+$this->title = Yii::t('app', 'Tours');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="tour-index">
@@ -18,7 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
     <?php if(Yii::$app->user->can('tourCrud')) : ?>
     <p>
-        <?= Html::a('Create Tour', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a(Yii::t('app', 'Create Tour'), ['create'], ['class' => 'btn btn-success']) ?>
     </p>
     <?php endif; ?>
 
