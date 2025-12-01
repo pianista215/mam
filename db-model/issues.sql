@@ -1,3 +1,5 @@
+SET NAMES 'utf8mb4';
+
 -- Issues code reported by mam-analyzer
 INSERT INTO issue_type(`code`, `penalty`, `description`) VALUES ('LandingHardFpm', '20', 'Hard landing (<-700 fpm)');
 INSERT INTO issue_type(`code`, `penalty`, `description`) VALUES ('TaxiOverspeed', '5', 'Taxi overspeed (>25 knots)');

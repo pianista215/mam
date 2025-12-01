@@ -1,3 +1,5 @@
+SET NAMES 'utf8mb4';
+
 -- Mam-analyzer parameters and phases
 -- Phase types
 INSERT INTO flight_phase_type(`id`, `code`, `name`) VALUES (1, 'startup', 'Startup');
