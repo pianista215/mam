@@ -14,6 +14,7 @@ use Yii;
 use yii\filters\AccessControl;
 use yii\helpers\Markdown;
 use yii\web\Controller;
+use yii\web\Cookie;
 use yii\web\Response;
 use yii\filters\VerbFilter;
 
@@ -139,5 +140,24 @@ class SiteController extends Controller
 
         return $this->goHome();
     }
+
+    public function actionLanguage()
+    {
+        $language = Yii::$app->request->post('language');
+
+        if (in_array($language, ['en', 'es'])) {
+            Yii::$app->language = $language;
+
+            $cookie = new \yii\web\Cookie([
+                'name' => 'language',
+                'value' => $language,
+                'expire' => time() + 10 * 365 * 24 * 60 * 60, // 10 years
+            ]);
+            Yii::$app->response->cookies->add($cookie);
+        }
+
+        return $this->redirect(Yii::$app->request->referrer ?: Yii::$app->homeUrl);
+    }
+
 
 }

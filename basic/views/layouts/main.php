@@ -48,7 +48,6 @@ $this->registerCssFile(
 
     $items =
     [
-            ['label' => Yii::t('app', 'Home'), 'url' => ['/site/index']],
             [
                 'label' => Yii::t('app', 'About'),
                 'items' => [
@@ -160,6 +159,20 @@ $this->registerCssFile(
             <?php if ($facebook = Config::get('facebook_url')): ?>
                 <a href="<?= $facebook ?>" target="_blank"><i class="fab fa-facebook"></i></a>
             <?php endif; ?>
+        </div>
+        <div class="text-center mt-2">
+            <?= \yii\helpers\Html::beginForm(['/site/language'], 'post', ['class' => 'd-inline']) ?>
+            <?= \yii\helpers\Html::dropDownList(
+                    'language',
+                    Yii::$app->language,
+                    ['es' => 'Español', 'en' => 'English'],
+                    [
+                        'class' => 'form-select form-select-sm d-inline w-auto',
+                        'onchange' => 'this.form.submit()'
+                    ]
+                )
+            ?>
+            <?= \yii\helpers\Html::endForm() ?>
         </div>
     </div>
 </footer>

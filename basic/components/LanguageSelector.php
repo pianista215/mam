@@ -9,7 +9,16 @@ class LanguageSelector implements BootstrapInterface
 
     public function bootstrap($app)
     {
-        $preferred = $app->request->getPreferredLanguage($this->supportedLanguages);
-        $app->language = $preferred ?: 'en';
+        $preferredLanguage = $app->request->cookies->getValue('language', null);
+        if (empty($preferredLanguage)) {
+            $preferredLanguage = $app->request->getPreferredLanguage($this->supportedLanguages);
+        }
+
+        // Get only the code, in order to match all spanish people in 'es'
+        $preferredLanguage = substr($preferredLanguage, 0, 2);
+        if (!in_array($preferredLanguage, $this->supportedLanguages)) {
+            $preferredLanguage = 'en';
+        }
+        $app->language = $preferredLanguage;
     }
 }
