@@ -120,7 +120,7 @@ class PilotController extends Controller
         if($now < $registrationStart || $now > $registrationEnd) {
             $page = Page::findOne(['code' => 'registration_closed']);
             $content = $page->getPageContents()
-                ->andWhere(['language' => 'en']) // TODO: Detect language
+                ->andWhere(['language' =>Yii::$app->language])
                 ->one();
 
             return $this->render('registration_closed', [

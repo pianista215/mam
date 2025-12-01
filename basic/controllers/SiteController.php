@@ -71,8 +71,8 @@ class SiteController extends Controller
     {
         $homePage = Page::findOne(['code' => 'home']);
         $content = $homePage->getPageContents()
-            ->andWhere(['language' => 'en']) // TODO: Use language
-            ->one();
+                ->andWhere(['language' => Yii::$app->language])
+                ->one();
 
         $bodyHtmlContent = Markdown::process($content->content_md, 'gfm');
 
