@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\helpers\LoggerTrait;
 use app\models\Page;
 use Yii;
 use yii\data\ActiveDataProvider;
@@ -16,21 +17,38 @@ use yii\filters\VerbFilter;
  */
 class PageController extends Controller
 {
+    use LoggerTrait;
 
-    public function actionView($code, $lang = 'en')
+    public function actionView($code)
     {
         $page = Page::find()->where(['code' => $code])->one();
         if (!$page) {
-            throw new NotFoundHttpException("Page not found: $code");
+            $this->logInfo('Page not found', ['code' => $code]);
+            throw new NotFoundHttpException();
         }
 
-        if(!$page->public && Yii::$app->user->isGuest) {
-            throw new ForbiddenHttpException('You are not allowed to access this page');
+        if (!$page->public && Yii::$app->user->isGuest) {
+            $this->logInfo('Forbidden page access for guest', ['code' => $code]);
+            throw new ForbiddenHttpException();
         }
 
-        $content = $page->getPageContents()->where(['language' => $lang])->one();
+        $userLang = Yii::$app->language;
+        $content = $page->getPageContents()->where(['language' => $userLang])->one();
+
         if (!$content) {
-            throw new NotFoundHttpException("Content not found for language: $lang");
+            $this->logInfo('Content not found for user language', [
+                'code' => $code,
+                'user_language' => $userLang
+            ]);
+
+            $content = $page->getPageContents()->where(['language' => 'en'])->one();
+        }
+
+        if (!$content) {
+            $this->logInfo('Content not found in any language (including fallback en)', [
+                'code' => $code,
+            ]);
+            throw new NotFoundHttpException();
         }
 
         $htmlContent = Markdown::process($content->content_md, 'gfm');
@@ -42,3 +60,4 @@ class PageController extends Controller
         ]);
     }
 }
+
