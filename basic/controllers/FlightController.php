@@ -90,7 +90,7 @@ class FlightController extends Controller
     public function actionIndexPending()
     {
         if (!Yii::$app->user->can('validateVfrFlight') && !Yii::$app->user->can('validateIfrFlight')) {
-            throw new ForbiddenHttpException('You\'re not allowed to validate flights.');
+            throw new ForbiddenHttpException(Yii::t('app', 'You\'re not allowed to validate flights.'));
         }
 
         $searchModel = new FlightSearch();
@@ -118,13 +118,13 @@ class FlightController extends Controller
         $model = $this->findModel($id);
 
         if (!Yii::$app->user->can('validateFlight', ['flight' => $model])) {
-            throw new ForbiddenHttpException('You\'re not allowed to validate this flight.');
+            throw new ForbiddenHttpException(Yii::t('app', 'You\'re not allowed to validate this flight.'));
         }
 
         $model->scenario = Flight::SCENARIO_VALIDATE;
 
         if (!$model->isPendingValidation() || !$model->load(Yii::$app->request->post())) {
-            throw new ForbiddenHttpException('You\'re not allowed to validate this flight');
+            throw new ForbiddenHttpException(Yii::t('app', 'You\'re not allowed to validate this flight.'));
         }
 
         $transaction = Yii::$app->db->beginTransaction();
@@ -143,7 +143,8 @@ class FlightController extends Controller
             }
 
             if (!$model->save()) {
-                throw new \Exception("Error saving flight validation: " . json_encode($model->errors));
+                $this->logError('Error saving flight', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
+                throw new \Exception(Yii::t('app', 'Error saving flight validation. Contact the administrator.'));
             }
 
             if ($model->tour_stage_id && $model->status === 'F') {
@@ -175,7 +176,8 @@ class FlightController extends Controller
                             ]);
 
                             if (!$completion->save()) {
-                                throw new \Exception("Error saving tour completion: " . json_encode($completion->errors));
+                                $this->logError('Error saving tour completion', ['completion' => $completion, 'user' => Yii::$app->user->identity->license]);
+                                throw new \Exception(Yii::t('app', 'Error saving tour completion. Contact the administrator.'));
                             }
                         }
                     }
@@ -183,11 +185,11 @@ class FlightController extends Controller
             }
 
             $transaction->commit();
-            Yii::$app->session->setFlash('success', 'Flight validation finished.');
+            Yii::$app->session->setFlash('success', Yii::t('app', 'Flight validation finished.'));
         } catch (\Throwable $e) {
             $transaction->rollBack();
             $this->logError('Error validating flight', ['model' => $model, 'user' => Yii::$app->user->identity->license, 'ex' => $e]);
-            Yii::$app->session->setFlash('error', 'Error validating flight.');
+            Yii::$app->session->setFlash('error', Yii::t('app', 'Error validating flight.'));
         }
 
         return $this->redirect(['view', 'id' => $model->id]);
