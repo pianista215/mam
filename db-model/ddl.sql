@@ -302,10 +302,19 @@ CREATE TABLE `flight_phase_metric_type` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `flight_phase_type_id` tinyint(3) unsigned NOT NULL,
   `code` varchar(32) NOT NULL,
-  `name` varchar(50) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `flight_phase_metric_type_unique` (`flight_phase_type_id`,`code`),
   CONSTRAINT `flight_phase_metric_type_flight_phase_type_FK` FOREIGN KEY (`flight_phase_type_id`) REFERENCES `flight_phase_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `flight_phase_metric_type_lang` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `flight_phase_metric_type_id` int(10) unsigned NOT NULL,
+  `language` char(2) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `flight_phase_metric_type_lang_unique` (`flight_phase_metric_type_id`, `language`),
+  CONSTRAINT `flight_phase_metric_type_lang_fk` FOREIGN KEY (`flight_phase_metric_type_id`) REFERENCES `flight_phase_metric_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `flight_phase_metric` (

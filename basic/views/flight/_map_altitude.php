@@ -163,7 +163,7 @@ foreach ($report->flightPhases as $phase) {
                         </div>
                         <?php foreach ($phase->flightPhaseMetrics as $metric): ?>
                             <p class="card-text mb-1">
-                                <?= htmlspecialchars($metric->metricType->name) . ' : ' . htmlspecialchars($metric->value) ?>
+                                <?= htmlspecialchars($metric->metricType->lang->name) . ' : ' . htmlspecialchars($metric->value) ?>
                             </p>
                         <?php endforeach; ?>
                     </div>

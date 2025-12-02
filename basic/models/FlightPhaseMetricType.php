@@ -10,7 +10,6 @@ use Yii;
  * @property int $id
  * @property int $flight_phase_type_id
  * @property string $code
- * @property string $name
  *
  * @property FlightPhaseMetric[] $flightPhaseMetrics
  * @property FlightPhaseType $flightPhaseType
@@ -35,7 +34,6 @@ class FlightPhaseMetricType extends \yii\db\ActiveRecord
             [['flight_phase_type_id', 'code', 'name'], 'required'],
             [['flight_phase_type_id'], 'integer'],
             [['code'], 'string', 'max' => 32],
-            [['name'], 'string', 'max' => 50],
             [['flight_phase_type_id', 'code'], 'unique', 'targetAttribute' => ['flight_phase_type_id', 'code']],
             [['flight_phase_type_id'], 'exist', 'skipOnError' => true, 'targetClass' => FlightPhaseType::class, 'targetAttribute' => ['flight_phase_type_id' => 'id']],
         ];
@@ -82,5 +80,16 @@ class FlightPhaseMetricType extends \yii\db\ActiveRecord
     public function getFlightPhases()
     {
         return $this->hasMany(FlightPhase::class, ['id' => 'flight_phase_id'])->viaTable('flight_phase_metric', ['metric_type_id' => 'id']);
+    }
+
+	public function getFlightPhaseMetricTypeLangs()
+    {
+        return $this->hasMany(FlightPhaseMetricTypeLang::class, ['flight_phase_metric_type_id' => 'id']);
+    }
+
+    public function getLang()
+    {
+        return $this->hasOne(FlightPhaseMetricTypeLang::class, ['flight_phase_metric_type_id' => 'id'])
+            ->andWhere(['language' => Yii::$app->language]);
     }
 }
