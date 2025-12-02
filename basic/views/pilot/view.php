@@ -3,6 +3,7 @@
 use app\helpers\TimeHelper;
 use app\helpers\ImageMam;
 use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\grid\GridView;
 
 /** @var yii\web\View $this */
@@ -121,7 +122,9 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'class' => 'yii\grid\ActionColumn',
                 'template' => '{view}',
-                'urlCreator' => fn($action, $model) => \yii\helpers\Url::toRoute([$action, 'id' => $model->id]),
+                'urlCreator' => function ($action, $model) {
+                    return Url::toRoute(["/flight/view", "id" => $model->id]);
+                },
             ],
         ],
         'tableOptions' => ['class' => 'table table-striped table-bordered align-middle'],
