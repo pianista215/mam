@@ -9,7 +9,6 @@ use Yii;
  *
  * @property int $id
  * @property string $code
- * @property string $description
  * @property int|null $penalty
  *
  * @property FlightPhaseIssue[] $flightPhaseIssues
@@ -33,7 +32,6 @@ class IssueType extends \yii\db\ActiveRecord
             [['code', 'description'], 'required'],
             [['penalty'], 'integer'],
             [['code'], 'string', 'max' => 80],
-            [['description'], 'string', 'max' => 200],
             [['code'], 'unique'],
         ];
     }
@@ -46,7 +44,6 @@ class IssueType extends \yii\db\ActiveRecord
         return [
             'id' => 'ID',
             'code' => 'Code',
-            'description' => 'Description',
             'penalty' => 'Penalty',
         ];
     }
@@ -59,5 +56,16 @@ class IssueType extends \yii\db\ActiveRecord
     public function getFlightPhaseIssues()
     {
         return $this->hasMany(FlightPhaseIssue::class, ['issue_type_id' => 'id']);
+    }
+
+    public function getIssueTypeLangs()
+    {
+        return $this->hasMany(IssueTypeLang::class, ['issue_type_id' => 'id']);
+    }
+
+    public function getLang()
+    {
+        return $this->hasOne(IssueTypeLang::class, ['issue_type_id' => 'id'])
+            ->andWhere(['language' => Yii::$app->language]);
     }
 }

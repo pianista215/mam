@@ -270,9 +270,18 @@ CREATE TABLE `acars_file` (
 CREATE TABLE `flight_phase_type` (
   `id` tinyint(3) unsigned NOT NULL AUTO_INCREMENT,
   `code` varchar(32) NOT NULL,
-  `name` varchar(50) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `flight_phase_type_unique_key` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `flight_phase_type_lang` (
+  `id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
+  `flight_phase_type_id` tinyint(3) unsigned NOT NULL,
+  `language` char(2) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `flight_phase_type_lang_unique` (`flight_phase_type_id`, `language`),
+  CONSTRAINT `flight_phase_type_lang_fk` FOREIGN KEY (`flight_phase_type_id`) REFERENCES `flight_phase_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `flight_phase` (
@@ -339,10 +348,19 @@ CREATE TABLE `flight_event_data` (
 CREATE TABLE `issue_type` (
   `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
   `code` varchar(80) NOT NULL,
-  `description` varchar(200) NOT NULL,
   `penalty` tinyint(3) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `issue_type_unique` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `issue_type_lang` (
+  `id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
+  `issue_type_id` smallint(5) unsigned NOT NULL,
+  `language` char(2) NOT NULL,
+  `description` varchar(200) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `issue_type_lang_unique` (`issue_type_id`, `language`),
+  CONSTRAINT `issue_type_lang_fk` FOREIGN KEY (`issue_type_id`) REFERENCES `issue_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `flight_phase_issue` (

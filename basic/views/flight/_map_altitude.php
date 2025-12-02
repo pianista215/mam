@@ -111,7 +111,7 @@ foreach ($report->flightPhases as $phase) {
             $segments[$lastIndex]['coordinates'][] = $coordinates[0];
         }
         $segments[] = [
-            'phase' => $phase->flightPhaseType->name,
+            'phase' => $phase->flightPhaseType->lang->name,
             'color' => $colors[$phase->flightPhaseType->code],
             'coordinates' => $coordinates,
         ];
@@ -120,7 +120,7 @@ foreach ($report->flightPhases as $phase) {
     // altitude
     if (!empty($pointsAltitude)) {
         $datasets[] = [
-            'label' => $phase->flightPhaseType->name . ' (Avión)',
+            'label' => $phase->flightPhaseType->lang->name . ' (Avión)',
             'data' => $pointsAltitude,
             'borderColor' => $colors[$phase->flightPhaseType->code],
             'fill' => false,
@@ -129,7 +129,7 @@ foreach ($report->flightPhases as $phase) {
     }
     if (!empty($pointsGround)) {
         $datasets[] = [
-            'label' => $phase->flightPhaseType->name . ' (Terreno)',
+            'label' => $phase->flightPhaseType->lang->name . ' (Terreno)',
             'data' => $pointsGround,
             'borderColor' => $colors[$phase->flightPhaseType->code],
             'borderDash' => [5, 5], // línea discontinua
@@ -153,7 +153,7 @@ foreach ($report->flightPhases as $phase) {
                 <div class="card shadow-sm h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h5 class="card-title mb-0"><?= htmlspecialchars($phase->flightPhaseType->name) ?></h5>
+                            <h5 class="card-title mb-0"><?= htmlspecialchars($phase->flightPhaseType->lang->name) ?></h5>
                             <div class="d-flex align-items-center">
                                 <small class="text-muted me-2">
                                     <?= date('H:i', strtotime($phase->start)) ?> - <?= date('H:i', strtotime($phase->end)) ?>

@@ -2,16 +2,40 @@ SET NAMES 'utf8mb4';
 
 -- Mam-analyzer parameters and phases
 -- Phase types
-INSERT INTO flight_phase_type(`id`, `code`, `name`) VALUES (1, 'startup', 'Startup');
-INSERT INTO flight_phase_type(`id`, `code`, `name`) VALUES (2, 'taxi', 'Taxi');
-INSERT INTO flight_phase_type(`id`, `code`, `name`) VALUES (3, 'takeoff', 'Takeoff');
-INSERT INTO flight_phase_type(`id`, `code`, `name`) VALUES (4, 'cruise', 'Cruise');
-INSERT INTO flight_phase_type(`id`, `code`, `name`) VALUES (5, 'touch_go', 'Touch & Go');
-INSERT INTO flight_phase_type(`id`, `code`, `name`) VALUES (6, 'approach', 'Approach');
-INSERT INTO flight_phase_type(`id`, `code`, `name`) VALUES (7, 'final_landing', 'Landing');
-INSERT INTO flight_phase_type(`id`, `code`, `name`) VALUES (8, 'shutdown', 'Shutdown');
-INSERT INTO flight_phase_type(`id`, `code`, `name`) VALUES (9, 'unknown', 'Unknown');
-INSERT INTO flight_phase_type(`id`, `code`, `name`) VALUES (10, 'backtrack', 'Backtrack');
+INSERT INTO flight_phase_type(`id`, `code`, `name`) VALUES (1, 'startup');
+INSERT INTO flight_phase_type(`id`, `code`, `name`) VALUES (2, 'taxi');
+INSERT INTO flight_phase_type(`id`, `code`, `name`) VALUES (3, 'takeoff');
+INSERT INTO flight_phase_type(`id`, `code`, `name`) VALUES (4, 'cruise');
+INSERT INTO flight_phase_type(`id`, `code`, `name`) VALUES (5, 'touch_go');
+INSERT INTO flight_phase_type(`id`, `code`, `name`) VALUES (6, 'approach');
+INSERT INTO flight_phase_type(`id`, `code`, `name`) VALUES (7, 'final_landing');
+INSERT INTO flight_phase_type(`id`, `code`, `name`) VALUES (8, 'shutdown');
+INSERT INTO flight_phase_type(`id`, `code`, `name`) VALUES (9, 'unknown');
+INSERT INTO flight_phase_type(`id`, `code`, `name`) VALUES (10, 'backtrack');
+
+-- Phase types translations
+INSERT INTO flight_phase_type_lang(`flight_phase_type_id`, `language`, `name`) VALUES
+(1, 'en', 'Startup'),
+(2, 'en', 'Taxi'),
+(3, 'en', 'Takeoff'),
+(4, 'en', 'Cruise'),
+(5, 'en', 'Touch & Go'),
+(6, 'en', 'Approach'),
+(7, 'en', 'Landing'),
+(8, 'en', 'Shutdown'),
+(9, 'en', 'Unknown'),
+(10, 'en', 'Backtrack'),
+
+(1, 'es', 'Encendido'),
+(2, 'es', 'Taxi'),
+(3, 'es', 'Despegue'),
+(4, 'es', 'Crucero'),
+(5, 'es', 'Touch & Go'),
+(6, 'es', 'Aproximación'),
+(7, 'es', 'Aterrizaje'),
+(8, 'es', 'Apagado'),
+(9, 'es', 'Desconocida'),
+(10, 'es', 'Backtrack');
 
 -- Metric types
 -- Takeoff
