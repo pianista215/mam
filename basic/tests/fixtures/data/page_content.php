@@ -63,4 +63,13 @@ return [
         'created_at' => '2025-01-05 00:00:00',
         'updated_at' => '2025-01-05 00:00:00',
     ],
+    [
+        'id' => 8,
+        'page_id' => 1,
+        'language' => 'es',
+        'title' => 'Página Principal',
+        'content_md' => "# Bienvenido. Esta es la página principal.",
+        'created_at' => '2025-01-01 00:00:00',
+        'updated_at' => '2025-01-01 00:00:00',
+    ],
 ];

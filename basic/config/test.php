@@ -12,6 +12,12 @@ return [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
     ],
+    'bootstrap' => [
+        [
+            'class' => 'app\components\LanguageSelector',
+            'supportedLanguages' => ['en', 'es'],
+        ],
+    ],
     'language' => 'en-US',
     'components' => [
         'db' => $db,

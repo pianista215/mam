@@ -117,7 +117,7 @@ $this->registerCssFile(
         : '<li class="nav-item">'
             . Html::beginForm(['/site/logout'])
             . Html::submitButton(
-                Yii::t('app', 'Logout'). '(' . Yii::$app->user->identity->license . ')',
+                Yii::t('app', 'Logout'). ' (' . Yii::$app->user->identity->license . ')',
                 ['class' => 'nav-link btn btn-link logout']
             )
             . Html::endForm()
