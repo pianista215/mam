@@ -21,6 +21,15 @@ class AboutPagesViewCest
         $I->see('Our staff page test content.');
     }
 
+    public function checkStaffPageChangeTranslation(\FunctionalTester $I)
+    {
+        $I->amOnRoute('page/view', ['code' => 'staff']);
+        $I->see('Our staff page test content.');
+        $I->submitForm('form', ['language' => 'es']);
+        $I->see('Página de prueba del staff.');
+        $I->seeInField('select[name=language]', 'es');
+    }
+
     public function checkRulesPage(\FunctionalTester $I)
     {
         $I->amOnRoute('page/view', ['code' => 'rules']);

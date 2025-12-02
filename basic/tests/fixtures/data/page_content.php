@@ -72,4 +72,13 @@ return [
         'created_at' => '2025-01-01 00:00:00',
         'updated_at' => '2025-01-01 00:00:00',
     ],
+    [
+        'id' => 9,
+        'page_id' => 2,
+        'language' => 'es',
+        'title' => 'Staff',
+        'content_md' => "Página de prueba del staff.",
+        'created_at' => '2025-01-01 00:00:00',
+        'updated_at' => '2025-01-01 00:00:00',
+    ],
 ];
