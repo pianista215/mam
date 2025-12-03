@@ -63,7 +63,7 @@ class AircraftConfigurationIndexViewCest
     private function checkAircraftConfigViewCommon(\FunctionalTester $I) {
         $I->amOnRoute('aircraft-configuration/view', [ 'id' => '1' ]);
 
-        $I->see('Aircraft Type Name');
+        $I->see('Aircraft Type');
         $I->see('Boeing 737-800');
         $I->see('Standard');
         $I->see('160');
