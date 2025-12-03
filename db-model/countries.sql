@@ -1,3 +1,5 @@
+SET NAMES 'utf8mb4';
+
 INSERT INTO country (iso2_code,name) VALUES
 	 ('AF','Afghanistan'),
 	 ('AX','Aland Islands'),

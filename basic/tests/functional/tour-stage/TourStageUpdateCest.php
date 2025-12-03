@@ -23,7 +23,7 @@ class TourStageUpdateCest
         $I->seeResponseCodeIs(200);
 
         $I->see('Update Stage 1 from Tour: Tour previous');
-        $I->see('Save Stage', 'button');
+        $I->see('Save', 'button');
     }
 
     public function openTourStageUpdateAsTourMgr(\FunctionalTester $I)
@@ -33,7 +33,7 @@ class TourStageUpdateCest
         $I->seeResponseCodeIs(200);
 
         $I->see('Update Stage 1 from Tour: Tour previous');
-        $I->see('Save Stage', 'button');
+        $I->see('Save', 'button');
     }
 
     public function openTourStageUpdateAsUser(\FunctionalTester $I)
@@ -44,7 +44,7 @@ class TourStageUpdateCest
 
         $I->see('Forbidden');
         $I->dontSee('Update Stage 1 from Tour: Tour previous');
-        $I->dontSee('Save Stage', 'button');
+        $I->dontSee('Save', 'button');
     }
 
     public function openTourStageUpdateAsVisitor(\FunctionalTester $I)
@@ -64,7 +64,7 @@ class TourStageUpdateCest
         $I->fillField('#tourstage-departure','LEVC');
         $I->fillField('#tourstage-arrival','LEVC');
         $I->fillField('#tourstage-description','New description');
-        $I->click('Save Stage', 'button');
+        $I->click('Save', 'button');
         $I->seeResponseCodeIs(200);
         $model = \app\models\TourStage::find()->where(['id' => '1'])->one();
         $I->assertEquals('LEBL', $model->departure);

@@ -5,7 +5,7 @@ use yii\helpers\Html;
 /** @var yii\web\View $this */
 /** @var app\models\SubmittedFlightPlan $model */
 
-$this->title = 'Flight Plan Submission';
+$this->title = Yii::t('app', 'Flight Plan Submission');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="submitted-flight-plan-create">

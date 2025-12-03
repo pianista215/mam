@@ -8,7 +8,7 @@ use yii\widgets\DetailView;
 /** @var app\models\Aircraft $model */
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Aircrafts', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Aircrafts'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
@@ -19,17 +19,17 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php if(Yii::$app->user->can('aircraftCrud') || Yii::$app->user->can('moveAircraft')) : ?>
     <p>
         <?php if(Yii::$app->user->can('aircraftCrud')) : ?>
-        <?= Html::a('Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('Delete', ['delete', 'id' => $model->id], [
+        <?= Html::a(Yii::t('app', 'Update'), ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
+        <?= Html::a(Yii::t('app', 'Delete'), ['delete', 'id' => $model->id], [
                     'class' => 'btn btn-danger',
                     'data' => [
-                        'confirm' => 'Are you sure you want to delete this item?',
+                        'confirm' => Yii::t('app', 'Are you sure you want to delete this item?'),
                         'method' => 'post',
                     ],
                 ]) ?>
         <?php endif; ?>
         <?php if(Yii::$app->user->can('moveAircraft')) : ?>
-        <?= Html::a('Move Aircraft', ['move', 'id' => $model->id], ['class' => 'btn btn-warning']) ?>
+        <?= Html::a(Yii::t('app', 'Move Aircraft'), ['move', 'id' => $model->id], ['class' => 'btn btn-warning']) ?>
         <?php endif; ?>
     </p>
     <?php endif; ?>
@@ -37,7 +37,10 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
-            'aircraftConfiguration.fullname',
+            [
+                'attribute' =>'aircraftConfiguration.fullname',
+                'label' => Yii::t('app', 'Aircraft Configuration'),
+            ],
             'registration',
             'name',
             'location',

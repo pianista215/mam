@@ -11,7 +11,7 @@ use yii\grid\GridView;
 /** @var app\models\PilotSearch $searchModel */
 /** @var yii\data\ActiveDataProvider $dataProvider */
 
-$this->title = 'Pilots';
+$this->title = Yii::t('app', 'Pilots');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="pilot-index">
@@ -19,7 +19,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
     <?php if(Yii::$app->user->can('userCrud')) : ?>
     <p>
-        <?= Html::a('Create Pilot', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a(Yii::t('app', 'Create Pilot'), ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
     <?php endif; ?>
@@ -36,7 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'name',
             'surname',
             [
-                'label' => 'Rank',
+                'label' => Yii::t('app', 'Rank'),
                 'value' => function ($model) {
                     $rank = $model->rank->name ?? null;
                     return $rank !== null

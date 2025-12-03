@@ -2,6 +2,8 @@
 
 namespace app\models\traits;
 
+use Yii;
+
 trait PasswordRulesTrait
 {
     public function passwordRules()
@@ -10,8 +12,8 @@ trait PasswordRulesTrait
             [['password'], 'required'],
             [['password'], 'string', 'max' => 255],
             [['password'], 'string', 'min' => 8],
-            [['password'], 'match', 'pattern'=>'/\d/', 'message' => 'Password must contain at least one numeric digit.'],
-            [['password'], 'match', 'pattern'=>'/[a-zA-Z]/', 'message' => 'Password must contain at least one letter.'],
+            [['password'], 'match', 'pattern'=>'/\d/', 'message' => Yii::t('app', 'Password must contain at least one numeric digit.')],
+            [['password'], 'match', 'pattern'=>'/[a-zA-Z]/', 'message' => Yii::t('app', 'Password must contain at least one letter.')],
         ];
     }
 }

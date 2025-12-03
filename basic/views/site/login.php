@@ -8,13 +8,13 @@
 use yii\bootstrap5\ActiveForm;
 use yii\bootstrap5\Html;
 
-$this->title = 'Login';
+$this->title = Yii::t('app', 'Login');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="site-login">
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <p>Please fill out the following fields to login:</p>
+    <p><?=Yii::t('app', 'Please fill out the following fields to login:')?></p>
 
     <div class="row">
         <div class="col-lg-5">
@@ -39,12 +39,12 @@ $this->params['breadcrumbs'][] = $this->title;
 
             <div class="form-group">
                 <div class="d-flex gap-2">
-                    <?= Html::submitButton('Login', ['class' => 'btn btn-primary', 'name' => 'login-button']) ?>
-                    <?= Html::a('Register', ['pilot/register'], ['class' => 'btn btn-outline-primary']) ?>
+                    <?= Html::submitButton(Yii::t('app', 'Login'), ['class' => 'btn btn-primary', 'name' => 'login-button']) ?>
+                    <?= Html::a(Yii::t('app', 'Register'), ['pilot/register'], ['class' => 'btn btn-outline-primary']) ?>
                 </div>
                 <br/>
                 <p>
-                    <?= Html::a('Forgot your password?', ['pilot/forgot-password']) ?>
+                    <?= Html::a(Yii::t('app', 'Forgot your password?'), ['pilot/forgot-password']) ?>
                 </p>
             </div>
 

@@ -4,7 +4,7 @@ use yii\helpers\Html;
 /** @var \app\models\FlightReport $report */
 ?>
 
-<h3>Detected Issues</h3>
+<h3><?=Yii::t('app', 'Detected Issues')?></h3>
 
 <?php
 $issues = [];
@@ -16,8 +16,8 @@ foreach ($report->flightPhases as $phase) {
 
         $issues[] = [
             'timestamp' => $issue->timestamp,
-            'phase' => $phase->flightPhaseType->name,
-            'description' => $issue->description,
+            'phase' => $phase->flightPhaseType->lang->name,
+            'description' => $issue->issueType->lang->description,
             'penalty' => $issue->issueType->penalty ?? '-',
         ];
     }
@@ -28,17 +28,17 @@ $score = max(0, 100 - $totalPenalty);
 <table class="table table-bordered table-striped">
     <thead>
         <tr>
-            <th>Timestamp</th>
-            <th>Phase</th>
-            <th>Description</th>
-            <th>Penalty</th>
+            <th><?=Yii::t('app', 'Timestamp')?></th>
+            <th><?=Yii::t('app', 'Phase')?></th>
+            <th><?=Yii::t('app', 'Description')?></th>
+            <th><?=Yii::t('app', 'Penalty')?></th>
         </tr>
     </thead>
     <tbody>
         <?php if (empty($issues)): ?>
             <tr>
                 <td colspan="4" class="text-center text-muted">
-                    No issues detected for this flight.
+                    <?=Yii::t('app', 'No issues detected for this flight.')?>
                 </td>
             </tr>
         <?php else: ?>
@@ -52,7 +52,7 @@ $score = max(0, 100 - $totalPenalty);
             <?php endforeach; ?>
         <?php endif; ?>
         <tr class="table-info">
-            <td colspan="3" class="text-end"><strong>Final Score</strong></td>
+            <td colspan="3" class="text-end"><strong><?=Yii::t('app', 'Final Score')?></strong></td>
             <td><strong><?= $score ?> / 100</strong></td>
         </tr>
     </tbody>

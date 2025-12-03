@@ -57,7 +57,7 @@ class FlightPhaseIssue extends \yii\db\ActiveRecord
 
     public function getDescription()
     {
-        $base_description = $this->issueType->description;
+        $base_description = $this->issueType->lang->description;
         $description = $base_description;
         $issue_code = $this->issueType->code;
 

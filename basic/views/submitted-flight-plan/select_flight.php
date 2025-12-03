@@ -11,7 +11,7 @@ use yii\grid\GridView;
 /** @var app\models\SubmittedFlightPlanSearch $searchModel */
 /** @var yii\data\ActiveDataProvider $dataProvider */
 
-$this->title = 'Select flight';
+$this->title = Yii::t('app', 'Select flight');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="submitted-flight-plan-index">
@@ -19,15 +19,15 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <?php if (!empty($tourStages)): ?>
-        <h3>Tour Stages</h3>
+        <h3><?=Yii::t('app', 'Tour Stages')?></h3>
         <table class="table table-striped table-bordered align-middle">
             <thead>
                 <tr>
-                    <th>Tour Stage</th>
-                    <th>Departure</th>
-                    <th>Arrival</th>
-                    <th>Distance Nm</th>
-                    <th>Description</th>
+                    <th><?=Yii::t('app', 'Tour Stage')?></th>
+                    <th><?=Yii::t('app', 'Departure')?></th>
+                    <th><?=Yii::t('app', 'Arrival')?></th>
+                    <th><?=Yii::t('app', 'Distance NM')?></th>
+                    <th><?=Yii::t('app', 'Description')?></th>
                     <th></th>
                 </tr>
             </thead>
@@ -68,7 +68,7 @@ $this->params['breadcrumbs'][] = $this->title;
             </tbody>
         </table>
     <?php endif; ?>
-    <h3>Routes</h3>
+    <h3><?=Yii::t('app', 'Routes')?></h3>
     <?= GridView::widget([
         'dataProvider' => $routeDataProvider,
         'columns' => [
@@ -82,7 +82,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'departure',
-                'label' => 'Departure',
+                'label' => Yii::t('app', 'Departure'),
                 'format' => 'raw',
                 'value' => function($model) {
                     return Html::tag('div',
@@ -99,7 +99,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'arrival',
-                'label' => 'Arrival',
+                'label' => Yii::t('app', 'Arrival'),
                 'format' => 'raw',
                 'value' => function($model) {
                      return Html::tag('div',

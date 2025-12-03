@@ -42,15 +42,40 @@ jobs:
             sleep 1
           done
 
-      - name: Import Database Schema
+      - name: Import Database Schema and data
         run: |
-          mysql -h127.0.0.1 -uroot -proot test_mam_database < db-model/ddl.sql        
+          mysql -h127.0.0.1 -uroot -proot test_mam_database < db-model/ddl.sql
+          mysql -h127.0.0.1 -uroot -proot test_mam_database < db-model/analysis.sql  
+          mysql -h127.0.0.1 -uroot -proot test_mam_database < db-model/config.sql
+          mysql -h127.0.0.1 -uroot -proot test_mam_database < db-model/countries.sql  
+          mysql -h127.0.0.1 -uroot -proot test_mam_database < db-model/issues.sql
+          mysql -h127.0.0.1 -uroot -proot test_mam_database < db-model/pages.sql
 
       - name: Run Migrations
         run: |
           php basic/yii migrate/up --interactive=0
           php basic/yii migrate-rbac --interactive=0
           php basic/yii migrate-custom-rbac --interactive=0
+
+      - name: Extract and Check i18n Messages
+        run: |
+          cd basic
+
+          echo "🔍 Extracting messages..."
+          php yii message config/message.php
+
+          echo "🔎 Checking for untranslated strings..."
+          if grep -n -E "=>\s*''\s*," messages/es/app.php > /dev/null; then
+            echo "❌ There are untranslated strings:"
+            grep -n -E "=>\s*''\s*," messages/es/app.php
+            exit 1
+          fi
+
+          echo "✅ No untranslated strings found."
+
+      - name: Check DB translations match
+        run: |
+          php translation-checker/check_db_translations.php          
 
       - name: Run Tests
         env:

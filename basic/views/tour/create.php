@@ -5,8 +5,8 @@ use yii\helpers\Html;
 /** @var yii\web\View $this */
 /** @var app\models\Tour $model */
 
-$this->title = 'Create Tour';
-$this->params['breadcrumbs'][] = ['label' => 'Tours', 'url' => ['index']];
+$this->title = Yii::t('app', 'Create Tour');
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Tours'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="tour-create">

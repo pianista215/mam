@@ -5,8 +5,8 @@ use yii\helpers\Html;
 /** @var yii\web\View $this */
 /** @var app\models\AircraftType $model */
 
-$this->title = 'Create Aircraft Type';
-$this->params['breadcrumbs'][] = ['label' => 'Aircraft Types', 'url' => ['index']];
+$this->title = Yii::t('app', 'Create Aircraft Type');
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Aircraft Types'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="aircraft-type-create">

@@ -14,6 +14,7 @@ use Yii;
 use yii\filters\AccessControl;
 use yii\helpers\Markdown;
 use yii\web\Controller;
+use yii\web\Cookie;
 use yii\web\Response;
 use yii\filters\VerbFilter;
 
@@ -70,8 +71,8 @@ class SiteController extends Controller
     {
         $homePage = Page::findOne(['code' => 'home']);
         $content = $homePage->getPageContents()
-            ->andWhere(['language' => 'en']) // TODO: Use language
-            ->one();
+                ->andWhere(['language' => Yii::$app->language])
+                ->one();
 
         $bodyHtmlContent = Markdown::process($content->content_md, 'gfm');
 
@@ -140,28 +141,23 @@ class SiteController extends Controller
         return $this->goHome();
     }
 
-    /**
-     * Displays about page.
-     *
-     * @return string
-     */
-    public function actionAbout()
+    public function actionLanguage()
     {
-        return $this->render('about');
-    }
+        $language = Yii::$app->request->post('language');
 
+        if (in_array($language, ['en', 'es'])) {
+            Yii::$app->language = $language;
 
-    public function actionEntry()
-    {
-        $model = new EntryForm();
-
-        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            // valid data received in $model
-            // do something meaningful here about $model ...
-            return $this->render('entry-confirm', ['model' => $model]);
-        } else {
-            // either the page is initially displayed or there is some validation error
-            return $this->render('entry', ['model' => $model]);
+            $cookie = new \yii\web\Cookie([
+                'name' => 'language',
+                'value' => $language,
+                'expire' => time() + 10 * 365 * 24 * 60 * 60, // 10 years
+            ]);
+            Yii::$app->response->cookies->add($cookie);
         }
+
+        return $this->redirect(Yii::$app->request->referrer ?: Yii::$app->homeUrl);
     }
+
+
 }

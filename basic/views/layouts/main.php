@@ -48,45 +48,44 @@ $this->registerCssFile(
 
     $items =
     [
-            ['label' => 'Home', 'url' => ['/site/index']],
             [
-                'label' => 'About',
+                'label' => Yii::t('app', 'About'),
                 'items' => [
-                    ['label' => 'Staff', 'url' => ['page/view', 'code' => 'staff']],
-                    ['label' => 'Rules', 'url' => ['page/view', 'code' => 'rules']],
-                    ['label' => 'Ranks', 'url' => ['page/view', 'code' => 'ranks']],
-                    ['label' => 'School', 'url' => ['page/view', 'code' => 'school']],
+                    ['label' => Yii::t('app', 'Staff'), 'url' => ['page/view', 'code' => 'staff']],
+                    ['label' => Yii::t('app', 'Rules'), 'url' => ['page/view', 'code' => 'rules']],
+                    ['label' => Yii::t('app', 'Ranks'), 'url' => ['page/view', 'code' => 'ranks']],
+                    ['label' => Yii::t('app', 'School'), 'url' => ['page/view', 'code' => 'school']],
                 ],
             ],
-            ['label' => 'Pilots', 'url' => ['/pilot/index']],
+            ['label' => Yii::t('app', 'Pilots'), 'url' => ['/pilot/index']],
     ];
 
     if (!Yii::$app->user->isGuest) {
         $items[] =
-         ['label' => 'Flights', 'url' => ['/flight/index']];
+         ['label' => Yii::t('app', 'Flights'), 'url' => ['/flight/index']];
     }
-    $items[] =  ['label' => 'Tours', 'url' => ['/tour/index']];
+    $items[] =  ['label' => Yii::t('app', 'Tours'), 'url' => ['/tour/index']];
     $items[] =
             [
-                'label' => 'Operations',
+                'label' => Yii::t('app', 'Operations'),
                 'items' => [
-                    ['label' => 'Aircraft Types', 'url' => ['/aircraft-type/index']],
-                    ['label' => 'Aircraft Configurations', 'url' => ['/aircraft-configuration/index']],
-                    ['label' => 'Aircrafts', 'url' => ['/aircraft/index']],
-                    ['label' => 'Airports', 'url' => ['/airport/index']],
-                    ['label' => 'Countries', 'url' => ['/country/index']],
-                    ['label' => 'Ranks', 'url' => ['/rank/index']],
-                    ['label' => 'Routes', 'url' => ['/route/index']],
+                    ['label' => Yii::t('app', 'Aircraft Types'), 'url' => ['/aircraft-type/index']],
+                    ['label' => Yii::t('app', 'Aircraft Configurations'), 'url' => ['/aircraft-configuration/index']],
+                    ['label' => Yii::t('app', 'Aircrafts'), 'url' => ['/aircraft/index']],
+                    ['label' => Yii::t('app', 'Airports'), 'url' => ['/airport/index']],
+                    ['label' => Yii::t('app', 'Countries'), 'url' => ['/country/index']],
+                    ['label' => Yii::t('app', 'Ranks'), 'url' => ['/rank/index']],
+                    ['label' => Yii::t('app', 'Routes'), 'url' => ['/route/index']],
                 ],
             ];
 
     if (Yii::$app->user->can('submitFpl')) {
         $items[] =
         [
-            'label' => 'Actions',
+            'label' => Yii::t('app', 'Actions'),
             'items' => [
-                ['label' => 'Submit FPL', 'url' => ['/submitted-flight-plan/my-fpl']],
-                ['label' => 'Move Pilot', 'url' => ['/pilot/move']],
+                ['label' => Yii::t('app', 'Submit FPL'), 'url' => ['/submitted-flight-plan/my-fpl']],
+                ['label' => Yii::t('app', 'Move Pilot'), 'url' => ['/pilot/move']],
             ],
         ];
     }
@@ -94,10 +93,10 @@ $this->registerCssFile(
     if (Yii::$app->user->can('validateVfrFlight') || Yii::$app->user->can('validateIfrFlight')) {
         $items[] =
         [
-            'label' => 'Validations',
+            'label' => Yii::t('app', 'Validations'),
             'items' => [
-                ['label' => 'Validate Flights', 'url' => ['/flight/index-pending']],
-                ['label' => 'List FPLs', 'url' => ['/submitted-flight-plan/index']],
+                ['label' => Yii::t('app', 'Validate Flights'), 'url' => ['/flight/index-pending']],
+                ['label' => Yii::t('app', 'List FPLs'), 'url' => ['/submitted-flight-plan/index']],
             ],
         ];
     }
@@ -105,20 +104,20 @@ $this->registerCssFile(
     // TODO: REFINE THE PERMISSIONS HERE. Not checking the role
     if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) !== null) {
         $items[] = [
-            'label' => 'Admin',
+            'label' => Yii::t('app', 'Admin'),
             'items' => [
-                ['label' => 'Activate Pilots', 'url' => ['/pilot/activate-pilots']],
-                ['label' => 'Manage Images', 'url' => ['/image/index']],
+                ['label' => Yii::t('app', 'Activate Pilots'), 'url' => ['/pilot/activate-pilots']],
+                ['label' => Yii::t('app', 'Manage Images'), 'url' => ['/image/index']],
             ],
         ];
     }
 
     $items[] = Yii::$app->user->isGuest
-        ? ['label' => 'Login', 'url' => ['/site/login']]
+        ? ['label' => Yii::t('app', 'Login'), 'url' => ['/site/login']]
         : '<li class="nav-item">'
             . Html::beginForm(['/site/logout'])
             . Html::submitButton(
-                'Logout (' . Yii::$app->user->identity->license . ')',
+                Yii::t('app', 'Logout'). ' (' . Yii::$app->user->identity->license . ')',
                 ['class' => 'nav-link btn btn-link logout']
             )
             . Html::endForm()
@@ -160,6 +159,20 @@ $this->registerCssFile(
             <?php if ($facebook = Config::get('facebook_url')): ?>
                 <a href="<?= $facebook ?>" target="_blank"><i class="fab fa-facebook"></i></a>
             <?php endif; ?>
+        </div>
+        <div class="text-center mt-2">
+            <?= \yii\helpers\Html::beginForm(['/site/language'], 'post', ['class' => 'd-inline']) ?>
+            <?= \yii\helpers\Html::dropDownList(
+                    'language',
+                    Yii::$app->language,
+                    ['es' => 'Español', 'en' => 'English'],
+                    [
+                        'class' => 'form-select form-select-sm d-inline w-auto',
+                        'onchange' => 'this.form.submit()'
+                    ]
+                )
+            ?>
+            <?= \yii\helpers\Html::endForm() ?>
         </div>
     </div>
 </footer>

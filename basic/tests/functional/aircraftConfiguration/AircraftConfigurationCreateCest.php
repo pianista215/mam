@@ -50,7 +50,7 @@ class AircraftConfigurationCreateCest
        $I->click('Save', 'button');
 
        $I->expectTo('see validations errors');
-       $I->see('Aircraft Type ID cannot be blank.');
+       $I->see('Aircraft Type cannot be blank.');
        $I->see('Name cannot be blank.');
        $I->see('Pax Capacity cannot be blank.');
        $I->see('Cargo Capacity cannot be blank.');

@@ -51,9 +51,9 @@ class Rank extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'name' => 'Name',
-            'position' => 'Position',
+            'id' => Yii::t('app', 'ID'),
+            'name' => Yii::t('app', 'Name'),
+            'position' => Yii::t('app', 'Position'),
         ];
     }
 

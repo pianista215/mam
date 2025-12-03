@@ -164,19 +164,19 @@ class AircraftController extends Controller
         if (Yii::$app->user->can('moveAircraft')) {
             $model = Aircraft::findOne($id);
             if ($model === null) {
-                throw new NotFoundHttpException('Aircraft not found.');
+                throw new NotFoundHttpException(Yii::t('app', 'Aircraft not found.'));
             }
 
             // Check if there is an active submitted flight plan for this aircraft
             $activePlan = SubmittedFlightPlan::findOne(['aircraft_id' => $id]);
             if ($activePlan !== null) {
-                throw new ForbiddenHttpException('You cannot change the location of an aircraft with an active submitted flight plan.');
+                throw new ForbiddenHttpException(Yii::t('app', 'You cannot change the location of an aircraft with an active submitted flight plan.'));
             }
 
             $model->setScenario(Aircraft::SCENARIO_MOVE);
 
             if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-                Yii::$app->session->setFlash('success', 'Aircraft has been moved to ' . $model->location . ' airport.');
+                Yii::$app->session->setFlash('success', Yii::t('app', 'Aircraft has been moved to'). ' ' . $model->location);
                 return $this->redirect(['view', 'id' => $model->id]);
             }
 
@@ -184,7 +184,7 @@ class AircraftController extends Controller
                 'model' => $model,
             ]);
         } else {
-            throw new ForbiddenHttpException('You do not have permission to move this aircraft.');
+            throw new ForbiddenHttpException(Yii::t('app', 'You don\'t have permission to move this aircraft.'));
         }
     }
 

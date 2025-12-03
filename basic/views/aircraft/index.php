@@ -11,7 +11,7 @@ use yii\grid\GridView;
 /** @var app\models\AircraftSearch $searchModel */
 /** @var yii\data\ActiveDataProvider $dataProvider */
 
-$this->title = 'Aircrafts';
+$this->title = Yii::t('app', 'Aircrafts');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="aircraft-index">
@@ -19,7 +19,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
     <?php if(Yii::$app->user->can('aircraftCrud')) : ?>
     <p>
-        <?= Html::a('Create Aircraft', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a(Yii::t('app', 'Create Aircraft'), ['create'], ['class' => 'btn btn-success']) ?>
     </p>
     <?php endif; ?>
 
@@ -30,7 +30,10 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
-            'aircraftConfiguration.fullname',
+            [
+                'attribute' =>'aircraftConfiguration.fullname',
+                'label' => Yii::t('app', 'Aircraft Configuration'),
+            ],
             'registration',
             'name',
             'location',

@@ -81,7 +81,7 @@ class TourController extends Controller
 
         if ($page !== null) {
             $pageContent = $page->getPageContents()
-                ->andWhere(['language' => 'en']) // TODO: Use language
+                ->andWhere(['language' => Yii::$app->language])
                 ->one();
 
             if ($pageContent === null) {

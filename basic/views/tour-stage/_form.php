@@ -28,8 +28,8 @@ use yii\widgets\ActiveForm;
     <?= $form->field($model, 'description')->textarea(['rows' => 4]) ?>
 
     <div class="form-group">
-        <?= Html::submitButton('Save Stage', ['class' => 'btn btn-success']) ?>
-        <?= Html::a('Cancel', ['tour/view', 'id' => $tour->id], ['class' => 'btn btn-secondary ms-2']) ?>
+        <?= Html::submitButton(Yii::t('app', 'Save'), ['class' => 'btn btn-success']) ?>
+        <?= Html::a(Yii::t('app', 'Cancel'), ['tour/view', 'id' => $tour->id], ['class' => 'btn btn-secondary ms-2']) ?>
     </div>
 
     <?php ActiveForm::end(); ?>

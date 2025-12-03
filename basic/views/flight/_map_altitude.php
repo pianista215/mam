@@ -111,7 +111,7 @@ foreach ($report->flightPhases as $phase) {
             $segments[$lastIndex]['coordinates'][] = $coordinates[0];
         }
         $segments[] = [
-            'phase' => $phase->flightPhaseType->name,
+            'phase' => $phase->flightPhaseType->lang->name,
             'color' => $colors[$phase->flightPhaseType->code],
             'coordinates' => $coordinates,
         ];
@@ -120,7 +120,7 @@ foreach ($report->flightPhases as $phase) {
     // altitude
     if (!empty($pointsAltitude)) {
         $datasets[] = [
-            'label' => $phase->flightPhaseType->name . ' (Avión)',
+            'label' => $phase->flightPhaseType->lang->name . ' (Avión)',
             'data' => $pointsAltitude,
             'borderColor' => $colors[$phase->flightPhaseType->code],
             'fill' => false,
@@ -129,7 +129,7 @@ foreach ($report->flightPhases as $phase) {
     }
     if (!empty($pointsGround)) {
         $datasets[] = [
-            'label' => $phase->flightPhaseType->name . ' (Terreno)',
+            'label' => $phase->flightPhaseType->lang->name . ' (Terreno)',
             'data' => $pointsGround,
             'borderColor' => $colors[$phase->flightPhaseType->code],
             'borderDash' => [5, 5], // línea discontinua
@@ -153,7 +153,7 @@ foreach ($report->flightPhases as $phase) {
                 <div class="card shadow-sm h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h5 class="card-title mb-0"><?= htmlspecialchars($phase->flightPhaseType->name) ?></h5>
+                            <h5 class="card-title mb-0"><?= htmlspecialchars($phase->flightPhaseType->lang->name) ?></h5>
                             <div class="d-flex align-items-center">
                                 <small class="text-muted me-2">
                                     <?= date('H:i', strtotime($phase->start)) ?> - <?= date('H:i', strtotime($phase->end)) ?>
@@ -163,7 +163,7 @@ foreach ($report->flightPhases as $phase) {
                         </div>
                         <?php foreach ($phase->flightPhaseMetrics as $metric): ?>
                             <p class="card-text mb-1">
-                                <?= htmlspecialchars($metric->metricType->name) . ' : ' . htmlspecialchars($metric->value) ?>
+                                <?= htmlspecialchars($metric->metricType->lang->name) . ' : ' . htmlspecialchars($metric->value) ?>
                             </p>
                         <?php endforeach; ?>
                     </div>
@@ -200,10 +200,10 @@ foreach ($report->flightPhases as $phase) {
     <div id="map" style="width: 100%; height: 600px;"></div>
     <canvas id="altitudeChart" width="800" height="400"></canvas>
     <div class="mt-4">
-        <h5>Raw Event Viewer</h5>
+        <h5><?=Yii::t('app', 'Raw Event Viewer')?></h5>
         <div class="d-flex gap-2 mb-2">
-            <button id="prevEvent" class="btn btn-sm btn-secondary">⬅ Previous</button>
-            <button id="nextEvent" class="btn btn-sm btn-secondary">Next ➡</button>
+            <button id="prevEvent" class="btn btn-sm btn-secondary">⬅ <?=Yii::t('app', 'Previous')?></button>
+            <button id="nextEvent" class="btn btn-sm btn-secondary"><?=Yii::t('app', 'Next')?> ➡</button>
         </div>
         <pre id="rawEventViewer" style="background:#111;color:#0f0;padding:10px;height:250px;overflow:auto;border:1px solid #444;"></pre>
     </div>

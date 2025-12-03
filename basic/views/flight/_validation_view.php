@@ -8,7 +8,7 @@ use yii\helpers\Html;
 
     <div class="row mb-3">
         <div class="col-md-12">
-            <div>Validator Comments</div>
+            <div><?=Yii::t('app', 'Validator Comments')?></div>
             <?= Html::textarea('route', $model->validator_comments, [
                 'rows' => 3,
                 'class' => 'form-control',
@@ -19,14 +19,14 @@ use yii\helpers\Html;
 
     <div class="row mb-3">
         <div class="col-md-3">
-            <div>Validator</div>
+            <div><?=Yii::t('app', 'Validator')?></div>
             <?= Html::input('text', 'validator', $model->validator->fullname, [
                 'disabled' => true,
                 'class' => 'form-control'
             ])?>
         </div>
         <div class="col-md-3">
-            <div>Validation date</div>
+            <div><?=Yii::t('app', 'Validation date')?></div>
             <?= Html::input('text', 'validation_date', $model->validation_date, [
                 'disabled' => true,
                 'class' => 'form-control'

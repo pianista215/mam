@@ -9,7 +9,7 @@ use yii\grid\GridView;
 /** @var yii\data\ActiveDataProvider $dataProvider */
 /** @var array $types */
 
-$this->title = 'Images';
+$this->title = Yii::t('app', 'Images');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="image-index">
@@ -19,9 +19,9 @@ $this->params['breadcrumbs'][] = $this->title;
     <!-- Dropdown filter -->
     <div class="mb-3">
         <form method="get" action="">
-            <label><strong>Filter by type:</strong></label>
+            <label><strong><?=Yii::t('app', 'Filter by type')?>:</strong></label>
             <select name="ImageSearch[type]" onchange="this.form.submit()" class="form-control" style="width:250px; display:inline-block;">
-                <option value="">-- All types --</option>
+                <option value="">-- <?=Yii::t('app', 'All types')?> --</option>
                 <?php foreach ($types as $key => $label): ?>
                     <option value="<?= Html::encode($key) ?>" <?= $searchModel->type === $key ? 'selected' : '' ?>>
                         <?= Html::encode($label) ?>
@@ -48,7 +48,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             // Preview column
             [
-                'label' => 'Preview',
+                'label' => Yii::t('app', 'Preview'),
                 'format' => 'raw',
                 'value' => function($model) {
                     $url = method_exists($model, 'getUrl') ? $model->getUrl() : null;
@@ -74,10 +74,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'buttons' => [
                     'replace' => function ($url, $model, $key) {
                         // getUploadUrl() ya devuelve la URL generada con Url::to(...)
-                        return Html::a('Replace', $model->getUploadUrl(), ['class' => 'btn btn-primary btn-sm']);
+                        return Html::a(Yii::t('app', 'Replace'), $model->getUploadUrl(), ['class' => 'btn btn-primary btn-sm']);
                     },
                     'delete' => function ($url, $model, $key) {
-                        return Html::a('Delete', ['delete', 'id' => $model->id], [
+                        return Html::a(Yii::t('app', 'Delete'), ['delete', 'id' => $model->id], [
                             'class' => 'btn btn-danger btn-sm',
                             'data-confirm' => 'Are you sure you want to delete this image?',
                             'data-method' => 'post',

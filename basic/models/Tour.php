@@ -57,11 +57,11 @@ class Tour extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'name' => 'Name',
-            'description' => 'Description',
-            'start' => 'Start',
-            'end' => 'End',
+            'id' => Yii::t('app', 'ID'),
+            'name' => Yii::t('app', 'Name'),
+            'description' => Yii::t('app', 'Description'),
+            'start' => Yii::t('app', 'Start'),
+            'end' => Yii::t('app', 'End'),
         ];
     }
 

@@ -11,7 +11,7 @@ use yii\grid\GridView;
 /** @var app\models\RouteSearch $searchModel */
 /** @var yii\data\ActiveDataProvider $dataProvider */
 
-$this->title = 'Routes';
+$this->title = Yii::t('app', 'Routes');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="route-index">
@@ -19,7 +19,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
     <?php if(Yii::$app->user->can('routeCrud')) : ?>
     <p>
-        <?= Html::a('Create Route', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a(Yii::t('app', 'Create Route'), ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
     <?php endif; ?>
@@ -42,7 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'departure',
-                'label' => 'Departure',
+                'label' => Yii::t('app', 'Departure'),
                 'format' => 'raw',
                 'value' => function($model) {
                     return Html::tag('div',
@@ -59,7 +59,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'arrival',
-                'label' => 'Arrival',
+                'label' => Yii::t('app', 'Arrival'),
                 'format' => 'raw',
                 'value' => function($model) {
                      return Html::tag('div',

@@ -3,6 +3,7 @@
 use app\helpers\TimeHelper;
 use app\helpers\ImageMam;
 use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\grid\GridView;
 
 /** @var yii\web\View $this */
@@ -10,7 +11,7 @@ use yii\grid\GridView;
 /** @var yii\data\ActiveDataProvider $flightsProvider */
 
 $this->title = $model->name . ' ' . $model->surname;
-$this->params['breadcrumbs'][] = ['label' => 'Pilots', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Pilots'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
@@ -22,15 +23,15 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php if (Yii::$app->user->can('userCrud')): ?>
             <div>
                 <?php if (isset($model->license)): ?>
-                    <?= Html::a('Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary me-2']) ?>
+                    <?= Html::a(Yii::t('app', 'Update'), ['update', 'id' => $model->id], ['class' => 'btn btn-primary me-2']) ?>
                 <?php else: ?>
-                    <?= Html::a('Activate', ['activate', 'id' => $model->id], ['class' => 'btn btn-success me-2']) ?>
+                    <?= Html::a(Yii::t('app', 'Activate'), ['activate', 'id' => $model->id], ['class' => 'btn btn-success me-2']) ?>
                 <?php endif; ?>
 
-                <?= Html::a('Delete', ['delete', 'id' => $model->id], [
+                <?= Html::a(Yii::t('app', 'Delete'), ['delete', 'id' => $model->id], [
                     'class' => 'btn btn-danger',
                     'data' => [
-                        'confirm' => 'Are you sure you want to delete this pilot?',
+                        'confirm' => Yii::t('app', 'Are you sure you want to delete this item?'),
                         'method' => 'post',
                     ],
                 ]) ?>
@@ -46,32 +47,32 @@ $this->params['breadcrumbs'][] = $this->title;
 
         <div class="pilot-data flex-fill me-4">
             <dl class="row mb-0">
-                <dt class="col-sm-4">License</dt>
+                <dt class="col-sm-4"><?=Yii::t('app', 'License')?></dt>
                 <dd class="col-sm-8"><?= Html::encode($model->license ?? '(none)') ?></dd>
 
-                <dt class="col-sm-4">Name</dt>
+                <dt class="col-sm-4"><?=Yii::t('app', 'Name')?></dt>
                 <dd class="col-sm-8"><?= Html::encode($model->name) ?></dd>
 
-                <dt class="col-sm-4">Surname</dt>
+                <dt class="col-sm-4"><?=Yii::t('app', 'Surname')?></dt>
                 <dd class="col-sm-8"><?= Html::encode($model->surname) ?></dd>
 
-                <dt class="col-sm-4">Registration date</dt>
+                <dt class="col-sm-4"><?=Yii::t('app', 'Registration Date')?></dt>
                 <dd class="col-sm-8"><?= Html::encode($model->registration_date) ?></dd>
 
                 <?php if (!empty($model->vatsim_id)): ?>
-                    <dt class="col-sm-4">VATSIM ID</dt>
+                    <dt class="col-sm-4"><?=Yii::t('app', 'Vatsim ID')?></dt>
                     <dd class="col-sm-8"><?= Html::encode($model->vatsim_id) ?></dd>
                 <?php endif; ?>
 
                 <?php if (!empty($model->ivao_id)): ?>
-                    <dt class="col-sm-4">IVAO ID</dt>
+                    <dt class="col-sm-4"><?=Yii::t('app', 'Ivao ID')?></dt>
                     <dd class="col-sm-8"><?= Html::encode($model->ivao_id) ?></dd>
                 <?php endif; ?>
 
-                <dt class="col-sm-4">Hours flown</dt>
+                <dt class="col-sm-4"><?=Yii::t('app', 'Hours Flown')?></dt>
                 <dd class="col-sm-8"><?= Html::encode(TimeHelper::formatHoursMinutes($model->hours_flown)) ?></dd>
 
-                <dt class="col-sm-4">Location</dt>
+                <dt class="col-sm-4"><?=Yii::t('app', 'Location')?></dt>
                 <dd class="col-sm-8"><?= Html::encode($model->location ?? '') ?></dd>
             </dl>
         </div>
@@ -83,7 +84,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 </div>
                 <div class="rank-name fw-semibold"><?= Html::encode($model->rank->name) ?></div>
             <?php else: ?>
-                <div class="text-muted fst-italic">No rank</div>
+                <div class="text-muted fst-italic"><?=Yii::t('app', 'No rank')?></div>
             <?php endif; ?>
         </div>
     </div>
@@ -93,7 +94,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
 
-    <h4 class="mb-3">Recent flights</h4>
+    <h4 class="mb-3"><?=Yii::t('app', 'Recent flights')?></h4>
 
     <?= GridView::widget([
         'dataProvider' => $flightsProvider,
@@ -121,7 +122,9 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'class' => 'yii\grid\ActionColumn',
                 'template' => '{view}',
-                'urlCreator' => fn($action, $model) => \yii\helpers\Url::toRoute([$action, 'id' => $model->id]),
+                'urlCreator' => function ($action, $model) {
+                    return Url::toRoute(["/flight/view", "id" => $model->id]);
+                },
             ],
         ],
         'tableOptions' => ['class' => 'table table-striped table-bordered align-middle'],

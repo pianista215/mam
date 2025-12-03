@@ -22,13 +22,13 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'country_id')->dropdownList(
                 $countries,
-                ['prompt'=>'Select Country']
+                ['prompt'=>Yii::t('app', 'Select Country')]
             ); ?>
 
     <?= $form->field($model, 'city')->textInput(['maxlength' => true]) ?>
 
     <div class="form-group">
-        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+        <?= Html::submitButton(Yii::t('app', 'Save'), ['class' => 'btn btn-success']) ?>
     </div>
 
     <?php ActiveForm::end(); ?>

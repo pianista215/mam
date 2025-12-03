@@ -13,7 +13,7 @@ use yii\widgets\DetailView;
 /** @var yii\data\ActiveDataProvider $dataProvider */
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Aircraft Types', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Aircraft Types'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
@@ -32,11 +32,11 @@ $this->params['breadcrumbs'][] = $this->title;
 
         <?php if (Yii::$app->user->can('aircraftTypeCrud')): ?>
             <div>
-                <?= Html::a('<i class="fa fa-edit"></i> Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary me-2']) ?>
-                <?= Html::a('<i class="fa fa-trash"></i> Delete', ['delete', 'id' => $model->id], [
+                <?= Html::a(Yii::t('app', 'Update'), ['update', 'id' => $model->id], ['class' => 'btn btn-primary me-2']) ?>
+                <?= Html::a(Yii::t('app', 'Delete'), ['delete', 'id' => $model->id], [
                     'class' => 'btn btn-danger',
                     'data' => [
-                        'confirm' => 'Are you sure you want to delete this aircraft type?',
+                        'confirm' => Yii::t('app', 'Are you sure you want to delete this item?'),
                         'method' => 'post',
                     ],
                 ]) ?>
@@ -47,19 +47,19 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="card shadow-sm mb-4">
         <div class="card-body">
             <dl class="row mb-0">
-                <dt class="col-sm-3">ICAO Code</dt>
+                <dt class="col-sm-3"><?=Yii::t('app', 'ICAO Code')?></dt>
                 <dd class="col-sm-9"><?= Html::encode($model->icao_type_code) ?></dd>
 
-                <dt class="col-sm-3">Name</dt>
+                <dt class="col-sm-3"><?=Yii::t('app', 'Name')?></dt>
                 <dd class="col-sm-9"><?= Html::encode($model->name) ?></dd>
 
-                <dt class="col-sm-3">Max Range (Nm)</dt>
+                <dt class="col-sm-3"><?=Yii::t('app', 'Max Range (NM)')?></dt>
                 <dd class="col-sm-9"><?= Html::encode($model->max_nm_range) ?></dd>
             </dl>
         </div>
     </div>
 
-    <h4>Configurations</h4>
+    <h4><?=Yii::t('app', 'Aircraft Configurations')?></h4>
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'columns' => [

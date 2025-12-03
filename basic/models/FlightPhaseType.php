@@ -9,7 +9,6 @@ use Yii;
  *
  * @property int $id
  * @property string $code
- * @property string $name
  *
  * @property FlightPhaseMetricType[] $flightPhaseMetricTypes
  * @property FlightPhase[] $flightPhases
@@ -32,7 +31,6 @@ class FlightPhaseType extends \yii\db\ActiveRecord
         return [
             [['code', 'name'], 'required'],
             [['code'], 'string', 'max' => 32],
-            [['name'], 'string', 'max' => 50],
             [['code'], 'unique'],
         ];
     }
@@ -45,7 +43,6 @@ class FlightPhaseType extends \yii\db\ActiveRecord
         return [
             'id' => 'ID',
             'code' => 'Code',
-            'name' => 'Name',
         ];
     }
 
@@ -67,5 +64,16 @@ class FlightPhaseType extends \yii\db\ActiveRecord
     public function getFlightPhases()
     {
         return $this->hasMany(FlightPhase::class, ['flight_phase_type_id' => 'id']);
+    }
+
+    public function getFlightPhaseTypeLangs()
+	{
+        return $this->hasMany(FlightPhaseTypeLang::class, ['flight_phase_type_id' => 'id']);
+    }
+
+    public function getLang()
+    {
+        return $this->hasOne(FlightPhaseTypeLang::class, ['flight_phase_type_id' => 'id'])
+            ->andWhere(['language' => Yii::$app->language]);
     }
 }

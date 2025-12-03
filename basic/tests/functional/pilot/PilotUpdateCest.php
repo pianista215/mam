@@ -59,7 +59,7 @@ class PilotUpdateCest
        $I->see('Name cannot be blank.');
        $I->see('Surname cannot be blank.');
        $I->see('Email cannot be blank.');
-       $I->see('Country ID cannot be blank.');
+       $I->see('Country cannot be blank.');
        $I->see('City cannot be blank.');
        $I->see('Date Of Birth cannot be blank.');
        $I->see('Location cannot be blank.');

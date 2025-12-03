@@ -42,10 +42,10 @@ class Airport extends \yii\db\ActiveRecord
             [['icao_code', 'name', 'latitude', 'longitude', 'city', 'country_id'], 'required'],
             [['icao_code'], 'filter', 'filter' => [CustomRules::class, 'removeSpaces']],
             [['latitude', 'longitude'], 'number'],
-            [['latitude'], 'compare', 'compareValue' => -90, 'operator' => '>=', 'message' => 'Latitude must be between -90 and 90.'],
-            [['latitude'], 'compare', 'compareValue' => 90, 'operator' => '<=', 'message' => 'Latitude must be between -90 and 90.'],
-            [['longitude'], 'compare', 'compareValue' => -180, 'operator' => '>=', 'message' => 'Longitude must be between -180 and 180.'],
-            [['longitude'], 'compare', 'compareValue' => 180, 'operator' => '<=', 'message' => 'Longitude must be between -180 and 180.'],
+            [['latitude'], 'compare', 'compareValue' => -90, 'operator' => '>=', 'message' => Yii::t('app', 'Latitude must be between -90 and 90.')],
+            [['latitude'], 'compare', 'compareValue' => 90, 'operator' => '<=', 'message' => Yii::t('app', 'Latitude must be between -90 and 90.')],
+            [['longitude'], 'compare', 'compareValue' => -180, 'operator' => '>=', 'message' => Yii::t('app', 'Longitude must be between -180 and 180.')],
+            [['longitude'], 'compare', 'compareValue' => 180, 'operator' => '<=', 'message' => Yii::t('app', 'Longitude must be between -180 and 180.')],
             [['country_id'], 'integer'],
             [['icao_code'], 'string', 'length' => 4],
             [['name'], 'string', 'max' => 100],
@@ -63,13 +63,13 @@ class Airport extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'icao_code' => 'Icao Code',
-            'name' => 'Name',
-            'latitude' => 'Latitude',
-            'longitude' => 'Longitude',
-            'city' => 'City',
-            'country_id' => 'Country ID',
+            'id' => Yii::t('app', 'ID'),
+            'icao_code' => Yii::t('app', 'Icao Code'),
+            'name' => Yii::t('app', 'Name'),
+            'latitude' => Yii::t('app', 'Latitude'),
+            'longitude' => Yii::t('app', 'Longitude'),
+            'city' => Yii::t('app', 'City'),
+            'country_id' => Yii::t('app', 'Country'),
         ];
     }
 

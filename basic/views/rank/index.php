@@ -12,7 +12,7 @@ use yii\grid\GridView;
 /** @var app\models\RankSearch $searchModel */
 /** @var yii\data\ActiveDataProvider $dataProvider */
 
-$this->title = 'Ranks';
+$this->title = Yii::t('app', 'Ranks');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="rank-index">
@@ -20,7 +20,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
     <?php if(Yii::$app->user->can('rankCrud')) : ?>
     <p>
-        <?= Html::a('Create Rank', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a(Yii::t('app', 'Create Rank'), ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
     <?php endif; ?>

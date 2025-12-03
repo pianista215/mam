@@ -162,7 +162,7 @@ class ImageController extends Controller
         $relatedModel = $image->getRelatedModel();
 
         if ($relatedModel === null || !$image->isValidElement()) {
-            throw new NotFoundHttpException('Element does not exist.');
+            throw new NotFoundHttpException(Yii::t('app', 'Element does not exist.'));
         }
 
         if (Yii::$app->request->isPost) {
@@ -177,13 +177,13 @@ class ImageController extends Controller
                             // Delete the old version
                             unlink($oldFile);
                         }
-                        Yii::$app->session->setFlash('success', 'Image correctly uploaded.');
+                        Yii::$app->session->setFlash('success', Yii::t('app', 'Image correctly uploaded.'));
                         $this->logInfo('Image uploaded', ['image' => $image, 'user' => Yii::$app->user->identity->license]);
                         return $this->redirect($image->getCallbackUrl());
                     } else {
                         // Delete the new image uploaded
                         unlink($image->path);
-                        Yii::$app->session->setFlash('error', 'Error saving image information.');
+                        Yii::$app->session->setFlash('error', Yii::t('app', 'Error saving image information.'));
                         $this->logError(
                             'Error saving uploaded file',
                             [
@@ -200,7 +200,7 @@ class ImageController extends Controller
                             'user' => Yii::$app->user->identity->license
                         ]
                     );
-                    Yii::$app->session->setFlash('error', 'Error saving uploaded file.');
+                    Yii::$app->session->setFlash('error', Yii::t('app', 'Error saving uploaded file.'));
                 }
 
             } else {
@@ -210,7 +210,7 @@ class ImageController extends Controller
                         'request' => Yii::$app->request,
                         'user' => Yii::$app->user->identity->license
                     ]);
-                Yii::$app->session->setFlash('error', "Can't find image");
+                Yii::$app->session->setFlash('error', Yii::t('app', 'Can\'t find image'));
             }
         }
 

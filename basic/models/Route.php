@@ -54,17 +54,17 @@ class Route extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'code' => 'Code',
-            'departure' => 'Departure',
-            'arrival' => 'Arrival',
-            'distance_nm' => 'Distance Nm',
+            'id' => Yii::t('app', 'ID'),
+            'code' => Yii::t('app', 'Code'),
+            'departure' => Yii::t('app', 'Departure'),
+            'arrival' => Yii::t('app', 'Arrival'),
+            'distance_nm' => Yii::t('app', 'Distance NM'),
         ];
     }
 
     public function getFplDescription()
     {
-        return 'Route '.$this->code.' ('.$this->departure.'-'.$this->arrival.')';
+        return Yii::t('app', 'Route') . ' '.$this->code.' ('.$this->departure.'-'.$this->arrival.')';
     }
 
     /**

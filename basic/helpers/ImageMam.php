@@ -69,7 +69,7 @@ class ImageMam
         $html .= Html::img($image->getUrl(), $imgOptions);
 
         if (Yii::$app->user->can('uploadImage', ['image' => $image])) {
-            $html .= Html::a('Edit', $image->getUploadUrl(), ['class' => 'image-mam-edit']);
+            $html .= Html::a(Yii::t('app', 'Edit'), $image->getUploadUrl(), ['class' => 'image-mam-edit']);
         }
 
         $html .= Html::endTag('div');

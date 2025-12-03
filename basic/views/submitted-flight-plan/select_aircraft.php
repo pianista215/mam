@@ -10,7 +10,7 @@ use yii\grid\GridView;
 /** @var app\models\Route|app\models\TourStage $entity */
 /** @var string $type */
 
-$titleLabel = "Select aircraft for $entity->fplDescription";
+$titleLabel = Yii::t('app', 'Select aircraft for').' '.$entity->fplDescription;
 
 $this->title = $titleLabel;
 $this->params['breadcrumbs'][] = $this->title;
@@ -32,7 +32,7 @@ $this->params['entity_type'] = $type;
             ['class' => 'yii\grid\SerialColumn'],
             [
                 'attribute' => 'aircraftConfiguration.fullname',
-                'label' => 'Type',
+                'label' => Yii::t('app', 'Aircraft'),
             ],
             'registration',
             'name',

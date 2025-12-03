@@ -9,7 +9,7 @@ use yii\grid\GridView;
 /** @var yii\web\View $this */
 /** @var yii\data\ActiveDataProvider $dataProvider */
 
-$this->title = 'Activate pilots';
+$this->title = Yii::t('app', 'Activate pilots');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="activate-users-index">

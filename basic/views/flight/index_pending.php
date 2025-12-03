@@ -10,7 +10,7 @@ use yii\grid\GridView;
 /** @var app\models\FlightSearch $searchModel */
 /** @var yii\data\ActiveDataProvider $dataProvider */
 
-$this->title = 'Pending Flights for validation';
+$this->title = Yii::t('app', 'Pending Flights for validation');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="flight-index">
