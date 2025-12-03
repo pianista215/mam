@@ -23,7 +23,7 @@ class TourStageAddCest
         $I->seeResponseCodeIs(200);
 
         $I->see('Add Stage 2 to Tour: Tour previous');
-        $I->see('Save Stage', 'button');
+        $I->see('Save', 'button');
     }
 
     public function openTourStageAddAsTourMgr(\FunctionalTester $I)
@@ -33,7 +33,7 @@ class TourStageAddCest
         $I->seeResponseCodeIs(200);
 
         $I->see('Add Stage 2 to Tour: Tour previous');
-        $I->see('Save Stage', 'button');
+        $I->see('Save', 'button');
     }
 
     public function openTourStageAddAsUser(\FunctionalTester $I)
@@ -44,7 +44,7 @@ class TourStageAddCest
 
         $I->see('Forbidden');
         $I->dontSee('Add Stage 2 to Tour: Tour previous');
-        $I->dontSee('Save Stage', 'button');
+        $I->dontSee('Save', 'button');
     }
 
     public function openTourStageAddAsVisitor(\FunctionalTester $I)
@@ -59,7 +59,7 @@ class TourStageAddCest
     {
         $I->amLoggedInAs(2);
         $I->amOnRoute('tour-stage/add-stage', ['tour_id' => '1']);
-        $I->click('Save Stage', 'button');
+        $I->click('Save', 'button');
         $I->expectTo('see validations errors');
         $I->see('Departure cannot be blank.');
         $I->see('Arrival cannot be blank.');
@@ -73,7 +73,7 @@ class TourStageAddCest
         $I->amOnRoute('tour-stage/add-stage', ['tour_id' => '1']);
         $I->fillField('#tourstage-departure','xxxx');
         $I->fillField('#tourstage-arrival','xxxx');
-        $I->click('Save Stage', 'button');
+        $I->click('Save', 'button');
         $I->expectTo('see validations errors');
         $I->see('Departure is invalid.');
         $I->see('Arrival is invalid.');
@@ -88,7 +88,7 @@ class TourStageAddCest
         $I->fillField('#tourstage-departure','LEVC');
         $I->fillField('#tourstage-arrival','GCLP');
         $I->fillField('#tourstage-description','Ex Description');
-        $I->click('Save Stage', 'button');
+        $I->click('Save', 'button');
         $I->seeResponseCodeIs(200);
         $count = \app\models\TourStage::find()->where(['tour_id' => '1'])->count();
         $I->assertEquals(2, $count);
