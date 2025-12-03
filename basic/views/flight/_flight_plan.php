@@ -56,11 +56,11 @@ use yii\widgets\ActiveForm;
             <div><?= Html::input('text', 'estimated_time', $model->estimated_time, ['disabled' => true, 'class' => 'form-control'])?></div>
         </div>
         <div class="col-md-3">
-            <div><?=Yii::t('app', 'Alternative 1')?></div>
+            <div><?=Yii::t('app', 'Altn Aerodrome')?></div>
             <div><?= Html::input('text', 'alternative1_icao', $model->alternative1_icao, ['disabled' => true, 'class' => 'form-control'])?></div>
         </div>
         <div class="col-md-3">
-            <div><?=Yii::t('app', 'Alternative 2')?></div>
+            <div><?=Yii::t('app', '2nd Altn Aerodrome')?></div>
             <div><?= Html::input('text', 'alternative2_icao', $model->alternative2_icao, ['disabled' => true, 'class' => 'form-control'])?></div>
         </div>
     </div>

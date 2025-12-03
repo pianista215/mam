@@ -17,6 +17,7 @@
  * NOTE: this file must be saved in UTF-8 encoding.
  */
 return [
+    '2nd Altn Aerodrome' => 'Segundo Alternativo',
     'ACARS files received. Awaiting processing.' => 'Ficheros ACARS recibidos. Esperando a ser procesado.',
     'About' => 'Acerca',
     'Access Token' => 'Access Token',
@@ -43,8 +44,7 @@ return [
     'Airport Location' => 'Localización del Aeropuerto',
     'Airports' => 'Aeropuertos',
     'All types' => 'Todos los tipos',
-    'Alternative 1' => 'Alternativo 1',
-    'Alternative 2' => 'Alternativo 2',
+    'Altn Aerodrome' => 'Alternativo',
     'Are you sure you want to delete this item?' => '¿Estás seguro de que deseas eliminar este elemento?',
     'Arrival' => 'Llegada',
     'Auth Key' => 'Auth Key',
