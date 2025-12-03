@@ -36,7 +36,7 @@ class AircraftMoveCest
         $I->amLoggedInAs(1); // pilot role, not moveAircraft
         $I->amOnRoute('aircraft/move', ['id' => 1]);
         $I->seeResponseCodeIs(403);
-        $I->see('You do not have permission to move this aircraft.');
+        $I->see('You don&apos;t have permission to move this aircraft.');
     }
 
     /**
@@ -54,7 +54,7 @@ class AircraftMoveCest
         $I->click('Move', 'button');
 
         $I->seeResponseCodeIs(200);
-        $I->see('Aircraft has been moved to LEBL airport.');
+        $I->see('Aircraft has been moved to LEBL');
 
         $aircraft = Aircraft::findOne(1);
         $I->assertEquals('LEBL', $aircraft->location);
@@ -75,7 +75,7 @@ class AircraftMoveCest
         $I->click('Move', 'button');
 
         $I->seeResponseCodeIs(200);
-        $I->see('Aircraft has been moved to LEBL airport.');
+        $I->see('Aircraft has been moved to LEBL');
 
         $aircraft = Aircraft::findOne(1);
         $I->assertEquals('LEBL', $aircraft->location);
