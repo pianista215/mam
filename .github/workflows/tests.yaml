@@ -42,9 +42,15 @@ jobs:
             sleep 1
           done
 
-      - name: Import Database Schema
+      - name: Import Database Schema and data
         run: |
-          mysql -h127.0.0.1 -uroot -proot test_mam_database < db-model/ddl.sql        
+          mysql -h127.0.0.1 -uroot -proot test_mam_database < db-model/ddl.sql
+          mysql -h127.0.0.1 -uroot -proot test_mam_database < /ddl.sql  
+          mysql -h127.0.0.1 -uroot -proot test_mam_database < /analysis.sql  
+          mysql -h127.0.0.1 -uroot -proot test_mam_database < /config.sql
+          mysql -h127.0.0.1 -uroot -proot test_mam_database < /countries.sql  
+          mysql -h127.0.0.1 -uroot -proot test_mam_database < /issues.sql
+          mysql -h127.0.0.1 -uroot -proot test_mam_database < /pages.sql
 
       - name: Run Migrations
         run: |
@@ -67,6 +73,10 @@ jobs:
           fi
 
           echo "✅ No untranslated strings found."
+
+      - name: Check DB translations match
+        run: |
+          php translation-checker/check_db_translations.php          
 
       - name: Run Tests
         env:
