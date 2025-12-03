@@ -51,7 +51,7 @@ class AirportCreateCest
        $I->see('Name cannot be blank.');
        $I->see('Latitude cannot be blank.');
        $I->see('Longitude cannot be blank.');
-       $I->see('Country ID cannot be blank.');
+       $I->see('Country cannot be blank.');
        $I->see('City cannot be blank.');
 
        $count = \app\models\Airport::find()->count();
