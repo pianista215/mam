@@ -44,7 +44,6 @@ jobs:
 
       - name: Import Database Schema and data
         run: |
-          set -x
           mysql -h127.0.0.1 -uroot -proot test_mam_database < db-model/ddl.sql
           mysql -h127.0.0.1 -uroot -proot test_mam_database < db-model/analysis.sql  
           mysql -h127.0.0.1 -uroot -proot test_mam_database < db-model/config.sql
