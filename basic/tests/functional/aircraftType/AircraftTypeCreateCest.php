@@ -52,7 +52,7 @@ class AircraftTypeCreateCest
        $I->expectTo('see validations errors');
        $I->see('Icao Type Code cannot be blank.');
        $I->see('Name cannot be blank.');
-       $I->see('Max Nm Range cannot be blank.');
+       $I->see('Max Range (NM) cannot be blank.');
 
        $count = \app\models\AircraftType::find()->count();
        $I->assertEquals(4, $count);
