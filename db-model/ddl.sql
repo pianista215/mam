@@ -294,7 +294,7 @@ CREATE TABLE `flight_phase` (
   UNIQUE KEY `flight_phase_unique` (`flight_report_id`,`flight_phase_type_id`,`start`,`end`),
   KEY `flight_phase_flight_report_FK` (`flight_report_id`),
   KEY `flight_phase_flight_phase_type_FK` (`flight_phase_type_id`),
-  CONSTRAINT `flight_phase_flight_phase_type_FK` FOREIGN KEY (`flight_phase_type_id`) REFERENCES `flight_phase_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `flight_phase_flight_phase_type_FK` FOREIGN KEY (`flight_phase_type_id`) REFERENCES `flight_phase_type` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `flight_phase_flight_report_FK` FOREIGN KEY (`flight_report_id`) REFERENCES `flight_report` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
