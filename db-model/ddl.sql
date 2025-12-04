@@ -67,9 +67,9 @@ CREATE TABLE `aircraft` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `rank` (
-  `id` tinyint(3) unsigned NOT NULL AUTO_INCREMENT,
+  `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
-  `position` tinyint(3) unsigned NOT NULL,
+  `position` smallint(5) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `rank_name_unique` (`name`),
   UNIQUE KEY `rank_position_unique` (`position`)
@@ -94,7 +94,7 @@ CREATE TABLE `pilot` (
   `location` char(4) NOT NULL,
   `pwd_reset_token` varchar(255) DEFAULT NULL,
   `pwd_reset_token_created_at` datetime DEFAULT NULL,
-  `rank_id` tinyint(3) unsigned DEFAULT NULL,
+  `rank_id` smallint(5) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `pilot_unique` (`email`),
   UNIQUE KEY `pilots_unique_license` (`license`),
@@ -102,7 +102,7 @@ CREATE TABLE `pilot` (
   KEY `pilot_airport_FK` (`location`),
   KEY `pilot_rank_FK` (`rank_id`),
   CONSTRAINT `pilot_airport_FK` FOREIGN KEY (`location`) REFERENCES `airport` (`icao_code`) ON UPDATE CASCADE,
-  CONSTRAINT `pilot_rank_FK` FOREIGN KEY (`rank_id`) REFERENCES `rank` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pilot_rank_FK` FOREIGN KEY (`rank_id`) REFERENCES `rank` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `pilots_countries_FK` FOREIGN KEY (`country_id`) REFERENCES `country` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -268,7 +268,7 @@ CREATE TABLE `acars_file` (
 
 
 CREATE TABLE `flight_phase_type` (
-  `id` tinyint(3) unsigned NOT NULL AUTO_INCREMENT,
+  `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
   `code` varchar(32) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `flight_phase_type_unique_key` (`code`)
@@ -276,7 +276,7 @@ CREATE TABLE `flight_phase_type` (
 
 CREATE TABLE `flight_phase_type_lang` (
   `id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
-  `flight_phase_type_id` tinyint(3) unsigned NOT NULL,
+  `flight_phase_type_id` smallint(5) unsigned NOT NULL,
   `language` char(2) NOT NULL,
   `name` varchar(50) NOT NULL,
   PRIMARY KEY (`id`),
@@ -287,20 +287,20 @@ CREATE TABLE `flight_phase_type_lang` (
 CREATE TABLE `flight_phase` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `flight_report_id` bigint(20) unsigned NOT NULL,
-  `flight_phase_type_id` tinyint(3) unsigned NOT NULL,
+  `flight_phase_type_id` smallint(5) unsigned NOT NULL,
   `start` datetime NOT NULL,
   `end` datetime NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `flight_phase_unique` (`flight_report_id`,`flight_phase_type_id`,`start`,`end`),
   KEY `flight_phase_flight_report_FK` (`flight_report_id`),
   KEY `flight_phase_flight_phase_type_FK` (`flight_phase_type_id`),
-  CONSTRAINT `flight_phase_flight_phase_type_FK` FOREIGN KEY (`flight_phase_type_id`) REFERENCES `flight_phase_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `flight_phase_flight_phase_type_FK` FOREIGN KEY (`flight_phase_type_id`) REFERENCES `flight_phase_type` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `flight_phase_flight_report_FK` FOREIGN KEY (`flight_report_id`) REFERENCES `flight_report` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `flight_phase_metric_type` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `flight_phase_type_id` tinyint(3) unsigned NOT NULL,
+  `flight_phase_type_id` smallint(5) unsigned NOT NULL,
   `code` varchar(32) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `flight_phase_metric_type_unique` (`flight_phase_type_id`,`code`),
