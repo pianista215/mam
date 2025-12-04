@@ -102,7 +102,7 @@ CREATE TABLE `pilot` (
   KEY `pilot_airport_FK` (`location`),
   KEY `pilot_rank_FK` (`rank_id`),
   CONSTRAINT `pilot_airport_FK` FOREIGN KEY (`location`) REFERENCES `airport` (`icao_code`) ON UPDATE CASCADE,
-  CONSTRAINT `pilot_rank_FK` FOREIGN KEY (`rank_id`) REFERENCES `rank` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pilot_rank_FK` FOREIGN KEY (`rank_id`) REFERENCES `rank` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `pilots_countries_FK` FOREIGN KEY (`country_id`) REFERENCES `country` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
