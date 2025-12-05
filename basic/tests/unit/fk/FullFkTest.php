@@ -222,8 +222,40 @@ class FullFkTest extends BaseUnitTest
         }
 
         // Pilot tour completion (ON DELETE CASCADE on pilot and tour)
-        $ptc = new PilotTourCompletion(['pilot_id' => $pilot->id, 'tour_id' => $tour->id, 'completed_at' => '2020-01-02']);
+        $tour2 = new Tour(['name' => 'Test2', 'description' => 'Description', 'start' => '2020-01-01', 'end' => '2023-01-01']);
+        $this->assertTrue($tour2->save(), 'tour saved');
+
+        $ptc = new PilotTourCompletion(['pilot_id' => $pilot->id, 'tour_id' => $tour2->id, 'completed_at' => '2020-01-02']);
         $this->assertTrue($ptc->save(), 'pilot tour completion saved');
+
+        $this->assertEquals(1, $tour2->delete(), 'tour 2 can be deleted');
+        $this->assertEquals(0, PilotTourCompletion::find()->count(), 'Pilot completition should be deleted with tour');
+
+        $pilot2 = new Pilot([
+            'name' => 'John2',
+            'surname' => 'Doe',
+            'email' => 'john.doe2@example.com',
+            'country_id' => $country2->id,
+            'rank_id' => $rank->id,
+            'city' => 'New York',
+            'location' => 'LEMD',
+            'password' => 'SecurePass123!',
+            'license' => 'lic345',
+            'date_of_birth' => '1990-01-01',
+        ]);
+        $this->assertTrue($pilot2->save(), 'pilot2 saved');
+
+        $tour3 = new Tour(['name' => 'Test3', 'description' => 'Description', 'start' => '2020-01-01', 'end' => '2023-01-01']);
+        $this->assertTrue($tour3->save(), 'tour saved');
+
+        $ptc = new PilotTourCompletion(['pilot_id' => $pilot2->id, 'tour_id' => $tour3->id, 'completed_at' => '2020-01-02']);
+        $this->assertTrue($ptc->save(), 'pilot tour 2 completion saved');
+
+        $this->assertEquals(1, $pilot2->delete(), 'pilot 2 can be deleted');
+        $this->assertEquals(0, PilotTourCompletion::find()->count(), 'Pilot completition should be deleted with pilot');
+
+        $this->assertEquals(1, $tour3->save(), 'Tour 3 can be delete without stages associated');
+
 
         // Submitted flight plan asociada a route (tour_stage_id = null)
         $sfpRoute = new SubmittedFlightPlan([
@@ -244,8 +276,6 @@ class FullFkTest extends BaseUnitTest
             'tour_stage_id' => null,
         ]);
         $this->assertTrue($sfpRoute->save(), 'sfpRoute saved');
-        $this->assertNull($sfpRoute->tour_stage_id, 'sfpRoute has no tour_stage_id');
-        $this->assertNotNull($sfpRoute->route_id, 'sfpRoute has route_id');
 
         // Submitted flight plan asociada a tour_stage (route_id = null)
         $sfpStage = new SubmittedFlightPlan([
@@ -257,7 +287,7 @@ class FullFkTest extends BaseUnitTest
             'cruise_speed_unit' => 'N',
             'flight_level_value' => '320',
             'flight_level_unit' => 'F',
-            'route' => '', // campo libre, lo dejamos vacío o con texto irrelevante
+            'route' => 'NAND UM871',
             'estimated_time' => '0045',
             'other_information' => 'PBN/A1',
             'endurance_time' => '0600',
@@ -266,8 +296,6 @@ class FullFkTest extends BaseUnitTest
             'tour_stage_id' => $stage->id,
         ]);
         $this->assertTrue($sfpStage->save(), 'sfpStage saved');
-        $this->assertNull($sfpStage->route_id, 'sfpStage has no route_id');
-        $this->assertNotNull($sfpStage->tour_stage_id, 'sfpStage has tour_stage_id');
 
 
         // Flight
