@@ -256,8 +256,7 @@ class FullFkTest extends BaseUnitTest
 
         $this->assertEquals(1, $tour3->save(), 'Tour 3 can be delete without stages associated');
 
-
-        // Submitted flight plan asociada a route (tour_stage_id = null)
+        // Submitted flight plan associated to route
         $sfpRoute = new SubmittedFlightPlan([
             'aircraft_id' => $aircraft->id,
             'flight_rules' => 'V',
@@ -277,7 +276,17 @@ class FullFkTest extends BaseUnitTest
         ]);
         $this->assertTrue($sfpRoute->save(), 'sfpRoute saved');
 
-        // Submitted flight plan asociada a tour_stage (route_id = null)
+        // Check we can't delete route with submitted fpl associated
+        try {
+            $route->delete();
+            $this->fail('Deleting route should have failed due to existing submittedFpl with route associated.');
+        } catch (\yii\db\IntegrityException $e) {
+            $this->assertTrue(true, 'route deletion blocked by submitted fpl with route');
+        }
+
+        $this->assertEquals(1, $sfpRoute->delete(), 'SubmittedFlightPlan with route associated can be deleted');
+
+        // Submitted flight plan associated to tour_stage
         $sfpStage = new SubmittedFlightPlan([
             'aircraft_id' => $aircraft->id,
             'flight_rules' => 'I',
@@ -297,6 +306,15 @@ class FullFkTest extends BaseUnitTest
         ]);
         $this->assertTrue($sfpStage->save(), 'sfpStage saved');
 
+        // Check we can't delete tour stage with submitted fpl associated
+        try {
+            $stage->delete();
+            $this->fail('Deleting tour stage should have failed due to existing submittedFpl with tour stage associated.');
+        } catch (\yii\db\IntegrityException $e) {
+            $this->assertTrue(true, 'tour stage deletion blocked by submitted fpl with tour stage');
+        }
+
+        $this->assertEquals(1, $sfpStage->delete(), 'SubmittedFlightPlan with tour stage associated can be deleted');
 
         // Flight
         $flight = new Flight();
