@@ -97,6 +97,7 @@ class FullFkTest extends BaseUnitTest
             $this->assertTrue(true, 'rank deletion blocked by pilot');
         }
 
+        $this->assertEquals(1, $pilot->delete());
 
         // Aircraft type & aircraft configuration & aircraft
         $atype = new AircraftType([
@@ -139,7 +140,52 @@ class FullFkTest extends BaseUnitTest
             $this->assertTrue(true, 'aircraft configuration deletion blocked by aircraft');
         }
 
-        // Create additional airports for routes and alternatives in submittedFpl and flights
+        // Check we can't delete airport with aircraft associated
+        try {
+            $lemd->delete();
+            $this->fail('Deleting airport should have failed due to existing aircraft.');
+        } catch (\yii\db\IntegrityException $e) {
+            $this->assertTrue(true, 'airport deletion blocked by aircraft');
+        }
+
+        $this->assertEquals(1, $aircraft->delete(), 'I can delete aircraft without nothing associated');
+        $this->assertEquals(1, $lemd->delete(), 'I can delete airport without nothing associated');
+
+        $lemd = new Airport([
+            'icao_code' => 'LEMD',
+            'name' => 'Madrid-Barajas',
+            'latitude' => 40.471926,
+            'longitude' => -3.56264,
+            'city' => 'Madrid',
+            'country_id' => $country->id,
+        ]);
+        $this->assertTrue($lemd->save(), 'lemd saved');
+
+        $aircraft = new Aircraft([
+            'aircraft_configuration_id' => $aconf->id,
+            'registration' => 'STD123',
+            'name' => 'Boeing 737 Std',
+            'location' => 'LEMD',
+            'hours_flown' => 1000.5,
+        ]);
+        $this->assertTrue($aircraft->save(), 'aircraft saved');
+
+
+        // Create additional airports and pilot for routes and alternatives in submittedFpl and flights
+        $pilot = new Pilot([
+            'name' => 'John',
+            'surname' => 'Doe',
+            'email' => 'john.doe@example.com',
+            'country_id' => $country2->id,
+            'rank_id' => $rank->id,
+            'city' => 'New York',
+            'location' => 'LEMD',
+            'password' => 'SecurePass123!',
+            'license' => 'lic123',
+            'date_of_birth' => '1990-01-01',
+        ]);
+        $this->assertTrue($pilot->save(), 'pilot saved');
+
         $lebl = new Airport([
             'icao_code' => 'LEBL',
             'name' => 'Barcelona-El Prat',
@@ -260,7 +306,7 @@ class FullFkTest extends BaseUnitTest
         $sfpRoute = new SubmittedFlightPlan([
             'aircraft_id' => $aircraft->id,
             'flight_rules' => 'V',
-            'alternative1_icao' => 'LEVD',
+            'alternative1_icao' => 'LEVC',
             'alternative2_icao' => 'LEMD',
             'cruise_speed_value' => '400',
             'cruise_speed_unit' => 'N',
@@ -284,13 +330,32 @@ class FullFkTest extends BaseUnitTest
             $this->assertTrue(true, 'route deletion blocked by submitted fpl with route');
         }
 
+        // Check we can't delete airport with submitted fpl associated
+        try {
+            $levc->delete();
+            $this->fail('Deleting airport should have failed due to submittedFpl with airport associated.');
+        } catch (\yii\db\IntegrityException $e) {
+            $this->assertTrue(true, 'airport deletion blocked by submitted fpl');
+        }
+
         $this->assertEquals(1, $sfpRoute->delete(), 'SubmittedFlightPlan with route associated can be deleted');
+        $this->assertEquals(1, $levc->delete(), 'Airport without submitted flight plan associated can be deleted');
+
+        $levc = new Airport([
+            'icao_code' => 'LEVC',
+            'name' => 'Valencia',
+            'latitude' => 39.489,
+            'longitude' => -0.481,
+            'city' => 'Valencia',
+            'country_id' => $country->id,
+        ]);
+        $this->assertTrue($levc->save(), 'levc saved');
 
         // Submitted flight plan associated to tour_stage
         $sfpStage = new SubmittedFlightPlan([
             'aircraft_id' => $aircraft->id,
             'flight_rules' => 'I',
-            'alternative1_icao' => 'LEVD',
+            'alternative1_icao' => 'LEVC',
             'alternative2_icao' => 'LEMD',
             'cruise_speed_value' => '380',
             'cruise_speed_unit' => 'N',
