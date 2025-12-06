@@ -56,6 +56,24 @@ class FullFkTest extends BaseUnitTest
         return $pilot;
     }
 
+    private function createPilot2($country, $rank)
+    {
+        $pilot2 = new Pilot([
+            'name' => 'John2',
+            'surname' => 'Doe',
+            'email' => 'john.doe2@example.com',
+            'country_id' => $country->id,
+            'rank_id' => $rank->id,
+            'city' => 'New York',
+            'location' => 'LEMD',
+            'password' => 'SecurePass123!',
+            'license' => 'lic345',
+            'date_of_birth' => '1990-01-01',
+        ]);
+        $this->assertTrue($pilot2->save(), 'pilot2 saved');
+        return $pilot2;
+    }
+
     private function createLEMD($country)
     {
         $lemd = new Airport([
@@ -95,6 +113,19 @@ class FullFkTest extends BaseUnitTest
         ]);
         $this->assertTrue($aircraft->save(), 'aircraft saved');
         return $aircraft;
+    }
+
+    private function createStage($tour)
+    {
+        $stage = new TourStage([
+            'tour_id' => $tour->id,
+            'departure' => 'LEMD',
+            'arrival' => 'LEVD',
+            'sequence' => 1,
+            'description' => 'Stage 1'
+        ]);
+        $this->assertTrue($stage->save(), 'tour stage saved');
+        return $stage;
     }
 
     private function createSubmittedFpl($aircraft, $pilot, $route, $stage)
@@ -140,6 +171,31 @@ class FullFkTest extends BaseUnitTest
             $this->assertTrue($sfp->save(), 'sfpStage saved');
         }
         return $sfp;
+    }
+
+    private function createFlight($aircraft, $pilot, $stage, $validator)
+    {
+        $flight = new Flight();
+        $flight->pilot_id = $pilot->id;
+        $flight->aircraft_id = $aircraft->id;
+        $flight->departure = 'LEMD';
+        $flight->arrival = 'LEBL';
+        $flight->alternative1_icao = 'LEVC';
+        $flight->alternative2_icao = 'LEAL';
+        $flight->flight_rules = 'V';
+        $flight->code = 'FLT001';
+        $flight->cruise_speed_value = '450';
+        $flight->cruise_speed_unit = 'N';
+        $flight->flight_level_value = '360';
+        $flight->flight_level_unit = 'F';
+        $flight->route = 'ROUTE';
+        $flight->estimated_time = '0200';
+        $flight->other_information = 'Other flight details';
+        $flight->endurance_time = '0500';
+        $flight->report_tool = 'ToolName';
+        $flight->tour_stage_id = $stage->id;
+        $flight->validator_id = $validator->id;
+        $this->assertTrue($flight->save(), 'flight saved');
     }
 
     public function testFullFkIntegrityAndCascades()
@@ -284,14 +340,7 @@ class FullFkTest extends BaseUnitTest
         $tour = new Tour(['name' => 'Test', 'description' => 'Description', 'start' => '2020-01-01', 'end' => '2023-01-01']);
         $this->assertTrue($tour->save(), 'tour saved');
 
-        $stage = new TourStage([
-            'tour_id' => $tour->id,
-            'departure' => 'LEMD',
-            'arrival' => 'LEVD',
-            'sequence' => 1,
-            'description' => 'Stage 1'
-        ]);
-        $this->assertTrue($stage->save(), 'tour stage saved');
+        $stage = $this->createStage($tour);
 
         // Check we can't delete tour with tour stage associated
         try {
@@ -319,19 +368,7 @@ class FullFkTest extends BaseUnitTest
         $this->assertEquals(1, $tour2->delete(), 'tour 2 can be deleted');
         $this->assertEquals(0, PilotTourCompletion::find()->count(), 'Pilot completition should be deleted with tour');
 
-        $pilot2 = new Pilot([
-            'name' => 'John2',
-            'surname' => 'Doe',
-            'email' => 'john.doe2@example.com',
-            'country_id' => $country2->id,
-            'rank_id' => $rank->id,
-            'city' => 'New York',
-            'location' => 'LEMD',
-            'password' => 'SecurePass123!',
-            'license' => 'lic345',
-            'date_of_birth' => '1990-01-01',
-        ]);
-        $this->assertTrue($pilot2->save(), 'pilot2 saved');
+        $pilot2 = $this->createPilot2($country2, $rank);
 
         $tour3 = new Tour(['name' => 'Test3', 'description' => 'Description', 'start' => '2020-01-01', 'end' => '2023-01-01']);
         $this->assertTrue($tour3->save(), 'tour saved');
@@ -380,27 +417,39 @@ class FullFkTest extends BaseUnitTest
         }
 
         $this->assertEquals(1, $sfpStage->delete(), 'SubmittedFlightPlan with tour stage associated can be deleted');
+        $this->assertEquals(1, $stage->delete(), 'Stage without nothing associated can be deleted');
 
-        // Flight
-        $flight = new Flight();
-        $flight->pilot_id = $pilot->id;
-        $flight->aircraft_id = $aircraft->id;
-        $flight->departure = 'LEMD';
-        $flight->arrival = 'LEBL';
-        $flight->alternative1_icao = 'LEVC';
-        $flight->alternative2_icao = 'LEAL';
-        $flight->flight_rules = 'V';
-        $flight->code = 'FLT001';
-        $flight->cruise_speed_value = '450';
-        $flight->cruise_speed_unit = 'N';
-        $flight->flight_level_value = '360';
-        $flight->flight_level_unit = 'F';
-        $flight->route = 'ROUTE';
-        $flight->estimated_time = '0200';
-        $flight->other_information = 'Other flight details';
-        $flight->endurance_time = '0500';
-        $flight->report_tool = 'ToolName';
-        $this->assertTrue($flight->save(), 'flight saved');
+        // Flight with tour stage and validator
+        $pilot2 = $this->createPilot2($country2, $rank);
+        $stage = $this->createStage($tour);
+        $flight = $this->createFlight($aircraft, $pilot, $stage, $pilot2);
+
+        // Check we can't delete tour stage with flight associated
+        try {
+            $stage->delete();
+            $this->fail('Deleting tour stage should have failed due to existing flight with tour stage associated.');
+        } catch (\yii\db\IntegrityException $e) {
+            $this->assertTrue(true, 'tour stage deletion blocked by flight with tour stage');
+        }
+
+        // Check we can't delete pilot with flight associated
+        /* We don't allow pilot cascade deletion in order to not alter the statistics
+         * We always can set the license to null, and the pilot will dissapear from the pilot main, but the flights will remain
+         **/
+        try {
+            $pilot->delete();
+            $this->fail('Deleting pilot should have failed due to existing flight associated.');
+        } catch (\yii\db\IntegrityException $e) {
+            $this->assertTrue(true, 'pilot deletion blocked by flight');
+        }
+
+        // Check we can't delete validator with flight associated
+        try {
+            $pilot2->delete();
+            $this->fail('Deleting pilot validator should have failed due to existing flight associated.');
+        } catch (\yii\db\IntegrityException $e) {
+            $this->assertTrue(true, 'pilot validator deletion blocked by flight');
+        }
 
         // Flight report -> ACARS file (flight_report has ON DELETE CASCADE from flight)
         $freport = new FlightReport(['flight_id' => $flight->id, 'landing_airport' => 'LEBL']);
