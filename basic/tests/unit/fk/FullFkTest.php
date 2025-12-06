@@ -37,14 +37,27 @@ use Yii;
 
 class FullFkTest extends BaseUnitTest
 {
-    public function testFullFkIntegrityAndCascades()
-    {
-        $country = new Country(['id' => 1, 'name' => 'Spain', 'iso2_code' => 'ES']);
-        $this->assertTrue($country->save(), 'Spain saved');
-        $country2 = new Country(['id' => 2, 'name' => 'USA', 'iso2_code' => 'US']);
-        $this->assertTrue($country2->save(), 'USA saved');
 
-        // Country & airport
+    private function createPilot($country, $rank)
+    {
+        $pilot = new Pilot([
+            'name' => 'John',
+            'surname' => 'Doe',
+            'email' => 'john.doe@example.com',
+            'country_id' => $country->id,
+            'rank_id' => $rank->id,
+            'city' => 'New York',
+            'location' => 'LEMD',
+            'password' => 'SecurePass123!',
+            'license' => 'lic123',
+            'date_of_birth' => '1990-01-01',
+        ]);
+        $this->assertTrue($pilot->save(), 'pilot saved');
+        return $pilot;
+    }
+
+    private function createLEMD($country)
+    {
         $lemd = new Airport([
             'icao_code' => 'LEMD',
             'name' => 'Madrid-Barajas',
@@ -54,6 +67,90 @@ class FullFkTest extends BaseUnitTest
             'country_id' => $country->id,
         ]);
         $this->assertTrue($lemd->save(), 'lemd saved');
+        return $lemd;
+    }
+
+    private function createLEVC($country)
+    {
+        $levc = new Airport([
+            'icao_code' => 'LEVC',
+            'name' => 'Valencia',
+            'latitude' => 39.489,
+            'longitude' => -0.481,
+            'city' => 'Valencia',
+            'country_id' => $country->id,
+        ]);
+        $this->assertTrue($levc->save(), 'levc saved');
+        return $levc;
+    }
+
+    private function createAircraft($aircraftConfiguration)
+    {
+        $aircraft = new Aircraft([
+            'aircraft_configuration_id' => $aircraftConfiguration->id,
+            'registration' => 'STD123',
+            'name' => 'Boeing 737 Std',
+            'location' => 'LEMD',
+            'hours_flown' => 1000.5,
+        ]);
+        $this->assertTrue($aircraft->save(), 'aircraft saved');
+        return $aircraft;
+    }
+
+    private function createSubmittedFpl($aircraft, $pilot, $route, $stage)
+    {
+        $sfp = null;
+        if($route !== null){
+            $sfp = new SubmittedFlightPlan([
+                'aircraft_id' => $aircraft->id,
+                'flight_rules' => 'V',
+                'alternative1_icao' => 'LEVC',
+                'alternative2_icao' => 'LEMD',
+                'cruise_speed_value' => '400',
+                'cruise_speed_unit' => 'N',
+                'flight_level_value' => '350',
+                'flight_level_unit' => 'F',
+                'route' => 'NAND UM871',
+                'estimated_time' => '0031',
+                'other_information' => 'PBN/A1B1D1',
+                'endurance_time' => '0500',
+                'route_id' => $route->id,
+                'pilot_id' => $pilot->id,
+                'tour_stage_id' => null,
+            ]);
+            $this->assertTrue($sfp->save(), 'sfpRoute saved');
+        } else {
+            $sfp = new SubmittedFlightPlan([
+                'aircraft_id' => $aircraft->id,
+                'flight_rules' => 'I',
+                'alternative1_icao' => 'LEVC',
+                'alternative2_icao' => 'LEMD',
+                'cruise_speed_value' => '380',
+                'cruise_speed_unit' => 'N',
+                'flight_level_value' => '320',
+                'flight_level_unit' => 'F',
+                'route' => 'NAND UM871',
+                'estimated_time' => '0045',
+                'other_information' => 'PBN/A1',
+                'endurance_time' => '0600',
+                'route_id' => null,
+                'pilot_id' => $pilot->id,
+                'tour_stage_id' => $stage->id,
+            ]);
+            $this->assertTrue($sfp->save(), 'sfpStage saved');
+        }
+        return $sfp;
+    }
+
+    public function testFullFkIntegrityAndCascades()
+    {
+        $country = new Country(['id' => 1, 'name' => 'Spain', 'iso2_code' => 'ES']);
+        $this->assertTrue($country->save(), 'Spain saved');
+        $country2 = new Country(['id' => 2, 'name' => 'USA', 'iso2_code' => 'US']);
+        $this->assertTrue($country2->save(), 'USA saved');
+
+        // Country & airport
+        $lemd = $this->createLEMD($country);
 
         // Check we can't delete country with airport
         try {
@@ -67,19 +164,7 @@ class FullFkTest extends BaseUnitTest
         $rank = new Rank(['name' => 'Captain', 'position' => 1]);
         $this->assertTrue($rank->save(), 'rank saved');
 
-        $pilot = new Pilot([
-            'name' => 'John',
-            'surname' => 'Doe',
-            'email' => 'john.doe@example.com',
-            'country_id' => $country2->id,
-            'rank_id' => $rank->id,
-            'city' => 'New York',
-            'location' => 'LEMD',
-            'password' => 'SecurePass123!',
-            'license' => 'lic123',
-            'date_of_birth' => '1990-01-01',
-        ]);
-        $this->assertTrue($pilot->save(), 'pilot saved');
+        $pilot = $this->createPilot($country2, $rank);
 
         // Check we can't delete country with pilot associated
         try {
@@ -123,14 +208,7 @@ class FullFkTest extends BaseUnitTest
             $this->assertTrue(true, 'aircraft type deletion blocked by aircraft configuration');
         }
 
-        $aircraft = new Aircraft([
-            'aircraft_configuration_id' => $aconf->id,
-            'registration' => 'STD123',
-            'name' => 'Boeing 737 Std',
-            'location' => 'LEMD',
-            'hours_flown' => 1000.5,
-        ]);
-        $this->assertTrue($aircraft->save(), 'aircraft saved');
+        $aircraft = $this->createAircraft($aconf);
 
         // Check we can't delete aircraft configuration with aircraft associated
         try {
@@ -151,40 +229,12 @@ class FullFkTest extends BaseUnitTest
         $this->assertEquals(1, $aircraft->delete(), 'I can delete aircraft without nothing associated');
         $this->assertEquals(1, $lemd->delete(), 'I can delete airport without nothing associated');
 
-        $lemd = new Airport([
-            'icao_code' => 'LEMD',
-            'name' => 'Madrid-Barajas',
-            'latitude' => 40.471926,
-            'longitude' => -3.56264,
-            'city' => 'Madrid',
-            'country_id' => $country->id,
-        ]);
-        $this->assertTrue($lemd->save(), 'lemd saved');
+        $lemd = $this->createLEMD($country);
 
-        $aircraft = new Aircraft([
-            'aircraft_configuration_id' => $aconf->id,
-            'registration' => 'STD123',
-            'name' => 'Boeing 737 Std',
-            'location' => 'LEMD',
-            'hours_flown' => 1000.5,
-        ]);
-        $this->assertTrue($aircraft->save(), 'aircraft saved');
-
+        $aircraft = $this->createAircraft($aconf);
 
         // Create additional airports and pilot for routes and alternatives in submittedFpl and flights
-        $pilot = new Pilot([
-            'name' => 'John',
-            'surname' => 'Doe',
-            'email' => 'john.doe@example.com',
-            'country_id' => $country2->id,
-            'rank_id' => $rank->id,
-            'city' => 'New York',
-            'location' => 'LEMD',
-            'password' => 'SecurePass123!',
-            'license' => 'lic123',
-            'date_of_birth' => '1990-01-01',
-        ]);
-        $this->assertTrue($pilot->save(), 'pilot saved');
+        $pilot = $this->createPilot($country2, $rank);
 
         $lebl = new Airport([
             'icao_code' => 'LEBL',
@@ -206,15 +256,7 @@ class FullFkTest extends BaseUnitTest
         ]);
         $this->assertTrue($levd->save(), 'levd saved');
 
-        $levc = new Airport([
-            'icao_code' => 'LEVC',
-            'name' => 'Valencia',
-            'latitude' => 39.489,
-            'longitude' => -0.481,
-            'city' => 'Valencia',
-            'country_id' => $country->id,
-        ]);
-        $this->assertTrue($levc->save(), 'levc saved');
+        $levc = $this->createLEVC($country);
 
         $leal = new Airport([
             'icao_code' => 'LEAL',
@@ -303,24 +345,7 @@ class FullFkTest extends BaseUnitTest
         $this->assertEquals(1, $tour3->save(), 'Tour 3 can be delete without stages associated');
 
         // Submitted flight plan associated to route
-        $sfpRoute = new SubmittedFlightPlan([
-            'aircraft_id' => $aircraft->id,
-            'flight_rules' => 'V',
-            'alternative1_icao' => 'LEVC',
-            'alternative2_icao' => 'LEMD',
-            'cruise_speed_value' => '400',
-            'cruise_speed_unit' => 'N',
-            'flight_level_value' => '350',
-            'flight_level_unit' => 'F',
-            'route' => 'NAND UM871',
-            'estimated_time' => '0031',
-            'other_information' => 'PBN/A1B1D1',
-            'endurance_time' => '0500',
-            'route_id' => $route->id,
-            'pilot_id' => $pilot->id,
-            'tour_stage_id' => null,
-        ]);
-        $this->assertTrue($sfpRoute->save(), 'sfpRoute saved');
+        $sfpRoute = $this->createSubmittedFpl($aircraft, $pilot, $route, null);
 
         // Check we can't delete route with submitted fpl associated
         try {
@@ -341,35 +366,10 @@ class FullFkTest extends BaseUnitTest
         $this->assertEquals(1, $sfpRoute->delete(), 'SubmittedFlightPlan with route associated can be deleted');
         $this->assertEquals(1, $levc->delete(), 'Airport without submitted flight plan associated can be deleted');
 
-        $levc = new Airport([
-            'icao_code' => 'LEVC',
-            'name' => 'Valencia',
-            'latitude' => 39.489,
-            'longitude' => -0.481,
-            'city' => 'Valencia',
-            'country_id' => $country->id,
-        ]);
-        $this->assertTrue($levc->save(), 'levc saved');
+        $levc = $this->createLEVC($country);
 
         // Submitted flight plan associated to tour_stage
-        $sfpStage = new SubmittedFlightPlan([
-            'aircraft_id' => $aircraft->id,
-            'flight_rules' => 'I',
-            'alternative1_icao' => 'LEVC',
-            'alternative2_icao' => 'LEMD',
-            'cruise_speed_value' => '380',
-            'cruise_speed_unit' => 'N',
-            'flight_level_value' => '320',
-            'flight_level_unit' => 'F',
-            'route' => 'NAND UM871',
-            'estimated_time' => '0045',
-            'other_information' => 'PBN/A1',
-            'endurance_time' => '0600',
-            'route_id' => null,
-            'pilot_id' => $pilot->id,
-            'tour_stage_id' => $stage->id,
-        ]);
-        $this->assertTrue($sfpStage->save(), 'sfpStage saved');
+        $sfpStage = $this->createSubmittedFpl($aircraft, $pilot, null, $stage);
 
         // Check we can't delete tour stage with submitted fpl associated
         try {
