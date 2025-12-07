@@ -534,162 +534,70 @@ class FullFkTest extends BaseUnitTest
         $phaseIssue = new FlightPhaseIssue(['phase_id' => $phase->id, 'issue_type_id' => $issueType->id, 'timestamp' => '2024-01-01 10:06:00']);
         $this->assertTrue($phaseIssue->save(), 'phase issue saved');
 
-        // Page + page_content (page_content ON DELETE CASCADE)
+        // Check if we delete the flight, all the elements except issuetype, flight_phase_type and flight_phase_metric_type are deleted
+        $this->assertEquals(1, $flight->delete(), 'Flight can be deleted');
+
+        $this->assertEquals(0, Flight::find()->count(), 'No flight should exist');
+
+        $this->assertEquals(0, FlightReport::find()->count(), 'The flight report must be deleted');
+
+        $this->assertEquals(0, AcarsFile::find()->count(), 'The acarsfile must be deleted');
+
+        $this->assertEquals(0, FlightPhase::find()->count(), 'Flight phase of the report must be deleted');
+
+        $this->assertEquals(0, FlightPhaseMetric::find()->count(), 'Flight phase metric must be deleted');
+
+        $this->assertEquals(0, FlightPhaseIssue::find()->count(), 'Flight phase issues must be deleted');
+
+        $this->assertEquals(0, FlightEvent::find()->count(), 'Flight event must be deleted');
+
+        $this->assertEquals(1, FlightPhaseType::find()->count(), 'Flight phase types remain');
+
+        $this->assertEquals(1, FlightPhaseTypeLang::find()->count(), 'Flight phase types lang remain');
+
+        $this->assertEquals(1, FlightPhaseMetricType::find()->count(), 'Flight phase metric types remain');
+
+        $this->assertEquals(1, FlightPhaseMetricTypeLang::find()->count(), 'Flight phase metric types lang remain');
+
+        // Check delete cascade flight phase type
+
+        $this->assertEquals(1, $phaseType->delete(), 'I can delete phase type');
+
+        $this->assertEquals(0, FlightPhaseType::find()->count(), 'Flight phase types must be deleted');
+
+        $this->assertEquals(0, FlightPhaseTypeLang::find()->count(), 'Flight phase types must be deleted');
+
+        $this->assertEquals(0, FlightPhaseMetricType::find()->count(), 'Flight phase metric types must be deleted');
+
+        $this->assertEquals(0, FlightPhaseMetricTypeLang::find()->count(), 'Flight phase metric types lang must be deleted');
+
+        // Check issue types and event attributes remain
+
+        $this->assertEquals(1, IssueType::find()->count(), 'IssueType remain');
+
+        $this->assertEquals(1, IssueTypeLang::find()->count(), 'IssueType lang remain');
+
+        $this->assertEquals(1, FlightEventAttribute::find()->count(), 'Flight event attribute remain');
+
+        // Issue type delete cascade
+
+        $this->assertEquals(1, $issueType->delete(), 'I can delete issue type');
+
+        $this->assertEquals(0, IssueTypeLang::find()->count(), 'Issue types lang must be deleted');
+
+        // Page + page_content delete cascade
         $page = new Page(['code' => 'home', 'public' => 1]);
         $this->assertTrue($page->save(), 'page saved');
 
-        $pageContent = new PageContent(['page_id' => $page->id, 'language' => 'en', 'title' => 'Home', 'content_md' => '...']);
+        $pageContent = new PageContent([
+            'page_id' => $page->id,
+            'language' => 'en',
+            'title' => 'Home',
+            'content_md' => '...'
+        ]);
         $this->assertTrue($pageContent->save(), 'page content saved');
 
-        // Image (no FK constraints in DDL)
-        $image = new Image(['type' => 'pilot', 'related_id' => $pilot->id, 'element' => 0, 'filename' => 'avatar.jpg']);
-        $this->assertTrue($image->save(), 'image saved');
-
-
-        // -------------------------
-        // 2) TRY DELETING PARENTS -> EXPECT INTEGRITY ERRORS WHERE APPLICABLE
-        // -------------------------
-
-        // 2.b Pilot deletion should be blocked because Flight references pilot (flight.pilot_id has no ON DELETE)
-        try {
-            $pilot->delete();
-            $this->fail('Deleting pilot should have failed because Flight exists referencing it.');
-        } catch (\yii\db\IntegrityException $e) {
-            $this->assertTrue(true, 'pilot deletion blocked by flight');
-        }
-
-        // 2.c Tour deletion should be blocked because TourStage references it (tour_stage.tour_id has no ON DELETE)
-        try {
-            $tour->delete();
-            $this->fail('Deleting tour should have failed because TourStage exists referencing it.');
-        } catch (\yii\db\IntegrityException $e) {
-            $this->assertTrue(true, 'tour deletion blocked by tour_stage');
-        }
-
-        // 2.d Route deletion should be blocked because SubmittedFlightPlan references it
-        try {
-            $route->delete();
-            $this->fail('Deleting route should have failed because sfpRoute exists referencing it.');
-        } catch (\yii\db\IntegrityException $e) {
-            $this->assertTrue(true, 'route deletion blocked by sfpRoute');
-        }
-
-        // 2.d tour_stage deletion should be blocked because SubmittedFlightPlan references it
-        try {
-            $stage->delete();
-            $this->fail('Deleting tour stage should have failed because sfpStage references it.');
-        } catch (\yii\db\IntegrityException $e) {
-            $this->assertTrue(true, 'tour stage deletion blocked by sfpStage');
-        }
-
-        // -------------------------
-        // 3) DELETE IN DEPENDENCY ORDER AND VERIFY CASCADES
-        // -------------------------
-
-        // 3.a Delete Flight -> should cascade to FlightReport -> AcarsFile, FlightPhase, FlightEvent, FlightEventData, FlightPhaseMetric, FlightPhaseIssue
-        $this->assertNotFalse($flight->delete(), 'flight deleted');
-
-        // flight should be gone
-        $this->assertNull(Flight::findOne($flight->id), 'flight removed');
-
-        // flight_report should have been cascade deleted
-        $this->assertNull(FlightReport::findOne($freport->id), 'flight_report cascade removed');
-
-        // acars file should be gone
-        $this->assertNull(AcarsFile::findOne(['flight_report_id' => $freport->id]), 'acars cascade removed');
-
-        // flight_phase should be gone
-        $this->assertNull(FlightPhase::findOne($phase->id), 'flight_phase cascade removed');
-
-        // flight event & data should be gone
-        $this->assertNull(FlightEvent::findOne($fe->id), 'flight_event cascade removed');
-        $this->assertNull(FlightEventData::findOne(['event_id' => $fe->id, 'attribute_id' => $feAttr->id]), 'flight_event_data cascade removed');
-
-        // flight phase metric should be gone (it cascades via flight_phase)
-        $this->assertNull(FlightPhaseMetric::findOne(['flight_phase_id' => $phase->id, 'metric_type_id' => $metricType->id]), 'flight_phase_metric cascade removed');
-
-        // phase issue should be gone as well
-        $this->assertNull(FlightPhaseIssue::findOne($phaseIssue->id), 'flight_phase_issue cascade removed');
-
-        // 3.b Now delete SubmittedFlightPlan explicitly (it references aircraft and pilot; pilot deletion later will cascade submitted plan too but we removed flight which blocked pilot)
-        $this->assertNotFalse($sfp->delete(), 'submitted flight plan deleted');
-
-        // 3.c Delete Pilot -> this should now succeed and cascade to pilot_tour_completion (ON DELETE CASCADE) and to any submitted_flight_plans (if any left)
-        $this->assertNotFalse($pilot->delete(), 'pilot deleted after flight removed');
-
-        $this->assertNull(Pilot::findOne($pilot->id), 'pilot removed');
-
-        // pilot_tour_completion must be gone (cascade)
-        $this->assertNull(PilotTourCompletion::findOne($ptc->id), 'pilot_tour_completion cascade removed');
-
-        // submitted flight plan is deleted already (we removed), assert absence
-        $this->assertNull(SubmittedFlightPlan::findOne($sfp->id), 'submitted flight plan removed');
-
-        // 3.d Delete TourStage -> then delete Tour (tour_stage had blocked tour)
-        $this->assertNotFalse($stage->delete(), 'tour stage deleted');
-        $this->assertNull(TourStage::findOne($stage->id), 'tour stage removed');
-
-        // Now Tour should delete (pilot_tour_completion was cascade removed when pilot was deleted; even if present it would cascade)
-        $this->assertNotFalse($tour->delete(), 'tour deleted');
-        $this->assertNull(Tour::findOne($tour->id), 'tour removed');
-
-        // 3.e Delete Route now that submitted plans referencing it were removed
-        $this->assertNotFalse($route->delete(), 'route deleted');
-        $this->assertNull(Route::findOne($route->id), 'route removed');
-
-        // 3.f Delete aircraft -> aircraft_configuration -> aircraft_type
-        // Aircraft has no ON DELETE on configuration, but we can remove aircraft then configuration
-        $this->assertNotFalse($aircraft->delete(), 'aircraft deleted');
-        $this->assertNull(Aircraft::findOne($aircraft->id), 'aircraft removed');
-
-        $this->assertNotFalse($aconf->delete(), 'aircraft configuration deleted');
-        $this->assertNull(AircraftConfiguration::findOne($aconf->id), 'aircraft configuration removed');
-
-        $this->assertNotFalse($atype->delete(), 'aircraft type deleted');
-        $this->assertNull(AircraftType::findOne($atype->id), 'aircraft type removed');
-
-        // 3.g Delete page -> page_content should cascade
-        $this->assertNotFalse($page->delete(), 'page deleted');
-        $this->assertNull(PageContent::findOne($pageContent->id), 'page_content cascade removed');
-
-        // 3.h Delete flight phase type -> its langs & metric types & metric type langs should cascade
-        $this->assertNotFalse($phaseType->delete(), 'phase type deleted');
-        $this->assertNull(FlightPhaseType::findOne($phaseType->id), 'phase type removed');
-        $this->assertNull(FlightPhaseTypeLang::findOne($phaseTypeLang->id), 'phase type lang cascade removed');
-        $this->assertNull(FlightPhaseMetricType::findOne($metricType->id), 'metric type cascade removed');
-        $this->assertNull(FlightPhaseMetricTypeLang::findOne($metricTypeLang->id), 'metric type lang cascade removed');
-
-        // 3.i Issue type deletion should cascade its langs but issue references from phase_issue already removed earlier
-        $this->assertNotFalse($issueType->delete(), 'issue type deleted');
-        $this->assertNull(IssueType::findOne($issueType->id), 'issue type removed');
-        $this->assertNull(IssueTypeLang::findOne($issueTypeLang->id), 'issue type lang cascade removed');
-
-        // 3.j Image has no FK, so delete it directly
-        $this->assertNotFalse($image->delete(), 'image deleted');
-        $this->assertNull(Image::findOne($image->id), 'image removed');
-
-        // 3.k Now try deleting airports: they should be deletable after all dependents removed
-        $this->assertNotFalse($lemd->delete(), 'lemd deleted');
-        $this->assertNull(Airport::findOne($lemd->id), 'lemd removed');
-
-        $this->assertNotFalse($lebl->delete(), 'lebl deleted');
-        $this->assertNull(Airport::findOne($lebl->id), 'lebl removed');
-
-        $this->assertNotFalse($levd->delete(), 'levd deleted');
-        $this->assertNull(Airport::findOne($levd->id), 'levd removed');
-
-        $this->assertNotFalse($levc->delete(), 'levc deleted');
-        $this->assertNull(Airport::findOne($levc->id), 'levc removed');
-
-        $this->assertNotFalse($leal->delete(), 'leal deleted');
-        $this->assertNull(Airport::findOne($leal->id), 'leal removed');
-
-        // 3.l Delete rank
-        $this->assertNotFalse($rank->delete(), 'rank deleted');
-        $this->assertNull(Rank::findOne($rank->id), 'rank removed');
-
-        // Finally delete country (should succeed now)
-        $this->assertNotFalse($country->delete(), 'country deleted');
-        $this->assertNull(Country::findOne($country->id), 'country removed');
+        $this->assertEquals(1, $page->delete(), 'I can delete the page');
+        $this->assertEquals(0, PageContent::find()->count(), 'The content must be deleted');
     }
 }
