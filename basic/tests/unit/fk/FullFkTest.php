@@ -451,6 +451,8 @@ class FullFkTest extends BaseUnitTest
             $this->assertTrue(true, 'pilot validator deletion blocked by flight');
         }
 
+        // Check delete on cascade on all associated to flights
+
         // Flight report -> ACARS file (flight_report has ON DELETE CASCADE from flight)
         $freport = new FlightReport(['flight_id' => $flight->id, 'landing_airport' => 'LEBL']);
         $this->assertTrue($freport->save(), 'flight report saved');

@@ -2,6 +2,7 @@
 namespace tests\unit\models;
 
 use Yii;
+use app\config\Config;
 use app\models\AcarsFile;
 use app\models\Aircraft;
 use app\models\AircraftConfiguration;
@@ -172,6 +173,39 @@ class AcarsFileTest extends BaseUnitTest
         ]);
 
         $this->assertFalse($model2->save(), 'Second model collides with PK');
+    }
+
+    public function testAfterDeleteRemovesFile()
+    {
+        $model = new AcarsFile([
+            'chunk_id' => 1,
+            'flight_report_id' => $this->report->id,
+            'sha256sum' => 'YTNjMjU2NGYyM2U3MThkODFkNjM4OWI3YTdkZjc3ZWE=',
+        ]);
+
+        $this->assertTrue($model->save());
+
+        $testPath = '/tmp/chunks_tests';
+        Config::set('chunks_storage_path', $testPath);
+
+        if (!is_dir($testPath)) {
+            mkdir($testPath, 0777, true);
+        }
+
+        $filePath = $testPath . '/' . $this->report->id . '/'. $model->chunk_id;
+
+        // create report folder
+        if (!is_dir(dirname($filePath))) {
+            mkdir(dirname($filePath), 0777, true);
+        }
+
+        // Create dummy file
+        file_put_contents($filePath, "test");
+        $this->assertFileExists($filePath);
+
+        $model->delete();
+
+        $this->assertFileDoesNotExist($filePath, "afterDelete() must delete the file");
     }
 
 }
