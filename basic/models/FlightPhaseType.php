@@ -29,7 +29,7 @@ class FlightPhaseType extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['code', 'name'], 'required'],
+            [['code'], 'required'],
             [['code'], 'string', 'max' => 32],
             [['code'], 'unique'],
         ];

@@ -31,7 +31,7 @@ class FlightPhaseMetricType extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['flight_phase_type_id', 'code', 'name'], 'required'],
+            [['flight_phase_type_id', 'code'], 'required'],
             [['flight_phase_type_id'], 'integer'],
             [['code'], 'string', 'max' => 32],
             [['flight_phase_type_id', 'code'], 'unique', 'targetAttribute' => ['flight_phase_type_id', 'code']],
@@ -48,7 +48,6 @@ class FlightPhaseMetricType extends \yii\db\ActiveRecord
             'id' => 'ID',
             'flight_phase_type_id' => 'Flight Phase Type ID',
             'code' => 'Code',
-            'name' => 'Name',
         ];
     }
 

@@ -196,6 +196,7 @@ class FullFkTest extends BaseUnitTest
         $flight->tour_stage_id = $stage->id;
         $flight->validator_id = $validator->id;
         $this->assertTrue($flight->save(), 'flight saved');
+        return $flight;
     }
 
     public function testFullFkIntegrityAndCascades()
@@ -451,34 +452,66 @@ class FullFkTest extends BaseUnitTest
             $this->assertTrue(true, 'pilot validator deletion blocked by flight');
         }
 
-        // Check delete on cascade on all associated to flights
-
-        // Flight report -> ACARS file (flight_report has ON DELETE CASCADE from flight)
-        $freport = new FlightReport(['flight_id' => $flight->id, 'landing_airport' => 'LEBL']);
+        // Check delete on cascade on all associated to flights, we construct all the dependencies and we check the delete on cascade
+        $freport = new FlightReport([
+            'flight_id' => $flight->id,
+            'flight_time_minutes' => 120,
+            'block_time_minutes' => 130,
+            'total_fuel_burn_kg' => 5000,
+            'distance_nm' => 300,
+            'initial_fuel_on_board' => 7000,
+            'zero_fuel_weight' => 50000,
+            'crash' => 0,
+            'start_time' => '2025-01-01 10:00:00',
+            'end_time' => '2025-01-01 12:00:00',
+            'landing_airport' => 'LEVC',
+            'pilot_comments' => 'Good flight.',
+            'sim_aircraft_name' => 'B738 Simulator',
+        ]);
         $this->assertTrue($freport->save(), 'flight report saved');
 
         $acars = new AcarsFile(['flight_report_id' => $freport->id, 'chunk_id' => 1, 'sha256sum' => str_repeat('a', 44)]);
         $this->assertTrue($acars->save(), 'acars saved');
 
         // Flight phase types / langs (cascade from type)
-        $phaseType = new FlightPhaseType(['code' => 'TAKEOFF']);
+        $phaseType = new FlightPhaseType(['code' => 'takeoff']);
         $this->assertTrue($phaseType->save(), 'phase type saved');
 
-        $phaseTypeLang = new FlightPhaseTypeLang(['flight_phase_type_id' => $phaseType->id, 'language' => 'en', 'name' => 'Takeoff']);
+        $phaseTypeLang = new FlightPhaseTypeLang([
+            'flight_phase_type_id' => $phaseType->id,
+            'language' => 'en',
+            'name' => 'Takeoff'
+        ]);
         $this->assertTrue($phaseTypeLang->save(), 'phase type lang saved');
 
         // Flight phase that depends on flight_report (ON DELETE CASCADE)
-        $phase = new FlightPhase(['flight_report_id' => $freport->id, 'flight_phase_type_id' => $phaseType->id, 'start' => '2024-01-01 10:00:00', 'end' => '2024-01-01 10:10:00']);
+        $phase = new FlightPhase([
+            'flight_report_id' => $freport->id,
+            'flight_phase_type_id' => $phaseType->id,
+            'start' => '2024-01-01 10:00:00',
+            'end' => '2024-01-01 10:10:00'
+        ]);
         $this->assertTrue($phase->save(), 'phase saved');
 
         // Flight phase metric types & metric (metric type cascades on phase_type deletion)
-        $metricType = new FlightPhaseMetricType(['flight_phase_type_id' => $phaseType->id, 'code' => 'SPEED']);
+        $metricType = new FlightPhaseMetricType([
+            'flight_phase_type_id' => $phaseType->id,
+            'code' => 'TakeoffBounces'
+        ]);
         $this->assertTrue($metricType->save(), 'metric type saved');
 
-        $metricTypeLang = new FlightPhaseMetricTypeLang(['flight_phase_metric_type_id' => $metricType->id, 'language' => 'en', 'name' => 'Speed']);
+        $metricTypeLang = new FlightPhaseMetricTypeLang([
+            'flight_phase_metric_type_id' => $metricType->id,
+            'language' => 'en',
+            'name' => 'TakeoffBounces'
+        ]);
         $this->assertTrue($metricTypeLang->save(), 'metric type lang saved');
 
-        $metric = new FlightPhaseMetric(['flight_phase_id' => $phase->id, 'metric_type_id' => $metricType->id, 'value' => '150']);
+        $metric = new FlightPhaseMetric([
+            'flight_phase_id' => $phase->id,
+            'metric_type_id' => $metricType->id,
+            'value' => '150'
+        ]);
         $this->assertTrue($metric->save(), 'metric saved');
 
         // Flight event attribute / event / data (cascade down from phase)
