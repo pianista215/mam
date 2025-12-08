@@ -6,9 +6,9 @@ use Yii;
 
 abstract class BaseUnitTest extends \Codeception\Test\Unit
 {
-    protected function _after()
+    protected function _before()
     {
-        parent::_after();
+        parent::_before();
         $this->clearDatabase();
     }
 
