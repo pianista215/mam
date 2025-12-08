@@ -474,13 +474,13 @@ class FullFkTest extends BaseUnitTest
         $this->assertTrue($acars->save(), 'acars saved');
 
         // Flight phase types / langs (cascade from type)
-        $phaseType = new FlightPhaseType(['code' => 'invented']);
+        $phaseType = new FlightPhaseType(['code' => 'takeoff']);
         $this->assertTrue($phaseType->save(), 'phase type saved');
 
         $phaseTypeLang = new FlightPhaseTypeLang([
             'flight_phase_type_id' => $phaseType->id,
             'language' => 'en',
-            'name' => 'Invented'
+            'name' => 'Takeoff'
         ]);
         $this->assertTrue($phaseTypeLang->save(), 'phase type lang saved');
 
@@ -496,14 +496,14 @@ class FullFkTest extends BaseUnitTest
         // Flight phase metric types & metric (metric type cascades on phase_type deletion)
         $metricType = new FlightPhaseMetricType([
             'flight_phase_type_id' => $phaseType->id,
-            'code' => 'invented'
+            'code' => 'TakeoffBounces'
         ]);
         $this->assertTrue($metricType->save(), 'metric type saved');
 
         $metricTypeLang = new FlightPhaseMetricTypeLang([
             'flight_phase_metric_type_id' => $metricType->id,
             'language' => 'en',
-            'name' => 'Invented'
+            'name' => 'TakeoffBounces'
         ]);
         $this->assertTrue($metricTypeLang->save(), 'metric type lang saved');
 
