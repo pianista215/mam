@@ -47,7 +47,7 @@ CREATE TABLE `aircraft_configuration` (
   `cargo_capacity` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `aircraft_configuration_unique` (`aircraft_type_id`,`name`),
-  CONSTRAINT `aircraft_configuration_aircraft_type_FK` FOREIGN KEY (`aircraft_type_id`) REFERENCES `aircraft_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `aircraft_configuration_aircraft_type_FK` FOREIGN KEY (`aircraft_type_id`) REFERENCES `aircraft_type` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `aircraft` (
@@ -116,8 +116,8 @@ CREATE TABLE `route` (
   UNIQUE KEY `routes_unique` (`code`),
   UNIQUE KEY `routes_unique_dep_arr` (`departure`,`arrival`),
   KEY `routes_airports_arrival_FK` (`arrival`),
-  CONSTRAINT `routes_airports_arrival_FK` FOREIGN KEY (`arrival`) REFERENCES `airport` (`icao_code`),
-  CONSTRAINT `routes_airports_departure_FK` FOREIGN KEY (`departure`) REFERENCES `airport` (`icao_code`)
+  CONSTRAINT `routes_airports_arrival_FK` FOREIGN KEY (`arrival`) REFERENCES `airport` (`icao_code`)  ON UPDATE CASCADE,
+  CONSTRAINT `routes_airports_departure_FK` FOREIGN KEY (`departure`) REFERENCES `airport` (`icao_code`)  ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `tour` (
@@ -141,9 +141,9 @@ CREATE TABLE `tour_stage` (
   UNIQUE KEY `tour_stage_unique` (`tour_id`,`sequence`),
   KEY `tour_stage_airport_departure_FK` (`departure`),
   KEY `tour_stage_airport_arrival_FK` (`arrival`),
-  CONSTRAINT `tour_stage_airport_arrival_FK` FOREIGN KEY (`arrival`) REFERENCES `airport` (`icao_code`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `tour_stage_airport_departure_FK` FOREIGN KEY (`departure`) REFERENCES `airport` (`icao_code`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `tour_stage_tour_FK` FOREIGN KEY (`tour_id`) REFERENCES `tour` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `tour_stage_airport_arrival_FK` FOREIGN KEY (`arrival`) REFERENCES `airport` (`icao_code`) ON UPDATE CASCADE,
+  CONSTRAINT `tour_stage_airport_departure_FK` FOREIGN KEY (`departure`) REFERENCES `airport` (`icao_code`) ON UPDATE CASCADE,
+  CONSTRAINT `tour_stage_tour_FK` FOREIGN KEY (`tour_id`) REFERENCES `tour` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `pilot_tour_completion` (
@@ -184,10 +184,10 @@ CREATE TABLE `submitted_flight_plan` (
   KEY `submitted_flightplan_tour_stage_FK` (`tour_stage_id`),
   CONSTRAINT `submitted_flightplan_airport_alt1_FK` FOREIGN KEY (`alternative1_icao`) REFERENCES `airport` (`icao_code`) ON UPDATE CASCADE,
   CONSTRAINT `submitted_flightplan_airport_alt2_FK` FOREIGN KEY (`alternative2_icao`) REFERENCES `airport` (`icao_code`) ON UPDATE CASCADE,
-  CONSTRAINT `submitted_flightplans_aircraft_reserved_FK` FOREIGN KEY (`aircraft_id`) REFERENCES `aircraft` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `submitted_flightplans_aircraft_reserved_FK` FOREIGN KEY (`aircraft_id`) REFERENCES `aircraft` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `submitted_flightplans_pilots_FK` FOREIGN KEY (`pilot_id`) REFERENCES `pilot` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `submitted_flightplans_routes_FK` FOREIGN KEY (`route_id`) REFERENCES `route` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `submitted_flightplans_tour_stage_FK` FOREIGN KEY (`tour_stage_id`) REFERENCES `tour_stage` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `submitted_flightplans_routes_FK` FOREIGN KEY (`route_id`) REFERENCES `route` (`id`) ON UPDATE CASCADE,
+  CONSTRAINT `submitted_flightplans_tour_stage_FK` FOREIGN KEY (`tour_stage_id`) REFERENCES `tour_stage` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `flight` (
@@ -232,7 +232,7 @@ CREATE TABLE `flight` (
   CONSTRAINT `flight_departure_FK` FOREIGN KEY (`departure`) REFERENCES `airport` (`icao_code`) ON UPDATE CASCADE,
   CONSTRAINT `flight_pilot_FK` FOREIGN KEY (`pilot_id`) REFERENCES `pilot` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `flight_tour_stage_FK` FOREIGN KEY (`tour_stage_id`) REFERENCES `tour_stage` (`id`) ON UPDATE CASCADE,
-  CONSTRAINT `flight_validator_FK` FOREIGN KEY (`validator_id`) REFERENCES `pilot` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `flight_validator_FK` FOREIGN KEY (`validator_id`) REFERENCES `pilot` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `flight_report` (
@@ -253,8 +253,8 @@ CREATE TABLE `flight_report` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `flight_report_unique` (`flight_id`),
   KEY `flight_report_airport_FK` (`landing_airport`),
-  CONSTRAINT `flight_report_airport_FK` FOREIGN KEY (`landing_airport`) REFERENCES `airport` (`icao_code`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `flight_report_flight_FK` FOREIGN KEY (`flight_id`) REFERENCES `flight` (`id`) ON UPDATE CASCADE
+  CONSTRAINT `flight_report_airport_FK` FOREIGN KEY (`landing_airport`) REFERENCES `airport` (`icao_code`) ON UPDATE CASCADE,
+  CONSTRAINT `flight_report_flight_FK` FOREIGN KEY (`flight_id`) REFERENCES `flight` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `acars_file` (
@@ -263,7 +263,7 @@ CREATE TABLE `acars_file` (
   `sha256sum` char(44) NOT NULL,
   `upload_date` datetime DEFAULT NULL,
   PRIMARY KEY (`flight_report_id`,`chunk_id`),
-  CONSTRAINT `acars_file_flight_report_FK` FOREIGN KEY (`flight_report_id`) REFERENCES `flight_report` (`id`) ON UPDATE CASCADE
+  CONSTRAINT `acars_file_flight_report_FK` FOREIGN KEY (`flight_report_id`) REFERENCES `flight_report` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -324,7 +324,7 @@ CREATE TABLE `flight_phase_metric` (
   PRIMARY KEY (`flight_phase_id`,`metric_type_id`),
   KEY `flight_phase_metric_flight_phase_metric_type_FK` (`metric_type_id`),
   CONSTRAINT `flight_phase_metric_flight_phase_FK` FOREIGN KEY (`flight_phase_id`) REFERENCES `flight_phase` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `flight_phase_metric_flight_phase_metric_type_FK` FOREIGN KEY (`metric_type_id`) REFERENCES `flight_phase_metric_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `flight_phase_metric_flight_phase_metric_type_FK` FOREIGN KEY (`metric_type_id`) REFERENCES `flight_phase_metric_type` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `flight_event_attribute` (
@@ -351,7 +351,7 @@ CREATE TABLE `flight_event_data` (
   PRIMARY KEY (`event_id`,`attribute_id`),
   KEY `flight_event_data_flight_event_attribute_FK` (`attribute_id`),
   CONSTRAINT `flight_event_data_flight_event_FK` FOREIGN KEY (`event_id`) REFERENCES `flight_event` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `flight_event_data_flight_event_attribute_FK` FOREIGN KEY (`attribute_id`) REFERENCES `flight_event_attribute` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `flight_event_data_flight_event_attribute_FK` FOREIGN KEY (`attribute_id`) REFERENCES `flight_event_attribute` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `issue_type` (
@@ -382,7 +382,7 @@ CREATE TABLE `flight_phase_issue` (
   KEY `flight_phase_issue_flight_phase_FK` (`phase_id`),
   KEY `flight_phase_issue_issue_type_FK` (`issue_type_id`),
   CONSTRAINT `flight_phase_issue_flight_phase_FK` FOREIGN KEY (`phase_id`) REFERENCES `flight_phase` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `flight_phase_issue_issue_type_FK` FOREIGN KEY (`issue_type_id`) REFERENCES `issue_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `flight_phase_issue_issue_type_FK` FOREIGN KEY (`issue_type_id`) REFERENCES `issue_type` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `page` (

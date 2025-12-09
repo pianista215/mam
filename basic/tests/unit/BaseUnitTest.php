@@ -6,9 +6,9 @@ use Yii;
 
 abstract class BaseUnitTest extends \Codeception\Test\Unit
 {
-    protected function _after()
+    protected function _before()
     {
-        parent::_after();
+        parent::_before();
         $this->clearDatabase();
     }
 
@@ -19,6 +19,7 @@ abstract class BaseUnitTest extends \Codeception\Test\Unit
         Yii::$app->db->createCommand()->delete('acars_file')->execute();
         Yii::$app->db->createCommand()->delete('flight_report')->execute();
         Yii::$app->db->createCommand()->delete('flight')->execute();
+        Yii::$app->db->createCommand()->delete('submitted_flight_plan')->execute();
         Yii::$app->db->createCommand()->delete('tour_stage')->execute();
         Yii::$app->db->createCommand()->delete('tour')->execute();
         Yii::$app->db->createCommand()->delete('aircraft')->execute();
@@ -32,6 +33,10 @@ abstract class BaseUnitTest extends \Codeception\Test\Unit
         Yii::$app->db->createCommand()->delete('page')->execute();
         Yii::$app->db->createCommand()->delete('page_content')->execute();
         Yii::$app->db->createCommand()->delete('image')->execute();
+        Yii::$app->db->createCommand()->delete('flight_phase_type')->execute();
+        Yii::$app->db->createCommand()->delete('flight_phase_metric_type')->execute();
+        Yii::$app->db->createCommand()->delete('flight_event_attribute')->execute();
+        Yii::$app->db->createCommand()->delete('issue_type')->execute();
     }
 
 }

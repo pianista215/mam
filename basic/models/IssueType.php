@@ -29,7 +29,7 @@ class IssueType extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['code', 'description'], 'required'],
+            [['code'], 'required'],
             [['penalty'], 'integer'],
             [['code'], 'string', 'max' => 80],
             [['code'], 'unique'],
