@@ -78,25 +78,21 @@ $this->params['breadcrumbs'][] = $this->title;
                 'method' => 'get',
             ]); ?>
 
-            <div class="row align-items-end">
-                <div class="col-md-4">
-                    <?= $form->field($charterForm, 'arrival')
-                        ->textInput([
-                            'maxlength' => 4,
-                            'placeholder' => Yii::t('app', 'Ex: LEMD'),
-                        ])
-                        ->label(Yii::t('app', 'Arrival airport (ICAO)')) ?>
-                </div>
-
-                <div class="col-md-1 text-end">
-                    <div class="form-group">
-                        <?= Html::submitButton(
-                            Yii::t('app', 'Continue'),
-                            ['class' => 'btn btn-primary']
-                        ) ?>
-                    </div>
-                </div>
-            </div>
+           <div class="row align-items-end">
+               <div class="col-md-4 d-flex">
+                   <?= Html::input('text', 'arrival', '', [
+                       'maxlength' => 4,
+                       'class' => 'form-control me-2',
+                       'placeholder' => Yii::t('app', 'Arrival airport (ICAO)'),
+                       'required' => true,
+                       'pattern' => '[A-Za-z]{4}'
+                   ]) ?>
+                   <?= Html::submitButton(
+                       Yii::t('app', 'Continue'),
+                       ['class' => 'btn btn-primary']
+                   ) ?>
+               </div>
+           </div>
 
             <?php \yii\widgets\ActiveForm::end(); ?>
 

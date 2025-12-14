@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\GeoUtils;
 use Yii;
 
 /**
@@ -36,10 +37,16 @@ class CharterRoute extends \yii\db\ActiveRecord
             [['pilot_id', 'departure', 'arrival', 'distance_nm'], 'required'],
             [['pilot_id', 'distance_nm'], 'integer'],
             [['departure', 'arrival'], 'string', 'max' => 4],
+            [['departure', 'arrival'], 'filter', 'filter' => 'strtoupper'],
             [['pilot_id'], 'unique'],
             [['arrival'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['arrival' => 'icao_code']],
             [['departure'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['departure' => 'icao_code']],
         ];
+    }
+
+    public function getFplDescription()
+    {
+        return Yii::t('app', 'Charter flight') . ' '.' ('.$this->departure.'-'.$this->arrival.')';
     }
 
     /**
@@ -51,9 +58,36 @@ class CharterRoute extends \yii\db\ActiveRecord
             'id' => Yii::t('app', 'ID'),
             'pilot_id' => Yii::t('app', 'Pilot'),
             'departure' => Yii::t('app', 'Departure'),
-            'arrival' => Yii::t('app', 'Arrival'),
+            'arrival' => Yii::t('app', 'Arrival airport (ICAO)'),
             'distance_nm' => Yii::t('app', 'Distance NM'),
         ];
+    }
+
+    public function beforeValidate()
+    {
+        if (parent::beforeValidate()) {
+            $dep = $this->departure0;
+            $arr = $this->arrival0;
+            // We do this to avoid error messages with distance_nm in select-aircraft, real NM will be computed in beforeSave
+            if($dep && $arr){
+                $this->distance_nm = round(GeoUtils::haversine($dep->latitude, $dep->longitude, $arr->latitude, $arr->longitude, 'nm'));
+            } else {
+                $this->distance_nm = 0;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert)) {
+            $dep = $this->departure0;
+            $arr = $this->arrival0;
+            $this->distance_nm = GeoUtils::haversine($dep->latitude, $dep->longitude, $arr->latitude, $arr->longitude, 'nm');
+            return true;
+        }
+        return false;
     }
 
     /**

@@ -209,6 +209,33 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
         return $this->hasMany(Tour::class, ['id' => 'tour_id'])->viaTable('pilot_tour_completion', ['pilot_id' => 'id']);
     }
 
+    public function getCharterFlightsCount(): int
+    {
+        return Flight::find()
+            ->where(['pilot_id' => $this->id])
+            ->andWhere(['flight_type' => Flight::TYPE_CHARTER])
+            ->count();
+    }
+
+    public function getNonCharterFlightsCount(): int
+    {
+        return Flight::find()
+            ->where(['pilot_id' => $this->id])
+            ->andWhere(['!=', 'flight_type', Flight::TYPE_CHARTER])
+            ->count();
+    }
+
+    public function getCharterRatio(): float
+    {
+        $total = $this->getCharterFlightsCount() + $this->getNonCharterFlightsCount();
+
+        if ($total === 0) {
+            return 0;
+        }
+
+        return $this->getCharterFlightsCount() / $total;
+    }
+
 
     /**
      * {@inheritdoc}

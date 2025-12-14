@@ -233,6 +233,7 @@ CREATE TABLE `flight` (
   `validator_id` int(10) unsigned DEFAULT NULL,
   `validation_date` datetime DEFAULT NULL,
   `tour_stage_id` mediumint(8) unsigned DEFAULT NULL,
+  `flight_type` char(1) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `flight_pilot_FK` (`pilot_id`),
   KEY `flight_aircraft_FK` (`aircraft_id`),
