@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\LoggerTrait;
 use Yii;
 
 /**
@@ -35,6 +36,7 @@ use Yii;
  */
 class SubmittedFlightPlan extends \yii\db\ActiveRecord
 {
+    use LoggerTrait;
     /**
      * {@inheritdoc}
      */
@@ -191,6 +193,20 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
             $this->addError('route_id', $msg);
             $this->addError('tour_stage_id', $msg);
             $this->addError('charter_route_id', $msg);
+        }
+    }
+
+    public function afterDelete()
+    {
+        parent::afterDelete();
+
+        if($this->charter_route_id != null) {
+            $charterRoute = CharterRoute::findOne(['id' => $this->charter_route_id]);
+
+            if ($charterRoute) {
+                $this->logInfo('Deleting charter route of this submitted fpl', $charterRoute);
+                $charterRoute->delete();
+            }
         }
     }
 

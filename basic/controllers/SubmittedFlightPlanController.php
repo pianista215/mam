@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\helpers\LoggerTrait;
 use app\models\Aircraft;
 use app\models\AircraftSearch;
+use app\models\CharterRouteForm;
 use app\models\Route;
 use app\models\RouteSearch;
 use app\models\SubmittedFlightPlan;
@@ -101,7 +102,9 @@ class SubmittedFlightPlanController extends Controller
                 $routeDataProvider = $routeSearch->searchWithFixedDeparture($location, $this->request->queryParams);
 
                 $this->logInfo('User selecting flight', ['location' => Yii::$app->user->identity->location, 'user' => Yii::$app->user->identity->license]);
+                $charterForm = new CharterRouteForm();
                 return $this->render('select_flight', [
+                    'charterForm' => $charterForm,
                     'routeDataProvider' => $routeDataProvider,
                     'tourStages' => $tourStages,
                 ]);
@@ -121,6 +124,19 @@ class SubmittedFlightPlanController extends Controller
     {
         $stage = TourStage::findOne(['id' => $tour_stage_id]);
         return $this->selectAircraft('stage', $stage);
+    }
+
+    public function actionSelectAircraftCharter()
+    {
+        $charterForm = new CharterRouteForm();
+
+        if ($charterForm->load(Yii::$app->request->get()) && $charterForm->validate()) {
+            return $this->selectAircraft('charter', $charterForm);
+        } else {
+            $errors = $charterForm->getFirstErrors();
+            $message = implode('; ', $errors);
+            throw new BadRequestHttpException($message ?: 'Invalid charter destination.');
+        }
     }
 
     protected function selectAircraft(string $type, $entity)
