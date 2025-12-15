@@ -157,8 +157,12 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
             if ($this->tourStage->departure != $this->pilot->location) {
                 $this->addError($attribute, Yii::t('app', 'The pilot is not in the correct location.'));
             }
-        } else {
+        } else if($this->route_id != null){
             if ($this->route0->departure != $this->pilot->location) {
+                $this->addError($attribute, Yii::t('app', 'The pilot is not in the correct location.'));
+            }
+        } else {
+            if ($this->charterRoute->departure != $this->pilot->location) {
                 $this->addError($attribute, Yii::t('app', 'The pilot is not in the correct location.'));
             }
         }
@@ -170,8 +174,12 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
             if ($this->tourStage->departure != $this->aircraft->location) {
                 $this->addError($attribute, Yii::t('app', 'The aircraft is not in the correct location.'));
             }
-        } else {
+        } else if($this->route_id != null){
             if ($this->route0->departure != $this->aircraft->location) {
+                $this->addError($attribute, Yii::t('app', 'The aircraft is not in the correct location.'));
+            }
+        } else {
+            if ($this->charterRoute->departure != $this->aircraft->location) {
                 $this->addError($attribute, Yii::t('app', 'The aircraft is not in the correct location.'));
             }
         }
