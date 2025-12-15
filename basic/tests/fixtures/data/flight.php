@@ -27,6 +27,7 @@ return [
         'creation_date' => '2025-01-01 01:00:00',
         'network' => 'IVAO',
         'tour_stage_id' => 2,
+        'flight_type' => 'T'
     ],
     [
         'id' => 2,
@@ -49,7 +50,8 @@ return [
         'report_tool' => 'Mam Acars 1.0',
         'status' => 'C',
         'creation_date' => '2025-01-01 02:00:00',
-        'network' => 'Vatsim'
+        'network' => 'Vatsim',
+        'flight_type' => 'R'
     ],
     [
         'id' => 3,
@@ -72,7 +74,8 @@ return [
         'report_tool' => 'Mam Acars 1.0',
         'status' => 'V',
         'creation_date' => '2025-01-02 01:00:00',
-        'network' => 'Vatsim'
+        'network' => 'Vatsim',
+        'flight_type' => 'R'
     ],
     [
         'id' => 4,
@@ -95,7 +98,8 @@ return [
         'report_tool' => 'Mam Acars 1.0',
         'status' => 'S',
         'creation_date' => '2025-01-02 02:00:00',
-        'network' => 'Vatsim'
+        'network' => 'Vatsim',
+        'flight_type' => 'R'
     ],
     [
         'id' => 5,
@@ -118,6 +122,7 @@ return [
         'report_tool' => 'Mam Acars 1.0',
         'status' => 'C',
         'creation_date' => '2025-01-01 02:00:00',
-        'network' => 'Vatsim'
+        'network' => 'Vatsim',
+        'flight_type' => 'R'
     ],
 ];

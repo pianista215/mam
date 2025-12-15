@@ -358,6 +358,7 @@ class FlightReportSubmissionCest
         $I->assertEquals($flight->code, 'R003');
         $I->assertEquals($flight->status, 'C');
         $I->assertEquals(null, $flight->tour_stage_id);
+        $I->assertEquals('R', $flight->flight_type);
 
         return $flight_report_id;
     }
@@ -495,6 +496,7 @@ class FlightReportSubmissionCest
         $I->assertEquals($flight->flight_level_unit, 'VFR');
         $I->assertEquals($flight->flight_level_value, '');
         $I->assertEquals(null, $flight->tour_stage_id);
+        $I->assertEquals('R', $flight->flight_type);
     }
 
     public function testValidFlightReportSubmissionTwice(ApiTester $I)
@@ -611,6 +613,7 @@ class FlightReportSubmissionCest
         $I->assertEquals('TAR1', $flight->code);
         $I->assertEquals('LEBL', $flight->departure);
         $I->assertEquals('LEMD', $flight->arrival);
+        $I->assertEquals('T', $flight->flight_type);
     }
 
 

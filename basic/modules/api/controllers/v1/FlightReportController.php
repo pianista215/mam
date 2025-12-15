@@ -135,8 +135,6 @@ class FlightReportController extends Controller
                     }
                 }
 
-
-
                 $submittedFlightPlan->delete();
 
                 $response = new ReportSavedDTO();
@@ -187,10 +185,17 @@ class FlightReportController extends Controller
             $flight->code = $this->generateTourStageCode($submittedFpl->tourStage);
             $flight->departure = $submittedFpl->tourStage->departure;
             $flight->arrival = $submittedFpl->tourStage->arrival;
-        } else {
+            $flight->flight_type = Flight::TYPE_TOUR;
+        } else if(!empty($submittedFpl->route_id)){
             $flight->code = $submittedFpl->route0->code;
             $flight->departure = $submittedFpl->route0->departure;
             $flight->arrival = $submittedFpl->route0->arrival;
+            $flight->flight_type = Flight::TYPE_ROUTE;
+        } else {
+            $flight->departure = $submittedFpl->route0->departure;
+            $flight->arrival = $submittedFpl->route0->arrival;
+            $flight->code = 'CHARTER';
+            $flight->flight_type = Flight::TYPE_CHARTER;
         }
 
         $flight->alternative1_icao = $submittedFpl->alternative1_icao;
