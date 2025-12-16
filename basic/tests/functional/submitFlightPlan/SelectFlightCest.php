@@ -19,13 +19,15 @@ class SelectFlightCest
         ];
     }
 
-
     public function openSelectFlightNoRoutesFromLocation(\FunctionalTester $I){
         $I->amLoggedInAs(10);
         $I->amOnRoute('submitted-flight-plan/select-flight');
 
         $I->see('Select flight');
         $I->see('No results found.');
+
+        $I->see('Charter flight');
+        $I->see('Continue', 'button');
     }
 
     public function openSelectFlightOnlyStagesFromLocation(\FunctionalTester $I){
@@ -39,6 +41,8 @@ class SelectFlightCest
 
         $I->see('Routes');
         $I->see('No results found.');
+        $I->see('Charter flight');
+        $I->see('Continue', 'button');
     }
 
     public function openSelectFlightBothStagesAndRoutes(\FunctionalTester $I){
@@ -64,6 +68,26 @@ class SelectFlightCest
         $I->see('1173');
         $I->seeElement('a[href*="/submitted-flight-plan/select-aircraft-route?route_id=1"]');
         $I->seeElement('a[href*="/submitted-flight-plan/select-aircraft-route?route_id=3"]');
+
+        $I->see('Charter flight');
+        $I->see('Continue', 'button');
+    }
+
+    public function canSelectCharterFlightWithAirport(\FunctionalTester $I){
+        $I->amLoggedInAs(2);
+        $I->amOnRoute('submitted-flight-plan/select-flight');
+
+        $I->see('Charter flight');
+        $I->see('Continue', 'button');
+
+        $I->fillField('input[name="arrival"]', 'gclp');
+        $I->click('Continue');
+
+        $I->seeResponseCodeIs(200);
+        $I->seeInCurrentUrl('submitted-flight-plan/select-aircraft-charter');
+        $I->seeInCurrentUrl('arrival=gclp');
+
+        $I->see('Charter flight (LEMD-GCLP)');
     }
 
     public function cantSelectFlightIfNonActivatedUser(\FunctionalTester $I){
@@ -76,6 +100,8 @@ class SelectFlightCest
         $I->dontSee('LEBL');
         $I->dontSee('LEVC');
         $I->dontSee('GCLP');
+        $I->dontSee('Charter flight');
+        $I->dontSee('Continue', 'button');
     }
 
     public function cantSelectFlightIfVisitor(\FunctionalTester $I){

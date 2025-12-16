@@ -94,7 +94,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="row text-center">
 
                 <div class="col-md-2 col-6 mb-3">
-                    <div class="text-muted small"><?= Yii::t('app', 'Hours flown') ?></div>
+                    <div class="text-muted small"><?= Yii::t('app', 'Hours Flown') ?></div>
                     <div class="fs-4 fw-semibold">
                         <?= TimeHelper::formatHoursMinutes($stats['hours_flown']) ?>
                     </div>
