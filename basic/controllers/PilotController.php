@@ -92,10 +92,14 @@ class PilotController extends Controller
         $flightSearch = new FlightSearch();
         $flightsProvider = $flightSearch->searchForPilot($model->id, Yii::$app->request->queryParams);
 
+        $stats = $model->getFlightStats();
+        $stats['hours_flown'] = $model->hours_flown;
+
         return $this->render('view', [
             'model' => $model,
             'flightSearch' => $flightSearch,
             'flightsProvider' => $flightsProvider,
+            'stats' => $stats
         ]);
     }
 

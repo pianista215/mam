@@ -236,6 +236,39 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
         return $this->getCharterFlightsCount() / $total;
     }
 
+    public function getFlightStats(): array
+    {
+        $rows = Flight::find()
+            ->select([
+                'flight_type',
+                'cnt' => 'COUNT(*)'
+            ])
+            ->where(['pilot_id' => $this->id])
+            ->groupBy('flight_type')
+            ->asArray()
+            ->all();
+
+        $charter = 0;
+        $regular = 0;
+
+        foreach ($rows as $row) {
+            if ($row['flight_type'] == Flight::TYPE_CHARTER) {
+                $charter = (int) $row['cnt'];
+            } else {
+                $regular += (int) $row['cnt'];
+            }
+        }
+
+        $total = $charter + $regular;
+
+        return [
+            'total_flights'   => $total,
+            'charter_flights' => $charter,
+            'regular_flights' => $regular,
+            'charter_ratio'   => $total > 0 ? round(($charter / $total) * 100) : 0,
+        ];
+    }
+
 
     /**
      * {@inheritdoc}
