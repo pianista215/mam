@@ -657,6 +657,11 @@ class FlightReportSubmissionCest
         $I->assertEquals('LEBL', $flight->departure);
         $I->assertEquals('LEVC', $flight->arrival);
         $I->assertEquals('C', $flight->flight_type);
+
+        $fpl = \app\models\SubmittedFlightPlan::find()->where(['pilot_id' => 4])->all();
+        $I->assertEmpty($fpl);
+        $charterRoute = \app\models\CharterRoute::find()->where(['pilot_id' => 4])->all();
+        $I->assertEmpty($charterRoute);
     }
 
 
