@@ -41,7 +41,20 @@ class SubmittedFlightPlanController extends Controller
             [
                 'access' => [
                     'class' => AccessControl::class,
-                    'only' => ['select-flight', 'select-aircraft-route', 'select-aircraft-tour','prepare-fpl-route', 'prepare-fpl-tour', 'my-fpl', 'index', 'view', 'update', 'delete'],
+                    'only' => [
+                        'select-flight',
+                        'select-aircraft-route',
+                        'select-aircraft-tour',
+                        'select-aircraft-charter',
+                        'prepare-fpl-route',
+                        'prepare-fpl-tour',
+                        'prepare-fpl-charter',
+                        'my-fpl',
+                        'index',
+                        'view',
+                        'update',
+                        'delete'
+                    ],
                     'rules' => [
                         [
                             'allow' => true,
@@ -151,8 +164,8 @@ class SubmittedFlightPlanController extends Controller
             $errors = $charter->getFirstErrors();
             $message = implode('; ', $errors);
             $this->logInfo('Select aircraft charter error', [
-                        'charter' => $charter,
-                    ]);
+                'charter' => $charter,
+            ]);
             throw new BadRequestHttpException($message ?: 'Invalid charter destination.');
         }
     }

@@ -67,7 +67,7 @@ return [
     ],
     [
         'id' => 5,
-        'aircraft_id' => 2,
+        'aircraft_id' => 8,
         'charter_route_id' => 1,
         'pilot_id' => 4,
         'flight_rules' => 'Z',

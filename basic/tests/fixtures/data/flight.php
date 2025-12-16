@@ -125,4 +125,28 @@ return [
         'network' => 'Vatsim',
         'flight_type' => 'R'
     ],
+    [
+        'id' => 6,
+        'pilot_id' => 10,
+        'aircraft_id' => 6,
+        'code' => 'F005',
+        'departure' => 'LEMD',
+        'arrival' => 'LEBL',
+        'alternative1_icao' => 'LEAL',
+        'alternative2_icao' => 'LEVC',
+        'flight_rules' => 'I',
+        'cruise_speed_unit' => 'N',
+        'cruise_speed_value' => '340',
+        'flight_level_unit' => 'F',
+        'flight_level_value' => '310',
+        'route' => 'DCT EXAMPLE',
+        'estimated_time' => '0130',
+        'other_information' => 'DOF/20241205 REG/ECDDD OPR/XXX',
+        'endurance_time' => '0500',
+        'report_tool' => 'Mam Acars 1.0',
+        'status' => 'C',
+        'creation_date' => '2025-01-01 02:00:00',
+        'network' => 'Vatsim',
+        'flight_type' => 'C'
+    ],
 ];
