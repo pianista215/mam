@@ -310,7 +310,7 @@ class FlightReportSubmissionCest
 
     private function testValidWithRequest(ApiTester $I, $request)
     {
-        // FPL with id 1 has aircraft_id 4 and pilot_id 4
+        // FPL with id 1 has aircraft_id 4 and pilot_id 5
         $aircraft_id = 4;
         $pilot_id = 5;
 
@@ -329,7 +329,7 @@ class FlightReportSubmissionCest
         $I->assertEquals($pilot_location, 'LEAL');
         $I->assertEquals($aircraft_location, 'LEAL');
 
-        $fpl = \app\models\SubmittedFlightPlan::find()->where(['pilot_id' => 4])->all();
+        $fpl = \app\models\SubmittedFlightPlan::find()->where(['pilot_id' => $pilot_id])->all();
         $I->assertEmpty($fpl);
 
         $flight_report = \app\models\FlightReport::find()->where(['id' => $flight_report_id])->one();
@@ -619,7 +619,7 @@ class FlightReportSubmissionCest
     public function testValidFlightReportSubmissionCharter(ApiTester $I)
     {
         $request = [
-            'pilot_comments' => 'Good stage',
+            'pilot_comments' => 'Good charter',
             'last_position_lat' => 38.280722,
             'last_position_lon' => -0.55235,
             'network' => 'IVAO',
@@ -644,7 +644,7 @@ class FlightReportSubmissionCest
         $flight_report_id = $data['flight_report_id'];
 
         $flight_report = \app\models\FlightReport::find()->where(['id' => $flight_report_id])->one();
-        $I->assertEquals($flight_report->pilot_comments, 'Good stage');
+        $I->assertEquals($flight_report->pilot_comments, 'Good charter');
         $I->assertEquals($flight_report->sim_aircraft_name, 'Xplane King Air 350');
         $I->assertEquals($flight_report->start_time, '2025-02-01 11:00:00');
         $I->assertEquals($flight_report->end_time, '2025-02-01 12:15:13');
@@ -655,7 +655,7 @@ class FlightReportSubmissionCest
         $I->assertEquals(null, $flight->tour_stage_id);
         $I->assertEquals('CHARTER', $flight->code);
         $I->assertEquals('LEBL', $flight->departure);
-        $I->assertEquals('LEMD', $flight->arrival);
+        $I->assertEquals('LEVC', $flight->arrival);
         $I->assertEquals('C', $flight->flight_type);
     }
 

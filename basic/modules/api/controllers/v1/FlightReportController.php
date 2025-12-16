@@ -192,8 +192,8 @@ class FlightReportController extends Controller
             $flight->arrival = $submittedFpl->route0->arrival;
             $flight->flight_type = Flight::TYPE_ROUTE;
         } else {
-            $flight->departure = $submittedFpl->route0->departure;
-            $flight->arrival = $submittedFpl->route0->arrival;
+            $flight->departure = $submittedFpl->charterRoute->departure;
+            $flight->arrival = $submittedFpl->charterRoute->arrival;
             $flight->code = 'CHARTER';
             $flight->flight_type = Flight::TYPE_CHARTER;
         }
