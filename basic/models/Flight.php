@@ -67,7 +67,7 @@ class Flight extends \yii\db\ActiveRecord
     const STATUS_SUBMITTED          = 'S';
     const STATUS_PENDING_VALIDATION = 'V';
     const STATUS_FINISHED           = 'F';
-    const STATUS_REJECTED           = 'C';
+    const STATUS_REJECTED           = 'R';
 
     // Flight type
     const TYPE_ROUTE   = 'R';
