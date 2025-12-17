@@ -19,7 +19,7 @@ class AircraftIndexViewCest
         $I->amOnRoute('aircraft/index');
 
         $I->see('Aircrafts');
-        $I->see('Showing 1-7 of 7 items.');
+        $I->see('Showing 1-10 of 10 items.');
 
         $I->see('Boeing 737-800 (Standard)');
         $I->see('Boeing Name Std');
