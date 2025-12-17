@@ -68,7 +68,16 @@ class SubmitFplCharterCest
         $I->dontSee('Submit FPL', 'button');
     }
 
-    // TODO UNAI: RATIO
+    public function openPrepareFplWithoutEnoughRegularRatio(\FunctionalTester $I){
+        $I->amLoggedInAs(10);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-charter', [ 'arrival' => 'gclp', 'aircraft_id' => '10' ]);
+        $I->seeResponseCodeIs(200);
+
+        $I->see('Your charter flights ratio is too high. Please complete more regular or tour flights before booking another charter.');
+        $I->seeInCurrentUrl('submitted-flight-plan/select-flight');
+        $I->dontSee('Flight Plan Submission');
+        $I->dontSee('Submit FPL', 'button');
+    }
 
 
     public function openPrepareFplCharterButAlreadyHaveOneSubmitted(\FunctionalTester $I)

@@ -72,5 +72,13 @@ return [
         'name' => 'Boeing Cargo HHH',
         'location' => 'GCLP',
         'hours_flown' => 139.4
+    ],
+    [
+        'id' => 10,
+        'aircraft_configuration_id' => 2,
+        'registration' => 'EC-JJJ',
+        'name' => 'Boeing Cargo JJJ',
+        'location' => 'LEAL',
+        'hours_flown' => 139.4
     ]
 ];
