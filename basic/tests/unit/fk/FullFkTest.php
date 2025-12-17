@@ -7,6 +7,7 @@ use app\models\Aircraft;
 use app\models\AircraftConfiguration;
 use app\models\AircraftType;
 use app\models\Airport;
+use app\models\CharterRoute;
 use app\models\Country;
 use app\models\Flight;
 use app\models\FlightEvent;
@@ -128,7 +129,7 @@ class FullFkTest extends BaseUnitTest
         return $stage;
     }
 
-    private function createSubmittedFpl($aircraft, $pilot, $route, $stage)
+    private function createSubmittedFpl($aircraft, $pilot, $route, $stage, $charterRoute)
     {
         $sfp = null;
         if($route !== null){
@@ -150,7 +151,7 @@ class FullFkTest extends BaseUnitTest
                 'tour_stage_id' => null,
             ]);
             $this->assertTrue($sfp->save(), 'sfpRoute saved');
-        } else {
+        } else if($stage !== null){
             $sfp = new SubmittedFlightPlan([
                 'aircraft_id' => $aircraft->id,
                 'flight_rules' => 'I',
@@ -169,6 +170,26 @@ class FullFkTest extends BaseUnitTest
                 'tour_stage_id' => $stage->id,
             ]);
             $this->assertTrue($sfp->save(), 'sfpStage saved');
+        } else {
+            $sfp = new SubmittedFlightPlan([
+                'aircraft_id' => $aircraft->id,
+                'flight_rules' => 'V',
+                'alternative1_icao' => 'LEVC',
+                'alternative2_icao' => 'LEMD',
+                'cruise_speed_value' => '400',
+                'cruise_speed_unit' => 'N',
+                'flight_level_value' => '350',
+                'flight_level_unit' => 'F',
+                'route' => 'NAND UM871',
+                'estimated_time' => '0031',
+                'other_information' => 'PBN/A1B1D1',
+                'endurance_time' => '0500',
+                'route_id' => null,
+                'pilot_id' => $pilot->id,
+                'tour_stage_id' => null,
+                'charter_route_id' => $charterRoute->id
+            ]);
+            $this->assertTrue($sfp->save(), 'sfpCharter saved');
         }
         return $sfp;
     }
@@ -195,6 +216,7 @@ class FullFkTest extends BaseUnitTest
         $flight->report_tool = 'ToolName';
         $flight->tour_stage_id = $stage->id;
         $flight->validator_id = $validator->id;
+        $flight->flight_type = 'T';
         $this->assertTrue($flight->save(), 'flight saved');
         return $flight;
     }
@@ -383,7 +405,7 @@ class FullFkTest extends BaseUnitTest
         $this->assertEquals(1, $tour3->save(), 'Tour 3 can be delete without stages associated');
 
         // Submitted flight plan associated to route
-        $sfpRoute = $this->createSubmittedFpl($aircraft, $pilot, $route, null);
+        $sfpRoute = $this->createSubmittedFpl($aircraft, $pilot, $route, null, null);
 
         // Check we can't delete route with submitted fpl associated
         try {
@@ -407,7 +429,7 @@ class FullFkTest extends BaseUnitTest
         $levc = $this->createLEVC($country);
 
         // Submitted flight plan associated to tour_stage
-        $sfpStage = $this->createSubmittedFpl($aircraft, $pilot, null, $stage);
+        $sfpStage = $this->createSubmittedFpl($aircraft, $pilot, null, $stage, null);
 
         // Check we can't delete tour stage with submitted fpl associated
         try {
@@ -419,6 +441,23 @@ class FullFkTest extends BaseUnitTest
 
         $this->assertEquals(1, $sfpStage->delete(), 'SubmittedFlightPlan with tour stage associated can be deleted');
         $this->assertEquals(1, $stage->delete(), 'Stage without nothing associated can be deleted');
+
+        // Submitted flight plan associated to charterRoute
+        $charterRoute = new CharterRoute(['pilot_id' => $pilot->id, 'departure' => 'LEMD', 'arrival' => 'LEVD']);
+        $this->assertTrue($charterRoute->save());
+        $sfpCharter = $this->createSubmittedFpl($aircraft, $pilot, null, null, $charterRoute);
+
+        // Check we can't delete charterRoute with submitted fpl associated
+        try {
+            $charterRoute->delete();
+            $this->fail('Deleting charter route should have failed due to existing submittedFpl with charter route associated.');
+        } catch (\yii\db\IntegrityException $e) {
+            $this->assertTrue(true, 'charter route deletion blocked by submitted fpl charter');
+        }
+
+        $this->assertEquals(1, $sfpCharter->delete(), 'SubmittedFlightPlan charter can be deleted');
+        // Check charter route is deleted with fpl
+        $this->assertEquals(0, CharterRoute::find()->where(['id' => $charterRoute->id])->count());
 
         // Flight with tour stage and validator
         $pilot2 = $this->createPilot2($country2, $rank);
