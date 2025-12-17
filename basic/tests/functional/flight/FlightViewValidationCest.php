@@ -266,7 +266,7 @@ class FlightViewValidationCest
             'Flight[validator_comments]' => 'One stage more for complete',
         ]);
         $I->seeResponseCodeIs(200);
-        $countFirst = \app\models\PilotTourCompletion::find(['tour_id' => '3'])->count();
+        $countFirst = \app\models\PilotTourCompletion::find()->where(['tour_id' => '3'])->count();
         $I->assertEquals(0, $countFirst);
 
         $I->amLoggedInAs(5);
@@ -278,10 +278,10 @@ class FlightViewValidationCest
             'Flight[validator_comments]' => 'Congratulations you have a tour completed',
         ]);
         $I->seeResponseCodeIs(200);
-        $countSecond = \app\models\PilotTourCompletion::find(['tour_id' => '3'])->count();
+        $countSecond = \app\models\PilotTourCompletion::find()->where(['tour_id' => '3'])->count();
         $I->assertEquals(1, $countSecond);
 
-        $tour_completed = \app\models\PilotTourCompletion::find(['tour_id' => '3'])->one();
+        $tour_completed = \app\models\PilotTourCompletion::find()->where(['tour_id' => '3'])->one();
         $I->assertEquals(1, $tour_completed->pilot_id);
         $I->assertEquals(3, $tour_completed->tour_id);
         $I->assertEquals(date('Y-m-d'), $tour_completed->completed_at);
@@ -301,7 +301,7 @@ class FlightViewValidationCest
             'Flight[validator_comments]' => 'One stage more for complete',
         ]);
         $I->seeResponseCodeIs(200);
-        $countFirst = \app\models\PilotTourCompletion::find(['tour_id' => '3'])->count();
+        $countFirst = \app\models\PilotTourCompletion::find()->where(['tour_id' => '3'])->count();
         $I->assertEquals(0, $countFirst);
 
         $I->amOnRoute('flight/view', ['id' => 3]);
@@ -312,7 +312,7 @@ class FlightViewValidationCest
             'Flight[validator_comments]' => 'Stage repeated',
         ]);
         $I->seeResponseCodeIs(200);
-        $countSecond = \app\models\PilotTourCompletion::find(['tour_id' => '3'])->count();
+        $countSecond = \app\models\PilotTourCompletion::find()->where(['tour_id' => '3'])->count();
         $I->assertEquals(0, $countSecond);
     }
 
@@ -327,7 +327,7 @@ class FlightViewValidationCest
             'Flight[validator_comments]' => 'One stage more for complete',
         ]);
         $I->seeResponseCodeIs(200);
-        $countFirst = \app\models\PilotTourCompletion::find(['tour_id' => '3'])->count();
+        $countFirst = \app\models\PilotTourCompletion::find()->where(['tour_id' => '3'])->count();
         $I->assertEquals(0, $countFirst);
 
         $I->amLoggedInAs(5);
@@ -339,10 +339,10 @@ class FlightViewValidationCest
             'Flight[validator_comments]' => 'Congratulations you have a tour completed',
         ]);
         $I->seeResponseCodeIs(200);
-        $countSecond = \app\models\PilotTourCompletion::find(['tour_id' => '3'])->count();
+        $countSecond = \app\models\PilotTourCompletion::find()->where(['tour_id' => '3'])->count();
         $I->assertEquals(1, $countSecond);
 
-        $tour_completed = \app\models\PilotTourCompletion::find(['tour_id' => '3'])->one();
+        $tour_completed = \app\models\PilotTourCompletion::find()->where(['tour_id' => '3'])->one();
         $I->assertEquals(1, $tour_completed->pilot_id);
         $I->assertEquals(3, $tour_completed->tour_id);
         $I->assertEquals(date('Y-m-d'), $tour_completed->completed_at);
@@ -363,7 +363,7 @@ class FlightViewValidationCest
         ]);
         $I->seeResponseCodeIs(200);
 
-        $countThird = \app\models\PilotTourCompletion::find(['tour_id' => '3'])->count();
+        $countThird = \app\models\PilotTourCompletion::find()->where(['tour_id' => '3'])->count();
         $I->assertEquals(1, $countThird);
         $I->assertEquals(1, $tour_completed->pilot_id);
         $I->assertEquals(3, $tour_completed->tour_id);

@@ -4,10 +4,9 @@ namespace tests\functional\submitFlightPlan;
 
 use tests\fixtures\AuthAssignmentFixture;
 use tests\fixtures\SubmittedFlightPlanFixture;
-use tests\fixtures\TourStageFixture;
 use Yii;
 
-class SelectAircraftTourCest
+class SelectAircraftCharterCest
 {
     public function _fixtures(){
         return [

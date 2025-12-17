@@ -353,6 +353,7 @@ class SubmittedFlightPlanController extends Controller
                             $this->logError('Problem creating charter route', ['entity' => $entity, 'errors' =>$entity->getErrors()]);
                             $ok = false;
                         } else {
+                            $this->logInfo('Saved charter route', ['route' => $entity]);
                             $model->charter_route_id = $entity->id;
                         }
                     }
