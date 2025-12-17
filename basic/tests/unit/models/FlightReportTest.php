@@ -118,7 +118,8 @@ class FlightReportTest extends BaseUnitTest
             'estimated_time' => '0200',
             'other_information' => 'Other flight details',
             'endurance_time' => '0500',
-            'report_tool' => 'Tool name'
+            'report_tool' => 'Tool name',
+            'flight_type' => 'R'
         ]);
 
         $this->flight->save();
