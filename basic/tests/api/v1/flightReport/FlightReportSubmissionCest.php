@@ -310,7 +310,7 @@ class FlightReportSubmissionCest
 
     private function testValidWithRequest(ApiTester $I, $request)
     {
-        // FPL with id 1 has aircraft_id 4 and pilot_id 4
+        // FPL with id 1 has aircraft_id 4 and pilot_id 5
         $aircraft_id = 4;
         $pilot_id = 5;
 
@@ -329,7 +329,7 @@ class FlightReportSubmissionCest
         $I->assertEquals($pilot_location, 'LEAL');
         $I->assertEquals($aircraft_location, 'LEAL');
 
-        $fpl = \app\models\SubmittedFlightPlan::find()->where(['pilot_id' => 4])->all();
+        $fpl = \app\models\SubmittedFlightPlan::find()->where(['pilot_id' => $pilot_id])->all();
         $I->assertEmpty($fpl);
 
         $flight_report = \app\models\FlightReport::find()->where(['id' => $flight_report_id])->one();
@@ -358,6 +358,7 @@ class FlightReportSubmissionCest
         $I->assertEquals($flight->code, 'R003');
         $I->assertEquals($flight->status, 'C');
         $I->assertEquals(null, $flight->tour_stage_id);
+        $I->assertEquals('R', $flight->flight_type);
 
         return $flight_report_id;
     }
@@ -495,6 +496,7 @@ class FlightReportSubmissionCest
         $I->assertEquals($flight->flight_level_unit, 'VFR');
         $I->assertEquals($flight->flight_level_value, '');
         $I->assertEquals(null, $flight->tour_stage_id);
+        $I->assertEquals('R', $flight->flight_type);
     }
 
     public function testValidFlightReportSubmissionTwice(ApiTester $I)
@@ -611,6 +613,55 @@ class FlightReportSubmissionCest
         $I->assertEquals('TAR1', $flight->code);
         $I->assertEquals('LEBL', $flight->departure);
         $I->assertEquals('LEMD', $flight->arrival);
+        $I->assertEquals('T', $flight->flight_type);
+    }
+
+    public function testValidFlightReportSubmissionCharter(ApiTester $I)
+    {
+        $request = [
+            'pilot_comments' => 'Good charter',
+            'last_position_lat' => 38.280722,
+            'last_position_lon' => -0.55235,
+            'network' => 'IVAO',
+            'sim_aircraft_name' => 'Xplane King Air 350',
+            'report_tool' => 'Mam Acars 1.0',
+            'start_time' => '2025-02-01 11:00:00',
+            'end_time' => '2025-02-01 12:15:13',
+            'chunks' => [
+                ['id' => 1, 'sha256sum' => str_repeat('A', 44)],
+            ]
+        ];
+
+        $this->loginAsUser(4, $I);
+        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=5', $request);
+        $I->seeResponseCodeIs(200);
+
+        $response = $I->grabResponse();
+        $data = json_decode($response, true);
+        $I->assertArrayHasKey('flight_report_id', $data);
+        $I->assertCount(1, $data);
+
+        $flight_report_id = $data['flight_report_id'];
+
+        $flight_report = \app\models\FlightReport::find()->where(['id' => $flight_report_id])->one();
+        $I->assertEquals($flight_report->pilot_comments, 'Good charter');
+        $I->assertEquals($flight_report->sim_aircraft_name, 'Xplane King Air 350');
+        $I->assertEquals($flight_report->start_time, '2025-02-01 11:00:00');
+        $I->assertEquals($flight_report->end_time, '2025-02-01 12:15:13');
+
+        $flight = \app\models\Flight::find()->where(['id' => $flight_report->flight_id])->one();
+        $I->assertEquals($flight->flight_level_unit, 'F');
+        $I->assertEquals($flight->flight_level_value, '320');
+        $I->assertEquals(null, $flight->tour_stage_id);
+        $I->assertEquals('CHARTER', $flight->code);
+        $I->assertEquals('LEBL', $flight->departure);
+        $I->assertEquals('LEVC', $flight->arrival);
+        $I->assertEquals('C', $flight->flight_type);
+
+        $fpl = \app\models\SubmittedFlightPlan::find()->where(['pilot_id' => 4])->all();
+        $I->assertEmpty($fpl);
+        $charterRoute = \app\models\CharterRoute::find()->where(['pilot_id' => 4])->all();
+        $I->assertEmpty($charterRoute);
     }
 
 

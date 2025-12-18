@@ -65,8 +65,8 @@ class SubmittedFlightPlanUpdateCest
         $I->see('Other Information cannot be blank.');
         $I->see('Endurance cannot be blank.');
 
-        $count = \app\models\AircraftType::find()->count();
-        $I->assertEquals(4, $count);
+        $count = \app\models\SubmittedFlightPlan::find()->count();
+        $I->assertEquals(5, $count);
     }
 
     public function updateValidSubmittedFlightPlanRoute(\FunctionalTester $I)
@@ -107,7 +107,7 @@ class SubmittedFlightPlanUpdateCest
         $I->assertEquals('0630', $model->endurance_time);
 
         $count = \app\models\SubmittedFlightPlan::find()->count();
-        $I->assertEquals(4, $count);
+        $I->assertEquals(5, $count);
     }
 
     public function updateValidSubmittedFlightPlanTour(\FunctionalTester $I)
@@ -148,7 +148,52 @@ class SubmittedFlightPlanUpdateCest
         $I->assertEquals('0630', $model->endurance_time);
 
         $count = \app\models\SubmittedFlightPlan::find()->count();
-        $I->assertEquals(4, $count);
+        $I->assertEquals(5, $count);
+    }
+
+    public function updateValidSubmittedFlightPlanCharter(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(4);
+        $I->amOnRoute('submitted-flight-plan/update', [ 'id' => '5' ]);
+
+        $I->fillField('#submittedflightplan-cruise_speed_value','100');
+        $I->fillField('#flight_level_value','120');
+        $I->fillField('#submittedflightplan-route','OTHER ROUTE');
+        $I->fillField('#submittedflightplan-estimated_time','0500');
+        $I->fillField('#submittedflightplan-alternative1_icao','LEAL');
+        $I->fillField('#submittedflightplan-other_information','OTHER INFO DIFFERENT');
+        $I->fillField('#submittedflightplan-endurance_time','0630');
+
+        $I->click('Submit FPL', 'button');
+
+        $I->seeResponseCodeIs(200);
+        $I->see('Current Flight Plan');
+        $I->see('Charter flight (LEBL-LEVC)');
+
+        $I->seeInField('input[name="SubmittedFlightPlan[cruise_speed_value]"]', '100');
+        $I->seeInField('input[name="SubmittedFlightPlan[flight_level_value]"]', '120');
+        $I->seeInField('textarea[name="SubmittedFlightPlan[route]"]', 'OTHER ROUTE');
+        $I->seeInField('input[name="SubmittedFlightPlan[alternative1_icao]"]', 'LEAL');
+        $I->seeInField('textarea[name="SubmittedFlightPlan[other_information]"]', 'OTHER INFO DIFFERENT');
+        $I->seeInField('input[name="SubmittedFlightPlan[endurance_time]"]', '0630');
+
+        $model = \app\models\SubmittedFlightPlan::find()->where(['pilot_id' => 4])->one();
+        $I->assertNotNull($model);
+        $I->assertEquals(100, $model->cruise_speed_value);
+        $I->assertEquals(120, $model->flight_level_value);
+        $I->assertEquals(null, $model->route_id);
+        $I->assertEquals(null, $model->tour_stage_id);
+        $I->assertEquals(1, $model->charter_route_id);
+        $I->assertEquals('OTHER ROUTE', $model->route);
+        $I->assertEquals('LEAL', $model->alternative1_icao);
+        $I->assertEquals('OTHER INFO DIFFERENT', $model->other_information);
+        $I->assertEquals('0630', $model->endurance_time);
+
+        $count = \app\models\CharterRoute::find()->count();
+        $I->assertEquals(1, $count);
+
+        $count = \app\models\SubmittedFlightPlan::find()->count();
+        $I->assertEquals(5, $count);
     }
 
 }

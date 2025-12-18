@@ -127,7 +127,7 @@ class SubmitFplRouteCest
         $I->see('Endurance cannot be blank.');
 
         $count = \app\models\SubmittedFlightPlan::find()->count();
-        $I->assertEquals(4, $count);
+        $I->assertEquals(5, $count);
     }
 
     public function openPrepareFplRouteInvalidAlternatives(\FunctionalTester $I)
@@ -168,7 +168,7 @@ class SubmitFplRouteCest
         $I->see('2nd Altn Aerodrome is invalid.');
 
         $count = \app\models\SubmittedFlightPlan::find()->count();
-        $I->assertEquals(4, $count);
+        $I->assertEquals(5, $count);
     }
 
     public function openPrepareFplRouteInvalidIntegerFields(\FunctionalTester $I)
@@ -204,7 +204,7 @@ class SubmitFplRouteCest
         $I->see('Flight Level Value must be an integer.');
 
         $count = \app\models\SubmittedFlightPlan::find()->count();
-        $I->assertEquals(4, $count);
+        $I->assertEquals(5, $count);
     }
 
     public function openPrepareFplRouteValidVFRPlan(\FunctionalTester $I)
@@ -266,6 +266,7 @@ class SubmitFplRouteCest
         $I->assertEquals(3, $model->aircraft_id);
         $I->assertEquals(1, $model->route_id);
         $I->assertEquals(null, $model->tour_stage_id);
+        $I->assertEquals(null, $model->charter_route_id);
         $I->assertEquals('V', $model->flight_rules);
         $I->assertEquals('K', $model->cruise_speed_unit);
         $I->assertEquals('100', $model->cruise_speed_value);
@@ -279,7 +280,7 @@ class SubmitFplRouteCest
         $I->assertEquals('0335', $model->endurance_time);
 
         $count = \app\models\SubmittedFlightPlan::find()->count();
-        $I->assertEquals(5, $count);
+        $I->assertEquals(6, $count);
     }
 
     public function openPrepareFplRouteValidIFRPlan(\FunctionalTester $I)
@@ -337,6 +338,7 @@ class SubmitFplRouteCest
         $I->assertEquals(2, $model->aircraft_id);
         $I->assertEquals(3, $model->route_id);
         $I->assertEquals(null, $model->tour_stage_id);
+        $I->assertEquals(null, $model->charter_route_id);
         $I->assertEquals('I', $model->flight_rules);
         $I->assertEquals('N', $model->cruise_speed_unit);
         $I->assertEquals('350', $model->cruise_speed_value);
@@ -350,7 +352,7 @@ class SubmitFplRouteCest
         $I->assertEquals('0235', $model->endurance_time);
 
         $count = \app\models\SubmittedFlightPlan::find()->count();
-        $I->assertEquals(5, $count);
+        $I->assertEquals(6, $count);
     }
 
     public function openPrepareFplRouteValidIFRToVFRPlan(\FunctionalTester $I)
@@ -412,6 +414,7 @@ class SubmitFplRouteCest
         $I->assertEquals(3, $model->aircraft_id);
         $I->assertEquals(1, $model->route_id);
         $I->assertEquals(null, $model->tour_stage_id);
+        $I->assertEquals(null, $model->charter_route_id);
         $I->assertEquals('Y', $model->flight_rules);
         $I->assertEquals('N', $model->cruise_speed_unit);
         $I->assertEquals('110', $model->cruise_speed_value);
@@ -425,7 +428,7 @@ class SubmitFplRouteCest
         $I->assertEquals('0400', $model->endurance_time);
 
         $count = \app\models\SubmittedFlightPlan::find()->count();
-        $I->assertEquals(5, $count);
+        $I->assertEquals(6, $count);
     }
 
     public function openPrepareFplRouteValidVFRToIFRPlan(\FunctionalTester $I)
@@ -487,6 +490,7 @@ class SubmitFplRouteCest
         $I->assertEquals(3, $model->aircraft_id);
         $I->assertEquals(1, $model->route_id);
         $I->assertEquals(null, $model->tour_stage_id);
+        $I->assertEquals(null, $model->charter_route_id);
         $I->assertEquals('Z', $model->flight_rules);
         $I->assertEquals('M', $model->cruise_speed_unit);
         $I->assertEquals('020', $model->cruise_speed_value);
@@ -500,7 +504,7 @@ class SubmitFplRouteCest
         $I->assertEquals('0325', $model->endurance_time);
 
         $count = \app\models\SubmittedFlightPlan::find()->count();
-        $I->assertEquals(5, $count);
+        $I->assertEquals(6, $count);
     }
 
 }

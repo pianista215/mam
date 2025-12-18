@@ -27,6 +27,7 @@ return [
         'status' => 'V',
         'creation_date' => date('Y-m-d H:i:s', strtotime('-1 day')),
         'tour_stage_id' => 2,
+        'flight_type' => 'T'
     ],
 
     // IFR flight, status V
@@ -51,6 +52,7 @@ return [
         'status' => 'V',
         'creation_date' => date('Y-m-d H:i:s', strtotime('-1 day')),
         'tour_stage_id' => 3,
+        'flight_type' => 'T'
     ],
 
     // Y flight, status V
@@ -75,6 +77,7 @@ return [
         'status' => 'V',
         'creation_date' => date('Y-m-d H:i:s', strtotime('-1 day')),
         'tour_stage_id' => 3,
+        'flight_type' => 'T'
     ],
 
     // Z flight, status V
@@ -98,6 +101,7 @@ return [
         'report_tool' => 'Mam Acars',
         'status' => 'V',
         'creation_date' => date('Y-m-d H:i:s', strtotime('-1 day')),
+        'flight_type' => 'R'
     ],
 
     // ----------------------------
@@ -125,6 +129,7 @@ return [
         'report_tool' => 'Mam Acars',
         'status' => 'C',
         'creation_date' => date('Y-m-d H:i:s', strtotime('-4 days')),
+        'flight_type' => 'C'
     ],
 
     // IFR flight, status C (>72h)
@@ -148,6 +153,7 @@ return [
         'report_tool' => 'Mam Acars',
         'status' => 'C',
         'creation_date' => date('Y-m-d H:i:s', strtotime('-4 days')),
+        'flight_type' => 'R'
     ],
 
     // Y flight, status C (>72h)
@@ -171,6 +177,7 @@ return [
         'report_tool' => 'Mam Acars',
         'status' => 'C',
         'creation_date' => date('Y-m-d H:i:s', strtotime('-4 days')),
+        'flight_type' => 'C'
     ],
 
     // Z flight, status C (>72h)
@@ -194,6 +201,7 @@ return [
         'report_tool' => 'Mam Acars',
         'status' => 'C',
         'creation_date' => date('Y-m-d H:i:s', strtotime('-4 days')),
+        'flight_type' => 'R'
     ],
 
     // ----------------------------
@@ -221,6 +229,7 @@ return [
         'report_tool' => 'Mam Acars',
         'status' => 'C',
         'creation_date' => date('Y-m-d H:i:s', strtotime('-1 day')),
+        'flight_type' => 'C'
     ],
 
     // Finished
@@ -246,7 +255,8 @@ return [
         'creation_date' => date('Y-m-d H:i:s', strtotime('-3 days')),
         'validator_id' => 5,
         'validation_date' => date('Y-m-d H:i:s', strtotime('-3 days')),
-        'validator_comments' => 'Good flight'
+        'validator_comments' => 'Good flight',
+        'flight_type' => 'R'
     ],
 
     // Rejected
@@ -272,7 +282,8 @@ return [
         'creation_date' => date('Y-m-d H:i:s', strtotime('-3 days')),
         'validator_id' => 4,
         'validation_date' => date('Y-m-d H:i:s', strtotime('-3 days')),
-        'validator_comments' => 'Repeat the flight please'
+        'validator_comments' => 'Repeat the flight please',
+        'flight_type' => 'C'
     ],
 
     // Own flight VFR Validator
@@ -296,6 +307,7 @@ return [
         'report_tool' => 'Mam Acars',
         'status' => 'V',
         'creation_date' => date('Y-m-d H:i:s', strtotime('-3 days')),
+        'flight_type' => 'R'
     ],
 
     // Own flight IFR Validator (C > 72h)
@@ -319,5 +331,6 @@ return [
         'report_tool' => 'Mam Acars',
         'status' => 'C',
         'creation_date' => date('Y-m-d H:i:s', strtotime('-4 days')),
+        'flight_type' => 'C'
     ],
 ];

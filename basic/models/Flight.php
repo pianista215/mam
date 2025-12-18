@@ -32,6 +32,7 @@ use Yii;
  * @property int|null $validator_id
  * @property string|null $validation_date
  * @property int|null $tour_stage_id
+ * @property string $flight_type
  *
  * @property Aircraft $aircraft
  * @property Airport $alternative1Icao
@@ -61,6 +62,18 @@ class Flight extends \yii\db\ActiveRecord
         return $scenarios;
     }
 
+    // Status
+    const STATUS_CREATED            = 'C';
+    const STATUS_SUBMITTED          = 'S';
+    const STATUS_PENDING_VALIDATION = 'V';
+    const STATUS_FINISHED           = 'F';
+    const STATUS_REJECTED           = 'R';
+
+    // Flight type
+    const TYPE_ROUTE   = 'R';
+    const TYPE_TOUR    = 'T';
+    const TYPE_CHARTER = 'C';
+
     /**
      * {@inheritdoc}
      */
@@ -72,12 +85,23 @@ class Flight extends \yii\db\ActiveRecord
             [['creation_date', 'validation_date'], 'safe'],
             [['code'], 'string', 'max' => 10],
             [['departure', 'arrival', 'alternative1_icao', 'alternative2_icao', 'cruise_speed_value', 'flight_level_value', 'estimated_time', 'endurance_time'], 'string', 'max' => 4],
-            [['cruise_speed_unit', 'status', 'flight_rules'], 'string', 'max' => 1],
+            [['cruise_speed_unit', 'status', 'flight_rules', 'flight_type'], 'string', 'max' => 1],
             [['flight_level_unit'], 'string', 'max' => 3],
             [['route', 'other_information', 'validator_comments'], 'string', 'max' => 400],
             [['report_tool'], 'string', 'max' => 20],
             [['network'], 'string', 'max' => 50],
-            [['status'], 'in', 'range' => ['F', 'R', 'V', 'C', 'S']],
+            [['status'], 'in', 'range' => [
+                self::STATUS_CREATED,
+                self::STATUS_SUBMITTED,
+                self::STATUS_PENDING_VALIDATION,
+                self::STATUS_FINISHED,
+                self::STATUS_REJECTED,
+            ]],
+            [['flight_type'], 'in', 'range' => [
+                self::TYPE_ROUTE,
+                self::TYPE_TOUR,
+                self::TYPE_CHARTER,
+            ]],
             [['aircraft_id'], 'exist', 'skipOnError' => true, 'targetClass' => Aircraft::class, 'targetAttribute' => ['aircraft_id' => 'id']],
             [['alternative1_icao'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['alternative1_icao' => 'icao_code']],
             [['alternative2_icao'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['alternative2_icao' => 'icao_code']],
@@ -122,23 +146,24 @@ class Flight extends \yii\db\ActiveRecord
             'validator_id' => 'Validator ID',
             'validation_date' => 'Validation Date',
             'tour_stage_id' => 'Tour Stage ID',
+            'flight_type' => 'Flight Type',
         ];
     }
 
     public function getFullStatus(){
         $list = [
-            'C' => Yii::t('app', 'Created. Basic information received. Awaiting ACARS files to be uploaded.'),
-            'S' => Yii::t('app', 'ACARS files received. Awaiting processing.'),
-            'V' => Yii::t('app', 'Pending validation.'),
-            'F' => Yii::t('app', 'Finished'),
-            'R' => Yii::t('app', 'Rejected')
+            self::STATUS_CREATED => Yii::t('app', 'Created. Basic information received. Awaiting ACARS files to be uploaded.'),
+            self::STATUS_SUBMITTED => Yii::t('app', 'ACARS files received. Awaiting processing.'),
+            self::STATUS_PENDING_VALIDATION => Yii::t('app', 'Pending validation.'),
+            self::STATUS_FINISHED => Yii::t('app', 'Finished'),
+            self::STATUS_REJECTED => Yii::t('app', 'Rejected')
         ];
 
         return $list[$this->status];
     }
 
     public function isProcessed(){
-        return $this->status === 'V' || $this->status === 'F' || $this->status === 'R';
+        return $this->status === self::STATUS_PENDING_VALIDATION || $this->status === self::STATUS_FINISHED || $this->status === self::STATUS_REJECTED;
     }
 
     public function hasAcarsInfo(){
@@ -146,15 +171,15 @@ class Flight extends \yii\db\ActiveRecord
     }
 
     public function isValidated(){
-        return $this->status === 'F' || $this->status === 'R';
+        return $this->status === self::STATUS_FINISHED || $this->status === self::STATUS_REJECTED;
     }
 
     public function isPendingValidation(){
-        if ($this->status === 'V') {
+        if ($this->status === self::STATUS_PENDING_VALIDATION) {
             return true;
         }
 
-        if ($this->status === 'C' && $this->creation_date) {
+        if ($this->status === self::STATUS_CREATED && $this->creation_date) {
             $creation = new \DateTimeImmutable($this->creation_date);
             // TODO: Make this configurable from config param
             return $creation->modify('+72 hours') < new \DateTimeImmutable();

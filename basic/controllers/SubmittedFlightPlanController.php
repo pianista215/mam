@@ -2,9 +2,13 @@
 
 namespace app\controllers;
 
+use app\config\Config;
+use app\helpers\GeoUtils;
 use app\helpers\LoggerTrait;
 use app\models\Aircraft;
 use app\models\AircraftSearch;
+use app\models\Airport;
+use app\models\CharterRoute;
 use app\models\Route;
 use app\models\RouteSearch;
 use app\models\SubmittedFlightPlan;
@@ -15,6 +19,7 @@ use yii\web\Controller;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
+use yii\web\ServerErrorHttpException;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use Yii;
@@ -36,7 +41,20 @@ class SubmittedFlightPlanController extends Controller
             [
                 'access' => [
                     'class' => AccessControl::class,
-                    'only' => ['select-flight', 'select-aircraft-route', 'select-aircraft-tour','prepare-fpl-route', 'prepare-fpl-tour', 'my-fpl', 'index', 'view', 'update', 'delete'],
+                    'only' => [
+                        'select-flight',
+                        'select-aircraft-route',
+                        'select-aircraft-tour',
+                        'select-aircraft-charter',
+                        'prepare-fpl-route',
+                        'prepare-fpl-tour',
+                        'prepare-fpl-charter',
+                        'my-fpl',
+                        'index',
+                        'view',
+                        'update',
+                        'delete'
+                    ],
                     'rules' => [
                         [
                             'allow' => true,
@@ -78,6 +96,11 @@ class SubmittedFlightPlanController extends Controller
     protected function checkAircraftIsAvailable($aircraft){
         return  isset($aircraft) &&
                 !SubmittedFlightPlan::find()->where(['aircraft_id' => $aircraft->id])->exists();
+    }
+
+    protected function checkUserCanCreateCharter() {
+        $ratio = (float) Config::get('charter_ratio');
+        return Yii::$app->user->identity->getCharterRatio() > $ratio;
     }
 
     protected function getCurrentFpl() {
@@ -123,6 +146,30 @@ class SubmittedFlightPlanController extends Controller
         return $this->selectAircraft('stage', $stage);
     }
 
+    public function actionSelectAircraftCharter($arrival)
+    {
+        if($this->checkUserCanCreateCharter()){
+            Yii::$app->session->setFlash('error', Yii::t('app', 'Your charter flights ratio is too high. Please complete more regular or tour flights before booking another charter.'));
+            return $this->redirect(['select-flight']);
+        }
+
+        $charter = new CharterRoute();
+        $charter->pilot_id = Yii::$app->user->identity->id;
+        $charter->departure = Yii::$app->user->identity->location;
+        $charter->arrival = $arrival;
+
+        if ($charter->validate()) {
+            return $this->selectAircraft('charter', $charter);
+        } else {
+            $errors = $charter->getFirstErrors();
+            $message = implode('; ', $errors);
+            $this->logInfo('Select aircraft charter error', [
+                'charter' => $charter,
+            ]);
+            throw new BadRequestHttpException($message ?: 'Invalid charter destination.');
+        }
+    }
+
     protected function selectAircraft(string $type, $entity)
     {
         if (!Yii::$app->user->can('submitFpl')) {
@@ -152,6 +199,11 @@ class SubmittedFlightPlanController extends Controller
             $arrival = $entity->arrival;
             $distance = $entity->distance_nm;
             $label = "Stage: {$departure}-{$arrival}";
+        } elseif ($type === 'charter'){
+            $departure = $entity->departure;
+            $arrival = $entity->arrival;
+            $distance = $entity->distance_nm;
+            $label = "{$departure}-{$arrival}";
         } else {
             $this->logInfo('Invalid entity type', [
                         'type' => $type,
@@ -224,6 +276,44 @@ class SubmittedFlightPlanController extends Controller
         return $this->prepareFplGeneric($stage, $aircraft, 'stage');
     }
 
+    public function actionPrepareFplCharter($arrival, $aircraft_id)
+    {
+        if (!Yii::$app->user->can('submitFpl')) {
+            throw new ForbiddenHttpException();
+        }
+
+        $model = $this->getCurrentFpl();
+        if ($model !== null) {
+            $this->logInfo('Returning user current fpl (prepare charter)', [
+                'model' => $model,
+                'user' => Yii::$app->user->identity->license
+            ]);
+            return $this->redirect(['view', 'id' => $model->id]);
+        }
+
+        if($this->checkUserCanCreateCharter()){
+            Yii::$app->session->setFlash('error', Yii::t('app', 'Your charter flights ratio is too high. Please complete more regular or tour flights before booking another charter.'));
+            return $this->redirect(['select-flight']);
+        }
+
+        $charter = new CharterRoute();
+        $charter->pilot_id = Yii::$app->user->identity->id;
+        $charter->departure = Yii::$app->user->identity->location;
+        $charter->arrival = $arrival;
+
+        if ($charter->validate()) {
+            $aircraft = Aircraft::findOne($aircraft_id);
+            return $this->prepareFplGeneric($charter, $aircraft, 'charter');
+        } else {
+            $errors = $charter->getFirstErrors();
+            $message = implode('; ', $errors);
+            $this->logInfo('Select aircraft charter error', [
+                        'charter' => $charter,
+                    ]);
+            throw new BadRequestHttpException($message ?: 'Invalid charter destination.');
+        }
+    }
+
     protected function prepareFplGeneric($entity, $aircraft, $entityType)
     {
         if (!$this->checkEntityIsUserLocation($entity)
@@ -249,12 +339,44 @@ class SubmittedFlightPlanController extends Controller
         }
 
         if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                $this->logInfo('Created FPL', [
-                    'model' => $model,
-                    'user' => Yii::$app->user->identity->license
-                ]);
-                return $this->redirect(['view', 'id' => $model->id]);
+
+            if ($model->load($this->request->post())) {
+
+                $transaction = Yii::$app->db->beginTransaction();
+
+                $ok = true;
+
+                try {
+                    if($entityType === 'charter') {
+                        if (!$entity->save()) {
+                            $model->addError('charter_route_id', Yii::t('app', 'Problem creating charter route.'));
+                            $this->logError('Problem creating charter route', ['entity' => $entity, 'errors' =>$entity->getErrors()]);
+                            $ok = false;
+                        } else {
+                            $this->logInfo('Saved charter route', ['route' => $entity]);
+                            $model->charter_route_id = $entity->id;
+                        }
+                    }
+
+                    if ($ok && !$model->save()) {
+                        $ok = false;
+                    }
+                    if ($ok) {
+                        $transaction->commit();
+                        $this->logInfo('Created FPL', [
+                            'model' => $model,
+                            'user' => Yii::$app->user->identity->license
+                        ]);
+
+                        return $this->redirect(['view', 'id' => $model->id]);
+                    } else {
+                        $transaction->rollBack();
+                    }
+                } catch (\Throwable $e) {
+                    $transaction->rollBack();
+                    $this->logError('Problem creating fpl', ['entityType' => $entityType, 'entity' => $entity, 'model' => $model, 'e' => $e]);
+                    throw $e;
+                }
             }
         } else {
             $model->loadDefaultValues();
@@ -329,6 +451,8 @@ class SubmittedFlightPlanController extends Controller
                 $entity = $model->route0;
             } elseif ($model->tour_stage_id) {
                 $entity = $model->tourStage;
+            } else {
+                $entity = $model->charterRoute;
             }
             return $this->render('view', [
                 'model' => $model,
@@ -357,6 +481,8 @@ class SubmittedFlightPlanController extends Controller
                 $entity = $model->route0;
             } elseif ($model->tour_stage_id) {
                 $entity = $model->tourStage;
+            } else {
+                $entity = $model->charterRoute;
             }
 
             if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
@@ -385,9 +511,18 @@ class SubmittedFlightPlanController extends Controller
         $model = $this->findModel($id);
 
         if (Yii::$app->user->can('crudOwnFpl', ['submittedFlightPlan' => $model])) {
-            $this->findModel($id)->delete();
-            $this->logInfo('Deleted fpl', ['id' => $id, 'user' => Yii::$app->user->identity->license]);
-            return $this->redirect(['site/index']);
+            $model = $this->findModel($id);
+            $tx = Yii::$app->db->beginTransaction();
+            try {
+                $model->delete();
+                $tx->commit();
+                $this->logInfo('Deleted fpl', ['id' => $id, 'user' => Yii::$app->user->identity->license]);
+                return $this->redirect(['site/index']);
+            } catch (\Throwable $e) {
+                $tx->rollBack();
+                $this->logError('Error deleting flight plan', ['fpl' => $model, 'e' => $e]);
+                throw new ServerErrorHttpException(Yii::t('app', 'Error deleting flight plan. Contact administrator.'));
+            }
         } else {
             throw new ForbiddenHttpException();
         }

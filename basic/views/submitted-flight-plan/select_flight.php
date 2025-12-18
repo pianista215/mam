@@ -68,6 +68,36 @@ $this->params['breadcrumbs'][] = $this->title;
             </tbody>
         </table>
     <?php endif; ?>
+    <h3><?= Yii::t('app', 'Charter flight') ?></h3>
+
+    <div class="card mb-3">
+        <div class="card-body">
+
+            <?php $form = \yii\widgets\ActiveForm::begin([
+                'action' => ['select-aircraft-charter'],
+                'method' => 'get',
+            ]); ?>
+
+           <div class="row align-items-end">
+               <div class="col-md-4 d-flex">
+                   <?= Html::input('text', 'arrival', '', [
+                       'maxlength' => 4,
+                       'class' => 'form-control me-2',
+                       'placeholder' => Yii::t('app', 'Arrival airport (ICAO)'),
+                       'required' => true,
+                       'pattern' => '[A-Za-z]{4}'
+                   ]) ?>
+                   <?= Html::submitButton(
+                       Yii::t('app', 'Continue'),
+                       ['class' => 'btn btn-primary']
+                   ) ?>
+               </div>
+           </div>
+
+            <?php \yii\widgets\ActiveForm::end(); ?>
+
+        </div>
+    </div>
     <h3><?=Yii::t('app', 'Routes')?></h3>
     <?= GridView::widget([
         'dataProvider' => $routeDataProvider,

@@ -7,6 +7,7 @@ INSERT INTO config(`key`, `value`) VALUES ('registration_start_location', 'LEVD'
 INSERT INTO config(`key`, `value`) VALUES ('chunks_storage_path', '/opt/mam/chunks');
 INSERT INTO config(`key`, `value`) VALUES ('images_storage_path', '/opt/mam/images');
 INSERT INTO config(`key`, `value`) VALUES ('token_life_h', '24');
+INSERT INTO config(`key`, `value`) VALUES ('charter_ratio', '0.1');
 
 -- Global config
 INSERT INTO config(`key`, `value`) VALUES ('airline_name', 'MamAirlines');

@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\LoggerTrait;
 use Yii;
 
 /**
@@ -23,6 +24,7 @@ use Yii;
  * @property int|null $route_id
  * @property int $pilot_id
  * @property int|null $tour_stage_id
+ * @property int|null $charter_route_id
  *
  * @property Aircraft $aircraft
  * @property Airport $alternative1Icao
@@ -30,9 +32,11 @@ use Yii;
  * @property Pilot $pilot
  * @property Route $route0
  * @property TourStage $tourStage
+ * @property CharterRoute $charterRoute
  */
 class SubmittedFlightPlan extends \yii\db\ActiveRecord
 {
+    use LoggerTrait;
     /**
      * {@inheritdoc}
      */
@@ -49,7 +53,7 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
         return [
             [['alternative1_icao', 'alternative2_icao', 'flight_level_value', 'cruise_speed_value', 'route', 'estimated_time', 'other_information', 'endurance_time'], 'trim'],
             [['aircraft_id', 'flight_rules', 'alternative1_icao', 'cruise_speed_value', 'route', 'estimated_time', 'other_information', 'endurance_time', 'pilot_id', 'cruise_speed_unit', 'flight_level_unit'], 'required'],
-            [['aircraft_id', 'route_id', 'pilot_id', 'tour_stage_id','cruise_speed_value', 'flight_level_value', 'estimated_time', 'endurance_time'], 'integer'],
+            [['aircraft_id', 'route_id', 'pilot_id', 'tour_stage_id', 'charter_route_id', 'cruise_speed_value', 'flight_level_value', 'estimated_time', 'endurance_time'], 'integer'],
             [['flight_rules', 'cruise_speed_unit'], 'string', 'length' => 1],
             [['cruise_speed_value', 'flight_level_value', 'estimated_time', 'endurance_time'], 'number', 'min' => 0],
             [['flight_rules'], 'in', 'range' => array_keys(SubmittedFlightPlan::getFlightRulesTypes())],
@@ -69,9 +73,10 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
             [['pilot_id'], 'exist', 'skipOnError' => true, 'targetClass' => Pilot::class, 'targetAttribute' => ['pilot_id' => 'id']],
             [['route_id'], 'exist', 'skipOnError' => true, 'targetClass' => Route::class, 'targetAttribute' => ['route_id' => 'id']],
             [['tour_stage_id'], 'exist', 'skipOnError' => true, 'targetClass' => TourStage::class, 'targetAttribute' => ['tour_stage_id' => 'id']],
+	        [['charter_route_id'], 'exist', 'skipOnError' => true, 'targetClass' => CharterRoute::class, 'targetAttribute' => ['charter_route_id' => 'id']],
             [['pilot_id'], 'validatePilotLocation'],
             [['aircraft_id'], 'validateAircraftLocation'],
-            [['route_id', 'tour_stage_id'], 'validateRouteOrStage', 'skipOnEmpty' => false],
+            [['route_id', 'tour_stage_id', 'charter_route_id'], 'validateRouteOrStageOrCharter', 'skipOnEmpty' => false],
         ];
     }
 
@@ -105,6 +110,7 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
             'route_id' => Yii::t('app', 'Route'),
             'pilot_id' => Yii::t('app', 'Pilot'),
             'tour_stage_id' => Yii::t('app', 'Tour Stage'),
+            'charter_route_id' => Yii::t('app', 'Charter Route'),
         ];
     }
 
@@ -151,8 +157,12 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
             if ($this->tourStage->departure != $this->pilot->location) {
                 $this->addError($attribute, Yii::t('app', 'The pilot is not in the correct location.'));
             }
-        } else {
+        } else if($this->route_id != null){
             if ($this->route0->departure != $this->pilot->location) {
+                $this->addError($attribute, Yii::t('app', 'The pilot is not in the correct location.'));
+            }
+        } else {
+            if ($this->charterRoute->departure != $this->pilot->location) {
                 $this->addError($attribute, Yii::t('app', 'The pilot is not in the correct location.'));
             }
         }
@@ -164,23 +174,47 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
             if ($this->tourStage->departure != $this->aircraft->location) {
                 $this->addError($attribute, Yii::t('app', 'The aircraft is not in the correct location.'));
             }
-        } else {
+        } else if($this->route_id != null){
             if ($this->route0->departure != $this->aircraft->location) {
+                $this->addError($attribute, Yii::t('app', 'The aircraft is not in the correct location.'));
+            }
+        } else {
+            if ($this->charterRoute->departure != $this->aircraft->location) {
                 $this->addError($attribute, Yii::t('app', 'The aircraft is not in the correct location.'));
             }
         }
     }
 
-    public function validateRouteOrStage($attribute, $params)
+    public function validateRouteOrStageOrCharter($attribute, $params)
     {
-        if (empty($this->route_id) && empty($this->tour_stage_id)) {
-            $this->addError('route_id', Yii::t('app', 'There are no route or tour stage associated.'));
-            $this->addError('tour_stage_id', Yii::t('app', 'There are no route or tour stage associated.'));
-        }
+        $set = array_filter([$this->route_id, $this->tour_stage_id, $this->charter_route_id]);
 
-        if (!empty($this->route_id) && !empty($this->tour_stage_id)) {
-            $this->addError('route_id', Yii::t('app', 'Only route or tour staged can be associated, not both.'));
-            $this->addError('tour_stage_id', Yii::t('app', 'Only route or tour staged can be associated, not both.'));
+        $count = count($set);
+
+        if ($count === 0) {
+            $msg = Yii::t('app', 'There are no route, tour stage or charter associated.');
+            $this->addError('route_id', $msg);
+            $this->addError('tour_stage_id', $msg);
+            $this->addError('charter_route_id', $msg);
+        } elseif ($count > 1) {
+            $msg = Yii::t('app', 'Only one of route, tour stage or charter route can be associated.');
+            $this->addError('route_id', $msg);
+            $this->addError('tour_stage_id', $msg);
+            $this->addError('charter_route_id', $msg);
+        }
+    }
+
+    public function afterDelete()
+    {
+        parent::afterDelete();
+
+        if($this->charter_route_id != null) {
+            $charterRoute = CharterRoute::findOne(['id' => $this->charter_route_id]);
+
+            if ($charterRoute) {
+                $this->logInfo('Deleting charter route of this submitted fpl', $charterRoute);
+                $charterRoute->delete();
+            }
         }
     }
 
@@ -242,6 +276,16 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
    public function getTourStage()
    {
        return $this->hasOne(TourStage::class, ['id' => 'tour_stage_id']);
+   }
+
+   /**
+    * Gets query for [[CharterRoute]].
+    *
+    * @return \yii\db\ActiveQuery
+    */
+   public function getCharterRoute()
+   {
+       return $this->hasOne(CharterRoute::class, ['id' => 'charter_route_id']);
    }
 
 }

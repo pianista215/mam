@@ -129,6 +129,7 @@ class FlightTest extends BaseUnitTest
         $model->arrival = 'LEBL';
         $model->alternative1_icao = 'LEVC';
         $model->flight_rules = 'I';
+        $model->flight_type = 'R';
         $this->assertFalse($model->save(), 'Model should not validate with some required fields missing.');
         $this->assertArrayHasKey('code', $model->getErrors(), 'Missing error for code with partial data.');
 
@@ -167,6 +168,8 @@ class FlightTest extends BaseUnitTest
         $model->other_information = 'Other flight details';
         $model->endurance_time = '0500';
         $model->report_tool = 'ToolName';
+        $model->flight_type = 'R';
+
 
         $this->assertTrue($model->save(), 'Model should validate with two alternatives.');
     }
@@ -190,6 +193,8 @@ class FlightTest extends BaseUnitTest
         $model->other_information = 'Other flight details';
         $model->endurance_time = '0500';
         $model->report_tool = 'ToolName';
+        $model->flight_type = 'R';
+
 
         $this->assertFalse($model->save(), 'Model should not validate with invalid aircraft/pilot.');
         $this->assertArrayHasKey('pilot_id', $model->getErrors());
@@ -216,6 +221,8 @@ class FlightTest extends BaseUnitTest
         $model->other_information = 'Other flight details';
         $model->endurance_time = '0500';
         $model->report_tool = 'ToolName';
+        $model->flight_type = 'R';
+
 
         $this->assertFalse($model->save(), 'Model should not validate with invalid airports.');
         $this->assertArrayHasKey('departure', $model->getErrors());

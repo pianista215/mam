@@ -23,7 +23,7 @@ class SubmittedFlightPlanDeleteCest
         $I->amOnRoute('submitted-flight-plan/delete', [ 'id' => '3' ]);
         $I->seeResponseCodeIs(405);
         $count = \app\models\SubmittedFlightPlan::find()->count();
-        $I->assertEquals(4, $count);
+        $I->assertEquals(5, $count);
     }
 
     public function noOneCantDeleteOthersSubmittedFpl(\FunctionalTester $I)

@@ -16,9 +16,17 @@ $this->title = $titleLabel;
 $this->params['breadcrumbs'][] = $this->title;
 
 // Needed for url-creator
-$this->params['entity_param'] = ($type === 'route')
-    ? ['route_id' => $entity->id]
-    : ['tour_stage_id' => $entity->id];
+if($type === 'route') {
+    $this->params['entity_param'] = ['route_id' => $entity->id];
+    $this->params['action'] = 'prepare-fpl-route';
+} else if($type === 'stage') {
+    $this->params['entity_param'] = ['tour_stage_id' => $entity->id];
+    $this->params['action'] = 'prepare-fpl-tour';
+} else {
+    $this->params['entity_param'] = ['arrival' => $entity->arrival];
+    $this->params['action'] = 'prepare-fpl-charter';
+}
+
 $this->params['entity_type'] = $type;
 ?>
 
@@ -45,12 +53,8 @@ $this->params['entity_type'] = $type;
                 ],
                 'urlCreator' => function ($action, Aircraft $model) {
                     $view = Yii::$app->view;
-                    $type = $view->params['entity_type'] ?? 'route'; // default route
                     $entityParam = $view->params['entity_param'];
-
-                    $actionName = $type === 'route'
-                        ? 'prepare-fpl-route'
-                        : 'prepare-fpl-tour';
+                    $actionName = $view->params['action'];
 
                     return Url::toRoute(array_merge(
                         [$actionName],
