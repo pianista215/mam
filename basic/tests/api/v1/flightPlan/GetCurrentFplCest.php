@@ -97,7 +97,7 @@ class GetCurrentFplCest
 
     public function testSubmittedFpl(ApiTester $I)
     {
-        $users = [5,6,7,8];
+        $users = [4,5,6,7,8];
         $length = count($users);
 
         for($i = 0; $i < $length; $i++){

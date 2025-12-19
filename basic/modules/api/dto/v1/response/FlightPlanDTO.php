@@ -28,6 +28,10 @@ class FlightPlanDTO extends Model
             $stage = $model->tourStage;
             $departure = $stage->departure0;
             $arrival = $stage->arrival0;
+        } else if(!empty($model->charter_route_id)){
+            $charterRoute = $model->charterRoute;
+            $departure = $charterRoute->departure0;
+            $arrival = $charterRoute->arrival0;
         } else {
             $route = $model->route0;
             $departure = $route->departure0;
