@@ -4,7 +4,7 @@ from datetime import datetime
 import math
 import sys
 
-parser = argparse.ArgumentParser(description="Migrate old VAM pilots into MAM schema")
+parser = argparse.ArgumentParser(description="Migrate old VAM flights into MAM schema")
 parser.add_argument("host", help="Host of the server")
 parser.add_argument("user", help="User of the database")
 #TODO: Enhance to protect password in shell
@@ -21,14 +21,18 @@ cursorvam = cnxvam.cursor(dictionary=True)
 cursormam = cnxmam.cursor()
 
 #Country, location, password and rank are not migrated
-cursorvam.execute("SELECT callsign, name, surname, email, register_date, city, birth_date, vatsimid, ivaovid FROM gvausers ORDER BY callsign")
+cursorvam.execute("""
+	SELECT g.callsign as pilot_callsign, v.callsign, departure, arrival, alt1, alt2, 
+	cruise_speed, flight_level, route, 
+	eet, remarks, endurance, flight_date, network, flight_type,
+	validator_comments, charter
+	FROM vampireps v LEFT JOIN gvausers g ON v.gvauser_id=g.gvauser_id""")
 pilots = cursorvam.fetchall()
 
-imported_pilots = 0
-DUMMY_PASSWORD = "$2b$12$k3Jp0Z7xE6dQ9ZpL2xN4WON4mC3Nw5Zb0hF3X9V6c5H8pYyWvU8a"
+imported_flights = 0
 
-for pilot in pilots:
-	print(f"Importing pilot {pilot['callsign']}")
+for flight in flights:
+	print(f"Importing flight {flight['callsign']} - ${flight['']}")
 	callsign = pilot['callsign']	
 	name = pilot['name']
 	surname = pilot['surname']
