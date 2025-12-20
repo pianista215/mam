@@ -21,7 +21,19 @@ cursorvam = cnxvam.cursor(dictionary=True)
 cursormam = cnxmam.cursor()
 
 #Country, location, password and rank are not migrated
-cursorvam.execute("SELECT callsign, name, surname, email, register_date, city, birth_date, vatsimid, ivaovid FROM gvausers ORDER BY callsign")
+cursorvam.execute("""
+	SELECT callsign, name, surname, email, register_date, city, birth_date, vatsimid, ivaovid,
+	COALESCE(v.gva_hours, 0) AS gva_hours,
+	transfered_hours
+	FROM gvausers g
+	LEFT JOIN (
+    SELECT
+        pilot,
+        SUM(time) AS gva_hours
+    FROM v_pilot_roster_rejected
+    GROUP BY pilot
+) v ON v.pilot = g.gvauser_id ORDER BY callsign
+""")
 pilots = cursorvam.fetchall()
 
 imported_pilots = 0
@@ -38,10 +50,11 @@ for pilot in pilots:
 	birth_date = datetime.strptime(pilot['birth_date'], "%d/%m/%Y").date()
 	vatsimid = pilot['vatsimid']
 	ivaovid = pilot['ivaovid']
+	hours = pilot['transfered_hours'] + pilot['gva_hours']
 
 	cursormam.execute(
-		"INSERT INTO pilot(country_id, location, password, license, name, surname, email, registration_date, city, date_of_birth, vatsim_id, ivao_id) VALUES (1, 'LEVD', %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-		(DUMMY_PASSWORD, callsign, name, surname, email, register_date, city, birth_date, vatsimid, ivaovid)
+		"INSERT INTO pilot(country_id, location, password, license, name, surname, email, registration_date, city, date_of_birth, vatsim_id, ivao_id, hours_flown) VALUES (1, 'LEVD', %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+		(DUMMY_PASSWORD, callsign, name, surname, email, register_date, city, birth_date, vatsimid, ivaovid, hours)
 	)
 	new_pilot_id = cursormam.lastrowid
 	imported_pilots += 1
