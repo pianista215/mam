@@ -25,6 +25,7 @@ cursorvam.execute("SELECT callsign, name, surname, email, register_date, city, b
 pilots = cursorvam.fetchall()
 
 imported_pilots = 0
+DUMMY_PASSWORD = "$2b$12$k3Jp0Z7xE6dQ9ZpL2xN4WON4mC3Nw5Zb0hF3X9V6c5H8pYyWvU8a"
 
 for pilot in pilots:
 	print(f"Importing pilot {pilot['callsign']}")
@@ -39,8 +40,8 @@ for pilot in pilots:
 	ivaovid = pilot['ivaovid']
 
 	cursormam.execute(
-		"INSERT INTO pilot(country_id, location, password, license, name, surname, email, registration_date, city, date_of_birth, vatsim_id, ivao_id) VALUES (1, 'LEVD', 1, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-		(callsign, name, surname, email, register_date, city, birth_date, vatsimid, ivaovid)
+		"INSERT INTO pilot(country_id, location, password, license, name, surname, email, registration_date, city, date_of_birth, vatsim_id, ivao_id) VALUES (1, 'LEVD', %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+		(DUMMY_PASSWORD, callsign, name, surname, email, register_date, city, birth_date, vatsimid, ivaovid)
 	)
 	new_pilot_id = cursormam.lastrowid
 	imported_pilots += 1
