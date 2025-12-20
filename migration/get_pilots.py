@@ -21,7 +21,7 @@ cursorvam = cnxvam.cursor(dictionary=True)
 cursormam = cnxmam.cursor()
 
 #Country, location, password and rank are not migrated
-cursorvam.execute("SELECT callsign, name, surname, email, register_date, city, birth_date, vatsimid, ivaovid FROM gvausers ORDER BY gvauser_id")
+cursorvam.execute("SELECT callsign, name, surname, email, register_date, city, birth_date, vatsimid, ivaovid FROM gvausers ORDER BY callsign")
 pilots = cursorvam.fetchall()
 
 imported_pilots = 0
