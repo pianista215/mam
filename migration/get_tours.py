@@ -10,7 +10,6 @@ parser.add_argument("user", help="User of the database")
 parser.add_argument("password", help="Password of the database")
 parser.add_argument("fromdb", help="Source (Vam) database")
 parser.add_argument("destinationdb", help="Destination (MAM) database")
-parser.add_argument("--include-completions", action="store_true", help="Include pilot tour completions")
 
 args = parser.parse_args()
 
@@ -90,25 +89,9 @@ for tour in tours:
 			raise e
 		imported_stages += 1
 
-	# --- Import pilot completions (optional) ---
-	if args.include_completions:
-		cursorvam.execute("SELECT * FROM tour_finished WHERE tour_id = %s", (tour['tour_id'],))
-		completions = cursorvam.fetchall()
-
-		for fin in completions:
-			cursormam.execute(
-				"INSERT INTO pilot_tour_completion(pilot_id, tour_id, completed_at) VALUES (%s, %s, %s)",
-				(fin['gvauser_id'], new_tour_id, fin['finish_date'])
-			)
-			imported_completions += 1
-
 print("\n✅ Migration completed:")
 print(f"- {imported_tours} tours imported")
 print(f"- {imported_stages} stages imported")
-if args.include_completions:
-	print(f"- {imported_completions} completions imported")
-else:
-	print("⚠️ Pilot completions were skipped (use --include-completions to import them)")
 
 cnxmam.commit()
 cursorvam.close()
