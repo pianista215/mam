@@ -20,6 +20,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     <div class="fw-semibold fs-5 text-dark">
                         <?php if (!empty($model->tourStage)): ?>
                         <?= Html::encode($model->tourStage->fplDescription) ?>
+                        <?php elseif($model->flight_type === 'C'): ?>
+                        <?= Yii::t('app', 'Charter flight') . ' '.' ('.$model->departure.'-'.$model->arrival.')' ?>
                         <?php else: ?>
                         <?= Html::encode(Yii::t('app', 'Route').' '.$model->code) ?>
                         <?php endif; ?>
