@@ -92,13 +92,33 @@ for tour in tours:
 
 	# --- Import pilot completions (optional) ---
 	if args.include_completions:
-		cursorvam.execute("SELECT * FROM tour_finished WHERE tour_id = %s", (tour['tour_id'],))
+		cursorvam.execute(
+		    """
+		    SELECT
+		        g.callsign,
+		        t.tour_id,
+		        MIN(t.finish_date) AS finish_date
+		    FROM tour_finished t
+		    LEFT JOIN gvausers g ON t.gvauser_id = g.gvauser_id
+		    WHERE t.tour_id = %s
+		    GROUP BY
+		        g.callsign,
+		        t.tour_id,
+		        t.gvauser_id
+		    """,
+		    (tour['tour_id'],)
+		)		
 		completions = cursorvam.fetchall()
 
 		for fin in completions:
 			cursormam.execute(
-				"INSERT INTO pilot_tour_completion(pilot_id, tour_id, completed_at) VALUES (%s, %s, %s)",
-				(fin['gvauser_id'], new_tour_id, fin['finish_date'])
+			    """
+			    INSERT INTO pilot_tour_completion (pilot_id, tour_id, completed_at)
+			    SELECT p.id, %s, %s
+			    FROM pilot p
+			    WHERE p.license = %s
+			    """,
+			    (new_tour_id, fin['finish_date'], fin['callsign'])
 			)
 			imported_completions += 1
 
