@@ -233,7 +233,7 @@ class FlightViewValidationCest
         $I->amLoggedInAs(5);
         $I->amOnRoute('flight/view', ['id' => 13]);
         $I->seeResponseCodeIs(200);
-        $I->see('Route IFRC001');
+        $I->see('Charter flight (LEMD-LEBL)');
         // Ensure validation form is NOT visible
         $I->dontSee('Validate', 'button');
         $I->dontSee('Reject', 'button');
