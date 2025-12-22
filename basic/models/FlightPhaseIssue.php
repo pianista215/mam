@@ -70,7 +70,7 @@ class FlightPhaseIssue extends \yii\db\ActiveRecord
             $to_add = $value. ' knots';
         } else if($issue_code == 'AppHighVsBelow1000AGL' || $issue_code == 'AppHighVsBelow2000AGL'){
             $parts = explode('|', $value);
-            $to_add = $parts[0]. 'fpm '. Yii::t('app','and'). ' '. $parts[1]. 'AGL';
+            $to_add = $parts[0]. ' fpm '. Yii::t('app','and'). ' '. $parts[1]. 'AGL';
         } else if($issue_code == 'Refueling'){
             $to_add = $value. ' Kg';
         } else {
