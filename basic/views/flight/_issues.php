@@ -17,7 +17,7 @@ foreach ($report->flightPhases as $phase) {
         $issues[] = [
             'timestamp' => $issue->timestamp,
             'phase' => $phase->flightPhaseType->lang->name,
-            'description' => $issue->issueType->lang->description,
+            'description' => $issue->description,
             'penalty' => $issue->issueType->penalty ?? '-',
         ];
     }
