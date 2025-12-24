@@ -278,6 +278,7 @@ return [
     'Your charter flights ratio is too high. Please complete more regular or tour flights before booking another charter.' => 'El ratio de vuelos chárter es demasiado alto. Por favor complete más vuelos regulares o de tour antes de reservar otro chárter.',
     'Zero Fuel Weight' => 'Zero Fuel Weight',
     'a link to reset your password has been sent.' => 'un link para resetear su contraseña ha sido enviado.',
+    'and' => 'y',
     'from Tour' => 'del Tour',
     'to Tour' => 'al Tour',
 ];
