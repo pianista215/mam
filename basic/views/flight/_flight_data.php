@@ -68,7 +68,7 @@ use yii\widgets\ActiveForm;
             </div>
         </div>
         <div class="col-md-3">
-            <div><?=Yii::t('app', 'Zero Fuel Weight')?></div>
+            <div><?=Yii::t('app', 'Zero Fuel Weight')?> (Kg)</div>
             <div class="input-group">
                 <div><?= Html::input('text', 'zero_fuel_weight', $model->flightReport->zero_fuel_weight, ['disabled' => true, 'class' => 'form-control'])?></div>
             </div>
