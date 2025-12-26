@@ -10,6 +10,7 @@ INSERT INTO issue_type(`code`, `penalty`) VALUES ('LandingAllEnginesStopped', NU
 INSERT INTO issue_type(`code`, `penalty`) VALUES ('LandingSomeEngineStopped', NULL);
 INSERT INTO issue_type(`code`, `penalty`) VALUES ('AirborneEngineStopped', NULL);
 INSERT INTO issue_type(`code`, `penalty`) VALUES ('AirborneAllEnginesStopped', NULL);
+INSERT INTO issue_type(`code`, `penalty`) VALUES ('ZfwModified', 30);
 
 -- Issues reported by mam
 INSERT INTO issue_type(`code`, `penalty`) VALUES ('LandingAirportNotPlanned', 30);
@@ -44,6 +45,9 @@ INSERT INTO issue_type_lang(issue_type_id, language, description) VALUES
 
 ((SELECT id FROM issue_type WHERE code='AirborneAllEnginesStopped'), 'en', 'All engines shut down in flight'),
 ((SELECT id FROM issue_type WHERE code='AirborneAllEnginesStopped'), 'es', 'Apagado de todos los motores en vuelo'),
+
+((SELECT id FROM issue_type WHERE code='ZfwModified'), 'en', 'ZFW modified after startup'),
+((SELECT id FROM issue_type WHERE code='ZfwModified'), 'es', 'ZFW modificado tras arrancar motores'),
 
 ((SELECT id FROM issue_type WHERE code='LandingAirportNotPlanned'), 'en', 'Landed at an airport not in flight plan'),
 ((SELECT id FROM issue_type WHERE code='LandingAirportNotPlanned'), 'es', 'Aterrizaje en un aeropuerto no incluido en el plan de vuelo'),

@@ -395,6 +395,10 @@ class FlightReportController extends Controller
                         $report->block_time_minutes = $data['global']['block_time_minutes'];
                     }
 
+                    if(!empty($data['global']['zfw_kg'])){
+                        $report->zero_fuel_weight = $data['global']['zfw_kg'];
+                    }
+
                     if (!$report->save()) {
                         throw new \Exception("Error updating flight report: " . json_encode($report->errors));
                     }
