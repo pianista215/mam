@@ -141,9 +141,7 @@ class FlightReportController extends Controller
         }
 
         $phaseAnalysisIssues = $phaseAnalysis['issues'];
-        if(!empty($phaseAnalysisIssues)){
-            $this->importPhaseIssues($phase, $phaseType, $phaseAnalysisIssues);
-        }
+        $this->importPhaseIssues($phase, $phaseType, $phaseAnalysisIssues);
     }
 
     protected function checkLandingInAirport($phase)
