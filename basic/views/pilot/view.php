@@ -10,7 +10,7 @@ use yii\grid\GridView;
 /** @var app\models\Pilot $model */
 /** @var yii\data\ActiveDataProvider $flightsProvider */
 
-$this->title = $model->name . ' ' . $model->surname;
+$this->title = $model->fullName;
 $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Pilots'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);

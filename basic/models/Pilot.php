@@ -287,12 +287,24 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
         return $this->location;
     }
 
+    public function getSecureSurname()
+    {
+        if (Yii::$app->user->isGuest) {
+            return implode(' ', array_map(
+                fn($p) => mb_substr($p, 0, 1) . '.',
+                preg_split('/\s+/', $this->surname)
+            ));
+        } else {
+            return $this->surname;
+        }
+    }
+
     /**
      * @return string current user fullname
      */
     public function getFullName()
     {
-        return $this->name.' '.$this->surname;
+        return $this->name.' '.$this->secureSurname;
     }
 
     /**

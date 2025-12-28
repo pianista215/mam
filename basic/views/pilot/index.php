@@ -8,7 +8,6 @@ use yii\grid\ActionColumn;
 use yii\grid\GridView;
 
 /** @var yii\web\View $this */
-/** @var app\models\PilotSearch $searchModel */
 /** @var yii\data\ActiveDataProvider $dataProvider */
 
 $this->title = Yii::t('app', 'Pilots');
@@ -24,28 +23,30 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php endif; ?>
 
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
-
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
+        'filterModel' => null,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
-
-            'license',
-            'name',
-            'surname',
+            [
+                'class' => 'yii\grid\SerialColumn',
+                'contentOptions' => ['style' => 'width:5%;']
+            ],
+            [
+                'attribute' => 'license',
+                'contentOptions' => ['style' => 'width:10%;']
+            ],
+            'fullname',
             [
                 'label' => Yii::t('app', 'Rank'),
-                'value' => function ($model) {
-                    $rank = $model->rank->name ?? null;
-                    return $rank !== null
-                        ? $rank
-                        : '-';
-                },
+                'attribute' => 'rank_name',
+                'value' => fn($model) => $model->rank->name ?? '-',
+                'enableSorting' => true,
                 'format' => 'text',
             ],
-            'location',
+            [
+                'attribute' => 'location',
+                'contentOptions' => ['style' => 'width:10%;']
+            ],
             [
                 'attribute' => 'hours_flown',
                 'filter' => false,
@@ -53,6 +54,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return TimeHelper::formatHoursMinutes($model->hours_flown);
                 },
                 'format' => 'text',
+                'contentOptions' => ['style' => 'width:10%;']
             ],
             [
                 'class' => ActionColumn::className(),
@@ -67,6 +69,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'urlCreator' => function ($action, Pilot $model, $key, $index, $column) {
                     return Url::toRoute([$action, 'id' => $model->id]);
                  },
+                 'contentOptions' => ['style' => 'width:10%; text-align:center;']
             ],
         ],
         'tableOptions' => ['class' => 'table table-striped table-bordered'],

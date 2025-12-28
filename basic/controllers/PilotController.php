@@ -15,12 +15,15 @@ use app\models\PilotSearch;
 use app\models\Rank;
 use app\models\SubmittedFlightPlan;
 use DateTime;
+
+use yii\db\Expression;
+use yii\data\ActiveDataProvider;
+use yii\filters\AccessControl;
+use yii\filters\VerbFilter;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
-use yii\filters\AccessControl;
-use yii\filters\VerbFilter;
 use Yii;
 
 
@@ -66,16 +69,32 @@ class PilotController extends Controller
      */
     public function actionIndex()
     {
-        $searchModel = new PilotSearch();
-        $dataProvider = $searchModel->search($this->request->queryParams);
-        $dataProvider->query->andWhere(['not', ['license' => null]]);
+        $query = Pilot::find()->joinWith('rank')
+            ->select(['pilot.*'])
+            ->andWhere(['not', ['pilot.license' => null]]);
 
-        $dataProvider->sort->defaultOrder = [
-            'license' => SORT_ASC,
-        ];
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'pagination' => false,
+            'sort' => [
+                'attributes' => [
+                    'license',
+                    'fullname' => [
+                        'asc'  => new Expression("CONCAT(pilot.name, ' ', pilot.surname) ASC"),
+                        'desc' => new Expression("CONCAT(pilot.name, ' ', pilot.surname) DESC"),
+                    ],
+                    'rank_name' => [
+                        'asc'  => ['rank.name' => SORT_ASC],
+                        'desc' => ['rank.name' => SORT_DESC],
+                    ],
+                    'hours_flown',
+                    'location'
+                ],
+                'defaultOrder' => ['license' => SORT_ASC],
+            ],
+        ]);
 
         return $this->render('index', [
-            'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
     }

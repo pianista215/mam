@@ -19,7 +19,7 @@ class PilotIndexViewCest
         $I->amOnRoute('pilot/index');
 
         $I->see('Pilots');
-        $I->see('Showing 1-9 of 9 items.');
+        $I->see('Total 9 items.');
         $I->see('AB1234');
         $I->see('John');
         $I->see('Doe');
@@ -54,7 +54,17 @@ class PilotIndexViewCest
 
     public function openPilotIndexAsVisitor(\FunctionalTester $I)
     {
-        $this->checkPilotIndexCommon($I);
+        $I->amOnRoute('pilot/index');
+
+        $I->see('Pilots');
+        $I->see('Total 9 items.');
+        $I->see('AB1234');
+        $I->see('John');
+        $I->dontSee('Doe');
+        $I->see('D.');
+        $I->see('Rank 1');
+
+        $I->dontSee('nonactivated');
 
         $I->dontSee('Create Pilot', 'a');
         $I->seeElement('a', ['title' => 'View']);
