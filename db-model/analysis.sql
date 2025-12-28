@@ -190,3 +190,4 @@ INSERT INTO flight_event_attribute(code, name) VALUES ('Engine 1', 'Engine 1');
 INSERT INTO flight_event_attribute(code, name) VALUES ('Engine 2', 'Engine 2');
 INSERT INTO flight_event_attribute(code, name) VALUES ('Engine 3', 'Engine 3');
 INSERT INTO flight_event_attribute(code, name) VALUES ('Engine 4', 'Engine 4');
+INSERT INTO flight_event_attribute(code, name) VALUES ('ZFW', 'Zero Fuel Weight');
