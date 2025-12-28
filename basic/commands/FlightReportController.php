@@ -141,9 +141,7 @@ class FlightReportController extends Controller
         }
 
         $phaseAnalysisIssues = $phaseAnalysis['issues'];
-        if(!empty($phaseAnalysisIssues)){
-            $this->importPhaseIssues($phase, $phaseType, $phaseAnalysisIssues);
-        }
+        $this->importPhaseIssues($phase, $phaseType, $phaseAnalysisIssues);
     }
 
     protected function checkLandingInAirport($phase)
@@ -393,6 +391,10 @@ class FlightReportController extends Controller
 
                     if(!empty($data['global']['block_time_minutes'])){
                         $report->block_time_minutes = $data['global']['block_time_minutes'];
+                    }
+
+                    if(!empty($data['global']['zfw_kg'])){
+                        $report->zero_fuel_weight = $data['global']['zfw_kg'];
                     }
 
                     if (!$report->save()) {
