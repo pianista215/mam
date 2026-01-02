@@ -83,24 +83,48 @@ $this->params['breadcrumbs'][] = $this->title;
                     <tr>
                         <td><?= Html::encode($stage->sequence) ?></td>
                         <td>
-                            <div style="display:flex; align-items:center; white-space:nowrap;">
-                                <span style="display:inline-block; width:44px;">
-                                    <?= Html::encode($stage->departure ?? '-') ?>
-                                </span>
-                                <span style="margin-left:5px; display:flex; align-items:center;">
-                                    <?= ImageMam::render('country_icon', $stage->departure0->country_id) ?>
-                                </span>
+                            <div>
+                                <div style="display:flex; align-items:center; white-space:nowrap; margin-bottom:3px;">
+                                    <span style="display:inline-block; width:44px;">
+                                        <?= Html::encode($stage->departure) ?>
+                                    </span>
+                                    <span style="margin-left:5px; display:flex; align-items:center;">
+                                        <?= ImageMam::render('country_icon', $stage->departure0->country_id) ?>
+                                    </span>
+                                </div>
+                                <div style="
+                                    font-size:0.75em;
+                                    color:#777;
+                                    max-width:160px;
+                                    white-space:nowrap;
+                                    overflow:hidden;
+                                    text-overflow:ellipsis;
+                                " title="<?= Html::encode($stage->departure0->name) ?>">
+                                    <?= Html::encode($stage->departure0->name) ?>
+                                </div>
                             </div>
                         </td>
-
                         <td>
-                            <div style="display:flex; align-items:center; white-space:nowrap;">
-                                <span style="display:inline-block; width:44px;">
-                                    <?= Html::encode($stage->arrival ?? '-') ?>
-                                </span>
-                                <span style="margin-left:5px; display:flex; align-items:center;">
-                                    <?= ImageMam::render('country_icon', $stage->arrival0->country_id) ?>
-                                </span>
+                            <div>
+                                <div style="display:flex; align-items:center; white-space:nowrap; margin-bottom:3px;">
+                                    <span style="display:inline-block; width:44px;">
+                                        <?= Html::encode($stage->arrival) ?>
+                                    </span>
+                                    <span style="margin-left:5px; display:flex; align-items:center;">
+                                        <?= ImageMam::render('country_icon', $stage->arrival0->country_id) ?>
+                                    </span>
+                                </div>
+
+                                <div style="
+                                    font-size:0.75em;
+                                    color:#777;
+                                    max-width:160px;
+                                    white-space:nowrap;
+                                    overflow:hidden;
+                                    text-overflow:ellipsis;
+                                " title="<?= Html::encode($stage->arrival0->name) ?>">
+                                    <?= Html::encode($stage->arrival0->name) ?>
+                                </div>
                             </div>
                         </td>
                         <td><?= Html::encode($stage->distance_nm ?? '-') ?></td>

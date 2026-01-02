@@ -288,4 +288,17 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
        return $this->hasOne(CharterRoute::class, ['id' => 'charter_route_id']);
    }
 
+   public function getEntity()
+   {
+       if ($this->route_id) {
+           return $this->route0;
+       } elseif ($this->tour_stage_id) {
+           return $this->tourStage;
+       } elseif ($this->charter_route_id) {
+           return $this->charterRoute;
+       }
+
+       return null;
+   }
+
 }

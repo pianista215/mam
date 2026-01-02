@@ -20,5 +20,11 @@ class LanguageSelector implements BootstrapInterface
             $preferredLanguage = 'en';
         }
         $app->language = $preferredLanguage;
+
+        if ($preferredLanguage === 'es') {
+            $app->formatter->locale = 'es_ES';
+        } else {
+            $app->formatter->locale = 'en_US';
+        }
     }
 }
