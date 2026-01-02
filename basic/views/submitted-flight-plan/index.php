@@ -1,5 +1,6 @@
 <?php
 
+use app\helpers\ImageMam;
 use app\models\SubmittedFlightPlan;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -21,8 +22,80 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'columns' => [
             'pilot.fullname',
-            'entity.departure',
-            'entity.arrival',
+            [
+                'attribute' => 'entity.departure',
+                'label' => Yii::t('app', 'Departure'),
+                'format' => 'raw',
+                'value' => function($model) {
+
+                    $airport = $model->entity->departure0;
+
+                    return Html::tag('div',
+                        Html::tag('div',
+                            Html::tag('span', Html::encode($model->entity->departure), [
+                                'style'=>'display:inline-block; width:44px; text-align:left;'
+                            ]) .
+                            Html::tag('span', ImageMam::render('country_icon', $airport->country->id), [
+                                'style' => 'display:inline-block; vertical-align:middle; margin-left:5px;'
+                            ]),
+                            ['style'=>'white-space:nowrap;']
+                        )
+                        .
+                        Html::tag('div',
+                            Html::encode($airport->name),
+                            [
+                                'style' => '
+                                    font-size:0.75em;
+                                    color:#777;
+                                    max-width:160px;
+                                    white-space:nowrap;
+                                    overflow:hidden;
+                                    text-overflow:ellipsis;
+                                ',
+                                'title' => $airport->name
+                            ]
+                        )
+                    );
+                },
+                'contentOptions' => ['style' => 'vertical-align:middle; text-align:left;'],
+            ],
+            [
+                'attribute' => 'entity.arrival',
+                'label' => Yii::t('app', 'Arrival'),
+                'format' => 'raw',
+                'value' => function($model) {
+
+                    $airport = $model->entity->arrival0;
+
+                    return Html::tag('div',
+                        Html::tag('div',
+                            Html::tag('span', Html::encode($model->entity->arrival), [
+                                'style'=>'display:inline-block; width:44px; text-align:left;'
+                            ]) .
+                            Html::tag('span', ImageMam::render('country_icon', $airport->country->id), [
+                                'style' => 'display:inline-block; vertical-align:middle; margin-left:5px;'
+                            ]),
+                            ['style'=>'white-space:nowrap;']
+                        )
+                        .
+                        Html::tag('div',
+                            Html::encode($airport->name),
+                            [
+                                'style' => '
+                                    font-size:0.75em;
+                                    color:#777;
+                                    max-width:160px;
+                                    white-space:nowrap;
+                                    overflow:hidden;
+                                    text-overflow:ellipsis;
+                                ',
+                                'title' => $airport->name
+                            ]
+                        )
+                    );
+                },
+                'contentOptions' => ['style' => 'vertical-align:middle; text-align:left;'],
+            ],
             'aircraft.name',
             'flight_rules',
             [
