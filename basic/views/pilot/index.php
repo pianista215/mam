@@ -1,5 +1,6 @@
 <?php
 
+use app\helpers\ImageMam;
 use app\helpers\TimeHelper;
 use app\models\Pilot;
 use yii\helpers\Html;
@@ -45,7 +46,40 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'location',
-                'contentOptions' => ['style' => 'width:10%;']
+                'label' => Yii::t('app', 'Departure'),
+                'format' => 'raw',
+                'value' => function($model) {
+
+                    $airport = $model->location0;
+
+                    return Html::tag('div',
+                        Html::tag('div',
+                            Html::tag('span', Html::encode($model->location), [
+                                'style'=>'display:inline-block; width:44px; text-align:left;'
+                            ]) .
+                            Html::tag('span', ImageMam::render('country_icon', $airport->country->id), [
+                                'style' => 'display:inline-block; vertical-align:middle; margin-left:5px;'
+                            ]),
+                            ['style'=>'white-space:nowrap;']
+                        )
+                        .
+                        Html::tag('div',
+                            Html::encode($airport->name),
+                            [
+                                'style' => '
+                                    font-size:0.75em;
+                                    color:#777;
+                                    max-width:160px;
+                                    white-space:nowrap;
+                                    overflow:hidden;
+                                    text-overflow:ellipsis;
+                                ',
+                                'title' => $airport->name
+                            ]
+                        )
+                    );
+                },
+                'contentOptions' => ['style' => 'vertical-align:middle; text-align:left; width:10%;'],
             ],
             [
                 'attribute' => 'hours_flown',
