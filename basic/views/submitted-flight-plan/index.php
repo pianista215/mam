@@ -21,8 +21,8 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'columns' => [
             'pilot.fullname',
-            'route0.departure',
-            'route0.arrival',
+            'entity.departure',
+            'entity.arrival',
             'aircraft.name',
             'flight_rules',
             [
