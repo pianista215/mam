@@ -35,26 +35,57 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?php foreach ($tourStages as $stage): ?>
                     <tr>
                         <td><?= Html::encode($stage->tour->name.' #'.$stage->sequence) ?></td>
-                        <td>
-                            <div style="display:flex; align-items:center; white-space:nowrap;">
-                                <span style="display:inline-block; width:44px;">
-                                    <?= Html::encode($stage->departure) ?>
-                                </span>
-                                <span style="margin-left:5px; display:flex; align-items:center;">
-                                    <?= ImageMam::render('country_icon', $stage->departure0->country_id) ?>
-                                </span>
-                            </div>
-                        </td>
-                        <td>
-                            <div style="display:flex; align-items:center; white-space:nowrap;">
-                                <span style="display:inline-block; width:44px;">
-                                    <?= Html::encode($stage->arrival) ?>
-                                </span>
-                                <span style="margin-left:5px; display:flex; align-items:center;">
-                                    <?= ImageMam::render('country_icon', $stage->arrival0->country_id) ?>
-                                </span>
-                            </div>
-                        </td>
+<td>
+    <div>
+        <!-- Línea ICAO + bandera -->
+        <div style="display:flex; align-items:center; white-space:nowrap; margin-bottom:3px;">
+            <span style="display:inline-block; width:44px;">
+                <?= Html::encode($stage->departure) ?>
+            </span>
+            <span style="margin-left:5px; display:flex; align-items:center;">
+                <?= ImageMam::render('country_icon', $stage->departure0->country_id) ?>
+            </span>
+        </div>
+
+        <!-- Línea nombre -->
+        <div style="
+            font-size:0.75em;
+            color:#777;
+            max-width:160px;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        " title="<?= Html::encode($stage->departure0->name) ?>">
+            <?= Html::encode($stage->departure0->name) ?>
+        </div>
+    </div>
+</td>
+
+<td>
+    <div>
+        <div style="display:flex; align-items:center; white-space:nowrap; margin-bottom:3px;">
+            <span style="display:inline-block; width:44px;">
+                <?= Html::encode($stage->arrival) ?>
+            </span>
+            <span style="margin-left:5px; display:flex; align-items:center;">
+                <?= ImageMam::render('country_icon', $stage->arrival0->country_id) ?>
+            </span>
+        </div>
+
+        <div style="
+            font-size:0.75em;
+            color:#777;
+            max-width:160px;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        " title="<?= Html::encode($stage->arrival0->name) ?>">
+            <?= Html::encode($stage->arrival0->name) ?>
+        </div>
+    </div>
+</td>
+
+
                         <td><?= Html::encode($stage->distance_nm) ?></td>
                         <td><?= Html::encode($stage->description) ?></td>
                         <td>
@@ -115,14 +146,34 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label' => Yii::t('app', 'Departure'),
                 'format' => 'raw',
                 'value' => function($model) {
+
+                    $airport = $model->departure0;
+
                     return Html::tag('div',
-                        Html::tag('span', Html::encode($model->departure), [
-                            'style'=>'display:inline-block; width:44px; text-align:left;'
-                        ]) .
-                        Html::tag('span', ImageMam::render('country_icon', $model->departure0->country->id), [
-                            'style' => 'display:inline-block; vertical-align:middle; margin-left:5px;'
-                        ]),
-                        ['style'=>'white-space:nowrap;']
+                        Html::tag('div',
+                            Html::tag('span', Html::encode($model->departure), [
+                                'style'=>'display:inline-block; width:44px; text-align:left;'
+                            ]) .
+                            Html::tag('span', ImageMam::render('country_icon', $airport->country->id), [
+                                'style' => 'display:inline-block; vertical-align:middle; margin-left:5px;'
+                            ]),
+                            ['style'=>'white-space:nowrap;']
+                        )
+                        .
+                        Html::tag('div',
+                            Html::encode($airport->name),
+                            [
+                                'style' => '
+                                    font-size:0.75em;
+                                    color:#777;
+                                    max-width:160px;
+                                    white-space:nowrap;
+                                    overflow:hidden;
+                                    text-overflow:ellipsis;
+                                ',
+                                'title' => $airport->name
+                            ]
+                        )
                     );
                 },
                 'contentOptions' => ['style' => 'vertical-align:middle; text-align:left;'],
@@ -132,15 +183,35 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label' => Yii::t('app', 'Arrival'),
                 'format' => 'raw',
                 'value' => function($model) {
-                     return Html::tag('div',
-                         Html::tag('span', Html::encode($model->arrival), [
-                             'style'=>'display:inline-block; width:44px; text-align:left;'
-                         ]) .
-                         Html::tag('span', ImageMam::render('country_icon', $model->arrival0->country->id), [
-                             'style' => 'display:inline-block; vertical-align:middle; margin-left:5px;'
-                         ]),
-                         ['style'=>'white-space:nowrap;']
-                     );
+
+                    $airport = $model->arrival0;
+
+                    return Html::tag('div',
+                        Html::tag('div',
+                            Html::tag('span', Html::encode($model->arrival), [
+                                'style'=>'display:inline-block; width:44px; text-align:left;'
+                            ]) .
+                            Html::tag('span', ImageMam::render('country_icon', $airport->country->id), [
+                                'style' => 'display:inline-block; vertical-align:middle; margin-left:5px;'
+                            ]),
+                            ['style'=>'white-space:nowrap;']
+                        )
+                        .
+                        Html::tag('div',
+                            Html::encode($airport->name),
+                            [
+                                'style' => '
+                                    font-size:0.75em;
+                                    color:#777;
+                                    max-width:160px;
+                                    white-space:nowrap;
+                                    overflow:hidden;
+                                    text-overflow:ellipsis;
+                                ',
+                                'title' => $airport->name
+                            ]
+                        )
+                    );
                 },
                 'contentOptions' => ['style' => 'vertical-align:middle; text-align:left;'],
             ],
