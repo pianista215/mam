@@ -233,6 +233,17 @@ function showRawEvent(index) {
     triggerChartPointByTimestamp(ev.timestamp);
 }
 
+function showRawEventByTimestamp(ts) {
+    const index = rawEventIndexByTimestamp[ts];
+    if (index !== undefined) {
+        showRawEvent(index);
+    }
+}
+
+window.addEventListener('jumpToTimestamp', (e) => {
+    showRawEventByTimestamp(e.detail.timestamp);
+});
+
 document.getElementById('prevEvent').addEventListener('click', () => {
     showRawEvent(currentEventIndex - 1);
 });

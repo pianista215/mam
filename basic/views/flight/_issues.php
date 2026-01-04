@@ -43,7 +43,9 @@ $score = max(0, 100 - $totalPenalty);
             </tr>
         <?php else: ?>
             <?php foreach ($issues as $issue): ?>
-                <tr>
+                <tr class="issue-row"
+                    data-ts="<?= Html::encode($issue['timestamp']) ?>"
+                    style="cursor:pointer">
                     <td><?= Html::encode($issue['timestamp']) ?></td>
                     <td><?= Html::encode($issue['phase']) ?></td>
                     <td><?= Html::encode($issue['description']) ?></td>
@@ -57,3 +59,16 @@ $score = max(0, 100 - $totalPenalty);
         </tr>
     </tbody>
 </table>
+
+<?php
+$this->registerJs("
+document.querySelectorAll('.issue-row').forEach(row => {
+    row.addEventListener('click', () => {
+        const ts = row.dataset.ts;
+        window.dispatchEvent(new CustomEvent('jumpToTimestamp', {
+            detail: { timestamp: ts }
+        }));
+    });
+});
+");
+?>
