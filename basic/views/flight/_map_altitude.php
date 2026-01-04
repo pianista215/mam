@@ -149,7 +149,9 @@ foreach ($report->flightPhases as $phase) {
             if ($phase->flightPhaseType->code !== 'unknown'):
                 $count++;
         ?>
-            <div class="col-md-4 timeline-item">
+            <div class="col-md-4 timeline-item phase-card"
+                 data-start-ts="<?= Html::encode($phase->start) ?>"
+                 style="cursor:pointer">
                 <div class="card shadow-sm h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -191,6 +193,13 @@ foreach ($report->flightPhases as $phase) {
     border-radius: 50%;
     border: 1px solid #333;
     flex-shrink: 0;
+}
+.phase-card {
+    transition: transform .1s ease, box-shadow .1s ease;
+}
+.phase-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0,0,0,.25);
 }
 </style>
 
@@ -258,6 +267,16 @@ function showRawEventByTimestamp(ts) {
         showRawEvent(index);
     }
 }
+
+document.querySelectorAll('.phase-card').forEach(card => {
+    card.addEventListener('click', () => {
+        const ts = card.dataset.startTs;
+        const index = rawEventIndexByTimestamp[ts];
+        if (index !== undefined) {
+            showRawEvent(index);
+        }
+    });
+});
 
 window.addEventListener('jumpToTimestamp', (e) => {
     showRawEventByTimestamp(e.detail.timestamp);
