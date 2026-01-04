@@ -222,6 +222,24 @@ const segments = " . json_encode($segments) . ";
 
 let currentEventIndex = 0;
 
+function updateMapFromEvent(ev) {
+    const lat = ev.values?.Latitude;
+    const lon = ev.values?.Longitude;
+
+    if (lat === undefined || lon === undefined) return;
+
+    const coords = [parseFloat(lon), parseFloat(lat)];
+    const mapCoordinates = ol.proj.fromLonLat(coords);
+
+    pointSource.clear();
+    pointSource.addFeature(new ol.Feature(new ol.geom.Point(mapCoordinates)));
+
+    map.getView().animate({
+        center: mapCoordinates,
+        duration: 500
+    });
+}
+
 function showRawEvent(index) {
     if (index < 0 || index >= rawEvents.length) return;
     currentEventIndex = index;
@@ -231,6 +249,7 @@ function showRawEvent(index) {
         JSON.stringify(ev, null, 2);
 
     triggerChartPointByTimestamp(ev.timestamp);
+    updateMapFromEvent(ev);
 }
 
 function showRawEventByTimestamp(ts) {
@@ -449,15 +468,6 @@ function triggerChartPointByTimestamp(timestamp) {
     myChart.setActiveElements([{ datasetIndex: 0, index: labelIndex }]);
     myChart.tooltip.setActiveElements([{ datasetIndex: 0, index: labelIndex }], { x: 0, y: 0 });
     myChart.update();
-
-    const firstPoint = { datasetIndex: 0, index: labelIndex };
-    const coords = myChart.data.datasets[firstPoint.datasetIndex].data[firstPoint.index].coords;
-    if (coords) {
-        pointSource.clear();
-        const mapCoordinates = ol.proj.fromLonLat(coords);
-        pointSource.addFeature(new ol.Feature(new ol.geom.Point(mapCoordinates)));
-        map.getView().animate({ center: mapCoordinates, duration: 500 });
-    }
 }
 
 showRawEvent(0);
