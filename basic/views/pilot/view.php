@@ -221,7 +221,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'aircraft.aircraftConfiguration.aircraftType.icao_type_code',
             [
-                'label' => 'Flight time',
+                'label' => Yii::t('app', 'Flight Time'),
                 'value' => function ($model) {
                     $minutes = $model->flightReport->flight_time_minutes ?? null;
                     return $minutes !== null
