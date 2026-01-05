@@ -149,7 +149,9 @@ foreach ($report->flightPhases as $phase) {
             if ($phase->flightPhaseType->code !== 'unknown'):
                 $count++;
         ?>
-            <div class="col-md-4 timeline-item">
+            <div class="col-md-4 timeline-item phase-card"
+                 data-start-ts="<?= Html::encode($phase->start) ?>"
+                 style="cursor:pointer">
                 <div class="card shadow-sm h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -192,6 +194,13 @@ foreach ($report->flightPhases as $phase) {
     border: 1px solid #333;
     flex-shrink: 0;
 }
+.phase-card {
+    transition: transform .1s ease, box-shadow .1s ease;
+}
+.phase-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0,0,0,.25);
+}
 </style>
 
 
@@ -222,6 +231,24 @@ const segments = " . json_encode($segments) . ";
 
 let currentEventIndex = 0;
 
+function updateMapFromEvent(ev) {
+    const lat = ev.values?.Latitude;
+    const lon = ev.values?.Longitude;
+
+    if (lat === undefined || lon === undefined) return;
+
+    const coords = [parseFloat(lon), parseFloat(lat)];
+    const mapCoordinates = ol.proj.fromLonLat(coords);
+
+    pointSource.clear();
+    pointSource.addFeature(new ol.Feature(new ol.geom.Point(mapCoordinates)));
+
+    map.getView().animate({
+        center: mapCoordinates,
+        duration: 500
+    });
+}
+
 function showRawEvent(index) {
     if (index < 0 || index >= rawEvents.length) return;
     currentEventIndex = index;
@@ -231,7 +258,29 @@ function showRawEvent(index) {
         JSON.stringify(ev, null, 2);
 
     triggerChartPointByTimestamp(ev.timestamp);
+    updateMapFromEvent(ev);
 }
+
+function showRawEventByTimestamp(ts) {
+    const index = rawEventIndexByTimestamp[ts];
+    if (index !== undefined) {
+        showRawEvent(index);
+    }
+}
+
+document.querySelectorAll('.phase-card').forEach(card => {
+    card.addEventListener('click', () => {
+        const ts = card.dataset.startTs;
+        const index = rawEventIndexByTimestamp[ts];
+        if (index !== undefined) {
+            showRawEvent(index);
+        }
+    });
+});
+
+window.addEventListener('jumpToTimestamp', (e) => {
+    showRawEventByTimestamp(e.detail.timestamp);
+});
 
 document.getElementById('prevEvent').addEventListener('click', () => {
     showRawEvent(currentEventIndex - 1);
@@ -438,15 +487,6 @@ function triggerChartPointByTimestamp(timestamp) {
     myChart.setActiveElements([{ datasetIndex: 0, index: labelIndex }]);
     myChart.tooltip.setActiveElements([{ datasetIndex: 0, index: labelIndex }], { x: 0, y: 0 });
     myChart.update();
-
-    const firstPoint = { datasetIndex: 0, index: labelIndex };
-    const coords = myChart.data.datasets[firstPoint.datasetIndex].data[firstPoint.index].coords;
-    if (coords) {
-        pointSource.clear();
-        const mapCoordinates = ol.proj.fromLonLat(coords);
-        pointSource.addFeature(new ol.Feature(new ol.geom.Point(mapCoordinates)));
-        map.getView().animate({ center: mapCoordinates, duration: 500 });
-    }
 }
 
 showRawEvent(0);
