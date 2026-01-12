@@ -7,6 +7,7 @@ use yii\helpers\Html;
 /* @var $matrix array */
 
 $this->title = Yii::t('app', 'Role assignment');
+$canAssignAdmin = Yii::$app->user->can('assignAdmin');
 ?>
 
 <h1><?= Html::encode($this->title) ?></h1>
@@ -24,29 +25,30 @@ $this->title = Yii::t('app', 'Role assignment');
     <tbody>
         <?php foreach ($users as $user): ?>
             <?php
-                $hasAdminRole = $matrix[$user->id]['admin'] ?? false;
-                $rowClass = $hasAdminRole ? 'table-info' : '';
+                $isAdmin = $matrix[$user->id]['admin'] ?? false;
+                $rowClass = $isAdmin ? 'table-info' : '';
+                $canEdit = !$isAdmin || $canAssignAdmin;
             ?>
             <tr class="<?= $rowClass ?>">
                 <td>
                     <?= Html::encode($user->fullname) ?>
-                    <?php if ($hasAdminRole): ?>
-                        <span class="badge bg-primary ms-1" title="Usuario con rol matrix: tiene todos los permisos">ADMIN</span>
+                    <?php if ($isAdmin): ?>
+                        <span class="badge bg-primary ms-1">ADMIN</span>
                     <?php endif; ?>
                 </td>
+
                 <?php foreach ($roles as $role): ?>
                     <td class="text-center">
-                        <?php if ($hasAdminRole): ?>
-                            <span class="text-muted">&#10003;</span> <!-- check inactivo -->
-                        <?php else: ?>
-                            <?= $matrix[$user->id][$role->name]
-                                ? '<span class="text-success">&#10003;</span>'
-                                : '' ?>
-                        <?php endif; ?>
+                        <?= $matrix[$user->id][$role->name] ? '<span class="text-success">&#10003;</span>' : '' ?>
                     </td>
                 <?php endforeach; ?>
+
                 <td>
-                    <?= Html::a('Modificar', ['admin/edit-roles', 'id' => $user->id], ['class' => 'btn btn-sm btn-primary']) ?>
+                    <?php if ($canEdit): ?>
+                        <?= Html::a(Yii::t('app','Edit'), ['admin/edit-roles','id'=>$user->id], ['class'=>'btn btn-sm btn-primary']) ?>
+                    <?php else: ?>
+                        <span class="text-muted" title="<?=Yii::t('app','Only superadmins can edit admin users')?>">🔒</span>
+                    <?php endif; ?>
                 </td>
             </tr>
         <?php endforeach; ?>
