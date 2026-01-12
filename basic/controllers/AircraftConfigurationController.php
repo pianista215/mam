@@ -96,7 +96,7 @@ class AircraftConfigurationController extends Controller
      */
     public function actionCreate()
     {
-        if(Yii::$app->user->can('aircraftTypeCrud')){
+        if(Yii::$app->user->can('aircraftConfigurationCrud')){
             $model = new AircraftConfiguration();
 
             if ($this->request->isPost) {
@@ -131,7 +131,7 @@ class AircraftConfigurationController extends Controller
      */
     public function actionUpdate($id)
     {
-        if(Yii::$app->user->can('aircraftTypeCrud')){
+        if(Yii::$app->user->can('aircraftConfigurationCrud')){
             $model = $this->findModel($id);
 
             if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
@@ -163,7 +163,7 @@ class AircraftConfigurationController extends Controller
      */
     public function actionDelete($id)
     {
-        if(Yii::$app->user->can('aircraftTypeCrud')){
+        if(Yii::$app->user->can('aircraftConfigurationCrud')){
             $this->findModel($id)->delete();
             $this->logInfo('Deleted aircraft config', ['id' => $id, 'user' => Yii::$app->user->identity->license]);
             return $this->redirect(['index']);

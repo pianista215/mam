@@ -82,18 +82,28 @@ class m241202_180323_add_rbac_roles extends Migration
         $auth->addChild($ifrValidator, $validateFlight);
 
         // Fleet Manager
+        $aircraftTypeCrud = $auth->createPermission('aircraftTypeCrud');
+        $aircraftTypeCrud->description = 'Can create, delete, and modify aircraft types';
+        $auth->add($aircraftTypeCrud);
+
+        $aircraftConfigurationCrud = $auth->createPermission('aircraftConfigurationCrud');
+        $aircraftConfigurationCrud->description = 'Can create, delete, and modify aircraft configurations';
+        $auth->add($aircraftConfigurationCrud);
+
+        $aircraftCrud = $auth->createPermission('aircraftCrud');
+        $aircraftCrud->description = 'Can create, delete, and modify aircrafts';
+        $auth->add($aircraftCrud);
+
         $moveAircraft = $auth->createPermission('moveAircraft');
         $moveAircraft->description = 'Move the aircraft to a new location';
         $auth->add($moveAircraft);
 
-        $cancelAircraftReservation = $auth->createPermission('cancelAircraftReservation');
-        $cancelAircraftReservation->description = 'Cancel the reservation of other user for the aircraft';
-        $auth->add($cancelAircraftReservation);
-
         $fleetManager = $auth->createRole('fleetManager');
         $auth->add($fleetManager);
+        $auth->addChild($fleetManager, $aircraftTypeCrud);
+        $auth->addChild($fleetManager, $aircraftConfigurationCrud);
+        $auth->addChild($fleetManager, $aircraftCrud);
         $auth->addChild($fleetManager, $moveAircraft);
-        $auth->addChild($fleetManager, $cancelAircraftReservation);
 
         // Route Manager
         $routeCrud = $auth->createPermission('routeCrud');
@@ -113,27 +123,20 @@ class m241202_180323_add_rbac_roles extends Migration
         $auth->add($tourManager);
         $auth->addChild($tourManager, $tourCrud);
 
+        // Airport Manager
+        $airportCrud = $auth->createPermission('airportCrud');
+        $airportCrud->description = 'Can create, delete, and modify airports';
+        $auth->add($airportCrud);
+
+        $airportManager = $auth->createRole('airportManager');
+        $auth->add($airportManager);
+        $auth->addChild($airportManager, $airportCrud);
+
         // Admin
         $userCrud = $auth->createPermission('userCrud');
         $userCrud->description = 'Can create, delete, modify, activate and reset users';
         $auth->add($userCrud);
 
-        // TODO: Think if the aircrafts cruds and airport cruds should be on other role
-        $aircraftTypeCrud = $auth->createPermission('aircraftTypeCrud');
-        $aircraftTypeCrud->description = 'Can create, delete, and modify aircraft types';
-        $auth->add($aircraftTypeCrud);
-
-        // TODO: THINK IF WE NEED AIRCRAFT CONFIGURATION CRUD OR JUST USE AIRCRAFT TYPE FOR ALL
-
-        $aircraftCrud = $auth->createPermission('aircraftCrud');
-        $aircraftCrud->description = 'Can create, delete, and modify aircrafts';
-        $auth->add($aircraftCrud);
-
-        $airportCrud = $auth->createPermission('airportCrud');
-        $airportCrud->description = 'Can create, delete, and modify airports';
-        $auth->add($airportCrud);
-
-        // TODO: Think if we need to manage countries, or we can consider them static
         $countryCrud = $auth->createPermission('countryCrud');
         $countryCrud->description = 'Can create, delete, and modify countries';
         $auth->add($countryCrud);
@@ -153,9 +156,7 @@ class m241202_180323_add_rbac_roles extends Migration
         $admin = $auth->createRole('admin');
         $auth->add($admin);
         $auth->addChild($admin, $userCrud);
-        $auth->addChild($admin, $aircraftTypeCrud);
-        $auth->addChild($admin, $aircraftCrud);
-        $auth->addChild($admin, $airportCrud);
+
         $auth->addChild($admin, $countryCrud);
         $auth->addChild($admin, $roleAssignment);
         $auth->addChild($admin, $rankCrud);
@@ -166,6 +167,7 @@ class m241202_180323_add_rbac_roles extends Migration
         $auth->addChild($admin, $fleetManager);
         $auth->addChild($admin, $routeManager);
         $auth->addChild($admin, $tourManager);
+        $auth->addChild($admin, $airportManager);
     }
 
     /**
