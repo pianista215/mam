@@ -6,7 +6,7 @@ use yii\helpers\Html;
 /* @var $roles array */
 /* @var $matrix array */
 
-$this->title = Yii::t('app', 'Roles matrix');
+$this->title = Yii::t('app', 'Role assignment');
 ?>
 
 <h1><?= Html::encode($this->title) ?></h1>

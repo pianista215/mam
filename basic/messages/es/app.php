@@ -213,6 +213,7 @@ return [
     'Replace' => 'Reemplazar',
     'Report Tool' => 'Programa de Reporte',
     'Reset Password' => 'Resetear Contraseña',
+    'Role assignment' => 'Asignación de Roles',
     'Roles matrix' => 'Matriz de Roles',
     'Roles of user' => 'Roles del usuario',
     'Roles updated for user' => 'Roles actualizados para el usuario',

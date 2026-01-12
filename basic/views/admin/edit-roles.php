@@ -6,7 +6,7 @@ use yii\widgets\ActiveForm;
 /* @var $user app\models\Pilot */
 /* @var $roles array */
 
-$this->title = Yii::t('app', 'Roles matrix');
+$this->title = Yii::t('app', 'Roles of user') . ': '. $user->fullname;
 $hasAdmin = in_array('admin', $formModel->roles);
 ?>
 
