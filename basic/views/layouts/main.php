@@ -5,6 +5,7 @@
 
 use app\assets\AppAsset;
 use app\config\Config;
+use app\rbac\constants\Permissions;
 use app\rbac\constants\Roles;
 use app\widgets\Alert;
 use yii\bootstrap5\Breadcrumbs;
@@ -80,7 +81,7 @@ $this->registerCssFile(
                 ],
             ];
 
-    if (Yii::$app->user->can('submitFpl')) {
+    if (Yii::$app->user->can(Permissions::SUBMIT_FPL)) {
         $items[] =
         [
             'label' => Yii::t('app', 'Actions'),
@@ -91,7 +92,7 @@ $this->registerCssFile(
         ];
     }
 
-    if (Yii::$app->user->can('validateVfrFlight') || Yii::$app->user->can('validateIfrFlight')) {
+    if (Yii::$app->user->can(Permissions::VALIDATE_VFR_FLIGHT) || Yii::$app->user->can(Permissions::VALIDATE_IFR_FLIGHT)) {
         $items[] =
         [
             'label' => Yii::t('app', 'Validations'),

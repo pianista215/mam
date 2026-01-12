@@ -3,6 +3,7 @@
 use app\helpers\ImageMam;
 use app\helpers\TimeHelper;
 use app\models\Pilot;
+use app\rbac\constants\Permissions;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\ActionColumn;
@@ -17,7 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="pilot-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-    <?php if(Yii::$app->user->can('userCrud')) : ?>
+    <?php if(Yii::$app->user->can(Permissions::USER_CRUD)) : ?>
     <p>
         <?= Html::a(Yii::t('app', 'Create Pilot'), ['create'], ['class' => 'btn btn-success']) ?>
     </p>
@@ -94,10 +95,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => ActionColumn::className(),
                 'visibleButtons'=>[
                     'delete'=> function($model){
-                        return Yii::$app->user->can('userCrud');
+                        return Yii::$app->user->can(Permissions::USER_CRUD);
                     },
                     'update'=> function($model){
-                        return Yii::$app->user->can('userCrud');
+                        return Yii::$app->user->can(Permissions::USER_CRUD);
                     },
                 ],
                 'urlCreator' => function ($action, Pilot $model, $key, $index, $column) {

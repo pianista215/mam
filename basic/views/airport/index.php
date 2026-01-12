@@ -1,6 +1,7 @@
 <?php
 
 use app\models\Airport;
+use app\rbac\constants\Permissions;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\ActionColumn;
@@ -17,7 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?php if(Yii::$app->user->can('userCrud')) : ?>
+    <?php if(Yii::$app->user->can(Permissions::AIRPORT_CRUD)) : ?>
     <p>
         <?= Html::a(Yii::t('app', 'Create Airport'), ['create'], ['class' => 'btn btn-success']) ?>
     </p>
@@ -42,10 +43,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => ActionColumn::className(),
                 'visibleButtons'=>[
                     'delete'=> function($model){
-                        return Yii::$app->user->can('airportCrud');
+                        return Yii::$app->user->can(Permissions::AIRPORT_CRUD);
                     },
                     'update'=> function($model){
-                        return Yii::$app->user->can('airportCrud');
+                        return Yii::$app->user->can(Permissions::AIRPORT_CRUD);
                     },
                 ],
                 'urlCreator' => function ($action, Airport $model, $key, $index, $column) {

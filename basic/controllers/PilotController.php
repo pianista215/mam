@@ -14,6 +14,7 @@ use app\models\Pilot;
 use app\models\PilotSearch;
 use app\models\Rank;
 use app\models\SubmittedFlightPlan;
+use app\rbac\constants\Permissions;
 use app\rbac\constants\Roles;
 use DateTime;
 
@@ -194,7 +195,7 @@ class PilotController extends Controller
      */
     public function actionCreate()
     {
-        if(Yii::$app->user->can('userCrud')){
+        if(Yii::$app->user->can(Permissions::USER_CRUD)){
             $model = new Pilot();
 
             if ($this->request->isPost) {
@@ -237,7 +238,7 @@ class PilotController extends Controller
      */
     public function actionUpdate($id)
     {
-        if(Yii::$app->user->can('userCrud')){
+        if(Yii::$app->user->can(Permissions::USER_CRUD)){
             $model = $this->findModel($id);
 
             if(!isset($model->license)){
@@ -284,7 +285,7 @@ class PilotController extends Controller
      */
     public function actionDelete($id)
     {
-        if(Yii::$app->user->can('userCrud')){
+        if(Yii::$app->user->can(Permissions::USER_CRUD)){
             $this->findModel($id)->delete();
             $this->logInfo('Deleted pilot', ['id' => $id, 'user' => Yii::$app->user->identity->license]);
             return $this->redirect(['index']);
@@ -294,7 +295,7 @@ class PilotController extends Controller
     }
 
     public function actionActivatePilots(){
-        if(Yii::$app->user->can('userCrud')){
+        if(Yii::$app->user->can(Permissions::USER_CRUD)){
             $searchModel = new PilotSearch();
             $dataProvider = $searchModel->search([]);
             $dataProvider->query->andWhere(['license' => null]);
@@ -312,7 +313,7 @@ class PilotController extends Controller
     }
 
     public function actionActivate($id){
-        if(Yii::$app->user->can('userCrud')){
+        if(Yii::$app->user->can(Permissions::USER_CRUD)){
             $model = $this->findModel($id);
 
             if(isset($model->license)){

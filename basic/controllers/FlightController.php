@@ -6,6 +6,7 @@ use app\helpers\LoggerTrait;
 use app\models\Flight;
 use app\models\FlightSearch;
 use app\models\PilotTourCompletion;
+use app\rbac\constants\Permissions;
 use yii\web\Controller;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
@@ -89,7 +90,7 @@ class FlightController extends Controller
      */
     public function actionIndexPending()
     {
-        if (!Yii::$app->user->can('validateVfrFlight') && !Yii::$app->user->can('validateIfrFlight')) {
+        if (!Yii::$app->user->can(Permissions::VALIDATE_VFR_FLIGHT) && !Yii::$app->user->can(Permissions::VALIDATE_IFR_FLIGHT)) {
             throw new ForbiddenHttpException(Yii::t('app', 'You\'re not allowed to validate flights.'));
         }
 
@@ -117,7 +118,7 @@ class FlightController extends Controller
     {
         $model = $this->findModel($id);
 
-        if (!Yii::$app->user->can('validateFlight', ['flight' => $model])) {
+        if (!Yii::$app->user->can(Permissions::VALIDATE_FLIGHT, ['flight' => $model])) {
             throw new ForbiddenHttpException(Yii::t('app', 'You\'re not allowed to validate this flight.'));
         }
 

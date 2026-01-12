@@ -8,6 +8,7 @@ use app\models\AircraftConfiguration;
 use app\models\AircraftSearch;
 use app\models\AircraftType;
 use app\models\SubmittedFlightPlan;
+use app\rbac\constants\Permissions;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
@@ -106,7 +107,7 @@ class AircraftController extends Controller
      */
     public function actionCreate()
     {
-        if(Yii::$app->user->can('aircraftCrud')){
+        if(Yii::$app->user->can(Permissions::AIRCRAFT_CRUD)){
             $model = new Aircraft();
 
             if ($this->request->isPost) {
@@ -138,7 +139,7 @@ class AircraftController extends Controller
      */
     public function actionUpdate($id)
     {
-        if(Yii::$app->user->can('aircraftCrud')){
+        if(Yii::$app->user->can(Permissions::AIRCRAFT_CRUD)){
             $model = $this->findModel($id);
 
             $model->setScenario(Aircraft::SCENARIO_UPDATE);
@@ -161,7 +162,7 @@ class AircraftController extends Controller
 
     public function actionMove($id)
     {
-        if (Yii::$app->user->can('moveAircraft')) {
+        if (Yii::$app->user->can(Permissions::MOVE_AIRCRAFT)) {
             $model = Aircraft::findOne($id);
             if ($model === null) {
                 throw new NotFoundHttpException(Yii::t('app', 'Aircraft not found.'));
@@ -197,7 +198,7 @@ class AircraftController extends Controller
      */
     public function actionDelete($id)
     {
-        if(Yii::$app->user->can('aircraftCrud')){
+        if(Yii::$app->user->can(Permissions::AIRCRAFT_CRUD)){
             $this->findModel($id)->delete();
             $this->logInfo('Deleted aircraft', ['id' => $id, 'user' => Yii::$app->user->identity->license]);
             return $this->redirect(['index']);

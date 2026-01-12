@@ -1,6 +1,7 @@
 <?php
 
 use app\helpers\TimeHelper;
+use app\rbac\constants\Permissions;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -16,9 +17,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?php if(Yii::$app->user->can('aircraftCrud') || Yii::$app->user->can('moveAircraft')) : ?>
+    <?php if(Yii::$app->user->can(Permissions::AIRCRAFT_CRUD) || Yii::$app->user->can(Permissions::MOVE_AIRCRAFT)) : ?>
     <p>
-        <?php if(Yii::$app->user->can('aircraftCrud')) : ?>
+        <?php if(Yii::$app->user->can(Permissions::AIRCRAFT_CRUD)) : ?>
         <?= Html::a(Yii::t('app', 'Update'), ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
         <?= Html::a(Yii::t('app', 'Delete'), ['delete', 'id' => $model->id], [
                     'class' => 'btn btn-danger',
@@ -28,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ]) ?>
         <?php endif; ?>
-        <?php if(Yii::$app->user->can('moveAircraft')) : ?>
+        <?php if(Yii::$app->user->can(Permissions::MOVE_AIRCRAFT)) : ?>
         <?= Html::a(Yii::t('app', 'Move Aircraft'), ['move', 'id' => $model->id], ['class' => 'btn btn-warning']) ?>
         <?php endif; ?>
     </p>

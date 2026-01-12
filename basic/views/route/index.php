@@ -2,6 +2,7 @@
 
 use app\helpers\ImageMam;
 use app\models\Route;
+use app\rbac\constants\Permissions;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\ActionColumn;
@@ -17,7 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="route-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-    <?php if(Yii::$app->user->can('routeCrud')) : ?>
+    <?php if(Yii::$app->user->can(Permissions::ROUTE_CRUD)) : ?>
     <p>
         <?= Html::a(Yii::t('app', 'Create Route'), ['create'], ['class' => 'btn btn-success']) ?>
     </p>
@@ -125,10 +126,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => ['style' => 'vertical-align:middle'],
                 'visibleButtons'=>[
                     'delete'=> function($model){
-                        return Yii::$app->user->can('routeCrud');
+                        return Yii::$app->user->can(Permissions::ROUTE_CRUD);
                     },
                     'update'=> function($model){
-                        return Yii::$app->user->can('routeCrud');
+                        return Yii::$app->user->can(Permissions::ROUTE_CRUD);
                     },
                 ],
                 'urlCreator' => function ($action, Route $model, $key, $index, $column) {

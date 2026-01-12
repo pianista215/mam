@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\helpers\LoggerTrait;
 use app\models\Country;
 use app\models\CountrySearch;
+use app\rbac\constants\Permissions;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
@@ -88,7 +89,7 @@ class CountryController extends Controller
      */
     public function actionCreate()
     {
-        if(Yii::$app->user->can('countryCrud')){
+        if(Yii::$app->user->can(Permissions::COUNTRY_CRUD)){
             $model = new Country();
 
             if ($this->request->isPost) {
@@ -117,7 +118,7 @@ class CountryController extends Controller
      */
     public function actionUpdate($id)
     {
-        if(Yii::$app->user->can('countryCrud')){
+        if(Yii::$app->user->can(Permissions::COUNTRY_CRUD)){
             $model = $this->findModel($id);
 
             if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
@@ -142,7 +143,7 @@ class CountryController extends Controller
      */
     public function actionDelete($id)
     {
-        if(Yii::$app->user->can('countryCrud')){
+        if(Yii::$app->user->can(Permissions::COUNTRY_CRUD)){
             $this->findModel($id)->delete();
             $this->logInfo('Deleted country', ['id' => $id, 'user' => Yii::$app->user->identity->license]);
             return $this->redirect(['index']);

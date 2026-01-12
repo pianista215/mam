@@ -7,6 +7,7 @@ use app\models\AircraftConfiguration;
 use app\models\AircraftConfigurationSearch;
 use app\models\AircraftType;
 use app\models\AircraftTypeSearch;
+use app\rbac\constants\Permissions;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
@@ -96,7 +97,7 @@ class AircraftTypeController extends Controller
      */
     public function actionCreate()
     {
-        if(Yii::$app->user->can('aircraftTypeCrud')){
+        if(Yii::$app->user->can(Permissions::AIRCRAFT_TYPE_CRUD)){
             $model = new AircraftType();
 
             if ($this->request->isPost) {
@@ -125,7 +126,7 @@ class AircraftTypeController extends Controller
      */
     public function actionUpdate($id)
     {
-        if(Yii::$app->user->can('aircraftTypeCrud')){
+        if(Yii::$app->user->can(Permissions::AIRCRAFT_TYPE_CRUD)){
             $model = $this->findModel($id);
 
             if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
@@ -150,7 +151,7 @@ class AircraftTypeController extends Controller
      */
     public function actionDelete($id)
     {
-        if(Yii::$app->user->can('aircraftTypeCrud')){
+        if(Yii::$app->user->can(Permissions::AIRCRAFT_TYPE_CRUD)){
             $this->findModel($id)->delete();
             $this->logInfo('Deleted aircraft type', ['id' => $id, 'user' => Yii::$app->user->identity->license]);
             return $this->redirect(['index']);

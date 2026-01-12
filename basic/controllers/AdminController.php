@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\models\AssignRolesForm;
 use app\models\Pilot;
+use app\rbac\constants\Permissions;
 use app\rbac\constants\Roles;
 use Yii;
 use yii\filters\AccessControl;
@@ -60,7 +61,7 @@ class AdminController extends Controller
 
     public function actionEditRoles($id)
     {
-        if (!Yii::$app->user->can('roleAssignment')) {
+        if (!Yii::$app->user->can(Permissions::ROLE_ASSIGNMENT)) {
             throw new ForbiddenHttpException();
         }
 
@@ -72,7 +73,7 @@ class AdminController extends Controller
         $auth = Yii::$app->authManager;
         $currentRoles = array_keys($auth->getRolesByUser($id));
 
-        if (in_array(Roles::ADMIN, $currentRoles, true) && !Yii::$app->user->can('assignAdmin')) {
+        if (in_array(Roles::ADMIN, $currentRoles, true) && !Yii::$app->user->can(Permissions::ASSIGN_ADMIN)) {
             throw new ForbiddenHttpException(Yii::t('app', 'You are not allowed to change the roles of an admin user.'));
         }
 
@@ -82,7 +83,7 @@ class AdminController extends Controller
         ]);
 
         if ($form->load(Yii::$app->request->post())) {
-            if (in_array(Roles::ADMIN, $form->roles, true) && !Yii::$app->user->can('assignAdmin')) {
+            if (in_array(Roles::ADMIN, $form->roles, true) && !Yii::$app->user->can(Permissions::ASSIGN_ADMIN)) {
                 throw new ForbiddenHttpException(Yii::t('app', 'You are not allowed to assign the admin role.'));
             }
             if ($form->save()) {

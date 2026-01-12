@@ -1,6 +1,7 @@
 <?php
 
 use app\models\Aircraft;
+use app\rbac\constants\Permissions;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
 use yii\helpers\Html;
@@ -19,7 +20,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?php if(Yii::$app->user->can('aircraftConfigurationCrud')) : ?>
+    <?php if(Yii::$app->user->can(Permissions::AIRCRAFT_CONFIGURATION_CRUD)) : ?>
     <p>
         <?= Html::a(Yii::t('app', 'Update'), ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
         <?= Html::a(Yii::t('app', 'Delete'), ['delete', 'id' => $model->id], [
@@ -58,10 +59,10 @@ $this->params['breadcrumbs'][] = $this->title;
                     'class' => ActionColumn::className(),
                     'visibleButtons'=>[
                         'delete'=> function($model){
-                            return Yii::$app->user->can('aircraftCrud');
+                            return Yii::$app->user->can(Permissions::AIRCRAFT_CRUD);
                         },
                         'update'=> function($model){
-                            return Yii::$app->user->can('aircraftCrud');
+                            return Yii::$app->user->can(Permissions::AIRCRAFT_CRUD);
                         },
                     ],
                     'urlCreator' => function ($action, Aircraft $model, $key, $index, $column) {

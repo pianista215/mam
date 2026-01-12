@@ -1,4 +1,6 @@
 <?php
+
+use app\rbac\constants\Permissions;
 use app\rbac\constants\Roles;
 use yii\helpers\Html;
 
@@ -8,7 +10,7 @@ use yii\helpers\Html;
 /* @var $matrix array */
 
 $this->title = Yii::t('app', 'Role assignment');
-$canAssignAdmin = Yii::$app->user->can('assignAdmin');
+$canAssignAdmin = Yii::$app->user->can(Permissions::ASSIGN_ADMIN);
 ?>
 
 <h1><?= Html::encode($this->title) ?></h1>

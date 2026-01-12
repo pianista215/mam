@@ -15,6 +15,7 @@ use app\models\SubmittedFlightPlan;
 use app\models\SubmittedFlightPlanSearch;
 use app\models\TourStage;
 use app\models\TourStageSearch;
+use app\rbac\constants\Permissions;
 use yii\web\Controller;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
@@ -109,7 +110,7 @@ class SubmittedFlightPlanController extends Controller
 
     public function actionSelectFlight()
     {
-        if(Yii::$app->user->can('submitFpl') && isset(Yii::$app->user->identity->location)){
+        if(Yii::$app->user->can(Permissions::SUBMIT_FPL) && isset(Yii::$app->user->identity->location)){
             $model = $this->getCurrentFpl();
             if($model !== null){
                 $this->logInfo('Returning user current fpl (sel route)', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
@@ -172,7 +173,7 @@ class SubmittedFlightPlanController extends Controller
 
     protected function selectAircraft(string $type, $entity)
     {
-        if (!Yii::$app->user->can('submitFpl')) {
+        if (!Yii::$app->user->can(Permissions::SUBMIT_FPL)) {
             throw new ForbiddenHttpException();
         }
 
@@ -236,7 +237,7 @@ class SubmittedFlightPlanController extends Controller
 
     public function actionPrepareFplRoute($route_id, $aircraft_id)
     {
-        if (!Yii::$app->user->can('submitFpl')) {
+        if (!Yii::$app->user->can(Permissions::SUBMIT_FPL)) {
             throw new ForbiddenHttpException();
         }
 
@@ -257,7 +258,7 @@ class SubmittedFlightPlanController extends Controller
 
     public function actionPrepareFplTour($tour_stage_id, $aircraft_id)
     {
-        if (!Yii::$app->user->can('submitFpl')) {
+        if (!Yii::$app->user->can(Permissions::SUBMIT_FPL)) {
             throw new ForbiddenHttpException();
         }
 
@@ -278,7 +279,7 @@ class SubmittedFlightPlanController extends Controller
 
     public function actionPrepareFplCharter($arrival, $aircraft_id)
     {
-        if (!Yii::$app->user->can('submitFpl')) {
+        if (!Yii::$app->user->can(Permissions::SUBMIT_FPL)) {
             throw new ForbiddenHttpException();
         }
 
@@ -411,13 +412,13 @@ class SubmittedFlightPlanController extends Controller
 
     public function actionIndex()
     {
-        if (Yii::$app->user->can('validateVfrFlight') || Yii::$app->user->can('validateIfrFlight')) {
+        if (Yii::$app->user->can(Permissions::VALIDATE_VFR_FLIGHT) || Yii::$app->user->can(Permissions::VALIDATE_IFR_FLIGHT)) {
             $searchModel = new SubmittedFlightPlanSearch();
             $queryParams = $this->request->queryParams;
 
-            if(Yii::$app->user->can('validateVfrFlight') && !Yii::$app->user->can('validateIfrFlight')){
+            if(Yii::$app->user->can(Permissions::VALIDATE_VFR_FLIGHT) && !Yii::$app->user->can(Permissions::VALIDATE_IFR_FLIGHT)){
                 $searchModel->flight_rules = 'V';
-            } else if(!Yii::$app->user->can('validateVfrFlight') && Yii::$app->user->can('validateIfrFlight')){
+            } else if(!Yii::$app->user->can(Permissions::VALIDATE_VFR_FLIGHT) && Yii::$app->user->can(Permissions::VALIDATE_IFR_FLIGHT)){
                 $searchModel->flight_rules = ['I', 'Y', 'Z'];
             }
 
@@ -442,9 +443,9 @@ class SubmittedFlightPlanController extends Controller
     {
         $model = $this->findModel($id);
         if (
-            Yii::$app->user->can('crudOwnFpl', ['submittedFlightPlan' => $model]) ||
-            Yii::$app->user->can('validateVfrFlight') && $model->isVfrFlight() ||
-            Yii::$app->user->can('validateIfrFlight') && $model->isIfrFlight()
+            Yii::$app->user->can(Permissions::CRUD_OWN_FPL, ['submittedFlightPlan' => $model]) ||
+            Yii::$app->user->can(Permissions::VALIDATE_VFR_FLIGHT) && $model->isVfrFlight() ||
+            Yii::$app->user->can(Permissions::VALIDATE_IFR_FLIGHT) && $model->isIfrFlight()
         ) {
             $entity = null;
             if ($model->route_id) {
@@ -474,7 +475,7 @@ class SubmittedFlightPlanController extends Controller
     {
         $model = $this->findModel($id);
 
-        if (Yii::$app->user->can('crudOwnFpl', ['submittedFlightPlan' => $model])) {
+        if (Yii::$app->user->can(Permissions::CRUD_OWN_FPL, ['submittedFlightPlan' => $model])) {
 
             $entity = null;
             if ($model->route_id) {
@@ -510,7 +511,7 @@ class SubmittedFlightPlanController extends Controller
     {
         $model = $this->findModel($id);
 
-        if (Yii::$app->user->can('crudOwnFpl', ['submittedFlightPlan' => $model])) {
+        if (Yii::$app->user->can(Permissions::CRUD_OWN_FPL, ['submittedFlightPlan' => $model])) {
             $model = $this->findModel($id);
             $tx = Yii::$app->db->beginTransaction();
             try {

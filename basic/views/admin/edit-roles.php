@@ -1,5 +1,6 @@
 <?php
 
+use app\rbac\constants\Permissions;
 use app\rbac\constants\Roles;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
@@ -11,7 +12,7 @@ use yii\widgets\ActiveForm;
 $this->title = Yii::t('app', 'Roles of user') . ': '. $user->fullname;
 
 $hasAdmin = in_array(Roles::ADMIN, $formModel->roles, true);
-$canAssignAdmin = Yii::$app->user->can('assignAdmin');
+$canAssignAdmin = Yii::$app->user->can(Permissions::ASSIGN_ADMIN);
 ?>
 
 <h2 class="mb-4">
@@ -24,7 +25,6 @@ $canAssignAdmin = Yii::$app->user->can('assignAdmin');
 
         <?php $form = ActiveForm::begin(['id' => 'roles-form']); ?>
 
-        <!-- Permite enviar array vacío -->
         <input type="hidden" name="AssignRolesForm[roles]" value="">
 
         <?= $form->errorSummary($formModel) ?>

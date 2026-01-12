@@ -1,6 +1,7 @@
 <?php
 
 use app\models\AircraftType;
+use app\rbac\constants\Permissions;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\ActionColumn;
@@ -16,7 +17,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="aircraft-type-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-    <?php if(Yii::$app->user->can('aircraftTypeCrud')) : ?>
+    <?php if(Yii::$app->user->can(Permissions::AIRCRAFT_TYPE_CRUD)) : ?>
     <p>
         <?= Html::a(Yii::t('app', 'Create Aircraft Type'), ['create'], ['class' => 'btn btn-success']) ?>
     </p>
@@ -37,10 +38,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => ActionColumn::className(),
                 'visibleButtons'=>[
                     'delete'=> function($model){
-                        return Yii::$app->user->can('aircraftTypeCrud');
+                        return Yii::$app->user->can(Permissions::AIRCRAFT_TYPE_CRUD);
                     },
                     'update'=> function($model){
-                        return Yii::$app->user->can('aircraftTypeCrud');
+                        return Yii::$app->user->can(Permissions::AIRCRAFT_TYPE_CRUD);
                     },
                 ],
                 'urlCreator' => function ($action, AircraftType $model, $key, $index, $column) {

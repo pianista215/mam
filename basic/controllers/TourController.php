@@ -7,6 +7,7 @@ use app\models\Page;
 use app\models\PageContent;
 use app\models\Tour;
 use app\models\TourSearch;
+use app\rbac\constants\Permissions;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
@@ -108,7 +109,7 @@ class TourController extends Controller
      */
     public function actionCreate()
     {
-        if(Yii::$app->user->can('tourCrud')){
+        if(Yii::$app->user->can(Permissions::TOUR_CRUD)){
             $model = new Tour();
 
             if ($this->request->isPost) {
@@ -137,7 +138,7 @@ class TourController extends Controller
      */
     public function actionUpdate($id)
     {
-        if(Yii::$app->user->can('tourCrud')){
+        if(Yii::$app->user->can(Permissions::TOUR_CRUD)){
             $model = $this->findModel($id);
 
             if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
@@ -162,7 +163,7 @@ class TourController extends Controller
      */
     public function actionDelete($id)
     {
-        if(Yii::$app->user->can('tourCrud')){
+        if(Yii::$app->user->can(Permissions::TOUR_CRUD)){
             $model = $this->findModel($id);
 
             $hasFlights = false;

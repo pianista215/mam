@@ -2,6 +2,7 @@
 
 use app\helpers\ImageMam;
 use app\models\AircraftConfiguration;
+use app\rbac\constants\Permissions;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
 use yii\helpers\Html;
@@ -30,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1 class="mb-0"><?= Html::encode($this->title) ?></h1>
 
-        <?php if (Yii::$app->user->can('aircraftTypeCrud')): ?>
+        <?php if (Yii::$app->user->can(Permissions::AIRCRAFT_TYPE_CRUD)): ?>
             <div>
                 <?= Html::a(Yii::t('app', 'Update'), ['update', 'id' => $model->id], ['class' => 'btn btn-primary me-2']) ?>
                 <?= Html::a(Yii::t('app', 'Delete'), ['delete', 'id' => $model->id], [
@@ -70,8 +71,8 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'class' => ActionColumn::className(),
                 'visibleButtons'=>[
-                    'delete'=> fn($model) => Yii::$app->user->can('aircraftTypeCrud'),
-                    'update'=> fn($model) => Yii::$app->user->can('aircraftTypeCrud'),
+                    'delete'=> fn($model) => Yii::$app->user->can(Permissions::AIRCRAFT_TYPE_CRUD),
+                    'update'=> fn($model) => Yii::$app->user->can(Permissions::AIRCRAFT_TYPE_CRUD),
                 ],
                 'urlCreator' => fn($action, AircraftConfiguration $model, $key, $index, $column) =>
                     Url::toRoute(['aircraft-configuration/'.$action, 'id' => $model->id]),

@@ -3,6 +3,7 @@
 namespace app\rbac\rules;
 
 use app\models\Flight;
+use app\rbac\constants\Permissions;
 use yii\rbac\Rule;
 use Yii;
 
@@ -24,9 +25,9 @@ class FlightValidationRule extends Rule
         }
 
         if ($flight->flight_rules === 'V') {
-            return Yii::$app->user->can('validateVfrFlight');
+            return Yii::$app->user->can(Permissions::VALIDATE_VFR_FLIGHT);
         } else {
-            return Yii::$app->user->can('validateIfrFlight');
+            return Yii::$app->user->can(Permissions::VALIDATE_IFR_FLIGHT);
         }
 
     }

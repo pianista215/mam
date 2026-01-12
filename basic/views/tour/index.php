@@ -1,6 +1,7 @@
 <?php
 
 use app\models\Tour;
+use app\rbac\constants\Permissions;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\ActionColumn;
@@ -16,7 +17,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="tour-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-    <?php if(Yii::$app->user->can('tourCrud')) : ?>
+    <?php if(Yii::$app->user->can(Permissions::TOUR_CRUD)) : ?>
     <p>
         <?= Html::a(Yii::t('app', 'Create Tour'), ['create'], ['class' => 'btn btn-success']) ?>
     </p>
@@ -47,10 +48,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => ActionColumn::className(),
                 'visibleButtons'=>[
                     'delete'=> function($model){
-                        return Yii::$app->user->can('tourCrud') && !$model->getFlights()->exists();
+                        return Yii::$app->user->can(Permissions::TOUR_CRUD) && !$model->getFlights()->exists();
                     },
                     'update'=> function($model){
-                        return Yii::$app->user->can('tourCrud');
+                        return Yii::$app->user->can(Permissions::TOUR_CRUD);
                     },
                 ],
                 'urlCreator' => function ($action, Tour $model, $key, $index, $column) {

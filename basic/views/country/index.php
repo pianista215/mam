@@ -2,6 +2,7 @@
 
 use app\helpers\ImageMam;
 use app\models\Country;
+use app\rbac\constants\Permissions;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\ActionColumn;
@@ -18,7 +19,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?php if(Yii::$app->user->can('userCrud')) : ?>
+    <?php if(Yii::$app->user->can(Permissions::COUNTRY_CRUD)) : ?>
         <p>
             <?= Html::a(Yii::t('app', 'Create Country'), ['create'], ['class' => 'btn btn-success']) ?>
         </p>
@@ -48,10 +49,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => ActionColumn::className(),
                 'visibleButtons'=>[
                     'delete'=> function($model){
-                        return Yii::$app->user->can('countryCrud');
+                        return Yii::$app->user->can(Permissions::COUNTRY_CRUD);
                     },
                     'update'=> function($model){
-                        return Yii::$app->user->can('countryCrud');
+                        return Yii::$app->user->can(Permissions::COUNTRY_CRUD);
                     },
                 ],
                 'urlCreator' => function ($action, Country $model, $key, $index, $column) {

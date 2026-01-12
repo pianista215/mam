@@ -3,6 +3,7 @@
 namespace app\rbac\rules;
 
 use app\models\Image;
+use app\rbac\constants\Permissions;
 use app\rbac\constants\Roles;
 use Yii;
 use yii\rbac\Rule;
@@ -29,22 +30,22 @@ class ImageUploadRule extends Rule
         switch ($type) {
 
             case 'rank_icon':
-                return Yii::$app->user->can('rankCrud');
+                return Yii::$app->user->can(Permissions::RANK_CRUD);
 
             case 'tour_image':
-                return Yii::$app->user->can('tourCrud');
+                return Yii::$app->user->can(Permissions::TOUR_CRUD);
 
             case 'country_icon':
-                return Yii::$app->user->can('countryCrud');
+                return Yii::$app->user->can(Permissions::COUNTRY_CRUD);
 
             case 'aircraftType_image':
-                return Yii::$app->user->can('aircraftTypeCrud');
+                return Yii::$app->user->can(Permissions::AIRCRAFT_TYPE_CRUD);
 
             case 'page_image':
                 return Yii::$app->authManager->getAssignment(Roles::ADMIN, $userId) !== null;
 
             case 'pilot_profile':
-                return ((int)$relatedId === (int)$userId) || Yii::$app->user->can('userCrud');
+                return ((int)$relatedId === (int)$userId) || Yii::$app->user->can(Permissions::USER_CRUD);
 
             default:
                 return false;
