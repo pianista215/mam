@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\AssignRolesForm;
 use app\models\Pilot;
 use Yii;
 use yii\filters\AccessControl;
@@ -39,31 +40,33 @@ class AdminController extends Controller
         ]);
     }
 
-    public function actionRoles($id)
+    public function actionEditRoles($id)
     {
-        $user = User::findOne($id);
+        $user = Pilot::findOne($id);
+        if (!$user) {
+            throw new NotFoundHttpException();
+        }
+
         $auth = Yii::$app->authManager;
 
         $roles = $auth->getRoles();
         $assigned = array_keys($auth->getRolesByUser($id));
 
-        if (Yii::$app->request->isPost) {
-            $selected = Yii::$app->request->post('roles', []);
+        $form = new AssignRolesForm([
+            'userId' => $id,
+            'roles' => $assigned,
+        ]);
 
-            $auth->revokeAll($id);
-            foreach ($selected as $roleName) {
-                $role = $auth->getRole($roleName);
-                $auth->assign($role, $id);
-            }
-
-            Yii::$app->session->setFlash('success', Yii::t('app','Roles updated'));
-            return $this->redirect(['user/view', 'id'=>$id]);
+        if ($form->load(Yii::$app->request->post()) && $form->save()) {
+            Yii::$app->session->setFlash('success', Yii::t('app','Roles updated for user') .': '. $user->fullname);
+            return $this->redirect(['roles-matrix']);
         }
 
-        return $this->render('roles', [
-            'user'=>$user,
-            'roles'=>$roles,
-            'assigned'=>$assigned,
+        return $this->render('edit-roles', [
+            'user' => $user,
+            'roles' => $roles,
+            'assigned' => $form->roles,
+            'formModel' => $form,
         ]);
     }
 

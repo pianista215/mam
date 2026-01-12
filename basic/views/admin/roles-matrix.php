@@ -2,7 +2,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $users app\models\User[] */
+/* @var $users app\models\Pilot[] */
 /* @var $roles array */
 /* @var $matrix array */
 
