@@ -81,6 +81,15 @@ class m241202_180323_add_rbac_roles extends Migration
         $auth->addChild($ifrValidator, $validateIfrFlight);
         $auth->addChild($ifrValidator, $validateFlight);
 
+        // Fleet Operator
+        $moveAircraft = $auth->createPermission('moveAircraft');
+        $moveAircraft->description = 'Move the aircraft to a new location';
+        $auth->add($moveAircraft);
+
+        $fleetOperator = $auth->createRole('fleetOperator');
+        $auth->add($fleetOperator);
+        $auth->addChild($fleetOperator, $moveAircraft);
+
         // Fleet Manager
         $aircraftTypeCrud = $auth->createPermission('aircraftTypeCrud');
         $aircraftTypeCrud->description = 'Can create, delete, and modify aircraft types';
@@ -94,16 +103,11 @@ class m241202_180323_add_rbac_roles extends Migration
         $aircraftCrud->description = 'Can create, delete, and modify aircrafts';
         $auth->add($aircraftCrud);
 
-        $moveAircraft = $auth->createPermission('moveAircraft');
-        $moveAircraft->description = 'Move the aircraft to a new location';
-        $auth->add($moveAircraft);
-
         $fleetManager = $auth->createRole('fleetManager');
         $auth->add($fleetManager);
         $auth->addChild($fleetManager, $aircraftTypeCrud);
         $auth->addChild($fleetManager, $aircraftConfigurationCrud);
         $auth->addChild($fleetManager, $aircraftCrud);
-        $auth->addChild($fleetManager, $moveAircraft);
 
         // Route Manager
         $routeCrud = $auth->createPermission('routeCrud');
@@ -164,6 +168,7 @@ class m241202_180323_add_rbac_roles extends Migration
         $auth->addChild($admin, $imageCrud);
         $auth->addChild($admin, $vfrValidator);
         $auth->addChild($admin, $ifrValidator);
+        $auth->addChild($admin, $fleetOperator);
         $auth->addChild($admin, $fleetManager);
         $auth->addChild($admin, $routeManager);
         $auth->addChild($admin, $tourManager);
