@@ -16,7 +16,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="aircraft-configuration-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-    <?php if(Yii::$app->user->can('aircraftTypeCrud')) : ?>
+    <?php if(Yii::$app->user->can('aircraftConfigurationCrud')) : ?>
     <p>
         <?= Html::a(Yii::t('app', 'Create Aircraft Configuration'), ['create'], ['class' => 'btn btn-success']) ?>
     </p>
@@ -40,10 +40,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => ActionColumn::className(),
                 'visibleButtons'=>[
                     'delete'=> function($model){
-                        return Yii::$app->user->can('aircraftTypeCrud');
+                        return Yii::$app->user->can('aircraftConfigurationCrud');
                     },
                     'update'=> function($model){
-                        return Yii::$app->user->can('aircraftTypeCrud');
+                        return Yii::$app->user->can('aircraftConfigurationCrud');
                     },
                 ],
                 'urlCreator' => function ($action, AircraftConfiguration $model, $key, $index, $column) {
