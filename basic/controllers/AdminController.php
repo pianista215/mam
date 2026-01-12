@@ -85,7 +85,7 @@ class AdminController extends Controller
                 throw new ForbiddenHttpException(Yii::t('app', 'You are not allowed to assign the admin role.'));
             }
             if ($form->save()) {
-                Yii::$app->session->setFlash('success', Yii::t('app','Roles updated'));
+                Yii::$app->session->setFlash('success', Yii::t('app','Roles updated for user'. ': ' . $user->fullname));
                 return $this->redirect(['roles-matrix']);
             }
         }

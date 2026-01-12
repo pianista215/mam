@@ -19,6 +19,17 @@ class AssignRolesForm extends Model
         ];
     }
 
+    public function load($data, $formName = null): bool
+    {
+        $loaded = parent::load($data, $formName);
+
+        if (!is_array($this->roles)) {
+            $this->roles = [];
+        }
+
+        return $loaded;
+    }
+
     public function beforeValidate()
     {
         if ($this->roles === '') {
