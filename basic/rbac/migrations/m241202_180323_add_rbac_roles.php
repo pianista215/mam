@@ -168,6 +168,11 @@ class m241202_180323_add_rbac_roles extends Migration
         $auth->addChild($admin, $routeManager);
         $auth->addChild($admin, $tourManager);
         $auth->addChild($admin, $airportManager);
+
+        // By now only assignable via database for security purposes
+        $assignAdmin = $auth->createPermission('assignAdmin');
+        $assignAdmin->description = 'Can assign or revoke admin role';
+        $auth->add($assignAdmin);
     }
 
     /**
