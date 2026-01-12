@@ -1,8 +1,8 @@
 <?php
+
+use app\rbac\constants\Roles;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-use app\components\Roles;
-use app\components\Permissions;
 
 /* @var $formModel app\models\forms\AssignRolesForm */
 /* @var $user app\models\Pilot */
@@ -10,7 +10,7 @@ use app\components\Permissions;
 
 $this->title = Yii::t('app', 'Roles of user') . ': '. $user->fullname;
 
-$hasAdmin = in_array('admin', $formModel->roles, true);
+$hasAdmin = in_array(Roles::ADMIN, $formModel->roles, true);
 $canAssignAdmin = Yii::$app->user->can('assignAdmin');
 ?>
 
@@ -30,9 +30,9 @@ $canAssignAdmin = Yii::$app->user->can('assignAdmin');
         <?= $form->errorSummary($formModel) ?>
 
         <?php foreach ($roles as $role): ?>
-            <?php if ($role->name !== 'admin' || $canAssignAdmin): ?>
+            <?php if ($role->name !== Roles::ADMIN || $canAssignAdmin): ?>
                 <?php
-                    $isAdmin = $role->name === 'admin';
+                    $isAdmin = $role->name === Roles::ADMIN;
                     $checked = in_array($role->name, $formModel->roles, true);
                     $disabled = $isAdmin && !$canAssignAdmin;
                 ?>

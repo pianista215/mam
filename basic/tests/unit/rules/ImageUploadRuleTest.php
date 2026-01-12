@@ -2,13 +2,14 @@
 
 namespace tests\unit\rbac;
 
-use Yii;
 use app\models\Airport;
 use app\models\Country;
 use app\models\Image;
 use app\models\Pilot;
+use app\rbac\constants\Roles;
 use app\rbac\rules\ImageUploadRule;
 use tests\unit\BaseUnitTest;
+use Yii;
 
 class ImageUploadRuleTest extends BaseUnitTest
 {
@@ -20,7 +21,7 @@ class ImageUploadRuleTest extends BaseUnitTest
         $auth = Yii::$app->authManager;
         $auth->removeAll();
 
-        $adminRole = $auth->createRole('admin');
+        $adminRole = $auth->createRole(Roles::ADMIN);
         $auth->add($adminRole);
 
         foreach (['rankCrud', 'tourCrud', 'countryCrud', 'aircraftTypeCrud', 'userCrud'] as $perm) {
@@ -223,7 +224,7 @@ class ImageUploadRuleTest extends BaseUnitTest
         $this->login($pilot);
 
         Yii::$app->authManager->assign(
-            Yii::$app->authManager->getRole('admin'),
+            Yii::$app->authManager->getRole(Roles::ADMIN),
             11
         );
 

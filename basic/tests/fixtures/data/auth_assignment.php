@@ -1,8 +1,10 @@
 <?php
 
+use app\rbac\constants\Roles;
+
 return [
     [
-        'item_name' => 'admin',
+        'item_name' => Roles::ADMIN,
         'user_id' => '2',
         'created_at' => time(),
     ],

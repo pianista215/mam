@@ -2,10 +2,10 @@
 
 namespace app\rbac\rules;
 
-use yii\rbac\Rule;
-use Yii;
 use app\models\Image;
-use Codeception\Util\Debug;
+use app\rbac\constants\Roles;
+use Yii;
+use yii\rbac\Rule;
 
 class ImageUploadRule extends Rule
 {
@@ -41,7 +41,7 @@ class ImageUploadRule extends Rule
                 return Yii::$app->user->can('aircraftTypeCrud');
 
             case 'page_image':
-                return Yii::$app->authManager->getAssignment('admin', $userId) !== null;
+                return Yii::$app->authManager->getAssignment(Roles::ADMIN, $userId) !== null;
 
             case 'pilot_profile':
                 return ((int)$relatedId === (int)$userId) || Yii::$app->user->can('userCrud');

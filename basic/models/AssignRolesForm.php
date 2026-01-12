@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\rbac\constants\Roles;
 use Yii;
 use yii\base\Model;
 
@@ -60,8 +61,8 @@ class AssignRolesForm extends Model
         $transaction = $db->beginTransaction();
 
         try {
-            if (in_array('admin', $this->roles, true)) {
-                $this->roles = ['admin'];
+            if (in_array(Roles::ADMIN, $this->roles, true)) {
+                $this->roles = [Roles::ADMIN];
             }
 
             $auth->revokeAll($this->userId);

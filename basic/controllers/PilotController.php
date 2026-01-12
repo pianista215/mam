@@ -14,6 +14,7 @@ use app\models\Pilot;
 use app\models\PilotSearch;
 use app\models\Rank;
 use app\models\SubmittedFlightPlan;
+use app\rbac\constants\Roles;
 use DateTime;
 
 use yii\db\Expression;
@@ -324,7 +325,7 @@ class PilotController extends Controller
 
             if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
                 $auth = Yii::$app->authManager;
-                $pilotRole = $auth->getRole('pilot');
+                $pilotRole = $auth->getRole(Roles::PILOT);
                 $auth->assign($pilotRole, $model->id);
                 // TODO: SEND MAIL TO THE PILOT
                 $this->logInfo('Pilot activated', ['id' => $id, 'user' => Yii::$app->user->identity->license]);

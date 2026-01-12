@@ -1,4 +1,5 @@
 <?php
+use app\rbac\constants\Roles;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
@@ -25,7 +26,7 @@ $canAssignAdmin = Yii::$app->user->can('assignAdmin');
     <tbody>
         <?php foreach ($users as $user): ?>
             <?php
-                $isAdmin = $matrix[$user->id]['admin'] ?? false;
+                $isAdmin = $matrix[$user->id][Roles::ADMIN] ?? false;
                 $rowClass = $isAdmin ? 'table-info' : '';
                 $canEdit = !$isAdmin || $canAssignAdmin;
             ?>

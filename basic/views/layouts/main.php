@@ -5,6 +5,7 @@
 
 use app\assets\AppAsset;
 use app\config\Config;
+use app\rbac\constants\Roles;
 use app\widgets\Alert;
 use yii\bootstrap5\Breadcrumbs;
 use yii\bootstrap5\Html;
@@ -101,8 +102,7 @@ $this->registerCssFile(
         ];
     }
 
-    // TODO: REFINE THE PERMISSIONS HERE. Not checking the role
-    if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) !== null) {
+    if (Yii::$app->authManager->getAssignment(Roles::ADMIN, Yii::$app->user->id) !== null) {
         $items[] = [
             'label' => Yii::t('app', 'Admin'),
             'items' => [
