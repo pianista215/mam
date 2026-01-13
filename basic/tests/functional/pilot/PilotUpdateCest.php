@@ -65,7 +65,7 @@ class PilotUpdateCest
        $I->see('Location cannot be blank.');
 
        $count = \app\models\Pilot::find()->count();
-       $I->assertEquals(10, $count);
+       $I->assertEquals(13, $count);
     }
 
     public function updateValidPilot(\FunctionalTester $I)
@@ -106,7 +106,7 @@ class PilotUpdateCest
 
 
        $count = \app\models\Pilot::find()->count();
-       $I->assertEquals(10, $count);
+       $I->assertEquals(13, $count);
     }
 
     public function updatePilotRange(\FunctionalTester $I)
@@ -140,7 +140,7 @@ class PilotUpdateCest
        $I->assertEquals(10.5, $model->hours_flown);
 
        $count = \app\models\Pilot::find()->count();
-       $I->assertEquals(10, $count);
+       $I->assertEquals(13, $count);
     }
 
 }
