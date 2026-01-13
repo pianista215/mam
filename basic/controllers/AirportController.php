@@ -6,6 +6,7 @@ use app\helpers\LoggerTrait;
 use app\models\Airport;
 use app\models\AirportSearch;
 use app\models\Country;
+use app\rbac\constants\Permissions;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
@@ -88,7 +89,7 @@ class AirportController extends Controller
      */
     public function actionCreate()
     {
-        if(Yii::$app->user->can('airportCrud')){
+        if(Yii::$app->user->can(Permissions::AIRPORT_CRUD)){
             $model = new Airport();
 
             if ($this->request->isPost) {
@@ -124,7 +125,7 @@ class AirportController extends Controller
      */
     public function actionUpdate($id)
     {
-        if(Yii::$app->user->can('airportCrud')){
+        if(Yii::$app->user->can(Permissions::AIRPORT_CRUD)){
             $model = $this->findModel($id);
 
             if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
@@ -156,7 +157,7 @@ class AirportController extends Controller
      */
     public function actionDelete($id)
     {
-        if(Yii::$app->user->can('airportCrud')){
+        if(Yii::$app->user->can(Permissions::AIRPORT_CRUD)){
             $this->findModel($id)->delete();
             $this->logInfo('Deleted airport', ['id' => $id, 'user' => Yii::$app->user->identity->license]);
             return $this->redirect(['index']);

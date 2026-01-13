@@ -5,6 +5,8 @@
 
 use app\assets\AppAsset;
 use app\config\Config;
+use app\rbac\constants\Permissions;
+use app\rbac\constants\Roles;
 use app\widgets\Alert;
 use yii\bootstrap5\Breadcrumbs;
 use yii\bootstrap5\Html;
@@ -79,7 +81,7 @@ $this->registerCssFile(
                 ],
             ];
 
-    if (Yii::$app->user->can('submitFpl')) {
+    if (Yii::$app->user->can(Permissions::SUBMIT_FPL)) {
         $items[] =
         [
             'label' => Yii::t('app', 'Actions'),
@@ -90,7 +92,7 @@ $this->registerCssFile(
         ];
     }
 
-    if (Yii::$app->user->can('validateVfrFlight') || Yii::$app->user->can('validateIfrFlight')) {
+    if (Yii::$app->user->can(Permissions::VALIDATE_VFR_FLIGHT) || Yii::$app->user->can(Permissions::VALIDATE_IFR_FLIGHT)) {
         $items[] =
         [
             'label' => Yii::t('app', 'Validations'),
@@ -101,13 +103,13 @@ $this->registerCssFile(
         ];
     }
 
-    // TODO: REFINE THE PERMISSIONS HERE. Not checking the role
-    if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) !== null) {
+    if (Yii::$app->authManager->getAssignment(Roles::ADMIN, Yii::$app->user->id) !== null) {
         $items[] = [
             'label' => Yii::t('app', 'Admin'),
             'items' => [
                 ['label' => Yii::t('app', 'Activate Pilots'), 'url' => ['/pilot/activate-pilots']],
                 ['label' => Yii::t('app', 'Manage Images'), 'url' => ['/image/index']],
+                ['label' => Yii::t('app', 'Role assignment'), 'url' => ['/admin/roles-matrix']],
             ],
         ];
     }

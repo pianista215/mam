@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\helpers\LoggerTrait;
 use app\models\Image;
 use app\models\ImageSearch;
+use app\rbac\constants\Permissions;
 use yii\helpers\FileHelper;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
@@ -56,7 +57,7 @@ class ImageController extends Controller
      */
     public function actionIndex()
     {
-        if(!Yii::$app->user->can('imageCrud')){
+        if(!Yii::$app->user->can(Permissions::IMAGE_CRUD)){
             throw new ForbiddenHttpException();
         }
         $searchModel = new ImageSearch();
@@ -155,7 +156,7 @@ class ImageController extends Controller
             'element' => $element,
         ]);
 
-        if (!Yii::$app->user->can('uploadImage', ['image' => $image])) {
+        if (!Yii::$app->user->can(Permissions::UPLOAD_IMAGE, ['image' => $image])) {
             throw new ForbiddenHttpException();
         }
 
@@ -229,7 +230,7 @@ class ImageController extends Controller
      */
     public function actionDelete($id)
     {
-        if(!Yii::$app->user->can('imageCrud')){
+        if(!Yii::$app->user->can(Permissions::IMAGE_CRUD)){
             throw new ForbiddenHttpException();
         }
         $image = $this->findModel($id);

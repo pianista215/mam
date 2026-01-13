@@ -1,6 +1,7 @@
 <?php
 
 use app\helpers\TimeHelper;
+use app\rbac\constants\Permissions;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\data\ArrayDataProvider;
@@ -28,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         </div>
 
-        <?php if (Yii::$app->user->can('rankCrud')): ?>
+        <?php if (Yii::$app->user->can(Permissions::RANK_CRUD)): ?>
             <div>
                 <?= Html::a(Yii::t('app', 'Update'), ['update', 'id' => $model->id], ['class' => 'btn btn-primary me-2']) ?>
                 <?= Html::a(Yii::t('app', 'Delete'), ['delete', 'id' => $model->id], [

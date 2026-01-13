@@ -6,6 +6,7 @@ use app\helpers\LoggerTrait;
 use app\models\Tour;
 use app\models\TourStage;
 use app\models\TourStageSearch;
+use app\rbac\constants\Permissions;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
@@ -55,7 +56,7 @@ class TourStageController extends Controller
      */
     public function actionAddStage($tour_id)
     {
-        if(Yii::$app->user->can('tourCrud')){
+        if(Yii::$app->user->can(Permissions::TOUR_CRUD)){
             $tour = Tour::findOne($tour_id);
             if (!$tour) {
                 throw new NotFoundHttpException("Tour not found.");
@@ -103,7 +104,7 @@ class TourStageController extends Controller
      */
     public function actionUpdate($id)
     {
-        if(Yii::$app->user->can('tourCrud')){
+        if(Yii::$app->user->can(Permissions::TOUR_CRUD)){
             $model = $this->findModel($id);
             $tour = $model->tour;
 
@@ -132,7 +133,7 @@ class TourStageController extends Controller
      */
     public function actionDelete($id)
     {
-        if(Yii::$app->user->can('tourCrud')){
+        if(Yii::$app->user->can(Permissions::TOUR_CRUD)){
             $model = $this->findModel($id);
             $tour_id = $model->tour->id;
 

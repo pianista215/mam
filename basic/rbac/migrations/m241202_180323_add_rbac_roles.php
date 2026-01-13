@@ -1,5 +1,7 @@
 <?php
 
+use app\rbac\constants\Permissions;
+use app\rbac\constants\Roles;
 use app\rbac\rules\ImageUploadRule;
 use app\rbac\rules\FlightValidationRule;
 use app\rbac\rules\SubmittedFlightPlanOwnerRule;
@@ -23,32 +25,27 @@ class m241202_180323_add_rbac_roles extends Migration
         $auth = Yii::$app->authManager;
 
         // Pilot
-        $reportFlight = $auth->createPermission('reportFlight');
-        $reportFlight->description = 'Report a flight from Acars';
-        $auth->add($reportFlight);
-
-        $submitFpl = $auth->createPermission('submitFpl');
+        $submitFpl = $auth->createPermission(Permissions::SUBMIT_FPL);
         $submitFpl->description = 'Submit a flight plan';
         $auth->add($submitFpl);
 
         // Image upload rule
         $imageUploadRule = new ImageUploadRule();
         $auth->add($imageUploadRule);
-        $uploadImage = $auth->createPermission('uploadImage');
+        $uploadImage = $auth->createPermission(Permissions::UPLOAD_IMAGE);
         $uploadImage->ruleName = $imageUploadRule->name;
         $auth->add($uploadImage);
 
         // Owner Fpl Rule
         $ownerFplRule = new SubmittedFlightPlanOwnerRule();
         $auth->add($ownerFplRule);
-        $crudOwnFpl = $auth->createPermission('crudOwnFpl');
+        $crudOwnFpl = $auth->createPermission(Permissions::CRUD_OWN_FPL);
         $crudOwnFpl->description = 'Update, delete or view its submitted flight plan';
         $crudOwnFpl->ruleName = $ownerFplRule->name;
         $auth->add($crudOwnFpl);
 
-        $pilot = $auth->createRole('pilot');
+        $pilot = $auth->createRole(Roles::PILOT);
         $auth->add($pilot);
-        $auth->addChild($pilot, $reportFlight);
         $auth->addChild($pilot, $submitFpl);
         $auth->addChild($pilot, $crudOwnFpl);
         // All active pilots inherit this rule, so all "potentially" can upload images
@@ -57,105 +54,110 @@ class m241202_180323_add_rbac_roles extends Migration
         // Flight Validator rule
         $flightValidationRule = new FlightValidationRule();
         $auth->add($flightValidationRule);
-        $validateFlight = $auth->createPermission('validateFlight');
+        $validateFlight = $auth->createPermission(Permissions::VALIDATE_FLIGHT);
         $validateFlight->ruleName = $flightValidationRule->name;
         $auth->add($validateFlight);
 
         // VFR validator
-        $validateVfrFlight = $auth->createPermission('validateVfrFlight');
+        $validateVfrFlight = $auth->createPermission(Permissions::VALIDATE_VFR_FLIGHT);
         $validateVfrFlight->description = 'Validate a VFR flight';
         $auth->add($validateVfrFlight);
 
-        $vfrValidator = $auth->createRole('vfrValidator');
+        $vfrValidator = $auth->createRole(Roles::VFR_VALIDATOR);
         $auth->add($vfrValidator);
         $auth->addChild($vfrValidator, $validateVfrFlight);
         $auth->addChild($vfrValidator, $validateFlight);
 
         // IFR validator
-        $validateIfrFlight = $auth->createPermission('validateIfrFlight');
+        $validateIfrFlight = $auth->createPermission(Permissions::VALIDATE_IFR_FLIGHT);
         $validateIfrFlight->description = 'Validate a IFR flight';
         $auth->add($validateIfrFlight);
 
-        $ifrValidator = $auth->createRole('ifrValidator');
+        $ifrValidator = $auth->createRole(Roles::IFR_VALIDATOR);
         $auth->add($ifrValidator);
         $auth->addChild($ifrValidator, $validateIfrFlight);
         $auth->addChild($ifrValidator, $validateFlight);
 
-        // Fleet Manager
-        $moveAircraft = $auth->createPermission('moveAircraft');
+        // Fleet Operator
+        $moveAircraft = $auth->createPermission(Permissions::MOVE_AIRCRAFT);
         $moveAircraft->description = 'Move the aircraft to a new location';
         $auth->add($moveAircraft);
 
-        $cancelAircraftReservation = $auth->createPermission('cancelAircraftReservation');
-        $cancelAircraftReservation->description = 'Cancel the reservation of other user for the aircraft';
-        $auth->add($cancelAircraftReservation);
+        $fleetOperator = $auth->createRole(Roles::FLEET_OPERATOR);
+        $auth->add($fleetOperator);
+        $auth->addChild($fleetOperator, $moveAircraft);
 
-        $fleetManager = $auth->createRole('fleetManager');
+        // Fleet Manager
+        $aircraftTypeCrud = $auth->createPermission(Permissions::AIRCRAFT_TYPE_CRUD);
+        $aircraftTypeCrud->description = 'Can create, delete, and modify aircraft types';
+        $auth->add($aircraftTypeCrud);
+
+        $aircraftConfigurationCrud = $auth->createPermission(Permissions::AIRCRAFT_CONFIGURATION_CRUD);
+        $aircraftConfigurationCrud->description = 'Can create, delete, and modify aircraft configurations';
+        $auth->add($aircraftConfigurationCrud);
+
+        $aircraftCrud = $auth->createPermission(Permissions::AIRCRAFT_CRUD);
+        $aircraftCrud->description = 'Can create, delete, and modify aircrafts';
+        $auth->add($aircraftCrud);
+
+        $fleetManager = $auth->createRole(Roles::FLEET_MANAGER);
         $auth->add($fleetManager);
-        $auth->addChild($fleetManager, $moveAircraft);
-        $auth->addChild($fleetManager, $cancelAircraftReservation);
+        $auth->addChild($fleetManager, $aircraftTypeCrud);
+        $auth->addChild($fleetManager, $aircraftConfigurationCrud);
+        $auth->addChild($fleetManager, $aircraftCrud);
 
         // Route Manager
-        $routeCrud = $auth->createPermission('routeCrud');
+        $routeCrud = $auth->createPermission(Permissions::ROUTE_CRUD);
         $routeCrud->description = 'Can create, delete or modify routes';
         $auth->add($routeCrud);
 
-        $routeManager = $auth->createRole('routeManager');
+        $routeManager = $auth->createRole(Roles::ROUTE_MANAGER);
         $auth->add($routeManager);
         $auth->addChild($routeManager, $routeCrud);
 
         // Tour Manager
-        $tourCrud = $auth->createPermission('tourCrud');
+        $tourCrud = $auth->createPermission(Permissions::TOUR_CRUD);
         $tourCrud->description = 'Can create, delete or modify tours';
         $auth->add($tourCrud);
 
-        $tourManager = $auth->createRole('tourManager');
+        $tourManager = $auth->createRole(Roles::TOUR_MANAGER);
         $auth->add($tourManager);
         $auth->addChild($tourManager, $tourCrud);
 
-        // Admin
-        $userCrud = $auth->createPermission('userCrud');
-        $userCrud->description = 'Can create, delete, modify, activate and reset users';
-        $auth->add($userCrud);
-
-        // TODO: Think if the aircrafts cruds and airport cruds should be on other role
-        $aircraftTypeCrud = $auth->createPermission('aircraftTypeCrud');
-        $aircraftTypeCrud->description = 'Can create, delete, and modify aircraft types';
-        $auth->add($aircraftTypeCrud);
-
-        // TODO: THINK IF WE NEED AIRCRAFT CONFIGURATION CRUD OR JUST USE AIRCRAFT TYPE FOR ALL
-
-        $aircraftCrud = $auth->createPermission('aircraftCrud');
-        $aircraftCrud->description = 'Can create, delete, and modify aircrafts';
-        $auth->add($aircraftCrud);
-
-        $airportCrud = $auth->createPermission('airportCrud');
+        // Airport Manager
+        $airportCrud = $auth->createPermission(Permissions::AIRPORT_CRUD);
         $airportCrud->description = 'Can create, delete, and modify airports';
         $auth->add($airportCrud);
 
-        // TODO: Think if we need to manage countries, or we can consider them static
-        $countryCrud = $auth->createPermission('countryCrud');
+        $airportManager = $auth->createRole(Roles::AIRPORT_MANAGER);
+        $auth->add($airportManager);
+        $auth->addChild($airportManager, $airportCrud);
+
+        // Admin
+        $userCrud = $auth->createPermission(Permissions::USER_CRUD);
+        $userCrud->description = 'Can create, delete, modify, activate and reset users';
+        $auth->add($userCrud);
+
+        $countryCrud = $auth->createPermission(Permissions::COUNTRY_CRUD);
         $countryCrud->description = 'Can create, delete, and modify countries';
         $auth->add($countryCrud);
 
-        $roleAssignment = $auth->createPermission('roleAssignment');
+        $roleAssignment = $auth->createPermission(Permissions::ROLE_ASSIGNMENT);
         $roleAssignment->description = 'Can assign or remove roles to other users';
         $auth->add($roleAssignment);
 
-        $rankCrud = $auth->createPermission('rankCrud');
+        $rankCrud = $auth->createPermission(Permissions::RANK_CRUD);
         $rankCrud->description = 'Can create, delete or modify ranks';
         $auth->add($rankCrud);
 
-        $imageCrud = $auth->createPermission('imageCrud');
+        $imageCrud = $auth->createPermission(Permissions::IMAGE_CRUD);
         $imageCrud->description = 'Can index and delete images';
         $auth->add($imageCrud);
 
-        $admin = $auth->createRole('admin');
+        $admin = $auth->createRole(Roles::ADMIN);
         $auth->add($admin);
         $auth->addChild($admin, $userCrud);
-        $auth->addChild($admin, $aircraftTypeCrud);
-        $auth->addChild($admin, $aircraftCrud);
-        $auth->addChild($admin, $airportCrud);
+
         $auth->addChild($admin, $countryCrud);
         $auth->addChild($admin, $roleAssignment);
         $auth->addChild($admin, $rankCrud);
@@ -163,9 +165,16 @@ class m241202_180323_add_rbac_roles extends Migration
         $auth->addChild($admin, $imageCrud);
         $auth->addChild($admin, $vfrValidator);
         $auth->addChild($admin, $ifrValidator);
+        $auth->addChild($admin, $fleetOperator);
         $auth->addChild($admin, $fleetManager);
         $auth->addChild($admin, $routeManager);
         $auth->addChild($admin, $tourManager);
+        $auth->addChild($admin, $airportManager);
+
+        // By now only assignable via database for security purposes
+        $assignAdmin = $auth->createPermission(Permissions::ASSIGN_ADMIN);
+        $assignAdmin->description = 'Can assign or revoke admin role';
+        $auth->add($assignAdmin);
     }
 
     /**

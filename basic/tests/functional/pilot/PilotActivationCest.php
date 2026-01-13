@@ -66,7 +66,7 @@ class PilotActivationCest
         $I->see('License cannot be blank.');
 
         $count = \app\models\Pilot::find()->count();
-        $I->assertEquals(10, $count);
+        $I->assertEquals(13, $count);
     }
 
     public function activatePilotAsAdmin(\FunctionalTester $I){

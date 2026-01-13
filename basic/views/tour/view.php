@@ -1,6 +1,7 @@
 <?php
 
 use app\helpers\ImageMam;
+use app\rbac\constants\Permissions;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
@@ -26,7 +27,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="d-flex justify-content-between align-items-center mt-3 mb-2">
             <h1 class="mb-0"><?= Html::encode($this->title) ?></h1>
 
-            <?php if (Yii::$app->user->can('tourCrud')): ?>
+            <?php if (Yii::$app->user->can(Permissions::TOUR_CRUD)): ?>
                 <div>
                     <?= Html::a(Yii::t('app', 'Update'), ['update', 'id' => $model->id], ['class' => 'btn btn-primary me-2']) ?>
 
@@ -146,7 +147,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 ]) ?>
                             <?php endif; ?>
 
-                            <?php if (Yii::$app->user->can('tourCrud')): ?>
+                            <?php if (Yii::$app->user->can(Permissions::TOUR_CRUD)): ?>
                                 <?= Html::a('<i class="fa fa-pencil"></i>', ['tour-stage/update', 'id' => $stage->id], [
                                     'class' => 'text-decoration-none me-2',
                                     'title' => Yii::t('app', 'Edit stage')
@@ -168,7 +169,7 @@ $this->params['breadcrumbs'][] = $this->title;
             </tbody>
         </table>
 
-        <?php if (Yii::$app->user->can('tourCrud') && !$model->getFlights()->exists()): ?>
+        <?php if (Yii::$app->user->can(Permissions::TOUR_CRUD) && !$model->getFlights()->exists()): ?>
             <div class="text-end mt-2">
                 <?= Html::a('<i class="fa fa-plus"></i> '.Yii::t('app', 'Add Stage'), ['tour-stage/add-stage', 'tour_id' => $model->id], [
                     'class' => 'btn btn-success',
@@ -181,7 +182,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <?=Yii::t('app', 'This tour has no stages yet.')?>
         </div>
 
-        <?php if (Yii::$app->user->can('tourCrud') && !$model->getFlights()->exists()): ?>
+        <?php if (Yii::$app->user->can(Permissions::TOUR_CRUD) && !$model->getFlights()->exists()): ?>
             <div class="text-center mt-3">
                 <?= Html::a('<i class="fa fa-plus"></i> '. Yii::t('app', 'Add First Stage'), ['tour-stage/add-stage', 'tour_id' => $model->id], [
                     'class' => 'btn btn-success',

@@ -2,6 +2,7 @@
 
 use app\helpers\TimeHelper;
 use app\helpers\ImageMam;
+use app\rbac\constants\Permissions;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\GridView;
@@ -20,7 +21,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1 class="mb-0"><?= Html::encode($this->title) ?></h1>
 
-        <?php if (Yii::$app->user->can('userCrud')): ?>
+        <?php if (Yii::$app->user->can(Permissions::USER_CRUD)): ?>
             <div>
                 <?php if (isset($model->license)): ?>
                     <?= Html::a(Yii::t('app', 'Update'), ['update', 'id' => $model->id], ['class' => 'btn btn-primary me-2']) ?>

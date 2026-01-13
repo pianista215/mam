@@ -2,13 +2,15 @@
 
 namespace tests\unit\rbac;
 
-use Yii;
 use app\models\Airport;
 use app\models\Country;
 use app\models\Image;
 use app\models\Pilot;
+use app\rbac\constants\Permissions;
+use app\rbac\constants\Roles;
 use app\rbac\rules\ImageUploadRule;
 use tests\unit\BaseUnitTest;
+use Yii;
 
 class ImageUploadRuleTest extends BaseUnitTest
 {
@@ -20,10 +22,10 @@ class ImageUploadRuleTest extends BaseUnitTest
         $auth = Yii::$app->authManager;
         $auth->removeAll();
 
-        $adminRole = $auth->createRole('admin');
+        $adminRole = $auth->createRole(Roles::ADMIN);
         $auth->add($adminRole);
 
-        foreach (['rankCrud', 'tourCrud', 'countryCrud', 'aircraftTypeCrud', 'userCrud'] as $perm) {
+        foreach ([Permissions::RANK_CRUD, Permissions::TOUR_CRUD, Permissions::COUNTRY_CRUD, Permissions::AIRCRAFT_TYPE_CRUD, Permissions::USER_CRUD] as $perm) {
             $p = $auth->createPermission($perm);
             $auth->add($p);
         }
@@ -135,7 +137,7 @@ class ImageUploadRuleTest extends BaseUnitTest
     {
         $pilot = $this->createPilot(5);
         $this->login($pilot);
-        $this->assign('rankCrud', 5);
+        $this->assign(Permissions::RANK_CRUD, 5);
 
         $img = $this->img('rank_icon', 1);
 
@@ -157,7 +159,7 @@ class ImageUploadRuleTest extends BaseUnitTest
     {
         $pilot = $this->createPilot(7);
         $this->login($pilot);
-        $this->assign('tourCrud', 7);
+        $this->assign(Permissions::TOUR_CRUD, 7);
 
         $img = $this->img('tour_image', 55);
 
@@ -179,7 +181,7 @@ class ImageUploadRuleTest extends BaseUnitTest
     {
         $pilot = $this->createPilot(9);
         $this->login($pilot);
-        $this->assign('countryCrud', 9);
+        $this->assign(Permissions::COUNTRY_CRUD, 9);
 
         $img = $this->img('country_icon', 34);
 
@@ -200,7 +202,7 @@ class ImageUploadRuleTest extends BaseUnitTest
     {
         $pilot = $this->createPilot(10);
         $this->login($pilot);
-        $this->assign('aircraftTypeCrud', 10);
+        $this->assign(Permissions::AIRCRAFT_TYPE_CRUD, 10);
 
         $img = $this->img('aircraftType_image', 99);
 
@@ -223,7 +225,7 @@ class ImageUploadRuleTest extends BaseUnitTest
         $this->login($pilot);
 
         Yii::$app->authManager->assign(
-            Yii::$app->authManager->getRole('admin'),
+            Yii::$app->authManager->getRole(Roles::ADMIN),
             11
         );
 
@@ -256,7 +258,7 @@ class ImageUploadRuleTest extends BaseUnitTest
     {
         $pilot = $this->createPilot(20);
         $this->login($pilot);
-        $this->assign('userCrud', 20);
+        $this->assign(Permissions::USER_CRUD, 20);
 
         $img = $this->img('pilot_profile', 999);
 
@@ -267,7 +269,7 @@ class ImageUploadRuleTest extends BaseUnitTest
     {
         $pilot = $this->createPilot(33);
         $this->login($pilot);
-        $this->assign('rankCrud', 33);
+        $this->assign(Permissions::RANK_CRUD, 33);
 
         $img = [
             'type' => 'rank_icon',

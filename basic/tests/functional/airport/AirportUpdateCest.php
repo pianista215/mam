@@ -22,6 +22,15 @@ class AirportUpdateCest
         $I->see('Save', 'button');
     }
 
+    public function openAirportUpdateAsAirportManager(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(12);
+        $I->amOnRoute('airport/update', [ 'id' => '1' ]);
+
+        $I->see('Update Airport: Madrid-Barajas');
+        $I->see('Save', 'button');
+    }
+
     public function openAirportUpdateAsUser(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);

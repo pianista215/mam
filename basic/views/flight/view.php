@@ -1,5 +1,6 @@
 <?php
 
+use app\rbac\constants\Permissions;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -59,7 +60,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ]) ?>
     <?php endif; ?>
 
-    <?php if ($model->isPendingValidation() && Yii::$app->user->can('validateFlight', ['flight' => $model])): ?>
+    <?php if ($model->isPendingValidation() && Yii::$app->user->can(Permissions::VALIDATE_FLIGHT, ['flight' => $model])): ?>
         <?= $this->render('_validation_form', [
             'model' => $model,
             'validatorList' => $validatorList ?? [],

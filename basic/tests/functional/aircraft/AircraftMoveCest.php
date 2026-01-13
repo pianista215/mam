@@ -60,12 +60,17 @@ class AircraftMoveCest
         $I->assertEquals('LEBL', $aircraft->location);
     }
 
-    /**
-     * Successful aircraft move
-     */
     public function moveAircraftToNewAirportFleetMgr(\FunctionalTester $I)
     {
-        $I->amLoggedInAs(9); // fleetMgr with moveAircraft
+        $I->amLoggedInAs(9); // fleetMgr can't move aircraft
+        $I->amOnRoute('aircraft/move', ['id' => 1]);
+        $I->seeResponseCodeIs(403);
+        $I->see('You don&apos;t have permission to move this aircraft.');
+    }
+
+    public function moveAircraftToNewAirportFleetOperator(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(11); // Fleet operator
         $I->amOnRoute('aircraft/move', ['id' => 1]);
 
         $I->seeResponseCodeIs(200);

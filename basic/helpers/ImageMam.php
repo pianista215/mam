@@ -3,6 +3,7 @@
 namespace app\helpers;
 
 use app\models\Image;
+use app\rbac\constants\Permissions;
 use yii\helpers\Html;
 use Yii;
 
@@ -68,7 +69,7 @@ class ImageMam
         $html = Html::beginTag('div', ['class' => 'image-mam-container']);
         $html .= Html::img($image->getUrl(), $imgOptions);
 
-        if (Yii::$app->user->can('uploadImage', ['image' => $image])) {
+        if (Yii::$app->user->can(Permissions::UPLOAD_IMAGE, ['image' => $image])) {
             $html .= Html::a(Yii::t('app', 'Edit'), $image->getUploadUrl(), ['class' => 'image-mam-edit']);
         }
 

@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\models\Rank;
 use app\models\RankSearch;
+use app\rbac\constants\Permissions;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
@@ -80,7 +81,7 @@ class RankController extends Controller
      */
     public function actionCreate()
     {
-        if(Yii::$app->user->can('rankCrud')){
+        if(Yii::$app->user->can(Permissions::RANK_CRUD)){
             $model = new Rank();
 
             if ($this->request->isPost) {
@@ -109,7 +110,7 @@ class RankController extends Controller
      */
     public function actionUpdate($id)
     {
-        if(Yii::$app->user->can('rankCrud')){
+        if(Yii::$app->user->can(Permissions::RANK_CRUD)){
             $model = $this->findModel($id);
 
             if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
@@ -133,7 +134,7 @@ class RankController extends Controller
      */
     public function actionDelete($id)
     {
-        if(Yii::$app->user->can('rankCrud')){
+        if(Yii::$app->user->can(Permissions::RANK_CRUD)){
             $this->findModel($id)->delete();
 
             return $this->redirect(['index']);

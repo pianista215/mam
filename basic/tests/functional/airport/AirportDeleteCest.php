@@ -24,9 +24,26 @@ class AirportDeleteCest
         $I->see('Delete');
     }
 
+    public function deleteAirportAsAirportManager(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(12);
+        $I->amOnRoute('airport/view', [ 'id' => '1' ]);
+
+        $I->see('Delete');
+    }
+
     public function deleteOnlyPostAsAdmin(\FunctionalTester $I)
     {
         $I->amLoggedInAs(2);
+        $I->amOnRoute('airport/delete', [ 'id' => '1' ]);
+        $I->seeResponseCodeIs(405);
+        $count = \app\models\Airport::find()->count();
+        $I->assertEquals(5, $count);
+    }
+
+    public function deleteOnlyPostAsAirportManager(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(12);
         $I->amOnRoute('airport/delete', [ 'id' => '1' ]);
         $I->seeResponseCodeIs(405);
         $count = \app\models\Airport::find()->count();

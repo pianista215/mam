@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\helpers\LoggerTrait;
 use app\models\Route;
 use app\models\RouteSearch;
+use app\rbac\constants\Permissions;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
@@ -87,7 +88,7 @@ class RouteController extends Controller
      */
     public function actionCreate()
     {
-        if(Yii::$app->user->can('routeCrud')){
+        if(Yii::$app->user->can(Permissions::ROUTE_CRUD)){
             $model = new Route();
 
             if ($this->request->isPost) {
@@ -116,7 +117,7 @@ class RouteController extends Controller
      */
     public function actionUpdate($id)
     {
-        if(Yii::$app->user->can('routeCrud')){
+        if(Yii::$app->user->can(Permissions::ROUTE_CRUD)){
             $model = $this->findModel($id);
 
             if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
@@ -141,7 +142,7 @@ class RouteController extends Controller
      */
     public function actionDelete($id)
     {
-        if(Yii::$app->user->can('routeCrud')){
+        if(Yii::$app->user->can(Permissions::ROUTE_CRUD)){
             $this->findModel($id)->delete();
             $this->logInfo('Deleted route', ['id' => $id, 'user' => Yii::$app->user->identity->license]);
             return $this->redirect(['index']);

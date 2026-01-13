@@ -2,6 +2,7 @@
 
 use app\helpers\TimeHelper;
 use app\models\Aircraft;
+use app\rbac\constants\Permissions;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\ActionColumn;
@@ -17,7 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="aircraft-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-    <?php if(Yii::$app->user->can('aircraftCrud')) : ?>
+    <?php if(Yii::$app->user->can(Permissions::AIRCRAFT_CRUD)) : ?>
     <p>
         <?= Html::a(Yii::t('app', 'Create Aircraft'), ['create'], ['class' => 'btn btn-success']) ?>
     </p>
@@ -48,10 +49,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => ActionColumn::className(),
                 'visibleButtons'=>[
                     'delete'=> function($model){
-                        return Yii::$app->user->can('aircraftCrud');
+                        return Yii::$app->user->can(Permissions::AIRCRAFT_CRUD);
                     },
                     'update'=> function($model){
-                        return Yii::$app->user->can('aircraftCrud');
+                        return Yii::$app->user->can(Permissions::AIRCRAFT_CRUD);
                     },
                 ],
                 'urlCreator' => function ($action, Aircraft $model, $key, $index, $column) {
