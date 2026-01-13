@@ -3,6 +3,7 @@
 namespace tests\functional\pilot;
 
 use app\models\Pilot;
+use tests\fixtures\ConfigFixture;
 use tests\fixtures\PilotFixture;
 use Yii;
 
@@ -11,7 +12,8 @@ class PilotChangePasswordCest
 
     public function _fixtures(){
         return [
-            'pilot' => PilotFixture::class
+            'pilot' => PilotFixture::class,
+            'config' => ConfigFixture::class,
         ];
     }
 

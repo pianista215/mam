@@ -12,6 +12,8 @@ return [
 
     // Global config
     ['key' => 'airline_name', 'value' => 'TestAirlines'],
+    ['key' => 'no_reply_mail', 'value' => 'no-reply@testairlines.com'],
+    ['key' => 'support_mail', 'value' => 'support@testairlines.com'],
 
     // Footer / Social
     ['key' => 'x_url', 'value' => 'https://testx.com/'],

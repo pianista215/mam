@@ -3,6 +3,7 @@
 namespace tests\functional\pilot;
 
 use tests\fixtures\AuthAssignmentFixture;
+use tests\fixtures\ConfigFixture;
 use Yii;
 
 class PilotActivationCest
@@ -10,7 +11,8 @@ class PilotActivationCest
 
     public function _fixtures(){
         return [
-            'authAssignment' => AuthAssignmentFixture::class
+            'authAssignment' => AuthAssignmentFixture::class,
+            'config' => ConfigFixture::class,
         ];
     }
 

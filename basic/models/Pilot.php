@@ -287,13 +287,35 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
         return $this->location;
     }
 
+    public function getSurnameInitials()
+    {
+        $surname = $this->surname;
+        if (!$surname) return null;
+
+        $parts = preg_split('/\s+/', trim($surname));
+
+        $trans = \Transliterator::create('NFD; [:Nonspacing Mark:] Remove; NFC');
+
+        $initials = array_map(function ($p) use ($trans) {
+
+            $letter = mb_substr($p, 0, 1, 'UTF-8');
+
+            $latin = $trans ? $trans->transliterate($letter) : $letter;
+
+            if (!$latin || $latin === '?') {
+                return $letter . '.';
+            }
+
+            return strtoupper($latin) . '.';
+        }, $parts);
+
+        return implode(' ', $initials);
+    }
+
     public function getSecureSurname()
     {
         if (Yii::$app->user->isGuest) {
-            return implode(' ', array_map(
-                fn($p) => mb_substr($p, 0, 1) . '.',
-                preg_split('/\s+/', $this->surname)
-            ));
+            return $this->getSurnameInitials();
         } else {
             return $this->surname;
         }
