@@ -1,5 +1,6 @@
 <?php
 
+use app\rbac\constants\Permissions;
 use app\rbac\constants\Roles;
 
 return [
@@ -87,6 +88,16 @@ return [
     [
         'item_name' => Roles::AIRPORT_MANAGER,
         'user_id' => '12',
+        'created_at' => time(),
+    ],
+    [
+        'item_name' => Roles::ADMIN,
+        'user_id' => '13',
+        'created_at' => time(),
+    ],
+    [
+        'item_name' => Permissions::ASSIGN_ADMIN,
+        'user_id' => '13',
         'created_at' => time(),
     ],
 ];

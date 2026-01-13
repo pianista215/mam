@@ -37,6 +37,10 @@ class AdminController extends Controller
 
     public function actionRolesMatrix()
     {
+        if (!Yii::$app->user->can(Permissions::ROLE_ASSIGNMENT)) {
+            throw new ForbiddenHttpException();
+        }
+
         $auth = Yii::$app->authManager;
 
         $roles = $auth->getRoles();
