@@ -328,7 +328,19 @@ class PilotController extends Controller
                 $auth = Yii::$app->authManager;
                 $pilotRole = $auth->getRole(Roles::PILOT);
                 $auth->assign($pilotRole, $model->id);
-                // TODO: SEND MAIL TO THE PILOT
+                $noReplyMail = Config::get('no_reply_mail');
+                $supportMail = Config::get('support_mail');
+                $airline = Config::get('airline_name');
+                Yii::$app->mailer
+                    ->compose('activatedAccount', [
+                        'license' => $model->license,
+                        'name' => $model->fullname
+                    ])
+                    ->setFrom([$noReplyMail => $airline])
+                    ->setReplyTo([$supportMail => 'Support '.$airline])
+                    ->setTo($model->email)
+                    ->setSubject($airline . ': Account activated')
+                    ->send();
                 $this->logInfo('Pilot activated', ['id' => $id, 'user' => Yii::$app->user->identity->license]);
                 return $this->redirect(['view', 'id' => $model->id]);
             }
@@ -393,15 +405,19 @@ class PilotController extends Controller
                 if (!$pilot->save()) {
                     Yii::error("Error with request of change password {$email}: " . json_encode($pilot->errors));
                 } else {
+                    $noReplyMail = Config::get('no_reply_mail');
+                    $supportMail = Config::get('support_mail');
+                    $airline = Config::get('airline_name');
                     Yii::$app->mailer
                         ->compose('passwordResetToken', [
                             'id' => $pilot->id,
                             'name' => $pilot->fullname,
                             'token' => $pilot->pwd_reset_token,
                         ])
-                        ->setFrom(['no-reply@tusitio.com' => 'Mam'])
+                        ->setFrom([$noReplyMail => $airline])
+                        ->setReplyTo([$supportMail => 'Support '.$airline])
                         ->setTo($pilot->email)
-                        ->setSubject('Password Reset Request')
+                        ->setSubject($airline . ': Password Reset Request')
                         ->send();
                 }
             }

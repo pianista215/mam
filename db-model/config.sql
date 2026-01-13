@@ -11,6 +11,8 @@ INSERT INTO config(`key`, `value`) VALUES ('charter_ratio', '0.1');
 
 -- Global config
 INSERT INTO config(`key`, `value`) VALUES ('airline_name', 'MamAirlines');
+INSERT INTO config(`key`, `value`) VALUES ('no_reply_mail', 'no-reply@mamairlines.com');
+INSERT INTO config(`key`, `value`) VALUES ('support_mail', 'support@mamairlines.com');
 
 -- Footer
 INSERT INTO config(`key`, `value`) VALUES ('x_url', 'https://x.com/');
