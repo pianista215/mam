@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\helpers\LoggerTrait;
 use app\models\AssignRolesForm;
 use app\models\Pilot;
 use app\rbac\constants\Permissions;
@@ -15,6 +16,7 @@ use yii\filters\VerbFilter;
 
 class AdminController extends Controller
 {
+    use LoggerTrait;
 
     public function behaviors()
     {
@@ -78,6 +80,7 @@ class AdminController extends Controller
         $currentRoles = array_keys($auth->getRolesByUser($id));
 
         if (in_array(Roles::ADMIN, $currentRoles, true) && !Yii::$app->user->can(Permissions::ASSIGN_ADMIN)) {
+            $this->logError('Forbidden attempt to modify roles of an admin user without assignAdmin permission', ['role_user' = $user, 'user' => Yii::$app->user->identity->license]);
             throw new ForbiddenHttpException(Yii::t('app', 'You are not allowed to change the roles of an admin user.'));
         }
 
@@ -88,9 +91,11 @@ class AdminController extends Controller
 
         if ($form->load(Yii::$app->request->post())) {
             if (in_array(Roles::ADMIN, $form->roles, true) && !Yii::$app->user->can(Permissions::ASSIGN_ADMIN)) {
+                $this->logError('Forbidden attempt to assign admin role without assignAdmin permission', ['role_user' => $id, 'form' => $form, 'user' => Yii::$app->user->identity->license]);
                 throw new ForbiddenHttpException(Yii::t('app', 'You are not allowed to assign the admin role.'));
             }
             if ($form->save()) {
+                $this->logInfo('Roles updated successfully for target user', ['form' => $form, 'user' => Yii::$app->user->identity->license]);
                 Yii::$app->session->setFlash('success', Yii::t('app','Roles updated for user') . ': ' . $user->fullname);
                 return $this->redirect(['roles-matrix']);
             }
