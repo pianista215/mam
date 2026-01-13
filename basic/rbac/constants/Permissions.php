@@ -5,7 +5,6 @@ namespace app\rbac\constants;
 final class Permissions
 {
     // Pilot
-    public const REPORT_FLIGHT = 'reportFlight'; // TODO UNAI: Needed?????
     public const SUBMIT_FPL = 'submitFpl';
     public const CRUD_OWN_FPL = 'crudOwnFpl';
     public const UPLOAD_IMAGE = 'uploadImage';

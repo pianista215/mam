@@ -25,10 +25,6 @@ class m241202_180323_add_rbac_roles extends Migration
         $auth = Yii::$app->authManager;
 
         // Pilot
-        $reportFlight = $auth->createPermission(Permissions::REPORT_FLIGHT);
-        $reportFlight->description = 'Report a flight from Acars';
-        $auth->add($reportFlight);
-
         $submitFpl = $auth->createPermission(Permissions::SUBMIT_FPL);
         $submitFpl->description = 'Submit a flight plan';
         $auth->add($submitFpl);
@@ -50,7 +46,6 @@ class m241202_180323_add_rbac_roles extends Migration
 
         $pilot = $auth->createRole(Roles::PILOT);
         $auth->add($pilot);
-        $auth->addChild($pilot, $reportFlight);
         $auth->addChild($pilot, $submitFpl);
         $auth->addChild($pilot, $crudOwnFpl);
         // All active pilots inherit this rule, so all "potentially" can upload images
