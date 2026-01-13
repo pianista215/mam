@@ -98,6 +98,17 @@ class AircraftIndexViewCest
 
         $this->checkAircraftViewCommon($I);
 
+        $I->see('Update', 'a');
+        $I->see('Delete', 'a');
+        $I->dontSee('Move Aircraft', 'a');
+    }
+
+    public function openAircraftViewAsFleetOperator(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(11);
+
+        $this->checkAircraftViewCommon($I);
+
         $I->dontSee('Update', 'a');
         $I->dontSee('Delete', 'a');
         $I->see('Move Aircraft', 'a');
