@@ -25,7 +25,7 @@ $canAssignAdmin = Yii::$app->user->can(Permissions::ASSIGN_ADMIN);
 
         <?php $form = ActiveForm::begin(['id' => 'roles-form']); ?>
 
-        <input type="hidden" name="AssignRolesForm[roles]" value="">
+        <input type="hidden" name="AssignRolesForm[roles][]" value="">
 
         <?= $form->errorSummary($formModel) ?>
 

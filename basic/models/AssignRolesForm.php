@@ -33,11 +33,17 @@ class AssignRolesForm extends Model
 
     public function beforeValidate()
     {
-        if ($this->roles === '') {
+        if ($this->roles === '' || $this->roles === null) {
             $this->roles = [];
         }
+
+        if (is_array($this->roles)) {
+            $this->roles = array_values(array_filter($this->roles));
+        }
+
         return parent::beforeValidate();
     }
+
 
     public function validateRolesExist($attribute)
     {

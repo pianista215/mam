@@ -109,6 +109,7 @@ $this->registerCssFile(
             'items' => [
                 ['label' => Yii::t('app', 'Activate Pilots'), 'url' => ['/pilot/activate-pilots']],
                 ['label' => Yii::t('app', 'Manage Images'), 'url' => ['/image/index']],
+                ['label' => Yii::t('app', 'Role assignment'), 'url' => ['/admin/roles-matrix']],
             ],
         ];
     }
