@@ -57,7 +57,7 @@ class PilotIndexViewCest
         $I->amOnRoute('pilot/index');
 
         $I->see('Pilots');
-        $I->see('Total 9 items.');
+        $I->see('Total 12 items.');
         $I->see('AB1234');
         $I->see('John');
         $I->dontSee('Doe');
