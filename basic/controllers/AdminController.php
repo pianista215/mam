@@ -80,7 +80,7 @@ class AdminController extends Controller
         $currentRoles = array_keys($auth->getRolesByUser($id));
 
         if (in_array(Roles::ADMIN, $currentRoles, true) && !Yii::$app->user->can(Permissions::ASSIGN_ADMIN)) {
-            $this->logError('Forbidden attempt to modify roles of an admin user without assignAdmin permission', ['role_user' = $user, 'user' => Yii::$app->user->identity->license]);
+            $this->logError('Forbidden attempt to modify roles of an admin user without assignAdmin permission', ['role_user' => $user, 'user' => Yii::$app->user->identity->license]);
             throw new ForbiddenHttpException(Yii::t('app', 'You are not allowed to change the roles of an admin user.'));
         }
 
