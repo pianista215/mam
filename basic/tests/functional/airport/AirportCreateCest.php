@@ -22,6 +22,15 @@ class AirportCreateCest
         $I->see('Save', 'button');
     }
 
+    public function openAirportCreateAsAirportManager(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(12);
+        $I->amOnRoute('airport/create');
+
+        $I->see('Create Airport');
+        $I->see('Save', 'button');
+    }
+
     public function openAirportCreateAsUser(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);

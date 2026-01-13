@@ -42,6 +42,18 @@ class AirportIndexViewCest
         $I->seeElement('a', ['title' => 'Delete']);
     }
 
+    public function openAirportIndexAsAirportManager(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(12);
+
+        $this->checkAirportIndexCommon($I);
+
+        $I->see('Create Airport', 'a');
+        $I->seeElement('a', ['title' => 'View']);
+        $I->seeElement('a', ['title' => 'Update']);
+        $I->seeElement('a', ['title' => 'Delete']);
+    }
+
     public function openAirportIndexAsUser(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
@@ -77,6 +89,16 @@ class AirportIndexViewCest
     public function openAirportViewAsAdmin(\FunctionalTester $I)
     {
         $I->amLoggedInAs(2);
+
+        $this->checkAirportViewCommon($I);
+
+        $I->see('Update', 'a');
+        $I->see('Delete', 'a');
+    }
+
+    public function openAirportViewAsAirportManager(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(12);
 
         $this->checkAirportViewCommon($I);
 

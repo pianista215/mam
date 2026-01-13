@@ -79,4 +79,14 @@ return [
         'user_id' => '11',
         'created_at' => time(),
     ],
+    [
+        'item_name' => Roles::PILOT,
+        'user_id' => '12',
+        'created_at' => time(),
+    ],
+    [
+        'item_name' => Roles::AIRPORT_MANAGER,
+        'user_id' => '12',
+        'created_at' => time(),
+    ],
 ];
