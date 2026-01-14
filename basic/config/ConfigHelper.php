@@ -51,22 +51,22 @@ class ConfigHelper
 
     public static function getChunksStoragePath(): string
     {
-        return Config::get(self::CHUNKS_STORAGE_PATH);
+        return Config::get(self::CHUNKS_STORAGE_PATH) ?? '/opt/airline/chunks';
     }
 
     public static function getImagesStoragePath(): string
     {
-        return Config::get(self::IMAGES_STORAGE_PATH);
+        return Config::get(self::IMAGES_STORAGE_PATH) ?? '/opt/airline/images';
     }
 
     public static function getTokenLifeH(): int
     {
-        return (int) Config::get(self::TOKEN_LIFE_H);
+        return (int) Config::get(self::TOKEN_LIFE_H) ?? 24;
     }
 
     public static function getCharterRatio(): float
     {
-        return (float) Config::get(self::CHARTER_RATIO);
+        return (float) Config::get(self::CHARTER_RATIO) ?? 0.1;
     }
 
     public static function getAirlineName(): string
@@ -76,12 +76,12 @@ class ConfigHelper
 
     public static function getNoReplyMail(): string
     {
-        return Config::get(self::NO_REPLY_MAIL);
+        return Config::get(self::NO_REPLY_MAIL) ?? 'no-reply@airlinename.com';
     }
 
     public static function getSupportMail(): string
     {
-        return Config::get(self::SUPPORT_MAIL);
+        return Config::get(self::SUPPORT_MAIL) ?? 'support@airlinename.com';
     }
 
     public static function getXUrl(): ?string
