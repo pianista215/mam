@@ -4,6 +4,7 @@ namespace tests\functional\admin;
 
 use app\config\Config;
 use app\config\ConfigHelper as CK;
+use tests\fixtures\AirportFixture;
 use tests\fixtures\AuthAssignmentFixture;
 use Yii;
 
@@ -12,12 +13,26 @@ class SiteSettingsCest
     public function _fixtures()
     {
         return [
+            'airport' => AirportFixture::class,
             'authAssignment' => AuthAssignmentFixture::class,
         ];
     }
 
     public function _before(\FunctionalTester $I)
     {
+        Config::set(CK::REGISTRATION_START_LOCATION, 'LEBL');
+        $chunksPath = '/tmp/chunks';
+        $imagesPath = '/tmp/images';
+
+        if (!is_dir($chunksPath)) {
+            mkdir($chunksPath, 0777, true);
+        }
+
+        if (!is_dir($imagesPath)) {
+            mkdir($imagesPath, 0777, true);
+        }
+        Config::set(CK::CHUNKS_STORAGE_PATH, $chunksPath);
+        Config::set(CK::IMAGES_STORAGE_PATH, $imagesPath);
         Yii::$app->cache->flush();
     }
 
