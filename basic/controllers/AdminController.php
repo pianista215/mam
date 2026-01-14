@@ -109,5 +109,24 @@ class AdminController extends Controller
         ]);
     }
 
+    public function actionSiteSettings()
+    {
+        if (!Yii::$app->user->can('changeSiteSettings')) {
+            throw new ForbiddenHttpException();
+        }
+
+        $model = new SiteSettingsForm();
+        $model->loadFromConfig();
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            Yii::$app->session->setFlash('success', 'Configuración actualizada correctamente.');
+            return $this->redirect(['admin/site-settings']);
+        }
+
+        return $this->render('site-settings', [
+            'model' => $model,
+        ]);
+    }
+
 
 }
