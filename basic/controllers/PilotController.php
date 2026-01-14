@@ -3,7 +3,7 @@
 namespace app\controllers;
 
 use app\helpers\LoggerTrait;
-use app\config\Config;
+use app\config\ConfigHelper as CK;
 use app\models\forms\ChangePasswordForm;
 use app\models\forms\ForgotPasswordForm;
 use app\models\Country;
@@ -133,8 +133,8 @@ class PilotController extends Controller
     public function actionRegister()
     {
 
-        $registrationStart = DateTime::createFromFormat('Y-m-d', Config::get('registration_start'));
-        $registrationEnd = DateTime::createFromFormat('Y-m-d', Config::get('registration_end'));
+        $registrationStart = CK::getRegistrationStart();
+        $registrationEnd = CK::getRegistrationEnd();
         $now = new DateTime();
 
         if ($registrationStart === false || $registrationEnd === false) {
@@ -154,7 +154,7 @@ class PilotController extends Controller
         } else {
             $model = new Pilot();
             $model->scenario = Pilot::SCENARIO_REGISTER;
-            $model->location = Config::get('registration_start_location');
+            $model->location = CK::getRegistrationStartLocation();
 
             if($this->request->isPost){
                 if ($model->load($this->request->post()) && $model->save()) {
@@ -328,9 +328,9 @@ class PilotController extends Controller
                 $auth = Yii::$app->authManager;
                 $pilotRole = $auth->getRole(Roles::PILOT);
                 $auth->assign($pilotRole, $model->id);
-                $noReplyMail = Config::get('no_reply_mail');
-                $supportMail = Config::get('support_mail');
-                $airline = Config::get('airline_name');
+                $noReplyMail = CK::getNoReplyMail();
+                $supportMail = CK::getSupportMail();
+                $airline = CK::getAirlineName();
                 Yii::$app->mailer
                     ->compose('activatedAccount', [
                         'license' => $model->license,
@@ -405,9 +405,9 @@ class PilotController extends Controller
                 if (!$pilot->save()) {
                     Yii::error("Error with request of change password {$email}: " . json_encode($pilot->errors));
                 } else {
-                    $noReplyMail = Config::get('no_reply_mail');
-                    $supportMail = Config::get('support_mail');
-                    $airline = Config::get('airline_name');
+                    $noReplyMail = CK::getNoReplyMail();
+                    $supportMail = CK::getSupportMail();
+                    $airline = CK::getAirlineName();
                     Yii::$app->mailer
                         ->compose('passwordResetToken', [
                             'id' => $pilot->id,

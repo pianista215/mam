@@ -51,7 +51,7 @@ class Image extends \yii\db\ActiveRecord
 
     public function getPath()
     {
-        return Config::get('images_storage_path').'/'.$this->type.'/'.$this->filename;
+        return CK::getImagesStoragePath() . '/' . $this->type . '/' . $this->filename;
     }
 
     public function afterDelete()

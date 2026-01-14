@@ -3,6 +3,7 @@
 namespace app\models\forms;
 
 use app\config\Config;
+use app\config\ConfigHelper as CK;
 use app\models\Airport;
 use yii\base\Model;
 use Yii;
@@ -80,6 +81,25 @@ class SiteSettingsForm extends Model
             'x_url' => Yii::t('app', 'X / Twitter URL'),
             'instagram_url' => Yii::t('app', 'Instagram URL'),
             'facebook_url' => Yii::t('app', 'Facebook URL'),
+        ];
+    }
+
+    public function attributes()
+    {
+        return [
+            CK::REGISTRATION_START,
+            CK::REGISTRATION_END,
+            CK::REGISTRATION_START_LOCATION,
+            CK::CHUNKS_STORAGE_PATH,
+            CK::IMAGES_STORAGE_PATH,
+            CK::TOKEN_LIFE_H,
+            CK::CHARTER_RATIO,
+            CK::AIRLINE_NAME,
+            CK::NO_REPLY_MAIL,
+            CK::SUPPORT_MAIL,
+            CK::X_URL,
+            CK::INSTAGRAM_URL,
+            CK::FACEBOOK_URL,
         ];
     }
 

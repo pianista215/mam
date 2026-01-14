@@ -125,7 +125,7 @@ class AdminController extends Controller
             $postModel->load(Yii::$app->request->post());
 
             if ($postModel->save()) {
-                Yii::$app->session->setFlash('success', 'Configuración actualizada correctamente.');
+                Yii::$app->session->setFlash('success', Yii::t('app', 'Site settings successfully saved.'));
                 return $this->redirect(['admin/site-settings']);
             }
 

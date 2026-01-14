@@ -2,7 +2,7 @@
 
 namespace tests\unit\models;
 
-use app\config\Config;
+use app\config\ConfigHelper as CK;
 use app\models\Airport;
 use app\models\Country;
 use app\models\Image;
@@ -238,7 +238,7 @@ class PilotTest extends BaseUnitTest
         $pilot->pwd_reset_token_created_at = date('Y-m-d H:i:s', strtotime('-1 hour'));
         $this->assertFalse($pilot->isPasswordResetTokenExpired());
 
-        $hours = (int)(\app\config\Config::get('token_life_h') ?? 24);
+        $hours = CK::getTokenLifeH() ?? 24;
         $pilot->pwd_reset_token_created_at = date('Y-m-d H:i:s', strtotime('-'.($hours + 1).' hours'));
         $this->assertTrue($pilot->isPasswordResetTokenExpired());
 
