@@ -26,7 +26,7 @@ class AdminController extends Controller
             [
                 'access' => [
                     'class' => AccessControl::class,
-                    'only' => ['roles-matrix', 'edit-roles'],
+                    'only' => ['roles-matrix', 'edit-roles', 'site-settings'],
                     'rules' => [
                         [
                             'allow' => true,
