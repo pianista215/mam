@@ -16,7 +16,7 @@ class RolesMatrixCest
     private function checkMatrixCommon(\FunctionalTester $I)
     {
         $I->amOnRoute('admin/roles-matrix');
-        $I->see('Role assignment');
+        $I->see('Role Assignment');
         $I->see('Admin Admin');
         $I->see('Tour Mgr');
         $I->see('Vfr School');
@@ -35,7 +35,7 @@ class RolesMatrixCest
         $I->amLoggedInAs(1);
         $I->amOnRoute('admin/roles-matrix');
         $I->seeResponseCodeIs(403);
-        $I->dontSee('Role assignment');
+        $I->dontSee('Role Assignment');
         $I->dontSee('Admin Admin');
         $I->dontSee('Tour Mgr');
     }

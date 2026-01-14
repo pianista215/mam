@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /** @var yii\web\View $this */
-/** @var app\models\ForgotPasswordForm $model */
+/** @var app\models\forms\ForgotPasswordForm $model */
 
 $this->title = Yii::t('app', 'Reset Password');
 ?>

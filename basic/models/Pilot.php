@@ -2,7 +2,7 @@
 
 namespace app\models;
 
-use app\config\Config;
+use app\config\ConfigHelper as CK;
 use app\helpers\CustomRules;
 use app\models\traits\ImageRelated;
 use app\models\traits\PasswordRulesTrait;
@@ -353,7 +353,7 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
         }
 
         try {
-            $hours = (int)(Config::get('token_life_h') ?? 24);
+            $hours = CK::getTokenLifeH() ?? 24;
 
             $createdAt = new \DateTime($this->pwd_reset_token_created_at);
             $createdAt->add(new \DateInterval('PT' . $hours . 'H'));

@@ -9,7 +9,7 @@ use yii\helpers\Html;
 /* @var $roles array */
 /* @var $matrix array */
 
-$this->title = Yii::t('app', 'Role assignment');
+$this->title = Yii::t('app', 'Role Assignment');
 $canAssignAdmin = Yii::$app->user->can(Permissions::ASSIGN_ADMIN);
 ?>
 

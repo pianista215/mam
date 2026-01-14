@@ -4,7 +4,7 @@
 /** @var string $content */
 
 use app\assets\AppAsset;
-use app\config\Config;
+use app\config\ConfigHelper as CK;
 use app\rbac\constants\Permissions;
 use app\rbac\constants\Roles;
 use app\widgets\Alert;
@@ -43,7 +43,7 @@ $this->registerCssFile(
 <header id="header">
     <?php
     NavBar::begin([
-        'brandLabel' => Config::get('airline_name'),
+        'brandLabel' => CK::getAirlineName(),
         'brandUrl' => Yii::$app->homeUrl,
         'options' => ['class' => 'navbar-expand-md navbar-dark bg-dark fixed-top']
     ]);
@@ -109,7 +109,8 @@ $this->registerCssFile(
             'items' => [
                 ['label' => Yii::t('app', 'Activate Pilots'), 'url' => ['/pilot/activate-pilots']],
                 ['label' => Yii::t('app', 'Manage Images'), 'url' => ['/image/index']],
-                ['label' => Yii::t('app', 'Role assignment'), 'url' => ['/admin/roles-matrix']],
+                ['label' => Yii::t('app', 'Role Assignment'), 'url' => ['/admin/roles-matrix']],
+                ['label' => Yii::t('app', 'Site Settings'), 'url' => ['/admin/site-settings']],
             ],
         ];
     }
@@ -146,19 +147,19 @@ $this->registerCssFile(
 <footer id="footer" class="mt-auto py-3 bg-light">
     <div class="container">
         <div class="row text-muted">
-            <div class="col-md-6 text-center text-md-start">&copy; <?= Config::get('airline_name') ?> <?= date('Y') ?></div>
+            <div class="col-md-6 text-center text-md-start">&copy; <?= CK::getAirlineName() ?> <?= date('Y') ?></div>
             <div class="col-md-6 text-center text-md-end">
                 Powered by <a href="https://github.com/pianista215/mam" target="_blank">Mam</a>
             </div>
         </div>
         <div class="d-flex justify-content-center gap-3 mt-1 fs-4">
-            <?php if ($x = Config::get('x_url')): ?>
+            <?php if ($x = CK::getXUrl()): ?>
                 <a href="<?= $x ?>" target="_blank"><i class="fab fa-x-twitter"></i></a>
             <?php endif; ?>
-            <?php if ($instagram = Config::get('instagram_url')): ?>
+            <?php if ($instagram = CK::getInstagramUrl()): ?>
                 <a href="<?= $instagram ?>" target="_blank"><i class="fab fa-instagram"></i></a>
             <?php endif; ?>
-            <?php if ($facebook = Config::get('facebook_url')): ?>
+            <?php if ($facebook = CK::getFacebookUrl()): ?>
                 <a href="<?= $facebook ?>" target="_blank"><i class="fab fa-facebook"></i></a>
             <?php endif; ?>
         </div>

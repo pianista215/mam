@@ -4,8 +4,8 @@ namespace tests\unit\config;
 
 use app\config\Config;
 use tests\unit\BaseUnitTest;
-use Yii;
 use DateTime;
+use Yii;
 
 class ConfigTest extends BaseUnitTest
 {

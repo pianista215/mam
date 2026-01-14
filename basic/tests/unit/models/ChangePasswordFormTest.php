@@ -2,7 +2,7 @@
 
 namespace tests\unit\models;
 
-use app\models\ChangePasswordForm;
+use app\models\forms\ChangePasswordForm;
 use tests\unit\BaseUnitTest;
 use Yii;
 

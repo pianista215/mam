@@ -1,9 +1,9 @@
 <?php
 
 /** @var yii\web\View $this */
-use app\config\Config;
+use app\config\ConfigHelper as CK;
 
-$this->title = Config::get('airline_name');
+$this->title = CK::getAirlineName();
 ?>
 <div class="site-index">
 

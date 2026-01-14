@@ -2,7 +2,7 @@
 
 namespace app\modules\api\controllers\v1;
 
-use app\config\Config;
+use app\config\ConfigHelper as CK;
 use app\helpers\GeoUtils;
 use app\helpers\LoggerTrait;
 use app\models\AcarsFile;
@@ -270,7 +270,7 @@ class FlightReportController extends Controller
 
     public function actionUploadChunk($flight_report_id, $chunk_id)
     {
-        $storagePath = Config::get('chunks_storage_path');
+        $storagePath = CK::getChunksStoragePath();
 
         $flightReport = FlightReport::findOne(['id' => $flight_report_id]);
         if (!$flightReport) {

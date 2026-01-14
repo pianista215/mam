@@ -1,8 +1,9 @@
 <?php
 
-namespace app\models;
+namespace app\models\forms;
 
 use app\helpers\LoggerTrait;
+use app\models\Pilot;
 use Yii;
 use yii\base\Model;
 

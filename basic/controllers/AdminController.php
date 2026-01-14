@@ -3,7 +3,8 @@
 namespace app\controllers;
 
 use app\helpers\LoggerTrait;
-use app\models\AssignRolesForm;
+use app\models\forms\AssignRolesForm;
+use app\models\forms\SiteSettingsForm;
 use app\models\Pilot;
 use app\rbac\constants\Permissions;
 use app\rbac\constants\Roles;
@@ -25,7 +26,7 @@ class AdminController extends Controller
             [
                 'access' => [
                     'class' => AccessControl::class,
-                    'only' => ['roles-matrix', 'edit-roles'],
+                    'only' => ['roles-matrix', 'edit-roles', 'site-settings'],
                     'rules' => [
                         [
                             'allow' => true,
@@ -107,6 +108,34 @@ class AdminController extends Controller
             'assigned' => $form->roles,
             'formModel' => $form,
         ]);
+    }
+
+    public function actionSiteSettings()
+    {
+        if (!Yii::$app->user->can('changeSiteSettings')) {
+            throw new ForbiddenHttpException();
+        }
+
+        $model = new SiteSettingsForm();
+        $model->loadFromConfig();
+
+        if (Yii::$app->request->isPost) {
+
+            $postModel = new SiteSettingsForm();
+            $postModel->load(Yii::$app->request->post());
+
+            if ($postModel->save()) {
+                Yii::$app->session->setFlash('success', Yii::t('app', 'Site settings successfully saved.'));
+                return $this->redirect(['admin/site-settings']);
+            }
+
+            $model->addErrors($postModel->getErrors());
+        }
+
+        return $this->render('site-settings', [
+            'model' => $model,
+        ]);
+
     }
 
 

@@ -2,7 +2,7 @@
 
 namespace app\controllers;
 
-use app\config\Config;
+use app\config\ConfigHelper as CK;
 use app\helpers\GeoUtils;
 use app\helpers\LoggerTrait;
 use app\models\Aircraft;
@@ -100,7 +100,7 @@ class SubmittedFlightPlanController extends Controller
     }
 
     protected function checkUserCanCreateCharter() {
-        $ratio = (float) Config::get('charter_ratio');
+        $ratio = CK::getCharterRatio();
         return Yii::$app->user->identity->getCharterRatio() > $ratio;
     }
 

@@ -1,7 +1,7 @@
 <?php
 namespace app\commands;
 
-use app\config\Config;
+use app\config\ConfigHelper as CK;
 use app\models\FlightEvent;
 use app\models\FlightEventAttribute;
 use app\models\FlightEventData;
@@ -21,7 +21,7 @@ class FlightReportController extends Controller
 
     protected function joinAcarsFiles($report): ?string
     {
-        $storagePath = Config::get('chunks_storage_path');
+        $storagePath = CK::getChunksStoragePath();
         $reportPath  = $storagePath . DIRECTORY_SEPARATOR . $report->id;
         $outputFile  = $reportPath . DIRECTORY_SEPARATOR . 'concat.gz';
 
@@ -64,7 +64,7 @@ class FlightReportController extends Controller
 
     protected function decompress($gzipFile, $report)
     {
-        $storagePath = Config::get('chunks_storage_path');
+        $storagePath = CK::getChunksStoragePath();
         $reportPath  = $storagePath . DIRECTORY_SEPARATOR . $report->id;
         $outputFile  = $reportPath . DIRECTORY_SEPARATOR . 'report.json';
 
@@ -346,7 +346,7 @@ class FlightReportController extends Controller
             ->where(['status' => 'S'])
             ->all();
 
-        $storagePath = Config::get('chunks_storage_path');
+        $storagePath = CK::getChunksStoragePath();
 
         foreach ($flightsPendingToAnalyze as $flight) {
             $report = $flight->flightReport;

@@ -154,15 +154,19 @@ class m241202_180323_add_rbac_roles extends Migration
         $imageCrud->description = 'Can index and delete images';
         $auth->add($imageCrud);
 
+        $changeSiteSettings = $auth->createPermission(Permissions::CHANGE_SITE_SETTINGS);
+        $changeSiteSettings->description = 'Can change the site settings';
+        $auth->add($changeSiteSettings);
+
         $admin = $auth->createRole(Roles::ADMIN);
         $auth->add($admin);
         $auth->addChild($admin, $userCrud);
-
         $auth->addChild($admin, $countryCrud);
         $auth->addChild($admin, $roleAssignment);
         $auth->addChild($admin, $rankCrud);
-        $auth->addChild($admin, $pilot);
         $auth->addChild($admin, $imageCrud);
+        $auth->addChild($admin, $changeSiteSettings);
+        $auth->addChild($admin, $pilot);
         $auth->addChild($admin, $vfrValidator);
         $auth->addChild($admin, $ifrValidator);
         $auth->addChild($admin, $fleetOperator);
