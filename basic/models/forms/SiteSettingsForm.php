@@ -124,13 +124,22 @@ class SiteSettingsForm extends Model
     {
         $value = $this->$attribute;
 
+        if ($value === null || $value === '') {
+            return; // no validar si vacío
+        }
+
         if ($value[0] !== '/') {
-            $this->addError($attribute, Yii::t('app', 'Path must be absolute.'));
+            $this->addError($attribute, Yii::t('app', '{field} must be an absolute path.', [
+                'field' => $this->getAttributeLabel($attribute),
+            ]));
             return;
         }
 
         if (!is_dir($value)) {
-            $this->addError($attribute, Yii::t('app', 'Path doesn\'t exist or is not a folder.'));
+            $this->addError($attribute, Yii::t('app', '{field} does not exist or is not a directory.', [
+                'field' => $this->getAttributeLabel($attribute),
+            ]));
         }
     }
+
 }

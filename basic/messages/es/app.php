@@ -186,8 +186,6 @@ return [
     'Password Reset Email Sent' => 'Email de reset de contraseña enviado',
     'Password must contain at least one letter.' => 'La contraseña debe contener al menos una letra.',
     'Password must contain at least one numeric digit.' => 'La contraseña debe contener al menos un número.',
-    'Path doesn\'t exist or is not a folder.' => 'El path no existe o no es un directorio',
-    'Path must be absolute.' => 'El path debe ser absoluto',
     'Pax Capacity' => 'Capacidad de Pasajeros',
     'Penalty' => 'Penalización',
     'Pending Flights for validation' => 'Vuelos pendientes de validar',
@@ -203,6 +201,7 @@ return [
     'Please contact us if you think this is a server error. Thank you.' => 'Por favor contacte con nosotros si piensa que esto es un error del servidor. Gracias',
     'Please enter the ICAO code of the airport to move this aircraft.' => 'Por favor introduzca el ICAO del aeropuerto al que desea mover esta aeronave.',
     'Please fill out the following fields to login:' => 'Por favor rellene los siguientes campos de login:',
+    'Please fix the following errors:' => 'Por favor corrija los siguientes errores:',
     'Please select ICAO code from airport you want to be moved.' => 'Por favor seleccione el código ICAO del aeropuerto al que desea trasladarse.',
     'Position' => 'Posición',
     'Preview' => 'Vista previa',
@@ -311,4 +310,6 @@ return [
     'and' => 'y',
     'from Tour' => 'del Tour',
     'to Tour' => 'al Tour',
+    '{field} does not exist or is not a directory.' => '{field} no existe o no es un directorio.',
+    '{field} must be an absolute path.' => '{field} debe ser un path absoluto.',
 ];
