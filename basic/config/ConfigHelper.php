@@ -51,12 +51,12 @@ class ConfigHelper
 
     public static function getChunksStoragePath(): string
     {
-        return Config::get(self::CHUNKS_STORAGE_PATH) ?? '/opt/airline/chunks';
+        return Config::get(self::CHUNKS_STORAGE_PATH) ?? '/opt/mam/chunks';
     }
 
     public static function getImagesStoragePath(): string
     {
-        return Config::get(self::IMAGES_STORAGE_PATH) ?? '/opt/airline/images';
+        return Config::get(self::IMAGES_STORAGE_PATH) ?? '/opt/mam/images';
     }
 
     public static function getTokenLifeH(): int
