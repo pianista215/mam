@@ -31,6 +31,7 @@ final class Permissions
     public const ROLE_ASSIGNMENT = 'roleAssignment';
     public const RANK_CRUD = 'rankCrud';
     public const IMAGE_CRUD = 'imageCrud';
+    public const CHANGE_SITE_SETTINGS = 'changeSiteSettings';
 
     // Superadmin
     public const ASSIGN_ADMIN = 'assignAdmin';

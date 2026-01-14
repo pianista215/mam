@@ -3,7 +3,7 @@
 namespace app\controllers;
 
 use app\helpers\LoggerTrait;
-use app\models\AssignRolesForm;
+use app\models\forms\AssignRolesForm;
 use app\models\Pilot;
 use app\rbac\constants\Permissions;
 use app\rbac\constants\Roles;

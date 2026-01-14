@@ -2,9 +2,9 @@
 
 namespace tests\unit\models;
 
+use app\models\forms\LoginForm;
 use app\models\Airport;
 use app\models\Country;
-use app\models\LoginForm;
 use app\models\Pilot;
 use tests\unit\BaseUnitTest;
 use Yii;

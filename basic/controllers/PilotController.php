@@ -4,9 +4,9 @@ namespace app\controllers;
 
 use app\helpers\LoggerTrait;
 use app\config\Config;
-use app\models\ChangePasswordForm;
+use app\models\forms\ChangePasswordForm;
+use app\models\forms\ForgotPasswordForm;
 use app\models\Country;
-use app\models\ForgotPasswordForm;
 use app\models\FlightSearch;
 use app\models\Page;
 use app\models\PageContent;

@@ -3,7 +3,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /** @var yii\web\View $this */
-/** @var app\models\ChangePasswordForm $model */
+/** @var app\models\forms\ChangePasswordForm $model */
 /** @var int $id */
 /** @var string $token */
 
