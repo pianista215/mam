@@ -71,7 +71,7 @@ class ConfigHelper
 
     public static function getAirlineName(): string
     {
-        return Config::get(self::AIRLINE_NAME);
+        return Config::get(self::AIRLINE_NAME) ?? 'AirlineName';
     }
 
     public static function getNoReplyMail(): string
@@ -84,17 +84,17 @@ class ConfigHelper
         return Config::get(self::SUPPORT_MAIL);
     }
 
-    public static function getXUrl(): string
+    public static function getXUrl(): ?string
     {
         return Config::get(self::X_URL);
     }
 
-    public static function getInstagramUrl(): string
+    public static function getInstagramUrl(): ?string
     {
         return Config::get(self::INSTAGRAM_URL);
     }
 
-    public static function getFacebookUrl(): string
+    public static function getFacebookUrl(): ?string
     {
         return Config::get(self::FACEBOOK_URL);
     }

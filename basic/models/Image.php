@@ -2,7 +2,7 @@
 
 namespace app\models;
 
-use app\config\Config;
+use app\config\ConfigHelper as CK;
 use yii\helpers\Url;
 use yii\web\UploadedFile;
 use Yii;
