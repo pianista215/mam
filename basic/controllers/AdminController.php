@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\helpers\LoggerTrait;
 use app\models\forms\AssignRolesForm;
+use app\models\forms\SiteSettingsForm;
 use app\models\Pilot;
 use app\rbac\constants\Permissions;
 use app\rbac\constants\Roles;
@@ -118,14 +119,23 @@ class AdminController extends Controller
         $model = new SiteSettingsForm();
         $model->loadFromConfig();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            Yii::$app->session->setFlash('success', 'Configuración actualizada correctamente.');
-            return $this->redirect(['admin/site-settings']);
+        if (Yii::$app->request->isPost) {
+
+            $postModel = new SiteSettingsForm();
+            $postModel->load(Yii::$app->request->post());
+
+            if ($postModel->save()) {
+                Yii::$app->session->setFlash('success', 'Configuración actualizada correctamente.');
+                return $this->redirect(['admin/site-settings']);
+            }
+
+            $model->addErrors($postModel->getErrors());
         }
 
         return $this->render('site-settings', [
             'model' => $model,
         ]);
+
     }
 
 

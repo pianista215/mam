@@ -2,9 +2,10 @@
 
 namespace app\models\forms;
 
-use yii\base\Model;
 use app\config\Config;
 use app\models\Airport;
+use yii\base\Model;
+use Yii;
 
 class SiteSettingsForm extends Model
 {
@@ -34,14 +35,24 @@ class SiteSettingsForm extends Model
               'airline_name','no_reply_mail','support_mail','x_url','instagram_url','facebook_url'], 'trim'],
 
             [['registration_start','registration_end'], 'date', 'format' => 'php:Y-m-d'],
+            ['registration_start_location', 'filter', 'filter' => 'strtoupper'],
+            ['registration_start_location', 'string', 'max' => 4],
 
-            ['registration_start_location', 'validateAirport'],
+            [
+                'registration_start_location',
+                'exist',
+                'skipOnError' => true,
+                'targetClass' => Airport::class,
+                'targetAttribute' => ['registration_start_location' => 'icao_code'],
+            ],
 
             [['chunks_storage_path','images_storage_path'], 'validatePath'],
 
             ['token_life_h', 'integer', 'min' => 1],
 
+            ['charter_ratio', 'filter', 'filter' => [$this, 'normalizeDecimal']],
             ['charter_ratio', 'number'],
+            ['charter_ratio', 'number', 'min' => 0, 'max' => 1],
 
             [['no_reply_mail','support_mail'], 'email'],
 
@@ -49,12 +60,47 @@ class SiteSettingsForm extends Model
         ];
     }
 
+    public function attributeLabels()
+    {
+        return [
+            'registration_start' => Yii::t('app', 'Registration start date'),
+            'registration_end' => Yii::t('app', 'Registration end date'),
+            'registration_start_location' => Yii::t('app', 'Registration start airport'),
+
+            'chunks_storage_path' => Yii::t('app', 'Chunks storage path'),
+            'images_storage_path' => Yii::t('app', 'Images storage path'),
+
+            'token_life_h' => Yii::t('app', 'Token lifetime (hours)'),
+            'charter_ratio' => Yii::t('app', 'Charter ratio'),
+
+            'airline_name' => Yii::t('app', 'Airline name'),
+            'no_reply_mail' => Yii::t('app', 'No-reply email'),
+            'support_mail' => Yii::t('app', 'Support email'),
+
+            'x_url' => Yii::t('app', 'X / Twitter URL'),
+            'instagram_url' => Yii::t('app', 'Instagram URL'),
+            'facebook_url' => Yii::t('app', 'Facebook URL'),
+        ];
+    }
+
+
     public function loadFromConfig()
     {
         foreach ($this->attributes() as $attr) {
             $this->$attr = Config::get($attr);
         }
     }
+
+    public function normalizeDecimal($value)
+    {
+        if ($value === null || $value === '') {
+            return $value;
+        }
+
+        $value = str_replace(',', '.', $value);
+        return $value;
+    }
+
 
     public function save()
     {
@@ -74,32 +120,17 @@ class SiteSettingsForm extends Model
         return true;
     }
 
-    public function validateAirport($attribute)
-    {
-        if (!$this->$attribute) {
-            return;
-        } // TODO: UNAI MEter relacion como en otros modelos????
-
-        $exists = Airport::find()
-            ->where(['icao' => strtoupper($this->$attribute)])
-            ->exists();
-
-        if (!$exists) {
-            $this->addError($attribute, 'El aeropuerto no existe.');
-        }
-    }
-
     public function validatePath($attribute)
     {
         $value = $this->$attribute;
 
         if ($value[0] !== '/') {
-            $this->addError($attribute, 'El path debe ser absoluto.');
+            $this->addError($attribute, Yii::t('app', 'Path must be absolute.'));
             return;
         }
 
         if (!is_dir($value)) {
-            $this->addError($attribute, 'El directorio no existe.');
+            $this->addError($attribute, Yii::t('app', 'Path doesn\'t exist or is not a folder.'));
         }
     }
 }
