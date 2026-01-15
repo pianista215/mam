@@ -70,11 +70,6 @@ class SiteController extends Controller
     public function actionIndex()
     {
         $homePage = Page::findOne(['code' => 'home']);
-        $content = $homePage->getPageContents()
-                ->andWhere(['language' => Yii::$app->language])
-                ->one();
-
-        $bodyHtmlContent = Markdown::process($content->content_md, 'gfm');
 
         $lastFlights = Flight::find()
                 ->with(['pilot', 'aircraft.aircraftConfiguration.aircraftType'])
@@ -95,7 +90,7 @@ class SiteController extends Controller
 
 
         return $this->render('index', [
-            'homeContent' => $bodyHtmlContent,
+            'homePage' => $homePage,
             'lastFlights' => $lastFlights,
             'lastPilots' => $lastPilots,
             'flightModel' => new Flight(),

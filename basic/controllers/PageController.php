@@ -53,13 +53,9 @@ class PageController extends Controller
             throw new NotFoundHttpException();
         }
 
-        $htmlContent = Markdown::process($content->content_md, 'gfm');
-        $cleanHtml = HtmlPurifier::process($htmlContent);
-
         return $this->render('view', [
             'page' => $page,
-            'title' => $content->title,
-            'content' => $cleanHtml,
+            'title' => $content->title
         ]);
     }
 
@@ -69,11 +65,11 @@ class PageController extends Controller
             throw new ForbiddenHttpException();
         }
 
-        if (!in_array($language, ['en', 'es'])) {
+        if (!in_array($language, ['en', 'es'])) { // TODO PageContent model
             throw new NotFoundHttpException();
         }
 
-        $page = Page::find()->where(['code' => $code])->one();
+        $page = Page::find()->where(['code' => $code])->one(); // Upsert tours/others?
         if (!$page) {
             throw new NotFoundHttpException();
         }
@@ -88,8 +84,13 @@ class PageController extends Controller
         }
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            $this->logInfo('Page content saved page access for guest', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
-            return $this->redirect(['view', 'code' => $code]);
+            $this->logInfo('Page content saved', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
+            if($code === 'home') {
+                return $this->redirect(['/']);
+            } else {
+                return $this->redirect(['view', 'code' => $code]);
+            }
+
         }
 
         return $this->render('edit', [

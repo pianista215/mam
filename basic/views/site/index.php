@@ -2,13 +2,14 @@
 
 /** @var yii\web\View $this */
 use app\config\ConfigHelper as CK;
+use app\helpers\PageContentMam;
 
 $this->title = CK::getAirlineName();
 ?>
 <div class="site-index">
 
     <div class="jumbotron text-center bg-transparent mt-5 mb-5">
-        <?= $homeContent ?>
+        <?= PageContentMam::render($homePage->code) ?>
     </div>
 
     <div class="body-content">
