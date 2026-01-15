@@ -88,6 +88,7 @@ $config = [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+                'page/edit' => 'page/edit',
                 'page/<code:[a-zA-Z0-9\-]+>' => 'page/view',
                 [
                     'prefix' => 'api/v1',

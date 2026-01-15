@@ -4,8 +4,10 @@ namespace app\controllers;
 
 use app\helpers\LoggerTrait;
 use app\models\Page;
+use app\models\PageContent;
 use Yii;
 use yii\data\ActiveDataProvider;
+use yii\helpers\HtmlPurifier;
 use yii\helpers\Markdown;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
@@ -52,11 +54,48 @@ class PageController extends Controller
         }
 
         $htmlContent = Markdown::process($content->content_md, 'gfm');
+        $cleanHtml = HtmlPurifier::process($htmlContent);
 
         return $this->render('view', [
             'page' => $page,
             'title' => $content->title,
-            'content' => $htmlContent,
+            'content' => $cleanHtml,
+        ]);
+    }
+
+    public function actionEdit($code, $language)
+    {
+        if (Yii::$app->user->isGuest) { // TODO: UNAI PERMISOS
+            throw new ForbiddenHttpException();
+        }
+
+        if (!in_array($language, ['en', 'es'])) {
+            throw new NotFoundHttpException();
+        }
+
+        $page = Page::find()->where(['code' => $code])->one();
+        if (!$page) {
+            throw new NotFoundHttpException();
+        }
+
+        $model = $page->getPageContents()->where(['language' => $language])->one();
+
+        if (!$model) {
+            $model = new PageContent([
+                'page_id' => $page->id,
+                'language' => $language,
+            ]);
+        }
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            $this->logInfo('Page content saved page access for guest', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
+            return $this->redirect(['view', 'code' => $code]);
+        }
+
+        return $this->render('edit', [
+            'page' => $page,
+            'model' => $model,
+            'language' => $language,
         ]);
     }
 }
