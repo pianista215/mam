@@ -13,7 +13,7 @@ class PageContentMam
 {
     private static $cssRegistered = false;
 
-    public static function render(string $code, ?string $language = null): string
+    public static function render(string $code, array $options = [], ?string $language = null): string
     {
         if (!self::$cssRegistered) {
             $css = <<<CSS
@@ -44,35 +44,36 @@ class PageContentMam
 
         $language = $language ?? substr(Yii::$app->language, 0, 2);
 
+        $fallbackText = $options['fallbackText'] ?? null;
+
         $page = Page::find()->where(['code' => $code])->one();
-        if (!$page) {
-            return '';
+        $content = null;
+
+        if($page) {
+            $content = $page->getPageContents()
+                ->where(['language' => $language])
+                ->one()
+                ?? $page->getPageContents()->where(['language' => 'en'])->one();
         }
-
-        $content = $page->getPageContents()
-            ->where(['language' => $language])
-            ->one()
-            ?? $page->getPageContents()->where(['language' => 'en'])->one();
-
-        if (!$content) {
-            return '';
-        }
-
-        $html = Markdown::process($content->content_md, 'gfm');
-        $html = HtmlPurifier::process($html);
 
         $out = Html::beginTag('div', ['class' => 'page-content-mam-container']);
 
-        // Overlay editar
         if (!Yii::$app->user->isGuest) {
+            $label = $content ? Yii::t('app', 'Edit') : Yii::t('app', 'Create content');
             $out .= Html::a(
-                Yii::t('app', 'Edit'),
-                ['page/edit', 'code' => $code, 'language' => $content->language],
+                Yii::t('app', $label),
+                ['page/edit', 'code' => $code, 'language' => $language],
                 ['class' => 'page-content-mam-edit']
             );
         }
 
-        $out .= $html;
+        if ($content) {
+            $html = Markdown::process($content->content_md, 'gfm');
+            $out .= HtmlPurifier::process($html);
+        } elseif ($fallbackText) {
+            $out .= Html::tag('div', Html::encode($fallbackText));
+        }
+
         $out .= Html::endTag('div');
 
         return $out;

@@ -1,6 +1,7 @@
 <?php
 
 use app\helpers\ImageMam;
+use app\helpers\PageContentMam;
 use app\rbac\constants\Permissions;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -54,13 +55,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
             <hr>
 
-            <?php if (!empty($pageHtml)): ?>
-                <div class="tour-page-content">
-                    <?= $pageHtml ?>
-                </div>
-            <?php else: ?>
-                <p><?= Html::encode($model->description) ?></p>
-            <?php endif; ?>
+            <div class="tour-page-content">
+                <?= PageContentMam::render($model->getPageCode(), ['fallbackText' => $model->description]); ?>
+            </div>
         </div>
     </div>
 

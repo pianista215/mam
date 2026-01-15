@@ -75,30 +75,8 @@ class TourController extends Controller
     public function actionView($id)
     {
         $model = $this->findModelExtended($id);
-
-        $pageCode = 'tour_content_' . $model->id;
-        $page = Page::findOne(['code' => $pageCode]);
-        $pageContent = null;
-
-        if ($page !== null) {
-            $pageContent = $page->getPageContents()
-                ->andWhere(['language' => Yii::$app->language])
-                ->one();
-
-            if ($pageContent === null) {
-                // fallback
-                $pageContent = $page->getPageContents()->one();
-            }
-        }
-
-        $pageHtml = null;
-        if ($pageContent && $pageContent->content_md) {
-            $pageHtml = Markdown::process($pageContent->content_md, 'gfm');
-        }
-
         return $this->render('view', [
-            'model' => $model,
-            'pageHtml' => $pageHtml,
+            'model' => $model
         ]);
     }
 
