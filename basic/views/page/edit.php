@@ -39,11 +39,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const easyMDE = new EasyMDE({
         element: textarea,
         spellChecker: false,
+        sideBySideFullscreen: false,
         autofocus: false,
         status: false,
     });
 
     easyMDE.value(textarea.value);
+    easyMDE.toggleSideBySide();
 });
 
 </script>
