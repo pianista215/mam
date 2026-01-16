@@ -56,15 +56,6 @@ return [
     ],
     [
         'id' => 7,
-        'page_id' => 7,
-        'language' => 'en',
-        'title' => 'Hidden gem',
-        'content_md' => "Secret content.",
-        'created_at' => '2025-01-05 00:00:00',
-        'updated_at' => '2025-01-05 00:00:00',
-    ],
-    [
-        'id' => 8,
         'page_id' => 1,
         'language' => 'es',
         'title' => 'Página Principal',
@@ -73,7 +64,7 @@ return [
         'updated_at' => '2025-01-01 00:00:00',
     ],
     [
-        'id' => 9,
+        'id' => 8,
         'page_id' => 2,
         'language' => 'es',
         'title' => 'Staff',

@@ -10,7 +10,7 @@ use Yii;
  *
  * @property int $id
  * @property string $code
- * @property int $public
+ * @property string $type
  * @property string $created_at
  * @property string $updated_at
  *
@@ -19,6 +19,10 @@ use Yii;
 class Page extends \yii\db\ActiveRecord
 {
     use ImageRelated;
+
+    public const TYPE_SITE = 'site';
+    public const TYPE_TOUR = 'tour';
+    public const TYPE_COMPONENT = 'component';
 
     /**
      * {@inheritdoc}
@@ -34,11 +38,10 @@ class Page extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['code'], 'required'],
-            [['public'], 'boolean'],
-            [['public'], 'default', 'value' => 0],
+            [['code', 'type'], 'required'],
             [['created_at', 'updated_at'], 'safe'],
             [['code'], 'string', 'max' => 50],
+            [['type'], 'string', 'max' => 20],
             [['code'], 'unique'],
         ];
     }
@@ -51,7 +54,7 @@ class Page extends \yii\db\ActiveRecord
         return [
             'id' => 'ID',
             'code' => 'Code',
-            'public' => 'Public Page',
+            'type' => 'Type',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
