@@ -406,7 +406,7 @@ CREATE TABLE `flight_phase_issue` (
 CREATE TABLE `page` (
   `id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
   `code` varchar(50) NOT NULL,
-  `public` tinyint(1) NOT NULL DEFAULT 0,
+  `type` varchar(20) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
