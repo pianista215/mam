@@ -57,7 +57,7 @@ class FlagsLoadController extends Controller
 
                 // Create Image
                 $image = new Image([
-                    'type' => 'country_icon',
+                    'type' => Image::TYPE_COUNTRY_ICON,
                     'related_id' => $country->id,
                     'element' => 0,
                 ]);
@@ -94,7 +94,7 @@ class FlagsLoadController extends Controller
 
             $flaggedCountryIds = Image::find()
                 ->select('related_id')
-                ->where(['type' => 'country_icon'])
+                ->where(['type' => Image::TYPE_COUNTRY_ICON])
                 ->column();
 
             $countryIds = array_map('intval', $countryIds);

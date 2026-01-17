@@ -2,6 +2,7 @@
 
 use app\helpers\TimeHelper;
 use app\helpers\ImageMam;
+use app\models\Image;
 use app\rbac\constants\Permissions;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -43,7 +44,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="card mb-4 shadow-sm">
         <div class="card-body d-flex align-items-start">
             <div class="pilot-photo me-4" style="min-width: 150px; text-align:center;">
-                <?= ImageMam::render('pilot_profile', $model->id) ?>
+                <?= ImageMam::render(Image::TYPE_PILOT_PROFILE, $model->id) ?>
             </div>
 
             <div class="pilot-data flex-fill me-4">
@@ -78,7 +79,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="pilot-rank text-center" style="min-width: 120px;">
                 <?php if ($model->rank): ?>
                     <div class="rank-image mb-1">
-                        <?= ImageMam::render('rank_icon', $model->rank->id, 0, ['class' => 'img-fluid']) ?>
+                        <?= ImageMam::render(Image::TYPE_RANK_ICON, $model->rank->id, 0, ['class' => 'img-fluid']) ?>
                     </div>
                     <div class="rank-name fw-semibold"><?= Html::encode($model->rank->name) ?></div>
                 <?php else: ?>
@@ -159,7 +160,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             Html::tag('span', Html::encode($model->departure), [
                                 'style'=>'display:inline-block; width:44px; text-align:left;'
                             ]) .
-                            Html::tag('span', ImageMam::render('country_icon', $airport->country->id), [
+                            Html::tag('span', ImageMam::render(Image::TYPE_COUNTRY_ICON, $airport->country->id), [
                                 'style' => 'display:inline-block; vertical-align:middle; margin-left:5px;'
                             ]),
                             ['style'=>'white-space:nowrap;']
@@ -196,7 +197,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             Html::tag('span', Html::encode($model->arrival), [
                                 'style'=>'display:inline-block; width:44px; text-align:left;'
                             ]) .
-                            Html::tag('span', ImageMam::render('country_icon', $airport->country->id), [
+                            Html::tag('span', ImageMam::render(Image::TYPE_COUNTRY_ICON, $airport->country->id), [
                                 'style' => 'display:inline-block; vertical-align:middle; margin-left:5px;'
                             ]),
                             ['style'=>'white-space:nowrap;']

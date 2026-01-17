@@ -107,18 +107,18 @@ class ImageTest extends BaseUnitTest
     private function getRelatedModel(string $type)
     {
         return match ($type) {
-            'pilot_profile'      => $this->pilot,
-            'rank_icon'          => $this->rank,
-            'tour_image'         => $this->tour,
-            'country_icon'       => $this->country,
-            'aircraftType_image' => $this->aircraftType,
-            default              => null,
+            Image::TYPE_PILOT_PROFILE      => $this->pilot,
+            Image::TYPE_RANK_ICON          => $this->rank,
+            Image::TYPE_TOUR_IMAGE         => $this->tour,
+            Image::TYPE_COUNTRY_ICON       => $this->country,
+            Image::TYPE_AIRCRAFT_TYPE_IMAGE => $this->aircraftType,
+            default                        => null,
         };
     }
 
     public function testValidImageIsSaved()
     {
-        $type = 'country_icon';
+        $type = Image::TYPE_COUNTRY_ICON;
         $related = $this->getRelatedModel($type);
         $this->assertNotNull($related);
 
@@ -136,7 +136,7 @@ class ImageTest extends BaseUnitTest
 
     public function testInvalidResolutionFails()
     {
-        $type = 'country_icon';
+        $type = Image::TYPE_COUNTRY_ICON;
         $related = $this->getRelatedModel($type);
         $this->assertNotNull($related);
 
@@ -158,7 +158,7 @@ class ImageTest extends BaseUnitTest
 
     public function testInvalidExtensionFails()
     {
-        $type = 'country_icon';
+        $type = Image::TYPE_COUNTRY_ICON;
         $related = $this->getRelatedModel($type);
         $this->assertNotNull($related);
 
@@ -178,7 +178,7 @@ class ImageTest extends BaseUnitTest
 
     public function testInvalidMimeFails()
     {
-        $type = 'country_icon';
+        $type = Image::TYPE_COUNTRY_ICON;
         $related = $this->getRelatedModel($type);
         $this->assertNotNull($related);
 
@@ -198,7 +198,7 @@ class ImageTest extends BaseUnitTest
 
     public function testRelatedModelDoesNotExist()
     {
-        $type = 'country_icon';
+        $type = Image::TYPE_COUNTRY_ICON;
 
         $this->prepareImage($type, 'ok.png');
 
@@ -226,7 +226,7 @@ class ImageTest extends BaseUnitTest
 
     public function testElementMustBeZeroForNonPageTypes()
     {
-        $type = 'pilot_profile';
+        $type = Image::TYPE_PILOT_PROFILE;
         $related = $this->getRelatedModel($type);
 
         $this->prepareImage($type, 'ok.png');
@@ -244,7 +244,7 @@ class ImageTest extends BaseUnitTest
 
     public function testUniqueConstraintOnTypeRelatedElement()
     {
-        $type = 'country_icon';
+        $type = Image::TYPE_COUNTRY_ICON;
         $related = $this->getRelatedModel($type);
 
         $this->prepareImage($type, 'img1.png');
@@ -272,7 +272,7 @@ class ImageTest extends BaseUnitTest
 
     public function testAfterDeleteRemovesFile()
     {
-        $type = 'country_icon';
+        $type = Image::TYPE_COUNTRY_ICON;
         $related = $this->getRelatedModel($type);
 
         $path = $this->prepareImage($type, 'deleteme.png');

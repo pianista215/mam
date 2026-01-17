@@ -1,6 +1,7 @@
 <?php
 
 use app\helpers\ImageMam;
+use app\models\Image;
 use app\models\Route;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -42,7 +43,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                         <?= Html::encode($stage->departure) ?>
                                     </span>
                                     <span style="margin-left:5px; display:flex; align-items:center;">
-                                        <?= ImageMam::render('country_icon', $stage->departure0->country_id) ?>
+                                        <?= ImageMam::render(Image::TYPE_COUNTRY_ICON, $stage->departure0->country_id) ?>
                                     </span>
                                 </div>
                                 <div style="
@@ -64,7 +65,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                         <?= Html::encode($stage->arrival) ?>
                                     </span>
                                     <span style="margin-left:5px; display:flex; align-items:center;">
-                                        <?= ImageMam::render('country_icon', $stage->arrival0->country_id) ?>
+                                        <?= ImageMam::render(Image::TYPE_COUNTRY_ICON, $stage->arrival0->country_id) ?>
                                     </span>
                                 </div>
 
@@ -148,7 +149,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             Html::tag('span', Html::encode($model->departure), [
                                 'style'=>'display:inline-block; width:44px; text-align:left;'
                             ]) .
-                            Html::tag('span', ImageMam::render('country_icon', $airport->country->id), [
+                            Html::tag('span', ImageMam::render(Image::TYPE_COUNTRY_ICON, $airport->country->id), [
                                 'style' => 'display:inline-block; vertical-align:middle; margin-left:5px;'
                             ]),
                             ['style'=>'white-space:nowrap;']
@@ -185,7 +186,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             Html::tag('span', Html::encode($model->arrival), [
                                 'style'=>'display:inline-block; width:44px; text-align:left;'
                             ]) .
-                            Html::tag('span', ImageMam::render('country_icon', $airport->country->id), [
+                            Html::tag('span', ImageMam::render(Image::TYPE_COUNTRY_ICON, $airport->country->id), [
                                 'style' => 'display:inline-block; vertical-align:middle; margin-left:5px;'
                             ]),
                             ['style'=>'white-space:nowrap;']

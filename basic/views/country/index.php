@@ -2,6 +2,7 @@
 
 use app\helpers\ImageMam;
 use app\models\Country;
+use app\models\Image;
 use app\rbac\constants\Permissions;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -35,7 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label' => Yii::t('app', 'Flag'),
                 'format' => 'raw',
                 'value' => function ($model) {
-                    $img = ImageMam::render('country_icon', $model->id);
+                    $img = ImageMam::render(Image::TYPE_COUNTRY_ICON, $model->id);
                     return Html::tag('div', $img, ['style' => 'text-align:center;']);
                 },
                 'contentOptions' => ['style' => 'width:70px; text-align:center; vertical-align:middle;'],

@@ -34,8 +34,8 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => '',
                 'format' => 'raw',
-                'value' => fn($model) => ImageMam::render('rank_icon', $model->id, 0),
-                'contentOptions' => ['style' => 'width: '.Image::getAllowedTypes()['rank_icon']['width'].'px;'],
+                'value' => fn($model) => ImageMam::render(Image::TYPE_RANK_ICON, $model->id, 0),
+                'contentOptions' => ['style' => 'width: '.Image::getAllowedTypes()[Image::TYPE_RANK_ICON]['width'].'px;'],
             ],
             'name',
             [

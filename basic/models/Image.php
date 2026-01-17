@@ -20,6 +20,12 @@ use Yii;
  */
 class Image extends \yii\db\ActiveRecord
 {
+    public const TYPE_RANK_ICON = 'rank_icon';
+    public const TYPE_PILOT_PROFILE = 'pilot_profile';
+    public const TYPE_TOUR_IMAGE = 'tour_image';
+    public const TYPE_COUNTRY_ICON = 'country_icon';
+    public const TYPE_AIRCRAFT_TYPE_IMAGE = 'aircraftType_image';
+    public const TYPE_PAGE_IMAGE = 'page_image';
 
     /**
      * {@inheritdoc}
@@ -88,35 +94,35 @@ class Image extends \yii\db\ActiveRecord
     public static function getAllowedTypes(): array
     {
         return [
-            'rank_icon'         => ['width' => 174, 'height' => 76, 'relatedModel' => Rank::class],
-            'pilot_profile'     => ['width' => 200, 'height' => 250, 'relatedModel' => Pilot::class],
-            'tour_image'        => ['width' => 1200, 'height' => 400, 'relatedModel' => Tour::class],
-            'country_icon'      => ['width' => 44, 'height' => 33, 'relatedModel' => Country::class],
-            'aircraftType_image'=> ['width' => 1200, 'height' => 400, 'relatedModel' => AircraftType::class],
-            'page_image'        => ['width' => null, 'height' => null, 'relatedModel' => Page::class],
+            self::TYPE_RANK_ICON          => ['width' => 174, 'height' => 76, 'relatedModel' => Rank::class],
+            self::TYPE_PILOT_PROFILE      => ['width' => 200, 'height' => 250, 'relatedModel' => Pilot::class],
+            self::TYPE_TOUR_IMAGE         => ['width' => 1200, 'height' => 400, 'relatedModel' => Tour::class],
+            self::TYPE_COUNTRY_ICON       => ['width' => 44, 'height' => 33, 'relatedModel' => Country::class],
+            self::TYPE_AIRCRAFT_TYPE_IMAGE=> ['width' => 1200, 'height' => 400, 'relatedModel' => AircraftType::class],
+            self::TYPE_PAGE_IMAGE         => ['width' => null, 'height' => null, 'relatedModel' => Page::class],
         ];
     }
 
     public static function getPlaceholder(string $type): ?string
     {
         $placeholders = [
-            'rank_icon' => '@app/web/images/placeholders/rank_icon.png',
-            'pilot_profile' => '@app/web/images/placeholders/pilot_profile.png',
-            'tour_image' => '@app/web/images/placeholders/tour_image.png',
-            'country_icon' => '@app/web/images/placeholders/country_icon.png',
-            'aircraftType_image' => '@app/web/images/placeholders/aircraftType_image.png',
+            self::TYPE_RANK_ICON => '@app/web/images/placeholders/rank_icon.png',
+            self::TYPE_PILOT_PROFILE => '@app/web/images/placeholders/pilot_profile.png',
+            self::TYPE_TOUR_IMAGE => '@app/web/images/placeholders/tour_image.png',
+            self::TYPE_COUNTRY_ICON => '@app/web/images/placeholders/country_icon.png',
+            self::TYPE_AIRCRAFT_TYPE_IMAGE => '@app/web/images/placeholders/aircraftType_image.png',
         ];
 
         return $placeholders[$type] ?? null;
     }
 
     public function isValidElement() {
-        return $this->type === 'page_image' || $this->element === 0;
+        return $this->type === self::TYPE_PAGE_IMAGE || $this->element === 0;
     }
 
     public function validateElement($attribute, $params)
     {
-        if ($this->type !== 'page_image' && $this->$attribute != 0) {
+        if ($this->type !== self::TYPE_PAGE_IMAGE && $this->$attribute != 0) {
             $this->addError($attribute, "Attribute 'element' must be 0 for type '{$this->type}'.");
         }
     }

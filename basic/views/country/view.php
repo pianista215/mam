@@ -1,6 +1,7 @@
 <?php
 
 use app\helpers\ImageMam;
+use app\models\Image;
 use app\rbac\constants\Permissions;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
@@ -31,7 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php endif; ?>
 
     <div style="text-align:center; margin-bottom:15px;">
-        <?= ImageMam::render('country_icon', $model->id) ?>
+        <?= ImageMam::render(Image::TYPE_COUNTRY_ICON, $model->id) ?>
     </div>
 
     <?= DetailView::widget([

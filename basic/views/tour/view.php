@@ -2,6 +2,7 @@
 
 use app\helpers\ImageMam;
 use app\helpers\PageContentMam;
+use app\models\Image;
 use app\models\Page;
 use app\rbac\constants\Permissions;
 use yii\helpers\Html;
@@ -21,7 +22,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="tour-view container mt-4">
 
     <div class="tour-header mb-4 text-center">
-        <?= ImageMam::render('tour_image', $model->id, 0, [
+        <?= ImageMam::render(Image::TYPE_TOUR_IMAGE, $model->id, 0, [
             'class' => 'img-fluid rounded shadow-sm mx-auto d-block',
             'style' => 'max-height:400px; object-fit:cover;'
         ]) ?>
@@ -88,7 +89,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                         <?= Html::encode($stage->departure) ?>
                                     </span>
                                     <span style="margin-left:5px; display:flex; align-items:center;">
-                                        <?= ImageMam::render('country_icon', $stage->departure0->country_id) ?>
+                                        <?= ImageMam::render(Image::TYPE_COUNTRY_ICON, $stage->departure0->country_id) ?>
                                     </span>
                                 </div>
                                 <div style="
@@ -110,7 +111,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                         <?= Html::encode($stage->arrival) ?>
                                     </span>
                                     <span style="margin-left:5px; display:flex; align-items:center;">
-                                        <?= ImageMam::render('country_icon', $stage->arrival0->country_id) ?>
+                                        <?= ImageMam::render(Image::TYPE_COUNTRY_ICON, $stage->arrival0->country_id) ?>
                                     </span>
                                 </div>
 
