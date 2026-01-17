@@ -29,19 +29,6 @@ class Tour extends \yii\db\ActiveRecord
 
     public const PAGE_CODE_PREFIX = 'tour_content_';
 
-    public static function isTourPageCode(string $code): bool
-    {
-        return str_starts_with($code, self::PAGE_CODE_PREFIX);
-    }
-
-    public static function extractIdFromPageCode(string $code): ?int
-    {
-        if (!self::isTourPageCode($code)) {
-            return null;
-        }
-        return (int)substr($code, strlen(self::PAGE_CODE_PREFIX));
-    }
-
     public function getPageCode(): string
     {
         return self::PAGE_CODE_PREFIX . $this->id;

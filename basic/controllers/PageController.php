@@ -29,7 +29,7 @@ class PageController extends Controller
             throw new NotFoundHttpException();
         }
 
-        if ($page->type != Page::TYPE_SITE && Yii::$app->user->isGuest) { // TODO: UNAI RULE
+        if (Yii::$app->user->isGuest && $page->type !== Page::TYPE_SITE) {
             $this->logInfo('Forbidden page access for guest', ['page' => $page]);
             throw new ForbiddenHttpException();
         }
