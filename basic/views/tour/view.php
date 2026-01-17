@@ -2,6 +2,7 @@
 
 use app\helpers\ImageMam;
 use app\helpers\PageContentMam;
+use app\models\Page;
 use app\rbac\constants\Permissions;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -56,7 +57,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <hr>
 
             <div class="tour-page-content">
-                <?= PageContentMam::render($model->getPageCode(), ['fallbackText' => $model->description]); ?>
+                <?= PageContentMam::render($model->getPageCode(), Page::TYPE_TOUR, ['fallbackText' => $model->description]); ?>
             </div>
         </div>
     </div>

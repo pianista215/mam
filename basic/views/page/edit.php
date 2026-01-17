@@ -1,9 +1,11 @@
 <?php
 
+use app\models\Page;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
-$this->title = "Edit page: {$page->code} ({$language})";
+/** @var string $title */
+$this->title = $title;
 
 $this->registerCssFile('https://unpkg.com/easymde@2.20.0/dist/easymde.min.css');
 $this->registerJsFile('https://unpkg.com/easymde@2.20.0/dist/easymde.min.js', ['depends' => \yii\web\JqueryAsset::class]);
@@ -13,12 +15,14 @@ $this->registerJsFile('https://unpkg.com/easymde@2.20.0/dist/easymde.min.js', ['
 
 <?php $form = ActiveForm::begin(); ?>
 
-<?= $form->field($model, 'title')->textInput(['maxlength' => true]) ?>
+<?php if ($page->type === Page::TYPE_SITE): ?>
+    <?= $form->field($model, 'title')->textInput(['maxlength' => true]) ?>
+<?php endif; ?>
 
 <?= $form->field($model, 'content_md')->textarea(['id' => 'editor', 'rows' => 20]) ?>
 
 <div class="form-group">
-    <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+    <?= Html::submitButton(Yii::t('app', 'Save'), ['class' => 'btn btn-success']) ?>
 </div>
 
 <?php ActiveForm::end(); ?>

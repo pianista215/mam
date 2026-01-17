@@ -20,9 +20,17 @@ class Page extends \yii\db\ActiveRecord
 {
     use ImageRelated;
 
+    public const TYPE_COMPONENT = 'component';
     public const TYPE_SITE = 'site';
     public const TYPE_TOUR = 'tour';
-    public const TYPE_COMPONENT = 'component';
+
+    public const HOME_PAGE = 'home';
+
+    public const TYPES = [
+        self::TYPE_COMPONENT,
+        self::TYPE_SITE,
+        self::TYPE_TOUR,
+    ];
 
     /**
      * {@inheritdoc}
@@ -39,6 +47,7 @@ class Page extends \yii\db\ActiveRecord
     {
         return [
             [['code', 'type'], 'required'],
+            ['type', 'in', 'range' => self::TYPES],
             [['created_at', 'updated_at'], 'safe'],
             [['code'], 'string', 'max' => 50],
             [['type'], 'string', 'max' => 20],

@@ -13,6 +13,6 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="page-content">
     <h1><?= $this->title ?></h1>
     <div>
-        <?= PageContentMam::render($page->code) ?>
+        <?= PageContentMam::render($page->code, $page->type) ?>
     </div>
 </div>

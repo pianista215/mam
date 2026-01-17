@@ -9,7 +9,7 @@ $this->title = CK::getAirlineName();
 <div class="site-index">
 
     <div class="jumbotron text-center bg-transparent mt-5 mb-5">
-        <?= PageContentMam::render($homePage->code) ?>
+        <?= PageContentMam::render($homePage->code, $homePage->type) ?>
     </div>
 
     <div class="body-content">

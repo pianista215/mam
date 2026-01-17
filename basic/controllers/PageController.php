@@ -5,14 +5,12 @@ namespace app\controllers;
 use app\helpers\LoggerTrait;
 use app\models\Page;
 use app\models\PageContent;
+use app\models\Tour;
 use Yii;
-use yii\data\ActiveDataProvider;
-use yii\helpers\HtmlPurifier;
-use yii\helpers\Markdown;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
+use app\rbac\constants\Permissions;
 
 /**
  * PageController implements the CRUD actions for Page model.
@@ -59,19 +57,23 @@ class PageController extends Controller
         ]);
     }
 
-    public function actionEdit($code, $language)
+    public function actionEdit($code, $language, $type)
     {
-        if (Yii::$app->user->isGuest) { // TODO: UNAI PERMISOS
-            throw new ForbiddenHttpException();
+        $page = Page::find()->where(['code' => $code])->one();
+
+        if (!$page) {
+            if ($type === Page::TYPE_TOUR) {
+                $page = Tour::findOrCreateTourPage($code);
+            }
         }
 
-        if (!in_array($language, ['en', 'es'])) { // TODO PageContent model
-            throw new NotFoundHttpException();
-        }
-
-        $page = Page::find()->where(['code' => $code])->one(); // Upsert tours/others?
         if (!$page) {
             throw new NotFoundHttpException();
+        }
+
+        if (!Yii::$app->user->can(Permissions::EDIT_PAGE_CONTENT, ['page' => $page])) {
+            $this->logInfo('User without permissions trying to edit page', ['page' => $page, 'user' => Yii::$app->user->identity->license]);
+            throw new ForbiddenHttpException();
         }
 
         $model = $page->getPageContents()->where(['language' => $language])->one();
@@ -83,21 +85,51 @@ class PageController extends Controller
             ]);
         }
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            $this->logInfo('Page content saved', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
-            if($code === 'home') {
-                return $this->redirect(['/']);
-            } else {
-                return $this->redirect(['view', 'code' => $code]);
+        if ($model->load(Yii::$app->request->post())) {
+            if ($page->type !== Page::TYPE_SITE) {
+                $model->title = '';
             }
 
+            if ($model->save()) {
+                $this->logInfo('Page content saved', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
+
+                if ($code === Page::HOME_PAGE) {
+                    return $this->redirect(['/']);
+                } elseif ($page->type === Page::TYPE_TOUR) {
+                    $tourId = Tour::extractIdFromPageCode($code);
+                    return $this->redirect(['tour/view', 'id' => $tourId]);
+                } else {
+                    return $this->redirect(['view', 'code' => $code]);
+                }
+            }
         }
+
+        $title = $this->buildEditTitle($page, $language);
 
         return $this->render('edit', [
             'page' => $page,
             'model' => $model,
             'language' => $language,
+            'title' => $title,
         ]);
+    }
+
+    private function buildEditTitle(Page $page, string $language): string
+    {
+        switch ($page->type) {
+            case Page::TYPE_TOUR:
+                $tourId = Tour::extractIdFromPageCode($page->code);
+                $tour = Tour::findOne($tourId);
+                $description = Yii::t('app', 'Tour page') . ': ' . ($tour ? $tour->name : $page->code);
+                break;
+            case Page::TYPE_COMPONENT:
+                $description = Yii::t('app', 'Component') . ': ' . $page->code;
+                break;
+            default:
+                $description = Yii::t('app', 'Page') . ': ' . $page->code;
+        }
+
+        return "({$language}) " . Yii::t('app', 'Editing') . ' ' . $description;
     }
 }
 

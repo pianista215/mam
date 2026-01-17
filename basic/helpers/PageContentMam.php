@@ -13,7 +13,7 @@ class PageContentMam
 {
     private static $cssRegistered = false;
 
-    public static function render(string $code, array $options = [], ?string $language = null): string
+    public static function render(string $code, string $type, array $options = [], ?string $language = null): string
     {
         if (!self::$cssRegistered) {
             $css = <<<CSS
@@ -62,7 +62,7 @@ class PageContentMam
             $label = $content ? Yii::t('app', 'Edit') : Yii::t('app', 'Create content');
             $out .= Html::a(
                 Yii::t('app', $label),
-                ['page/edit', 'code' => $code, 'language' => $language],
+                ['page/edit', 'code' => $code, 'language' => $language, 'type' => $type],
                 ['class' => 'page-content-mam-edit']
             );
         }
