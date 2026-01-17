@@ -3,6 +3,7 @@
 namespace tests\functional\image;
 
 use app\config\Config;
+use app\config\ConfigHelper;
 use tests\fixtures\AuthAssignmentFixture;
 use tests\fixtures\ImageFixture;
 use Yii;
@@ -19,8 +20,7 @@ class ImageViewCest
 
     public function _before(\FunctionalTester $I)
     {
-        // Configura la ruta base de las imágenes
-        Config::set('images_storage_path', '/tmp/mam_test_images');
+        Config::set(ConfigHelper::IMAGES_STORAGE_PATH, '/tmp/mam_test_images');
 
         $types = ['rank_icon', 'pilot_profile', 'tour_image', 'country_icon', 'aircraftType_image', 'page_image'];
 
@@ -63,7 +63,7 @@ class ImageViewCest
         $restricted = [
             ['pilot_profile', 2, 0],
             ['tour_image', 2, 0],
-            ['page_image', 7, 0], // private
+            ['page_image', 7, 0], // TYPE_TOUR page - restricted for guests
         ];
 
         foreach ($restricted as [$type, $related_id, $element]) {
@@ -75,7 +75,7 @@ class ImageViewCest
             ['rank_icon', 1, 0],
             ['country_icon', 1, 0],
             ['aircraftType_image', 1, 0],
-            ['page_image', 6, 0], // public
+            ['page_image', 6, 0], // TYPE_COMPONENT page - allowed for guests
             ['aircraftType_image', 2, 0] // must return placeholder
         ];
 
@@ -95,8 +95,8 @@ class ImageViewCest
             ['tour_image', 2, 0],
             ['country_icon', 1, 0],
             ['aircraftType_image', 1, 0],
-            ['page_image', 7, 0], // private
-            ['page_image', 6, 0], // public
+            ['page_image', 7, 0], // TYPE_TOUR page
+            ['page_image', 6, 0], // TYPE_COMPONENT page
             ['aircraftType_image', 2, 0] // must return placeholder
         ];
 

@@ -44,4 +44,11 @@ return [
         'created_at' => '2025-01-05 00:00:00',
         'updated_at' => '2025-01-05 00:00:00',
     ],
+    [
+        'id' => 7,
+        'code' => 'tour_content_1',
+        'type' => Page::TYPE_TOUR,
+        'created_at' => '2025-01-06 00:00:00',
+        'updated_at' => '2025-01-06 00:00:00',
+    ],
 ];
