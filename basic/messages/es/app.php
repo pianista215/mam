@@ -219,6 +219,7 @@ return [
     'Register' => 'Registrarse',
     'Register Pilot' => 'Registrar Piloto',
     'Registration' => 'Matrícula',
+    'Registration Closed' => 'Registro Cerrado',
     'Registration Date' => 'Fecha de Registro',
     'Registration Settings' => 'Configuración del Registro',
     'Registration end date' => 'Fin del periodo de registro',
