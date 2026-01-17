@@ -25,6 +25,9 @@ final class Permissions
     public const TOUR_CRUD = 'tourCrud';
     public const AIRPORT_CRUD = 'airportCrud';
 
+    // Tour & Admin
+    public const EDIT_PAGE_CONTENT = 'editPageContent';
+
     // Admin
     public const USER_CRUD = 'userCrud';
     public const COUNTRY_CRUD = 'countryCrud';

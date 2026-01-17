@@ -2,6 +2,7 @@
 
 use app\helpers\ImageMam;
 use app\helpers\TimeHelper;
+use app\models\Image;
 use app\models\Pilot;
 use app\rbac\constants\Permissions;
 use yii\helpers\Html;
@@ -58,7 +59,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             Html::tag('span', Html::encode($model->location), [
                                 'style'=>'display:inline-block; width:44px; text-align:left;'
                             ]) .
-                            Html::tag('span', ImageMam::render('country_icon', $airport->country->id), [
+                            Html::tag('span', ImageMam::render(Image::TYPE_COUNTRY_ICON, $airport->country->id), [
                                 'style' => 'display:inline-block; vertical-align:middle; margin-left:5px;'
                             ]),
                             ['style'=>'white-space:nowrap;']

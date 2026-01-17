@@ -107,7 +107,7 @@ class ImageUploadRuleTest extends BaseUnitTest
     public function testGuestCannotUpload()
     {
         Yii::$app->user->logout(false);
-        $img = $this->img('rank_icon', 1);
+        $img = $this->img(Image::TYPE_RANK_ICON, 1);
 
         $this->assertFalse(Yii::$app->user->can('imageUpload', ['image' => $img]));
     }
@@ -128,7 +128,7 @@ class ImageUploadRuleTest extends BaseUnitTest
         $pilot = $this->createPilot(5);
         $this->login($pilot);
 
-        $img = $this->img('rank_icon', 1);
+        $img = $this->img(Image::TYPE_RANK_ICON, 1);
 
         $this->assertFalse(Yii::$app->user->can('imageUpload', ['image' => $img]));
     }
@@ -139,7 +139,7 @@ class ImageUploadRuleTest extends BaseUnitTest
         $this->login($pilot);
         $this->assign(Permissions::RANK_CRUD, 5);
 
-        $img = $this->img('rank_icon', 1);
+        $img = $this->img(Image::TYPE_RANK_ICON, 1);
 
         $this->assertTrue(Yii::$app->user->can('imageUpload', ['image' => $img]));
     }
@@ -150,7 +150,7 @@ class ImageUploadRuleTest extends BaseUnitTest
         $pilot = $this->createPilot(7);
         $this->login($pilot);
 
-        $img = $this->img('tour_image', 55);
+        $img = $this->img(Image::TYPE_TOUR_IMAGE, 55);
 
         $this->assertFalse(Yii::$app->user->can('imageUpload', ['image' => $img]));
     }
@@ -161,7 +161,7 @@ class ImageUploadRuleTest extends BaseUnitTest
         $this->login($pilot);
         $this->assign(Permissions::TOUR_CRUD, 7);
 
-        $img = $this->img('tour_image', 55);
+        $img = $this->img(Image::TYPE_TOUR_IMAGE, 55);
 
         $this->assertTrue(Yii::$app->user->can('imageUpload', ['image' => $img]));
     }
@@ -172,7 +172,7 @@ class ImageUploadRuleTest extends BaseUnitTest
         $pilot = $this->createPilot(9);
         $this->login($pilot);
 
-        $img = $this->img('country_icon', 34);
+        $img = $this->img(Image::TYPE_COUNTRY_ICON, 34);
 
         $this->assertFalse(Yii::$app->user->can('imageUpload', ['image' => $img]));
     }
@@ -183,7 +183,7 @@ class ImageUploadRuleTest extends BaseUnitTest
         $this->login($pilot);
         $this->assign(Permissions::COUNTRY_CRUD, 9);
 
-        $img = $this->img('country_icon', 34);
+        $img = $this->img(Image::TYPE_COUNTRY_ICON, 34);
 
         $this->assertTrue(Yii::$app->user->can('imageUpload', ['image' => $img]));
     }
@@ -193,7 +193,7 @@ class ImageUploadRuleTest extends BaseUnitTest
         $pilot = $this->createPilot(10);
         $this->login($pilot);
 
-        $img = $this->img('aircraftType_image', 99);
+        $img = $this->img(Image::TYPE_AIRCRAFT_TYPE_IMAGE, 99);
 
         $this->assertFalse(Yii::$app->user->can('imageUpload', ['image' => $img]));
     }
@@ -204,7 +204,7 @@ class ImageUploadRuleTest extends BaseUnitTest
         $this->login($pilot);
         $this->assign(Permissions::AIRCRAFT_TYPE_CRUD, 10);
 
-        $img = $this->img('aircraftType_image', 99);
+        $img = $this->img(Image::TYPE_AIRCRAFT_TYPE_IMAGE, 99);
 
         $this->assertTrue(Yii::$app->user->can('imageUpload', ['image' => $img]));
     }
@@ -214,7 +214,7 @@ class ImageUploadRuleTest extends BaseUnitTest
         $pilot = $this->createPilot(11);
         $this->login($pilot);
 
-        $img = $this->img('page_image', 1);
+        $img = $this->img(Image::TYPE_PAGE_IMAGE, 1);
 
         $this->assertFalse(Yii::$app->user->can('imageUpload', ['image' => $img]));
     }
@@ -229,7 +229,7 @@ class ImageUploadRuleTest extends BaseUnitTest
             11
         );
 
-        $img = $this->img('page_image', 1);
+        $img = $this->img(Image::TYPE_PAGE_IMAGE, 1);
 
         $this->assertTrue(Yii::$app->user->can('imageUpload', ['image' => $img]));
     }
@@ -239,7 +239,7 @@ class ImageUploadRuleTest extends BaseUnitTest
         $pilot = $this->createPilot(20);
         $this->login($pilot);
 
-        $img = $this->img('pilot_profile', 20);
+        $img = $this->img(Image::TYPE_PILOT_PROFILE, 20);
 
         $this->assertTrue(Yii::$app->user->can('imageUpload', ['image' => $img]));
     }
@@ -249,7 +249,7 @@ class ImageUploadRuleTest extends BaseUnitTest
         $pilot = $this->createPilot(20);
         $this->login($pilot);
 
-        $img = $this->img('pilot_profile', 999);
+        $img = $this->img(Image::TYPE_PILOT_PROFILE, 999);
 
         $this->assertFalse(Yii::$app->user->can('imageUpload', ['image' => $img]));
     }
@@ -260,7 +260,7 @@ class ImageUploadRuleTest extends BaseUnitTest
         $this->login($pilot);
         $this->assign(Permissions::USER_CRUD, 20);
 
-        $img = $this->img('pilot_profile', 999);
+        $img = $this->img(Image::TYPE_PILOT_PROFILE, 999);
 
         $this->assertTrue(Yii::$app->user->can('imageUpload', ['image' => $img]));
     }
@@ -272,7 +272,7 @@ class ImageUploadRuleTest extends BaseUnitTest
         $this->assign(Permissions::RANK_CRUD, 33);
 
         $img = [
-            'type' => 'rank_icon',
+            'type' => Image::TYPE_RANK_ICON,
             'related_id' => 123
         ];
 

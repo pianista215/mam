@@ -1,12 +1,12 @@
 SET NAMES 'utf8mb4';
 
-INSERT INTO `page` (`code`, `public`, `created_at`, `updated_at`) VALUES
-('staff', 1, NOW(), NOW()),
-('rules', 1, NOW(), NOW()),
-('ranks', 1, NOW(), NOW()),
-('school', 1, NOW(), NOW()),
-('home', 1, NOW(), NOW()),
-('registration_closed', 1, NOW(), NOW());
+INSERT INTO `page` (`code`, `type`, `created_at`, `updated_at`) VALUES
+('staff', 'site', NOW(), NOW()),
+('rules', 'site', NOW(), NOW()),
+('ranks', 'site', NOW(), NOW()),
+('school', 'site', NOW(), NOW()),
+('home', 'component', NOW(), NOW()),
+('registration_closed', 'component', NOW(), NOW());
 
 INSERT INTO page_content (page_id, language, title, content_md, created_at, updated_at)
 VALUES (

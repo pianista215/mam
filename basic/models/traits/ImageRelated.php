@@ -14,10 +14,8 @@ trait ImageRelated
         return static::class . " #{$this->id}";
     }
 
-    public function afterDelete()
+    protected function afterDeleteImageCleanup(): void
     {
-        parent::afterDelete();
-
         $class = static::class;
 
         foreach (Image::getAllowedTypes() as $type => $cfg) {
@@ -34,5 +32,11 @@ trait ImageRelated
                 }
             }
         }
+    }
+
+    public function afterDelete()
+    {
+        parent::afterDelete();
+        $this->afterDeleteImageCleanup();
     }
 }

@@ -2,6 +2,7 @@
 
 use app\rbac\constants\Permissions;
 use app\rbac\constants\Roles;
+use app\rbac\rules\EditPageContentRule;
 use app\rbac\rules\ImageUploadRule;
 use app\rbac\rules\FlightValidationRule;
 use app\rbac\rules\SubmittedFlightPlanOwnerRule;
@@ -115,6 +116,13 @@ class m241202_180323_add_rbac_roles extends Migration
         $auth->add($routeManager);
         $auth->addChild($routeManager, $routeCrud);
 
+        // Edit page content rule
+        $editPageContentRule = new EditPageContentRule();
+        $auth->add($editPageContentRule);
+        $editPageContent = $auth->createPermission(Permissions::EDIT_PAGE_CONTENT);
+        $editPageContent->ruleName = $editPageContentRule->name;
+        $auth->add($editPageContent);
+
         // Tour Manager
         $tourCrud = $auth->createPermission(Permissions::TOUR_CRUD);
         $tourCrud->description = 'Can create, delete or modify tours';
@@ -123,6 +131,8 @@ class m241202_180323_add_rbac_roles extends Migration
         $tourManager = $auth->createRole(Roles::TOUR_MANAGER);
         $auth->add($tourManager);
         $auth->addChild($tourManager, $tourCrud);
+        // Only tour manager and administrator (that inherits permissions) should have the rule for extra security
+        $auth->addChild($tourManager, $editPageContent);
 
         // Airport Manager
         $airportCrud = $auth->createPermission(Permissions::AIRPORT_CRUD);

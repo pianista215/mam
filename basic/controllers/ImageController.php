@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\helpers\LoggerTrait;
 use app\models\Image;
 use app\models\ImageSearch;
+use app\models\Page;
 use app\rbac\constants\Permissions;
 use yii\helpers\FileHelper;
 use yii\web\Controller;
@@ -88,18 +89,18 @@ class ImageController extends Controller
         ]);
 
         if (Yii::$app->user->isGuest) {
-            if ($type === 'pilot_profile' || $type === 'tour_image') {
+            if ($type === Image::TYPE_PILOT_PROFILE || $type === Image::TYPE_TOUR_IMAGE) {
                 throw new ForbiddenHttpException();
             }
 
-            if ($type === 'page_image') {
+            if ($type === Image::TYPE_PAGE_IMAGE) {
                 if ($image === null) {
                     throw new ForbiddenHttpException();
                 }
 
                 $page = $image->getRelatedModel();
 
-                if (!$page || !$page->public) {
+                if (!$page || $page->type === Page::TYPE_TOUR) {
                     throw new ForbiddenHttpException();
                 }
             }

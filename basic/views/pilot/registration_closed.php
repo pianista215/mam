@@ -1,16 +1,16 @@
 <?php
 
-use yii\helpers\Markdown;
+use app\helpers\PageContentMam;
+use app\models\Page;
 
 /** @var yii\web\View $this */
-/** @var app\models\PageContent $content */
 
-$this->title = $content->title;
+$this->title = Yii::t('app', 'Registration Closed');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="registration-closed">
     <div class="page-content">
         <h1><?= $this->title ?></h1>
-        <?= Markdown::process($content->content_md, 'gfm') ?>
+        <?= PageContentMam::render('registration_closed', Page::TYPE_COMPONENT) ?>
     </div>
 </div>

@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\models\traits\ImageRelated;
+use app\models\traits\PageRelated;
 use Yii;
 
 /**
@@ -20,11 +21,68 @@ use Yii;
  */
 class Tour extends \yii\db\ActiveRecord
 {
-    use ImageRelated;
+    use ImageRelated, PageRelated;
 
     public function getImageDescription(): string
     {
         return "tour: {$this->name}";
+    }
+
+    public const PAGE_CODE_PREFIX = 'tour_content_';
+
+    public static function isTourPageCode(string $code): bool
+    {
+        return str_starts_with($code, self::PAGE_CODE_PREFIX);
+    }
+
+    public static function extractIdFromPageCode(string $code): ?int
+    {
+        if (!self::isTourPageCode($code)) {
+            return null;
+        }
+        return (int)substr($code, strlen(self::PAGE_CODE_PREFIX));
+    }
+
+    public function getPageCode(): string
+    {
+        return self::PAGE_CODE_PREFIX . $this->id;
+    }
+
+    /**
+     * Finds or creates a Page from a page code.
+     * Returns null if code is not a tour page code or if the tour doesn't exist.
+     */
+    public static function findOrCreateTourPage(string $code): ?Page
+    {
+        if (!self::isTourPageCode($code)) {
+            return null;
+        }
+
+        $tourId = self::extractIdFromPageCode($code);
+        $tour = self::findOne($tourId);
+
+        if (!$tour) {
+            return null;
+        }
+
+        $page = Page::find()->where(['code' => $code])->one();
+        if ($page) {
+            return $page;
+        }
+
+        $page = new Page([
+            'code' => $code,
+            'type' => Page::TYPE_TOUR,
+        ]);
+
+        return $page->save() ? $page : null;
+    }
+
+    public function afterDelete()
+    {
+        parent::afterDelete();
+        $this->afterDeleteImageCleanup();
+        $this->afterDeletePageCleanup();
     }
 
     /**

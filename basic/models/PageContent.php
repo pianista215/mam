@@ -2,6 +2,8 @@
 
 namespace app\models;
 
+use app\config\Languages;
+
 use Yii;
 
 /**
@@ -33,7 +35,11 @@ class PageContent extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['page_id', 'language', 'title', 'content_md'], 'required'],
+            [['page_id', 'language', 'content_md'], 'required'],
+            ['title', 'required', 'when' => function ($model) {
+                return $model->page && $model->page->type === Page::TYPE_SITE;
+            }],
+            ['language', 'in', 'range' => Languages::ALL],
             [['page_id'], 'integer'],
             [['content_md'], 'string'],
             [['created_at', 'updated_at'], 'safe'],

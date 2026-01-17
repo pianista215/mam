@@ -1,6 +1,8 @@
 <?php
 
+use app\helpers\ImageMam;
 use app\helpers\TimeHelper;
+use app\models\Image;
 use app\rbac\constants\Permissions;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -20,7 +22,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="card-body d-flex align-items-center">
 
             <div class="me-3">
-                <?= \app\helpers\ImageMam::render('rank_icon', $model->id, 0) ?>
+                <?= ImageMam::render(Image::TYPE_RANK_ICON, $model->id, 0) ?>
             </div>
 
             <div>

@@ -1,4 +1,7 @@
 <?php
+
+use app\helpers\PageContentMam;
+
 /** @var yii\web\View $this */
 /** @var app\models\Page $page */
 /** @var string $title */
@@ -10,6 +13,6 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="page-content">
     <h1><?= $this->title ?></h1>
     <div>
-        <?= $content ?>
+        <?= PageContentMam::render($page->code, $page->type) ?>
     </div>
 </div>

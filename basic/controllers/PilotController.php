@@ -8,8 +8,6 @@ use app\models\forms\ChangePasswordForm;
 use app\models\forms\ForgotPasswordForm;
 use app\models\Country;
 use app\models\FlightSearch;
-use app\models\Page;
-use app\models\PageContent;
 use app\models\Pilot;
 use app\models\PilotSearch;
 use app\models\Rank;
@@ -143,14 +141,7 @@ class PilotController extends Controller
         }
 
         if($now < $registrationStart || $now > $registrationEnd) {
-            $page = Page::findOne(['code' => 'registration_closed']);
-            $content = $page->getPageContents()
-                ->andWhere(['language' =>Yii::$app->language])
-                ->one();
-
-            return $this->render('registration_closed', [
-                'content' => $content,
-            ]);
+            return $this->render('registration_closed');
         } else {
             $model = new Pilot();
             $model->scenario = Pilot::SCENARIO_REGISTER;

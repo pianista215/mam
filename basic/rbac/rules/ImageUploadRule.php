@@ -29,22 +29,22 @@ class ImageUploadRule extends Rule
 
         switch ($type) {
 
-            case 'rank_icon':
+            case Image::TYPE_RANK_ICON:
                 return Yii::$app->user->can(Permissions::RANK_CRUD);
 
-            case 'tour_image':
+            case Image::TYPE_TOUR_IMAGE:
                 return Yii::$app->user->can(Permissions::TOUR_CRUD);
 
-            case 'country_icon':
+            case Image::TYPE_COUNTRY_ICON:
                 return Yii::$app->user->can(Permissions::COUNTRY_CRUD);
 
-            case 'aircraftType_image':
+            case Image::TYPE_AIRCRAFT_TYPE_IMAGE:
                 return Yii::$app->user->can(Permissions::AIRCRAFT_TYPE_CRUD);
 
-            case 'page_image':
+            case Image::TYPE_PAGE_IMAGE:
                 return Yii::$app->authManager->getAssignment(Roles::ADMIN, $userId) !== null;
 
-            case 'pilot_profile':
+            case Image::TYPE_PILOT_PROFILE:
                 return ((int)$relatedId === (int)$userId) || Yii::$app->user->can(Permissions::USER_CRUD);
 
             default:

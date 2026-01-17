@@ -2,6 +2,7 @@
 
 use app\helpers\ImageMam;
 use app\models\AircraftConfiguration;
+use app\models\Image;
 use app\rbac\constants\Permissions;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
@@ -22,7 +23,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="aircraft-type-view container mt-4">
 
     <div class="text-center mb-4">
-        <?= ImageMam::render('aircraftType_image', $model->id, 0, [
+        <?= ImageMam::render(Image::TYPE_AIRCRAFT_TYPE_IMAGE, $model->id, 0, [
             'class' => 'img-fluid rounded shadow-sm mx-auto d-block',
             'style' => 'max-height:400px; object-fit:cover;'
         ]) ?>
