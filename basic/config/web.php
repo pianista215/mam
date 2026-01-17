@@ -89,7 +89,7 @@ $config = [
             'showScriptName' => false,
             'rules' => [
                 'page/edit' => 'page/edit',
-                'page/<code:[a-zA-Z0-9\-]+>' => 'page/view',
+                'page/<code:[a-zA-Z0-9_\-]+>' => 'page/view',
                 [
                     'prefix' => 'api/v1',
                     'class' => 'yii\rest\UrlRule',
