@@ -140,9 +140,8 @@ class ImageController extends Controller
         ]);
     }
 
-    public function actionUpload(string $type, int $related_id, int $element = 0)
+    public function actionUpload(string $type, int $related_id, int $element = 0, bool $fromEditor = false)
     {
-
         $image = Image::findOne([
             'type' => $type,
             'related_id' => $related_id,
@@ -181,7 +180,13 @@ class ImageController extends Controller
                         }
                         Yii::$app->session->setFlash('success', Yii::t('app', 'Image correctly uploaded.'));
                         $this->logInfo('Image uploaded', ['image' => $image, 'user' => Yii::$app->user->identity->license]);
-                        return $this->redirect($image->getCallbackUrl());
+
+                        $redirectUrl = $image->getCallbackUrl();
+                        if ($fromEditor && $type === Image::TYPE_PAGE_IMAGE) {
+                            $page = $relatedModel;
+                            $redirectUrl = ['page/edit', 'code' => $page->code, 'language' => Yii::$app->language, 'type' => $page->type];
+                        }
+                        return $this->redirect($redirectUrl);
                     } else {
                         // Delete the new image uploaded
                         unlink($image->path);
@@ -219,6 +224,7 @@ class ImageController extends Controller
         return $this->render('upload', [
             'image' => $image,
             'description' => $relatedModel->getImageDescription(),
+            'fromEditor' => $fromEditor,
         ]);
     }
 

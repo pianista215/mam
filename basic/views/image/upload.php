@@ -1,17 +1,23 @@
 <?php
+use app\models\Image;
 use yii\helpers\Url;
 use yii\helpers\Html;
 
 /** @var $image app\models\Image */
-/** @var description string */
+/** @var $description string */
+/** @var $fromEditor bool */
 
 $this->title = Yii::t('app', 'Uploading image for') . ' ' . $description;
-$uploadUrl = Url::to([
+$uploadParams = [
     'image/upload',
     'type' => $image->type,
     'related_id' => $image->related_id,
     'element' => $image->element,
-]);
+];
+if ($fromEditor) {
+    $uploadParams['fromEditor'] = true;
+}
+$uploadUrl = Url::to($uploadParams);
 $viewUrl = Url::to([
     'image/view',
     'type' => $image->type,
@@ -19,18 +25,27 @@ $viewUrl = Url::to([
     'element' => $image->element,
 ]);
 
-$typeSettings = \app\models\Image::getAllowedTypes()[$image->type] ?? [];
-$displayWidth = $typeSettings['width'] ?? 400;
-$displayHeight = $typeSettings['height'] ?? 300;
+$typeSettings = Image::getAllowedTypes()[$image->type] ?? [];
+$displayWidth = $typeSettings['width'] ?? null;
+$displayHeight = $typeSettings['height'] ?? null;
+$hasFixedDimensions = $displayWidth !== null && $displayHeight !== null;
+$imageExists = $image->id !== null;
+$showPreview = $imageExists || $image->type !== Image::TYPE_PAGE_IMAGE;
 ?>
 
 <div class="image-upload">
     <h2><?= Html::encode($this->title) ?></h2>
 
     <div style="max-width: 100%; width: 80%; margin: 0 auto;">
-        <img id="image-to-crop" src="<?= Html::encode($viewUrl) ?>"
-             alt="Actual image"
-             style="max-width:100%; height:auto; display:block; margin:0 auto;">
+        <?php if ($showPreview): ?>
+            <img id="image-to-crop" src="<?= Html::encode($viewUrl) ?>"
+                 alt="Actual image"
+                 style="max-width:100%; height:auto; display:block; margin:0 auto;">
+        <?php else: ?>
+            <img id="image-to-crop" src=""
+                 alt=""
+                 style="max-width:100%; height:auto; display:none; margin:0 auto;">
+        <?php endif; ?>
     </div>
 
     <div style="display:flex; flex-direction:column; align-items:center; margin-top:1rem;">
@@ -49,9 +64,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const button = document.getElementById('uploadBtn');
     let cropper = null;
 
-    const targetWidth = <?= $displayWidth ?>;
-    const targetHeight = <?= $displayHeight ?>;
-    const aspectRatio = targetWidth / targetHeight;
+    const targetWidth = <?= $displayWidth ?? 'null' ?>;
+    const targetHeight = <?= $displayHeight ?? 'null' ?>;
+    const hasFixedDimensions = targetWidth !== null && targetHeight !== null;
+    const aspectRatio = hasFixedDimensions ? targetWidth / targetHeight : NaN;
 
     input.addEventListener('change', (event) => {
         const file = event.target.files[0];
@@ -60,15 +76,20 @@ document.addEventListener('DOMContentLoaded', function() {
         const reader = new FileReader();
         reader.onload = (e) => {
             image.src = e.target.result;
+            image.style.display = 'block';
             if (cropper) cropper.destroy();
 
-            cropper = new Cropper(image, {
+            const cropperOptions = {
                 viewMode: 1,
                 dragMode: 'move',
                 background: false,
                 autoCropArea: 1,
-                aspectRatio: aspectRatio
-            });
+            };
+            if (hasFixedDimensions) {
+                cropperOptions.aspectRatio = aspectRatio;
+            }
+
+            cropper = new Cropper(image, cropperOptions);
         };
         reader.readAsDataURL(file);
     });
@@ -79,10 +100,8 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        cropper.getCroppedCanvas({
-            width: targetWidth,
-            height: targetHeight
-        }).toBlob(async (blob) => {
+        const canvasOptions = hasFixedDimensions ? { width: targetWidth, height: targetHeight } : {};
+        cropper.getCroppedCanvas(canvasOptions).toBlob(async (blob) => {
             const formData = new FormData();
             formData.append('croppedImage', blob, 'crop.png');
             const csrfParam = document.querySelector('meta[name="csrf-param"]').getAttribute('content');

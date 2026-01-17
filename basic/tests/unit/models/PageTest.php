@@ -122,4 +122,109 @@ class PageTest extends BaseUnitTest
         $this->assertNull($deletedImage, 'Image must be deleted when page was deleted');
         $this->assertFileDoesNotExist($target);
     }
+
+    public function testGetImagesReturnsEmptyArrayWhenNoImages()
+    {
+        $page = new Page([
+            'code' => 'test_page',
+            'type' => Page::TYPE_SITE,
+        ]);
+        $page->save();
+
+        $this->assertEmpty($page->images);
+    }
+
+    public function testGetImagesReturnsImagesOrderedByElement()
+    {
+        Config::set('images_storage_path', '/tmp');
+
+        $page = new Page([
+            'code' => 'test_page',
+            'type' => Page::TYPE_SITE,
+        ]);
+        $page->save();
+
+        $dir = '/tmp/page_image';
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
+
+        $source = Yii::getAlias(Image::getPlaceHolder(Image::TYPE_AIRCRAFT_TYPE_IMAGE));
+
+        // Create images in reverse order
+        foreach ([2, 0, 1] as $element) {
+            $filename = "test_element_{$element}.jpg";
+            copy($source, $dir . '/' . $filename);
+
+            $image = new Image([
+                'type' => Image::TYPE_PAGE_IMAGE,
+                'related_id' => $page->id,
+                'element' => $element,
+                'filename' => $filename,
+            ]);
+            $image->save(false);
+        }
+
+        $images = $page->images;
+
+        $this->assertCount(3, $images);
+        $this->assertEquals(0, $images[0]->element);
+        $this->assertEquals(1, $images[1]->element);
+        $this->assertEquals(2, $images[2]->element);
+
+        // Cleanup
+        foreach ($images as $img) {
+            @unlink($img->path);
+        }
+    }
+
+    public function testGetNextImageElementReturnsZeroWhenNoImages()
+    {
+        $page = new Page([
+            'code' => 'test_page',
+            'type' => Page::TYPE_SITE,
+        ]);
+        $page->save();
+
+        $this->assertEquals(0, $page->getNextImageElement());
+    }
+
+    public function testGetNextImageElementReturnsNextElement()
+    {
+        Config::set('images_storage_path', '/tmp');
+
+        $page = new Page([
+            'code' => 'test_page',
+            'type' => Page::TYPE_SITE,
+        ]);
+        $page->save();
+
+        $dir = '/tmp/page_image';
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
+
+        $source = Yii::getAlias(Image::getPlaceHolder(Image::TYPE_AIRCRAFT_TYPE_IMAGE));
+
+        // Create images with elements 0, 1, 2
+        foreach ([0, 1, 2] as $element) {
+            $filename = "test_next_{$element}.jpg";
+            copy($source, $dir . '/' . $filename);
+
+            $image = new Image([
+                'type' => Image::TYPE_PAGE_IMAGE,
+                'related_id' => $page->id,
+                'element' => $element,
+                'filename' => $filename,
+            ]);
+            $image->save(false);
+        }
+
+        $this->assertEquals(3, $page->getNextImageElement());
+
+        // Cleanup
+        foreach ($page->images as $img) {
+            @unlink($img->path);
+        }
+    }
 }

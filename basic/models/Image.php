@@ -240,12 +240,21 @@ class Image extends \yii\db\ActiveRecord
             return Url::to(['/site/index']);
         }
 
-        $shortName = (new \ReflectionClass($relatedClass))->getShortName();
+        if ($this->type === self::TYPE_PAGE_IMAGE) {
+            $page = $this->getRelatedModel();
+            if ($page) {
+                return $page->getViewUrl();
+            } else {
+                return Url::to(['/site/index']);
+            }
+        } else {
+            $shortName = (new \ReflectionClass($relatedClass))->getShortName();
 
-        // Camel case -> Kebab-case
-        $controllerId = strtolower(preg_replace('/(?<!^)[A-Z]/', '-$0', $shortName));
+            // Camel case -> Kebab-case
+            $controllerId = strtolower(preg_replace('/(?<!^)[A-Z]/', '-$0', $shortName));
 
-        return Url::to(["/{$controllerId}/view", 'id' => $this->related_id]);
+            return Url::to(["/{$controllerId}/view", 'id' => $this->related_id]);
+        }
     }
 
 

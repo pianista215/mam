@@ -2,9 +2,11 @@
 
 namespace tests\functional\page;
 
+use app\models\Image;
 use app\models\Page;
 use app\models\Tour;
 use tests\fixtures\AuthAssignmentFixture;
+use tests\fixtures\ImageFixture;
 use tests\fixtures\PageContentFixture;
 use tests\fixtures\TourFixture;
 
@@ -14,6 +16,7 @@ class PageEditCest
     {
         return [
             'authAssignment' => AuthAssignmentFixture::class,
+            'image' => ImageFixture::class,
             'pageContent' => PageContentFixture::class,
             'tour' => TourFixture::class,
         ];
@@ -183,5 +186,50 @@ class PageEditCest
         $I->see('for info.');
         $I->dontSeeInSource('onclick');
         $I->dontSeeInSource('alert(1)');
+    }
+
+    // Image carousel
+
+    public function editPageShowsImagesSectionWithoutImages(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(2); // Admin
+        $I->amOnRoute('page/edit', ['code' => 'staff', 'language' => 'en', 'type' => Page::TYPE_SITE]);
+        $I->seeResponseCodeIs(200);
+
+        $I->see('Page Images');
+        $I->see('Add Image');
+        $I->seeElement('a[href*="image/upload"][href*="type=page_image"][href*="element=0"]');
+    }
+
+    public function editPageShowsExistingImages(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(10); // Tour Manager
+
+        $tour = Tour::findOne(1);
+        $pageCode = $tour->getPageCode();
+
+        $I->amOnRoute('page/edit', ['code' => $pageCode, 'language' => 'en', 'type' => Page::TYPE_TOUR]);
+        $I->seeResponseCodeIs(200);
+
+        $I->see('Page Images');
+        // Page id=7 has one image (element=0), so next element should be 1
+        $I->seeElement('a[href*="image/upload"][href*="type=page_image"][href*="element=1"]');
+        // Should have copy URL button
+        $I->seeElement('.copy-url-btn');
+        // Should have edit button
+        $I->seeElement('a[href*="image/upload"][href*="element=0"]');
+    }
+
+    public function editPageAddImageLinkHasCorrectNextElement(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(2); // Admin
+
+        // Page id=6 (registration_closed) has one image at element=0
+        $I->amOnRoute('page/edit', ['code' => 'registration_closed', 'language' => 'en', 'type' => Page::TYPE_COMPONENT]);
+        $I->seeResponseCodeIs(200);
+
+        $I->see('Page Images');
+        // Next element should be 1
+        $I->seeElement('a[href*="image/upload"][href*="related_id=6"][href*="element=1"]');
     }
 }
