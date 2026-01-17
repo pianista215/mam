@@ -4,6 +4,8 @@ namespace tests\unit\models;
 
 use app\config\Config;
 use app\models\Image;
+use app\models\Page;
+use app\models\PageContent;
 use app\models\Tour;
 use tests\unit\BaseUnitTest;
 use Yii;
@@ -113,6 +115,42 @@ class TourTest extends BaseUnitTest
 
         $this->assertNull($deletedImage, 'Image must be deleted when tour was deleted');
         $this->assertFileDoesNotExist($target);
+    }
+
+    public function testTourPageIsDeletedOnTourDelete()
+    {
+        $tour = new Tour([
+            'name' => 'Test Tour',
+            'description' => 'Description',
+            'start' => '2020-01-01',
+            'end' => '2023-01-01',
+        ]);
+        $this->assertTrue($tour->save());
+
+        $page = new Page([
+            'code' => $tour->getPageCode(),
+            'type' => Page::TYPE_TOUR,
+        ]);
+        $this->assertTrue($page->save());
+
+        $pageContent = new PageContent([
+            'page_id' => $page->id,
+            'language' => 'en',
+            'title' => '',
+            'content_md' => 'Test content',
+        ]);
+        $this->assertTrue($pageContent->save());
+
+        $pageId = $page->id;
+        $pageContentId = $pageContent->id;
+
+        $tour->delete();
+
+        $deletedPage = Page::findOne($pageId);
+        $this->assertNull($deletedPage, 'Page must be deleted when tour was deleted');
+
+        $deletedPageContent = PageContent::findOne($pageContentId);
+        $this->assertNull($deletedPageContent, 'PageContent must be deleted when tour was deleted (cascade)');
     }
 
 }

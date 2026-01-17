@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\models\traits\ImageRelated;
+use app\models\traits\PageRelated;
 use Yii;
 
 /**
@@ -20,7 +21,7 @@ use Yii;
  */
 class Tour extends \yii\db\ActiveRecord
 {
-    use ImageRelated;
+    use ImageRelated, PageRelated;
 
     public function getImageDescription(): string
     {
@@ -77,7 +78,12 @@ class Tour extends \yii\db\ActiveRecord
         return $page->save() ? $page : null;
     }
 
-    // TODO: UNAI METER EL AFTER DELETE
+    public function afterDelete()
+    {
+        parent::afterDelete();
+        $this->afterDeleteImageCleanup();
+        $this->afterDeletePageCleanup();
+    }
 
     /**
      * {@inheritdoc}
