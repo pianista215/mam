@@ -625,7 +625,7 @@ class FullFkTest extends BaseUnitTest
         $this->assertEquals(0, IssueTypeLang::find()->count(), 'Issue types lang must be deleted');
 
         // Page + page_content delete cascade
-        $page = new Page(['code' => 'home', 'public' => 1]);
+        $page = new Page(['code' => 'home', 'type' => Page::TYPE_COMPONENT]);
         $this->assertTrue($page->save(), 'page saved');
 
         $pageContent = new PageContent([
@@ -638,5 +638,27 @@ class FullFkTest extends BaseUnitTest
 
         $this->assertEquals(1, $page->delete(), 'I can delete the page');
         $this->assertEquals(0, PageContent::find()->count(), 'The content must be deleted');
+
+        // Tour + associated page delete cascade (via PageRelated trait)
+        $tourWithPage = new Tour(['name' => 'TourWithPage', 'description' => 'Test', 'start' => '2020-01-01', 'end' => '2030-01-01']);
+        $this->assertTrue($tourWithPage->save(), 'tour with page saved');
+
+        $tourPage = new Page(['code' => $tourWithPage->getPageCode(), 'type' => Page::TYPE_TOUR]);
+        $this->assertTrue($tourPage->save(), 'tour page saved');
+
+        $tourPageContent = new PageContent([
+            'page_id' => $tourPage->id,
+            'language' => 'en',
+            'title' => '',
+            'content_md' => 'Tour content'
+        ]);
+        $this->assertTrue($tourPageContent->save(), 'tour page content saved');
+
+        $this->assertEquals(1, Page::find()->where(['code' => $tourWithPage->getPageCode()])->count(), 'Tour page exists before deletion');
+
+        $this->assertEquals(1, $tourWithPage->delete(), 'I can delete the tour with associated page');
+
+        $this->assertEquals(0, Page::find()->where(['code' => 'tour_content_' . $tourWithPage->id])->count(), 'Tour page must be deleted with tour');
+        $this->assertEquals(0, PageContent::find()->where(['page_id' => $tourPage->id])->count(), 'Tour page content must be deleted');
     }
 }
