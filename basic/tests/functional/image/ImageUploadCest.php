@@ -7,6 +7,7 @@ use app\models\Image;
 use tests\fixtures\AircraftTypeFixture;
 use tests\fixtures\AuthAssignmentFixture;
 use tests\fixtures\PageContentFixture;
+use tests\fixtures\PageFixture;
 use tests\fixtures\PilotFixture;
 use tests\fixtures\TourStageFixture;
 use Yii;
@@ -20,6 +21,7 @@ class ImageUploadCest
             'pilot'          => PilotFixture::class,
             'aircraftType'   => AircraftTypeFixture::class,
             'tourStage'      => TourStageFixture::class,
+            'page'           => PageFixture::class,
             'pageContent'    => PageContentFixture::class,
         ];
     }
@@ -107,6 +109,58 @@ class ImageUploadCest
         ]);
 
         $I->see('Uploading image for aircraft type');
+        $I->see('Upload Image', 'button');
+    }
+
+    public function tourManagerCanUploadTourPageImage(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(10); // Tour Manager
+        $I->amOnRoute('image/upload', [
+            'type' => Image::TYPE_PAGE_IMAGE,
+            'related_id' => 7, // Tour page
+            'element' => 0,
+        ]);
+
+        $I->seeResponseCodeIs(200);
+        $I->see('Uploading image for page:');
+        $I->see('Upload Image', 'button');
+    }
+
+    public function tourManagerCannotUploadSitePageImage(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(10); // Tour Manager
+        $I->amOnRoute('image/upload', [
+            'type' => Image::TYPE_PAGE_IMAGE,
+            'related_id' => 2, // Site page
+            'element' => 0,
+        ]);
+
+        $I->seeResponseCodeIs(403);
+    }
+
+    public function regularUserCannotUploadTourPageImage(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(1); // Regular pilot
+        $I->amOnRoute('image/upload', [
+            'type' => Image::TYPE_PAGE_IMAGE,
+            'related_id' => 7, // Tour page
+            'element' => 0,
+        ]);
+
+        $I->seeResponseCodeIs(403);
+    }
+
+    public function adminCanUploadSitePageImage(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(2); // Admin
+        $I->amOnRoute('image/upload', [
+            'type' => Image::TYPE_PAGE_IMAGE,
+            'related_id' => 2, // Site page
+            'element' => 0,
+        ]);
+
+        $I->seeResponseCodeIs(200);
+        $I->see('Uploading image for page:');
         $I->see('Upload Image', 'button');
     }
 }

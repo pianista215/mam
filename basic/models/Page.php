@@ -20,6 +20,11 @@ class Page extends \yii\db\ActiveRecord
 {
     use ImageRelated;
 
+    public function getImageDescription(): string
+    {
+        return "page: {$this->code}";
+    }
+
     public const TYPE_COMPONENT = 'component';
     public const TYPE_SITE = 'site';
     public const TYPE_TOUR = 'tour';
