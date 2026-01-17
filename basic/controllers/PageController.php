@@ -6,11 +6,13 @@ use app\helpers\LoggerTrait;
 use app\models\Page;
 use app\models\PageContent;
 use app\models\Tour;
+use app\rbac\constants\Permissions;
 use Yii;
+use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
-use app\rbac\constants\Permissions;
+
 
 /**
  * PageController implements the CRUD actions for Page model.
@@ -18,6 +20,25 @@ use app\rbac\constants\Permissions;
 class PageController extends Controller
 {
     use LoggerTrait;
+
+    public function behaviors()
+    {
+        return array_merge(
+            parent::behaviors(),
+            [
+                'access' => [
+                    'class' => AccessControl::class,
+                    'only' => ['edit'],
+                    'rules' => [
+                        [
+                            'allow' => true,
+                            'roles' => ['@'],
+                        ],
+                    ],
+                ]
+            ]
+        );
+    }
 
     public function actionView($code)
     {
@@ -72,7 +93,16 @@ class PageController extends Controller
         }
 
         if (!Yii::$app->user->can(Permissions::EDIT_PAGE_CONTENT, ['page' => $page])) {
-            $this->logInfo('User without permissions trying to edit page', ['page' => $page, 'user' => Yii::$app->user->identity->license]);
+            $user = Yii::$app->user;
+            $this->logInfo(
+                'User without permissions trying to edit page',
+                [
+                    'page' => $page,
+                    'user' => $user->isGuest
+                        ? 'guest'
+                        : $user->identity->license,
+                ]
+            );
             throw new ForbiddenHttpException();
         }
 
@@ -99,7 +129,7 @@ class PageController extends Controller
                     $tourId = Tour::extractIdFromPageCode($code);
                     return $this->redirect(['tour/view', 'id' => $tourId]);
                 } else {
-                    return $this->redirect(['view', 'code' => $code]);
+                    return $this->redirect(['page/view', 'code' => $code]);
                 }
             }
         }
