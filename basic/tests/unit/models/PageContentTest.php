@@ -11,7 +11,7 @@ class PageContentTest extends BaseUnitTest
 {
     public function testCreateValidPageContent()
     {
-        $page = new Page(['code' => 'home']);
+        $page = new Page(['code' => 'home', 'type' => Page::TYPE_SITE]);
         $this->assertTrue($page->save());
 
         $content = new PageContent([
@@ -25,19 +25,49 @@ class PageContentTest extends BaseUnitTest
         $this->assertNotEmpty($content->id);
     }
 
-    public function testCreatePageContentWithoutRequiredFields()
+    public function testCreatePageContentWithoutRequiredFieldsForSitePage()
+    {
+        $page = new Page(['code' => 'testpage', 'type' => Page::TYPE_SITE]);
+        $this->assertTrue($page->save());
+
+        $content = new PageContent([
+            'page_id' => $page->id,
+            'language' => 'en',
+            'title' => '',
+            'content_md' => '',
+        ]);
+
+        $this->assertFalse($content->save());
+        $this->assertArrayHasKey('title', $content->errors);
+        $this->assertArrayHasKey('content_md', $content->errors);
+    }
+
+    public function testTitleNotRequiredForComponentPage()
+    {
+        $page = new Page(['code' => 'component_test', 'type' => Page::TYPE_COMPONENT]);
+        $this->assertTrue($page->save());
+
+        $content = new PageContent([
+            'page_id' => $page->id,
+            'language' => 'en',
+            'title' => '',
+            'content_md' => 'Some content',
+        ]);
+
+        $this->assertTrue($content->save());
+    }
+
+    public function testCreatePageContentWithoutPageId()
     {
         $content = new PageContent([
             'page_id' => null,
             'language' => '',
-            'title' => '',
             'content_md' => '',
         ]);
 
         $this->assertFalse($content->save());
         $this->assertArrayHasKey('page_id', $content->errors);
         $this->assertArrayHasKey('language', $content->errors);
-        $this->assertArrayHasKey('title', $content->errors);
         $this->assertArrayHasKey('content_md', $content->errors);
     }
 
@@ -56,7 +86,7 @@ class PageContentTest extends BaseUnitTest
 
     public function testUniquePageIdLanguageConstraint()
     {
-        $page = new Page(['code' => 'about']);
+        $page = new Page(['code' => 'about', 'type' => Page::TYPE_SITE]);
         $this->assertTrue($page->save());
 
         $content1 = new PageContent([
@@ -79,7 +109,7 @@ class PageContentTest extends BaseUnitTest
 
     public function testLanguageMaxLengthValidation()
     {
-        $page = new Page(['code' => 'services']);
+        $page = new Page(['code' => 'services', 'type' => Page::TYPE_SITE]);
         $this->assertTrue($page->save());
 
         $content = new PageContent([
@@ -95,7 +125,7 @@ class PageContentTest extends BaseUnitTest
 
     public function testTitleMaxLengthValidation()
     {
-        $page = new Page(['code' => 'contact']);
+        $page = new Page(['code' => 'contact', 'type' => Page::TYPE_SITE]);
         $this->assertTrue($page->save());
 
         $content = new PageContent([
@@ -111,7 +141,7 @@ class PageContentTest extends BaseUnitTest
 
     public function testGetPageRelation()
     {
-        $page = new Page(['code' => 'blog']);
+        $page = new Page(['code' => 'blog', 'type' => Page::TYPE_SITE]);
         $this->assertTrue($page->save());
 
         $content = new PageContent([

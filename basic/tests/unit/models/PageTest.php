@@ -15,7 +15,7 @@ class PageTest extends BaseUnitTest
     {
         $page = new Page([
             'code' => 'home',
-            'public' => 1,
+            'type' => Page::TYPE_SITE,
         ]);
 
         $this->assertTrue($page->save());
@@ -24,51 +24,57 @@ class PageTest extends BaseUnitTest
 
     public function testCreatePageWithoutRequiredFields()
     {
-        $page = new Page(['code' => '']);
+        $page = new Page(['code' => '', 'type' => '']);
         $this->assertFalse($page->save());
         $this->assertArrayHasKey('code', $page->errors);
+        $this->assertArrayHasKey('type', $page->errors);
     }
 
     public function testCreatePageWithDuplicateCode()
     {
         $existingPage = new Page([
             'code' => 'about',
+            'type' => Page::TYPE_SITE,
         ]);
         $existingPage->save();
 
         $page = new Page([
             'code' => 'about',
+            'type' => Page::TYPE_SITE,
         ]);
 
         $this->assertFalse($page->save());
         $this->assertArrayHasKey('code', $page->errors);
     }
 
-    public function testPublicDefaultsToZero()
+    public function testTypeValidation()
     {
         $page = new Page([
             'code' => 'contact',
+            'type' => 'invalid_type',
         ]);
 
-        $this->assertTrue($page->save());
-        $this->assertEquals(0, $page->public);
+        $this->assertFalse($page->save());
+        $this->assertArrayHasKey('type', $page->errors);
     }
 
-    public function testPublicAcceptsBoolean()
+    public function testValidTypes()
     {
-        $page = new Page([
-            'code' => 'services',
-            'public' => true,
-        ]);
+        foreach ([Page::TYPE_SITE, Page::TYPE_COMPONENT, Page::TYPE_TOUR] as $type) {
+            $page = new Page([
+                'code' => 'test_' . $type,
+                'type' => $type,
+            ]);
 
-        $this->assertTrue($page->save());
-        $this->assertEquals(1, $page->public);
+            $this->assertTrue($page->save(), "Page with type $type should be valid");
+        }
     }
 
     public function testCodeMaxLengthValidation()
     {
         $page = new Page([
             'code' => str_repeat('a', 51),
+            'type' => Page::TYPE_SITE,
         ]);
 
         $this->assertFalse($page->save());
@@ -81,7 +87,7 @@ class PageTest extends BaseUnitTest
 
         $page = new Page([
             'code' => 'home',
-            'public' => 1,
+            'type' => Page::TYPE_SITE,
         ]);
 
         $this->assertTrue($page->save());
@@ -92,7 +98,7 @@ class PageTest extends BaseUnitTest
         }
 
         // Page doesn't have placeholder or size limits, so use any of the images for testing
-        $source = Yii::getAlias(Image::getPlaceHolder('aircraftType_image'));
+        $source = Yii::getAlias(Image::getPlaceHolder(Image::TYPE_AIRCRAFT_TYPE_IMAGE));
         $target = $dir . '/testfile.jpg';
 
         copy($source, $target);
@@ -100,7 +106,7 @@ class PageTest extends BaseUnitTest
         $this->assertFileExists($target);
 
         $image = new Image([
-            'type' => 'page_image',
+            'type' => Image::TYPE_PAGE_IMAGE,
             'related_id' => $page->id,
             'filename' => 'testfile.jpg',
         ]);
@@ -109,7 +115,7 @@ class PageTest extends BaseUnitTest
         $page->delete();
 
         $deletedImage = Image::findOne([
-            'type' => 'page_image',
+            'type' => Image::TYPE_PAGE_IMAGE,
             'related_id' => $page->id,
         ]);
 
