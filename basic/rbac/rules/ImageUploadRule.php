@@ -3,6 +3,7 @@
 namespace app\rbac\rules;
 
 use app\models\Image;
+use app\models\Page;
 use app\rbac\constants\Permissions;
 use app\rbac\constants\Roles;
 use Yii;
@@ -42,7 +43,15 @@ class ImageUploadRule extends Rule
                 return Yii::$app->user->can(Permissions::AIRCRAFT_TYPE_CRUD);
 
             case Image::TYPE_PAGE_IMAGE:
-                return Yii::$app->authManager->getAssignment(Roles::ADMIN, $userId) !== null;
+                $page = $image->getRelatedModel();
+                if (!$page instanceof Page) {
+                    return false;
+                }
+                if ($page->type === Page::TYPE_TOUR) {
+                    return Yii::$app->user->can(Permissions::TOUR_CRUD);
+                } else {
+                    return Yii::$app->authManager->getAssignment(Roles::ADMIN, $userId) !== null;
+                }
 
             case Image::TYPE_PILOT_PROFILE:
                 return ((int)$relatedId === (int)$userId) || Yii::$app->user->can(Permissions::USER_CRUD);

@@ -5,6 +5,7 @@ namespace tests\unit\rbac;
 use app\models\Airport;
 use app\models\Country;
 use app\models\Image;
+use app\models\Page;
 use app\models\Pilot;
 use app\rbac\constants\Permissions;
 use app\rbac\constants\Roles;
@@ -53,6 +54,20 @@ class ImageUploadRuleTest extends BaseUnitTest
             'country_id' => 1
         ]);
         $airport->save(false);
+
+        $tourPage = new Page([
+            'id' => 7,
+            'code' => 'tour_content_1',
+            'type' => Page::TYPE_TOUR,
+        ]);
+        $tourPage->save(false);
+
+        $sitePage = new Page([
+            'id' => 2,
+            'code' => 'staff',
+            'type' => Page::TYPE_SITE,
+        ]);
+        $sitePage->save(false);
     }
 
     private function createPilot($idOverride = null)
@@ -209,17 +224,17 @@ class ImageUploadRuleTest extends BaseUnitTest
         $this->assertTrue(Yii::$app->user->can('imageUpload', ['image' => $img]));
     }
 
-    public function testPageWithoutAdmin()
+    public function testSitePageWithoutAdmin()
     {
         $pilot = $this->createPilot(11);
         $this->login($pilot);
 
-        $img = $this->img(Image::TYPE_PAGE_IMAGE, 1);
+        $img = $this->img(Image::TYPE_PAGE_IMAGE, 2); // Site page
 
         $this->assertFalse(Yii::$app->user->can('imageUpload', ['image' => $img]));
     }
 
-    public function testPageWithAdminRole()
+    public function testSitePageWithAdminRole()
     {
         $pilot = $this->createPilot(11);
         $this->login($pilot);
@@ -229,9 +244,51 @@ class ImageUploadRuleTest extends BaseUnitTest
             11
         );
 
-        $img = $this->img(Image::TYPE_PAGE_IMAGE, 1);
+        $img = $this->img(Image::TYPE_PAGE_IMAGE, 2); // Site page
 
         $this->assertTrue(Yii::$app->user->can('imageUpload', ['image' => $img]));
+    }
+
+    public function testTourPageWithoutPermission()
+    {
+        $pilot = $this->createPilot(12);
+        $this->login($pilot);
+
+        $img = $this->img(Image::TYPE_PAGE_IMAGE, 7); // Tour page
+
+        $this->assertFalse(Yii::$app->user->can('imageUpload', ['image' => $img]));
+    }
+
+    public function testTourPageWithTourCrudPermission()
+    {
+        $pilot = $this->createPilot(12);
+        $this->login($pilot);
+        $this->assign(Permissions::TOUR_CRUD, 12);
+
+        $img = $this->img(Image::TYPE_PAGE_IMAGE, 7); // Tour page
+
+        $this->assertTrue(Yii::$app->user->can('imageUpload', ['image' => $img]));
+    }
+
+    public function testTourCrudCannotUploadSitePageImage()
+    {
+        $pilot = $this->createPilot(13);
+        $this->login($pilot);
+        $this->assign(Permissions::TOUR_CRUD, 13);
+
+        $img = $this->img(Image::TYPE_PAGE_IMAGE, 2); // Site page
+
+        $this->assertFalse(Yii::$app->user->can('imageUpload', ['image' => $img]));
+    }
+
+    public function testPageImageWithNonExistentPage()
+    {
+        $pilot = $this->createPilot(14);
+        $this->login($pilot);
+
+        $img = $this->img(Image::TYPE_PAGE_IMAGE, 9999); // Non-existent page
+
+        $this->assertFalse(Yii::$app->user->can('imageUpload', ['image' => $img]));
     }
 
     public function testPilotCanEditOwnProfile()

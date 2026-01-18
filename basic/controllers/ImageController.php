@@ -23,6 +23,9 @@ class ImageController extends Controller
 {
     use LoggerTrait;
 
+    const REDIRECT_IMAGE_MANAGER = 'image_manager';
+    const REDIRECT_PAGE_EDITOR = 'page_editor';
+
     /**
      * @inheritDoc
      */
@@ -140,9 +143,8 @@ class ImageController extends Controller
         ]);
     }
 
-    public function actionUpload(string $type, int $related_id, int $element = 0)
+    public function actionUpload(string $type, int $related_id, int $element = 0, ?string $redirect = null)
     {
-
         $image = Image::findOne([
             'type' => $type,
             'related_id' => $related_id,
@@ -169,9 +171,14 @@ class ImageController extends Controller
 
         if (Yii::$app->request->isPost) {
             $uploadedFile = UploadedFile::getInstanceByName('croppedImage');
-            if ($uploadedFile) {
+            if ($uploadedFile && $uploadedFile->error === UPLOAD_ERR_OK) {
                 $newFilename = Yii::$app->security->generateRandomString() . '.' . $uploadedFile->extension;
                 $image->filename = $newFilename;
+
+                $directory = dirname($image->path);
+                if (!is_dir($directory)) {
+                    FileHelper::createDirectory($directory, 0755, true);
+                }
 
                 if ($uploadedFile->saveAs($image->path)){
                     if($image->save()) {
@@ -181,13 +188,14 @@ class ImageController extends Controller
                         }
                         Yii::$app->session->setFlash('success', Yii::t('app', 'Image correctly uploaded.'));
                         $this->logInfo('Image uploaded', ['image' => $image, 'user' => Yii::$app->user->identity->license]);
-                        return $this->redirect($image->getCallbackUrl());
+
+                        return $this->redirect($this->getRedirectUrl($redirect, $type, $relatedModel, $image));
                     } else {
                         // Delete the new image uploaded
                         unlink($image->path);
                         Yii::$app->session->setFlash('error', Yii::t('app', 'Error saving image information.'));
                         $this->logError(
-                            'Error saving uploaded file',
+                            'Error saving uploaded file due to model problems',
                             [
                                 'errors' => $image->getErrors(),
                                 'user' => Yii::$app->user->identity->license
@@ -196,20 +204,31 @@ class ImageController extends Controller
                     }
                 } else {
                     $this->logError(
-                        'Error saving uploaded file',
+                        'Error saving uploaded file into the location',
                         [
                             'image' => $image,
+                            'path' => $image->path,
                             'user' => Yii::$app->user->identity->license
                         ]
                     );
                     Yii::$app->session->setFlash('error', Yii::t('app', 'Error saving uploaded file.'));
                 }
 
+            } elseif ($uploadedFile && $uploadedFile->error === UPLOAD_ERR_INI_SIZE) {
+                $maxSize = ini_get('upload_max_filesize');
+                $this->logError(
+                    'Uploaded file exceeds size limit',
+                    [
+                        'error' => $uploadedFile->error,
+                        'max_size' => $maxSize,
+                        'user' => Yii::$app->user->identity->license
+                    ]);
+                Yii::$app->session->setFlash('error', Yii::t('app', 'The image is too large. Maximum size allowed: {size}.', ['size' => $maxSize]));
             } else {
                 $this->logError(
-                    'Uploaded file not found',
+                    'Uploaded file not found or has errors',
                     [
-                        'request' => Yii::$app->request,
+                        'error' => $uploadedFile ? $uploadedFile->error : 'no file',
                         'user' => Yii::$app->user->identity->license
                     ]);
                 Yii::$app->session->setFlash('error', Yii::t('app', 'Can\'t find image'));
@@ -219,28 +238,53 @@ class ImageController extends Controller
         return $this->render('upload', [
             'image' => $image,
             'description' => $relatedModel->getImageDescription(),
+            'redirect' => $redirect,
         ]);
     }
 
     /**
      * Deletes an existing Image model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param string $id ID
+     * If deletion is successful, the browser will be redirected based on the redirect parameter.
+     * @param int $id ID
+     * @param string|null $redirect Where to redirect after deletion
      * @return \yii\web\Response
      * @throws NotFoundHttpException if the model cannot be found
+     * @throws ForbiddenHttpException if user lacks permission
      */
-    public function actionDelete($id)
+    public function actionDelete(int $id, ?string $redirect = null)
     {
-        if(!Yii::$app->user->can(Permissions::IMAGE_CRUD)){
-            throw new ForbiddenHttpException();
-        }
         $image = $this->findModel($id);
 
+        if (!Yii::$app->user->can(Permissions::UPLOAD_IMAGE, ['image' => $image])) {
+            throw new ForbiddenHttpException();
+        }
+
         $type = $image->type;
+        $relatedModel = $image->getRelatedModel();
+        $redirectUrl = $this->getRedirectUrl($redirect, $type, $relatedModel, $image);
 
         $image->delete();
 
-        return $this->redirect(['index', 'ImageSearch[type]' => $type]);
+        return $this->redirect($redirectUrl);
+    }
+
+    /**
+     * Determines the redirect URL based on the redirect parameter.
+     * @param string|null $redirect The redirect type
+     * @param string $type The image type
+     * @param mixed $relatedModel The related model
+     * @param Image $image The image model
+     * @return array|string The redirect URL
+     */
+    protected function getRedirectUrl(?string $redirect, string $type, $relatedModel, Image $image)
+    {
+        if ($redirect === self::REDIRECT_IMAGE_MANAGER) {
+            return ['index', 'ImageSearch[type]' => $type];
+        } elseif ($redirect === self::REDIRECT_PAGE_EDITOR && $type === Image::TYPE_PAGE_IMAGE && $relatedModel) {
+            return ['page/edit', 'code' => $relatedModel->code, 'language' => Yii::$app->language, 'type' => $relatedModel->type];
+        } else {
+            return $image->getCallbackUrl();
+        }
     }
 
     /**

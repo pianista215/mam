@@ -1,17 +1,23 @@
 <?php
+use app\models\Image;
 use yii\helpers\Url;
 use yii\helpers\Html;
 
 /** @var $image app\models\Image */
-/** @var description string */
+/** @var $description string */
+/** @var $redirect string|null */
 
 $this->title = Yii::t('app', 'Uploading image for') . ' ' . $description;
-$uploadUrl = Url::to([
+$uploadParams = [
     'image/upload',
     'type' => $image->type,
     'related_id' => $image->related_id,
     'element' => $image->element,
-]);
+];
+if ($redirect !== null) {
+    $uploadParams['redirect'] = $redirect;
+}
+$uploadUrl = Url::to($uploadParams);
 $viewUrl = Url::to([
     'image/view',
     'type' => $image->type,
@@ -19,23 +25,59 @@ $viewUrl = Url::to([
     'element' => $image->element,
 ]);
 
-$typeSettings = \app\models\Image::getAllowedTypes()[$image->type] ?? [];
-$displayWidth = $typeSettings['width'] ?? 400;
-$displayHeight = $typeSettings['height'] ?? 300;
+$typeSettings = Image::getAllowedTypes()[$image->type] ?? [];
+$displayWidth = $typeSettings['width'] ?? null;
+$displayHeight = $typeSettings['height'] ?? null;
+$hasFixedDimensions = $displayWidth !== null && $displayHeight !== null;
+$imageExists = $image->id !== null;
+$showPreview = $imageExists || $image->type !== Image::TYPE_PAGE_IMAGE;
+
+$photoTypes = [
+    Image::TYPE_PAGE_IMAGE,
+    Image::TYPE_PILOT_PROFILE,
+    Image::TYPE_TOUR_IMAGE,
+    Image::TYPE_AIRCRAFT_TYPE_IMAGE,
+];
+$isPhoto = in_array($image->type, $photoTypes);
 ?>
 
 <div class="image-upload">
     <h2><?= Html::encode($this->title) ?></h2>
 
     <div style="max-width: 100%; width: 80%; margin: 0 auto;">
-        <img id="image-to-crop" src="<?= Html::encode($viewUrl) ?>"
-             alt="Actual image"
-             style="max-width:100%; height:auto; display:block; margin:0 auto;">
+        <?php if ($showPreview): ?>
+            <img id="image-to-crop" src="<?= Html::encode($viewUrl) ?>"
+                 alt="Actual image"
+                 style="max-width:100%; height:auto; display:block; margin:0 auto;">
+        <?php else: ?>
+            <img id="image-to-crop" src=""
+                 alt=""
+                 style="max-width:100%; height:auto; display:none; margin:0 auto;">
+        <?php endif; ?>
     </div>
 
     <div style="display:flex; flex-direction:column; align-items:center; margin-top:1rem;">
         <input type="file" id="imageInput" accept="image/*" class="form-control mb-2" style="max-width:250px;">
-        <button id="uploadBtn" class="btn btn-primary"><?=Yii::t('app', 'Upload image')?></button>
+        <div class="btn-group" role="group">
+            <button id="uploadBtn" class="btn btn-primary"><?= Yii::t('app', 'Upload image') ?></button>
+            <?php if ($imageExists): ?>
+                <?php
+                $deleteParams = ['image/delete', 'id' => $image->id];
+                if ($redirect !== null) {
+                    $deleteParams['redirect'] = $redirect;
+                }
+                ?>
+                <?= Html::a(
+                    Yii::t('app', 'Delete image'),
+                    Url::to($deleteParams),
+                    [
+                        'class' => 'btn btn-danger',
+                        'data-method' => 'post',
+                        'data-confirm' => Yii::t('app', 'Are you sure you want to delete this item?'),
+                    ]
+                ) ?>
+            <?php endif; ?>
+        </div>
     </div>
 </div>
 
@@ -49,9 +91,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const button = document.getElementById('uploadBtn');
     let cropper = null;
 
-    const targetWidth = <?= $displayWidth ?>;
-    const targetHeight = <?= $displayHeight ?>;
-    const aspectRatio = targetWidth / targetHeight;
+    const targetWidth = <?= $displayWidth ?? 'null' ?>;
+    const targetHeight = <?= $displayHeight ?? 'null' ?>;
+    const hasFixedDimensions = targetWidth !== null && targetHeight !== null;
+    const aspectRatio = hasFixedDimensions ? targetWidth / targetHeight : NaN;
 
     input.addEventListener('change', (event) => {
         const file = event.target.files[0];
@@ -60,15 +103,20 @@ document.addEventListener('DOMContentLoaded', function() {
         const reader = new FileReader();
         reader.onload = (e) => {
             image.src = e.target.result;
+            image.style.display = 'block';
             if (cropper) cropper.destroy();
 
-            cropper = new Cropper(image, {
+            const cropperOptions = {
                 viewMode: 1,
                 dragMode: 'move',
                 background: false,
                 autoCropArea: 1,
-                aspectRatio: aspectRatio
-            });
+            };
+            if (hasFixedDimensions) {
+                cropperOptions.aspectRatio = aspectRatio;
+            }
+
+            cropper = new Cropper(image, cropperOptions);
         };
         reader.readAsDataURL(file);
     });
@@ -79,12 +127,23 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        cropper.getCroppedCanvas({
-            width: targetWidth,
-            height: targetHeight
-        }).toBlob(async (blob) => {
+        const canvasOptions = hasFixedDimensions ? { width: targetWidth, height: targetHeight } : {};
+        const isPhoto = <?= $isPhoto ? 'true' : 'false' ?>;
+        const mimeType = isPhoto ? 'image/jpeg' : 'image/png';
+        const fileExtension = isPhoto ? 'jpg' : 'png';
+        const quality = isPhoto ? 0.92 : undefined;
+
+        cropper.getCroppedCanvas(canvasOptions).toBlob(async (blob) => {
+            const maxSize = <?= \yii\helpers\Json::encode(Yii::$app->formatter->asShortSize((int)ini_get('upload_max_filesize') * 1024 * 1024, 0)) ?>;
+            const maxBytes = <?= (int)ini_get('upload_max_filesize') * 1024 * 1024 ?>;
+
+            if (blob.size > maxBytes) {
+                alert(<?= \yii\helpers\Json::encode(Yii::t('app', 'The image is too large. Maximum size allowed:')) ?> + ' ' + maxSize);
+                return;
+            }
+
             const formData = new FormData();
-            formData.append('croppedImage', blob, 'crop.png');
+            formData.append('croppedImage', blob, 'crop.' + fileExtension);
             const csrfParam = document.querySelector('meta[name="csrf-param"]').getAttribute('content');
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             formData.append(csrfParam, csrfToken);
@@ -99,7 +158,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 alert('Error uploading image.');
             }
-        }, 'image/png');
+        }, mimeType, quality);
     });
 });
 </script>

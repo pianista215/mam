@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\models\traits\ImageRelated;
 use Yii;
+use yii\helpers\Url;
 
 /**
  * This is the model class for table "page".
@@ -19,6 +20,11 @@ use Yii;
 class Page extends \yii\db\ActiveRecord
 {
     use ImageRelated;
+
+    public function getImageDescription(): string
+    {
+        return "page: {$this->code}";
+    }
 
     public const TYPE_COMPONENT = 'component';
     public const TYPE_SITE = 'site';
@@ -77,5 +83,35 @@ class Page extends \yii\db\ActiveRecord
     public function getPageContents()
     {
         return $this->hasMany(PageContent::class, ['page_id' => 'id']);
+    }
+
+    /**
+     * Gets query for [[Images]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getImages()
+    {
+        return $this->hasMany(Image::class, ['related_id' => 'id'])
+            ->andWhere(['type' => Image::TYPE_PAGE_IMAGE])
+            ->orderBy(['element' => SORT_ASC]);
+    }
+
+    public function getNextImageElement(): int
+    {
+        $lastImage = $this->getImages()->orderBy(['element' => SORT_DESC])->one();
+        return $lastImage ? $lastImage->element + 1 : 0;
+    }
+
+    public function getViewUrl(): string
+    {
+        if ($this->code === self::HOME_PAGE) {
+            return Url::to(['/']);
+        } elseif ($this->type === self::TYPE_TOUR) {
+            $tourId = Tour::extractIdFromPageCode($this->code);
+            return Url::to(['/tour/view', 'id' => $tourId]);
+        } else {
+            return Url::to(['/page/view', 'code' => $this->code]);
+        }
     }
 }
