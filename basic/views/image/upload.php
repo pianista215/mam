@@ -31,6 +31,14 @@ $displayHeight = $typeSettings['height'] ?? null;
 $hasFixedDimensions = $displayWidth !== null && $displayHeight !== null;
 $imageExists = $image->id !== null;
 $showPreview = $imageExists || $image->type !== Image::TYPE_PAGE_IMAGE;
+
+$photoTypes = [
+    Image::TYPE_PAGE_IMAGE,
+    Image::TYPE_PILOT_PROFILE,
+    Image::TYPE_TOUR_IMAGE,
+    Image::TYPE_AIRCRAFT_TYPE_IMAGE,
+];
+$isPhoto = in_array($image->type, $photoTypes);
 ?>
 
 <div class="image-upload">
@@ -101,9 +109,22 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const canvasOptions = hasFixedDimensions ? { width: targetWidth, height: targetHeight } : {};
+        const isPhoto = <?= $isPhoto ? 'true' : 'false' ?>;
+        const mimeType = isPhoto ? 'image/jpeg' : 'image/png';
+        const fileExtension = isPhoto ? 'jpg' : 'png';
+        const quality = isPhoto ? 0.92 : undefined;
+
         cropper.getCroppedCanvas(canvasOptions).toBlob(async (blob) => {
+            const maxSize = <?= \yii\helpers\Json::encode(Yii::$app->formatter->asShortSize((int)ini_get('upload_max_filesize') * 1024 * 1024, 0)) ?>;
+            const maxBytes = <?= (int)ini_get('upload_max_filesize') * 1024 * 1024 ?>;
+
+            if (blob.size > maxBytes) {
+                alert(<?= \yii\helpers\Json::encode(Yii::t('app', 'The image is too large. Maximum size allowed:')) ?> + ' ' + maxSize);
+                return;
+            }
+
             const formData = new FormData();
-            formData.append('croppedImage', blob, 'crop.png');
+            formData.append('croppedImage', blob, 'crop.' + fileExtension);
             const csrfParam = document.querySelector('meta[name="csrf-param"]').getAttribute('content');
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             formData.append(csrfParam, csrfToken);
@@ -118,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 alert('Error uploading image.');
             }
-        }, 'image/png');
+        }, mimeType, quality);
     });
 });
 </script>

@@ -2,6 +2,7 @@
 
 use app\models\Image;
 use app\models\Page;
+use app\rbac\constants\Permissions;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
@@ -68,6 +69,22 @@ $this->registerJsFile('https://unpkg.com/easymde@2.20.0/dist/easymde.min.js', ['
                                 'title' => Yii::t('app', 'Edit'),
                             ]
                         ) ?>
+                        <?php if (Yii::$app->user->can(Permissions::IMAGE_CRUD)): ?>
+                            <?= Html::a(
+                                '<i class="fas fa-trash"></i>',
+                                Url::to([
+                                    'image/delete',
+                                    'id' => $image->id,
+                                    'fromEditor' => true,
+                                ]),
+                                [
+                                    'class' => 'btn btn-outline-danger',
+                                    'title' => Yii::t('app', 'Delete'),
+                                    'data-method' => 'post',
+                                    'data-confirm' => Yii::t('app', 'Are you sure you want to delete this image? This action will not check page contents for references. If this image is used in any page, it may display incorrectly.'),
+                                ]
+                            ) ?>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>

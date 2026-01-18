@@ -168,9 +168,14 @@ class ImageController extends Controller
 
         if (Yii::$app->request->isPost) {
             $uploadedFile = UploadedFile::getInstanceByName('croppedImage');
-            if ($uploadedFile) {
+            if ($uploadedFile && $uploadedFile->error === UPLOAD_ERR_OK) {
                 $newFilename = Yii::$app->security->generateRandomString() . '.' . $uploadedFile->extension;
                 $image->filename = $newFilename;
+
+                $directory = dirname($image->path);
+                if (!is_dir($directory)) {
+                    FileHelper::createDirectory($directory, 0755, true);
+                }
 
                 if ($uploadedFile->saveAs($image->path)){
                     if($image->save()) {
@@ -192,7 +197,7 @@ class ImageController extends Controller
                         unlink($image->path);
                         Yii::$app->session->setFlash('error', Yii::t('app', 'Error saving image information.'));
                         $this->logError(
-                            'Error saving uploaded file',
+                            'Error saving uploaded file due to model problems',
                             [
                                 'errors' => $image->getErrors(),
                                 'user' => Yii::$app->user->identity->license
@@ -201,20 +206,31 @@ class ImageController extends Controller
                     }
                 } else {
                     $this->logError(
-                        'Error saving uploaded file',
+                        'Error saving uploaded file into the location',
                         [
                             'image' => $image,
+                            'path' => $image->path,
                             'user' => Yii::$app->user->identity->license
                         ]
                     );
                     Yii::$app->session->setFlash('error', Yii::t('app', 'Error saving uploaded file.'));
                 }
 
+            } elseif ($uploadedFile && $uploadedFile->error === UPLOAD_ERR_INI_SIZE) {
+                $maxSize = ini_get('upload_max_filesize');
+                $this->logError(
+                    'Uploaded file exceeds size limit',
+                    [
+                        'error' => $uploadedFile->error,
+                        'max_size' => $maxSize,
+                        'user' => Yii::$app->user->identity->license
+                    ]);
+                Yii::$app->session->setFlash('error', Yii::t('app', 'The image is too large. Maximum size allowed: {size}.', ['size' => $maxSize]));
             } else {
                 $this->logError(
-                    'Uploaded file not found',
+                    'Uploaded file not found or has errors',
                     [
-                        'request' => Yii::$app->request,
+                        'error' => $uploadedFile ? $uploadedFile->error : 'no file',
                         'user' => Yii::$app->user->identity->license
                     ]);
                 Yii::$app->session->setFlash('error', Yii::t('app', 'Can\'t find image'));
@@ -230,23 +246,30 @@ class ImageController extends Controller
 
     /**
      * Deletes an existing Image model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param string $id ID
+     * If deletion is successful, the browser will be redirected to the 'index' page or editor.
+     * @param int $id ID
+     * @param bool $fromEditor Whether to redirect back to page editor
      * @return \yii\web\Response
      * @throws NotFoundHttpException if the model cannot be found
+     * @throws ForbiddenHttpException if user lacks permission
      */
-    public function actionDelete($id)
+    public function actionDelete(int $id, bool $fromEditor = false)
     {
-        if(!Yii::$app->user->can(Permissions::IMAGE_CRUD)){
+        if (!Yii::$app->user->can(Permissions::IMAGE_CRUD)) {
             throw new ForbiddenHttpException();
         }
-        $image = $this->findModel($id);
 
+        $image = $this->findModel($id);
         $type = $image->type;
+        $relatedModel = $image->getRelatedModel();
 
         $image->delete();
 
-        return $this->redirect(['index', 'ImageSearch[type]' => $type]);
+        if ($fromEditor && $type === Image::TYPE_PAGE_IMAGE && $relatedModel) {
+            return $this->redirect(['page/edit', 'code' => $relatedModel->code, 'language' => Yii::$app->language, 'type' => $relatedModel->type]);
+        } else {
+            return $this->redirect(['index', 'ImageSearch[type]' => $type]);
+        }
     }
 
     /**
