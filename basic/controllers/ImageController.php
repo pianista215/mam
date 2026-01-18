@@ -23,6 +23,9 @@ class ImageController extends Controller
 {
     use LoggerTrait;
 
+    const REDIRECT_IMAGE_MANAGER = 'image_manager';
+    const REDIRECT_PAGE_EDITOR = 'page_editor';
+
     /**
      * @inheritDoc
      */
@@ -140,7 +143,7 @@ class ImageController extends Controller
         ]);
     }
 
-    public function actionUpload(string $type, int $related_id, int $element = 0, bool $fromEditor = false)
+    public function actionUpload(string $type, int $related_id, int $element = 0, ?string $redirect = null)
     {
         $image = Image::findOne([
             'type' => $type,
@@ -186,12 +189,7 @@ class ImageController extends Controller
                         Yii::$app->session->setFlash('success', Yii::t('app', 'Image correctly uploaded.'));
                         $this->logInfo('Image uploaded', ['image' => $image, 'user' => Yii::$app->user->identity->license]);
 
-                        $redirectUrl = $image->getCallbackUrl();
-                        if ($fromEditor && $type === Image::TYPE_PAGE_IMAGE) {
-                            $page = $relatedModel;
-                            $redirectUrl = ['page/edit', 'code' => $page->code, 'language' => Yii::$app->language, 'type' => $page->type];
-                        }
-                        return $this->redirect($redirectUrl);
+                        return $this->redirect($this->getRedirectUrl($redirect, $type, $relatedModel, $image));
                     } else {
                         // Delete the new image uploaded
                         unlink($image->path);
@@ -240,35 +238,52 @@ class ImageController extends Controller
         return $this->render('upload', [
             'image' => $image,
             'description' => $relatedModel->getImageDescription(),
-            'fromEditor' => $fromEditor,
+            'redirect' => $redirect,
         ]);
     }
 
     /**
      * Deletes an existing Image model.
-     * If deletion is successful, the browser will be redirected to the 'index' page or editor.
+     * If deletion is successful, the browser will be redirected based on the redirect parameter.
      * @param int $id ID
-     * @param bool $fromEditor Whether to redirect back to page editor
+     * @param string|null $redirect Where to redirect after deletion
      * @return \yii\web\Response
      * @throws NotFoundHttpException if the model cannot be found
      * @throws ForbiddenHttpException if user lacks permission
      */
-    public function actionDelete(int $id, bool $fromEditor = false)
+    public function actionDelete(int $id, ?string $redirect = null)
     {
-        if (!Yii::$app->user->can(Permissions::IMAGE_CRUD)) {
+        $image = $this->findModel($id);
+
+        if (!Yii::$app->user->can(Permissions::UPLOAD_IMAGE, ['image' => $image])) {
             throw new ForbiddenHttpException();
         }
 
-        $image = $this->findModel($id);
         $type = $image->type;
         $relatedModel = $image->getRelatedModel();
+        $redirectUrl = $this->getRedirectUrl($redirect, $type, $relatedModel, $image);
 
         $image->delete();
 
-        if ($fromEditor && $type === Image::TYPE_PAGE_IMAGE && $relatedModel) {
-            return $this->redirect(['page/edit', 'code' => $relatedModel->code, 'language' => Yii::$app->language, 'type' => $relatedModel->type]);
+        return $this->redirect($redirectUrl);
+    }
+
+    /**
+     * Determines the redirect URL based on the redirect parameter.
+     * @param string|null $redirect The redirect type
+     * @param string $type The image type
+     * @param mixed $relatedModel The related model
+     * @param Image $image The image model
+     * @return array|string The redirect URL
+     */
+    protected function getRedirectUrl(?string $redirect, string $type, $relatedModel, Image $image)
+    {
+        if ($redirect === self::REDIRECT_IMAGE_MANAGER) {
+            return ['index', 'ImageSearch[type]' => $type];
+        } elseif ($redirect === self::REDIRECT_PAGE_EDITOR && $type === Image::TYPE_PAGE_IMAGE && $relatedModel) {
+            return ['page/edit', 'code' => $relatedModel->code, 'language' => Yii::$app->language, 'type' => $relatedModel->type];
         } else {
-            return $this->redirect(['index', 'ImageSearch[type]' => $type]);
+            return $image->getCallbackUrl();
         }
     }
 

@@ -1,5 +1,6 @@
 <?php
 
+use app\controllers\ImageController;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\GridView;
@@ -73,20 +74,23 @@ $this->params['breadcrumbs'][] = $this->title;
                 'template' => '{replace} {delete}',
                 'buttons' => [
                     'replace' => function ($url, $model, $key) {
-                        // getUploadUrl() ya devuelve la URL generada con Url::to(...)
-                        return Html::a(Yii::t('app', 'Replace'), $model->getUploadUrl(), ['class' => 'btn btn-primary btn-sm']);
+                        $uploadUrl = Url::to([
+                            'image/upload',
+                            'type' => $model->type,
+                            'related_id' => $model->related_id,
+                            'element' => $model->element,
+                            'redirect' => ImageController::REDIRECT_IMAGE_MANAGER,
+                        ]);
+                        return Html::a(Yii::t('app', 'Replace'), $uploadUrl, ['class' => 'btn btn-primary btn-sm']);
                     },
                     'delete' => function ($url, $model, $key) {
-                        return Html::a(Yii::t('app', 'Delete'), ['delete', 'id' => $model->id], [
+                        return Html::a(Yii::t('app', 'Delete'), ['delete', 'id' => $model->id, 'redirect' => ImageController::REDIRECT_IMAGE_MANAGER], [
                             'class' => 'btn btn-danger btn-sm',
-                            'data-confirm' => 'Are you sure you want to delete this image?',
+                            'data-confirm' => Yii::t('app', 'Are you sure you want to delete this image?'),
                             'data-method' => 'post',
                         ]);
                     },
                 ],
-                'urlCreator' => function ($action, $model, $key, $index) {
-                    return Url::to([$action, 'id' => $model->id]);
-                },
             ],
 
         ],

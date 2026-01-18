@@ -5,7 +5,7 @@ use yii\helpers\Html;
 
 /** @var $image app\models\Image */
 /** @var $description string */
-/** @var $fromEditor bool */
+/** @var $redirect string|null */
 
 $this->title = Yii::t('app', 'Uploading image for') . ' ' . $description;
 $uploadParams = [
@@ -14,8 +14,8 @@ $uploadParams = [
     'related_id' => $image->related_id,
     'element' => $image->element,
 ];
-if ($fromEditor) {
-    $uploadParams['fromEditor'] = true;
+if ($redirect !== null) {
+    $uploadParams['redirect'] = $redirect;
 }
 $uploadUrl = Url::to($uploadParams);
 $viewUrl = Url::to([
@@ -58,7 +58,26 @@ $isPhoto = in_array($image->type, $photoTypes);
 
     <div style="display:flex; flex-direction:column; align-items:center; margin-top:1rem;">
         <input type="file" id="imageInput" accept="image/*" class="form-control mb-2" style="max-width:250px;">
-        <button id="uploadBtn" class="btn btn-primary"><?=Yii::t('app', 'Upload image')?></button>
+        <div class="btn-group" role="group">
+            <button id="uploadBtn" class="btn btn-primary"><?= Yii::t('app', 'Upload image') ?></button>
+            <?php if ($imageExists): ?>
+                <?php
+                $deleteParams = ['image/delete', 'id' => $image->id];
+                if ($redirect !== null) {
+                    $deleteParams['redirect'] = $redirect;
+                }
+                ?>
+                <?= Html::a(
+                    Yii::t('app', 'Delete image'),
+                    Url::to($deleteParams),
+                    [
+                        'class' => 'btn btn-danger',
+                        'data-method' => 'post',
+                        'data-confirm' => Yii::t('app', 'Are you sure you want to delete this image?'),
+                    ]
+                ) ?>
+            <?php endif; ?>
+        </div>
     </div>
 </div>
 

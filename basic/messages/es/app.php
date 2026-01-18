@@ -90,6 +90,7 @@ return [
     'Date' => 'Fecha',
     'Date Of Birth' => 'Fecha de Nacimiento',
     'Delete' => 'Eliminar',
+    'Delete image' => 'Eliminar imagen',
     'Delete stage' => 'Borrar etapa',
     'Departure' => 'Salida',
     'Departure Aerodrome' => 'Aeródromo de Salida',
