@@ -73,7 +73,7 @@ $isPhoto = in_array($image->type, $photoTypes);
                     [
                         'class' => 'btn btn-danger',
                         'data-method' => 'post',
-                        'data-confirm' => Yii::t('app', 'Are you sure you want to delete this image?'),
+                        'data-confirm' => Yii::t('app', 'Are you sure you want to delete this item?'),
                     ]
                 ) ?>
             <?php endif; ?>

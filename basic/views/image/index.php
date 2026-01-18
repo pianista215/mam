@@ -86,7 +86,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'delete' => function ($url, $model, $key) {
                         return Html::a(Yii::t('app', 'Delete'), ['delete', 'id' => $model->id, 'redirect' => ImageController::REDIRECT_IMAGE_MANAGER], [
                             'class' => 'btn btn-danger btn-sm',
-                            'data-confirm' => Yii::t('app', 'Are you sure you want to delete this image?'),
+                            'data-confirm' => Yii::t('app', 'Are you sure you want to delete this item?'),
                             'data-method' => 'post',
                         ]);
                     },
