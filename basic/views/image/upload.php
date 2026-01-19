@@ -96,9 +96,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const hasFixedDimensions = targetWidth !== null && targetHeight !== null;
     const aspectRatio = hasFixedDimensions ? targetWidth / targetHeight : NaN;
 
+    let originalFileType = null;
+
     input.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (!file) return;
+
+        originalFileType = file.type;
 
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -129,9 +133,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const canvasOptions = hasFixedDimensions ? { width: targetWidth, height: targetHeight } : {};
         const isPhoto = <?= $isPhoto ? 'true' : 'false' ?>;
-        const mimeType = isPhoto ? 'image/jpeg' : 'image/png';
-        const fileExtension = isPhoto ? 'jpg' : 'png';
-        const quality = isPhoto ? 0.92 : undefined;
+        const isPng = originalFileType === 'image/png';
+        const mimeType = (isPhoto && !isPng) ? 'image/jpeg' : 'image/png';
+        const fileExtension = (isPhoto && !isPng) ? 'jpg' : 'png';
+        const quality = (isPhoto && !isPng) ? 0.92 : undefined;
 
         cropper.getCroppedCanvas(canvasOptions).toBlob(async (blob) => {
             const maxSize = <?= \yii\helpers\Json::encode(Yii::$app->formatter->asShortSize((int)ini_get('upload_max_filesize') * 1024 * 1024, 0)) ?>;
