@@ -7,7 +7,7 @@ return [
     'dsn' => 'mysql:host=172.17.0.2;dbname=test_mam_database',
     'username' => 'mam',
     'password' => 'complex-password',
-    'charset' => 'utf8',
+    'charset' => 'utf8mb4',
 
     'enableLogging' => false,
     'enableProfiling' => false,
