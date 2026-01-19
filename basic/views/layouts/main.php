@@ -29,6 +29,15 @@ $this->registerCssFile(
         'referrerpolicy' => 'no-referrer'
     ]
 );
+
+// Load custom CSS if it exists (for theme customization)
+$customCssPath = Yii::getAlias('@webroot/css/custom.css');
+if (file_exists($customCssPath)) {
+    $this->registerCssFile(
+        Yii::getAlias('@web/css/custom.css'),
+        ['depends' => [\app\assets\AppAsset::class]]
+    );
+}
 ?>
 <?php $this->beginPage() ?>
 <!DOCTYPE html>

@@ -1,0 +1,261 @@
+/**
+ * MAM Custom CSS Template
+ *
+ * Copy this file to 'custom.css' in the same directory and modify the values
+ * to customize the appearance of your airline website.
+ *
+ * Instructions:
+ * 1. Copy this file: cp custom-template.css custom.css
+ * 2. Edit custom.css and change the color values below
+ * 3. Refresh your browser to see the changes
+ *
+ * The custom.css file is ignored by git, so your customizations won't be
+ * overwritten by updates.
+ */
+
+:root {
+    /* ========================================
+     * HEADER / NAVBAR
+     * ======================================== */
+
+    /* Navbar background color (default: Bootstrap dark #212529) */
+    --mam-navbar-bg: #212529;
+
+    /* Navbar brand/logo text color */
+    --mam-navbar-brand-color: #ffffff;
+    --mam-navbar-brand-hover-color: #ffffff;
+
+    /* Navbar links color */
+    --mam-navbar-link-color: rgba(255, 255, 255, 0.85);
+    --mam-navbar-link-hover-color: #ffffff;
+    --mam-navbar-link-active-color: #ffffff;
+
+    /* Navbar dropdown menu */
+    --mam-navbar-dropdown-bg: #ffffff;
+    --mam-navbar-dropdown-link-color: #212529;
+    --mam-navbar-dropdown-link-hover-bg: #e9ecef;
+    --mam-navbar-dropdown-link-hover-color: #1e2125;
+
+    /* ========================================
+     * FOOTER
+     * ======================================== */
+
+    /* Footer background color (default: Bootstrap light #f8f9fa) */
+    --mam-footer-bg: #f8f9fa;
+
+    /* Footer text color */
+    --mam-footer-text-color: #6c757d;
+
+    /* Footer link color */
+    --mam-footer-link-color: #0d6efd;
+    --mam-footer-link-hover-color: #0a58ca;
+
+    /* Footer social icons */
+    --mam-footer-social-color: #212529;
+    --mam-footer-social-hover-color: #0d6efd;
+
+    /* ========================================
+     * GENERAL / BODY
+     * ======================================== */
+
+    /* Page background color */
+    --mam-body-bg: #ffffff;
+
+    /* Main text color */
+    --mam-body-color: #212529;
+
+    /* Primary link color */
+    --mam-link-color: #0d6efd;
+    --mam-link-hover-color: #0a58ca;
+
+    /* ========================================
+     * BUTTONS (Primary)
+     * ======================================== */
+
+    --mam-btn-primary-bg: #0d6efd;
+    --mam-btn-primary-border: #0d6efd;
+    --mam-btn-primary-color: #ffffff;
+    --mam-btn-primary-hover-bg: #0b5ed7;
+    --mam-btn-primary-hover-border: #0a58ca;
+
+    /* ========================================
+     * TABLES
+     * ======================================== */
+
+    /* Table header background */
+    --mam-table-header-bg: #f8f9fa;
+    --mam-table-header-color: #212529;
+
+    /* Table striped rows */
+    --mam-table-striped-bg: rgba(0, 0, 0, 0.05);
+
+    /* ========================================
+     * BREADCRUMBS
+     * ======================================== */
+
+    --mam-breadcrumb-bg: transparent;
+    --mam-breadcrumb-color: #6c757d;
+    --mam-breadcrumb-active-color: #6c757d;
+    --mam-breadcrumb-link-color: #0d6efd;
+}
+
+/* ============================================================================
+ * HEADER / NAVBAR STYLES
+ * ============================================================================ */
+
+#header .navbar {
+    background-color: var(--mam-navbar-bg) !important;
+}
+
+#header .navbar-brand {
+    color: var(--mam-navbar-brand-color) !important;
+}
+
+#header .navbar-brand:hover,
+#header .navbar-brand:focus {
+    color: var(--mam-navbar-brand-hover-color) !important;
+}
+
+#header .navbar-nav .nav-link {
+    color: var(--mam-navbar-link-color) !important;
+}
+
+#header .navbar-nav .nav-link:hover,
+#header .navbar-nav .nav-link:focus {
+    color: var(--mam-navbar-link-hover-color) !important;
+}
+
+#header .navbar-nav .nav-link.active,
+#header .navbar-nav .nav-item.active > .nav-link {
+    color: var(--mam-navbar-link-active-color) !important;
+}
+
+/* Navbar dropdown */
+#header .dropdown-menu {
+    background-color: var(--mam-navbar-dropdown-bg);
+}
+
+#header .dropdown-item {
+    color: var(--mam-navbar-dropdown-link-color);
+}
+
+#header .dropdown-item:hover,
+#header .dropdown-item:focus {
+    background-color: var(--mam-navbar-dropdown-link-hover-bg);
+    color: var(--mam-navbar-dropdown-link-hover-color);
+}
+
+/* Navbar toggler (mobile hamburger menu) */
+#header .navbar-toggler {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+#header .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.85%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* Logout button in navbar */
+#header .nav-link.logout,
+#header .btn.logout {
+    color: var(--mam-navbar-link-color) !important;
+}
+
+#header .nav-link.logout:hover,
+#header .btn.logout:hover {
+    color: var(--mam-navbar-link-hover-color) !important;
+}
+
+/* ============================================================================
+ * FOOTER STYLES
+ * ============================================================================ */
+
+#footer {
+    background-color: var(--mam-footer-bg) !important;
+}
+
+#footer,
+#footer .text-muted {
+    color: var(--mam-footer-text-color) !important;
+}
+
+#footer a {
+    color: var(--mam-footer-link-color);
+}
+
+#footer a:hover {
+    color: var(--mam-footer-link-hover-color);
+}
+
+/* Social media icons */
+#footer .fab,
+#footer .fa-brands {
+    color: var(--mam-footer-social-color);
+    transition: color 0.2s ease;
+}
+
+#footer a:hover .fab,
+#footer a:hover .fa-brands {
+    color: var(--mam-footer-social-hover-color);
+}
+
+/* ============================================================================
+ * BODY / GENERAL STYLES
+ * ============================================================================ */
+
+body {
+    background-color: var(--mam-body-bg);
+    color: var(--mam-body-color);
+}
+
+a {
+    color: var(--mam-link-color);
+}
+
+a:hover {
+    color: var(--mam-link-hover-color);
+}
+
+/* ============================================================================
+ * BUTTONS
+ * ============================================================================ */
+
+.btn-primary {
+    background-color: var(--mam-btn-primary-bg);
+    border-color: var(--mam-btn-primary-border);
+    color: var(--mam-btn-primary-color);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: var(--mam-btn-primary-hover-bg);
+    border-color: var(--mam-btn-primary-hover-border);
+}
+
+/* ============================================================================
+ * TABLES
+ * ============================================================================ */
+
+.table > thead {
+    background-color: var(--mam-table-header-bg);
+    color: var(--mam-table-header-color);
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+    background-color: var(--mam-table-striped-bg);
+}
+
+/* ============================================================================
+ * BREADCRUMBS
+ * ============================================================================ */
+
+.breadcrumb {
+    background-color: var(--mam-breadcrumb-bg);
+}
+
+.breadcrumb-item a {
+    color: var(--mam-breadcrumb-link-color);
+}
+
+.breadcrumb-item.active {
+    color: var(--mam-breadcrumb-active-color);
+}
