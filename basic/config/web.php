@@ -105,6 +105,11 @@ $config = [
                     'class' => 'yii\rest\UrlRule',
                     'controller' => ['flight-report'],
                 ],
+                [
+                    'prefix' => 'api/v1',
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => ['live-position'],
+                ],
             ],
         ],
     ],
