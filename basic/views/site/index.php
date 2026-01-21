@@ -19,54 +19,57 @@ $this->title = CK::getAirlineName();
 
                 <div class="mb-4">
                     <h4 class="mb-3"><?=Yii::t('app', 'Last flights')?></h4>
-                    <table class="table table-striped table-hover table-sm">
-                        <thead class="table-light">
-                        <tr>
-                            <th><?= $pilotModel->getAttributeLabel('license') ?></th>
-                            <th><?= $pilotModel->getAttributeLabel('fullname') ?></th>
-                            <th><?= $flightModel->getAttributeLabel('departure') ?></th>
-                            <th><?= $flightModel->getAttributeLabel('arrival') ?></th>
-                            <th><?=Yii::t('app', 'Aircraft')?></th>
-                            <th><?=Yii::t('app', 'Date')?></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <?php foreach ($lastFlights as $flight): ?>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover table-sm">
+                            <thead class="table-light">
                             <tr>
-                                <td><?= htmlspecialchars($flight->pilot->license) ?></td>
-                                <td><?= htmlspecialchars($flight->pilot->fullname) ?></td>
-                                <td><?= htmlspecialchars($flight->departure) ?></td>
-                                <td><?= htmlspecialchars($flight->arrival) ?></td>
-                                <td><?= htmlspecialchars($flight->aircraft->aircraftConfiguration->aircraftType->icao_type_code ?? 'N/A') ?></td>
-                                <td><?= Yii::$app->formatter->asDate($flight->creation_date, 'php:d/m/Y') ?></td>
+                                <th><?= $pilotModel->getAttributeLabel('license') ?></th>
+                                <th><?= $pilotModel->getAttributeLabel('fullname') ?></th>
+                                <th><?= $flightModel->getAttributeLabel('departure') ?></th>
+                                <th><?= $flightModel->getAttributeLabel('arrival') ?></th>
+                                <th><?=Yii::t('app', 'Aircraft')?></th>
+                                <th><?=Yii::t('app', 'Date')?></th>
                             </tr>
-                        <?php endforeach; ?>
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                            <?php foreach ($lastFlights as $flight): ?>
+                                <tr>
+                                    <td><?= htmlspecialchars($flight->pilot->license) ?></td>
+                                    <td><?= htmlspecialchars($flight->pilot->fullname) ?></td>
+                                    <td><?= htmlspecialchars($flight->departure) ?></td>
+                                    <td><?= htmlspecialchars($flight->arrival) ?></td>
+                                    <td><?= htmlspecialchars($flight->aircraft->aircraftConfiguration->aircraftType->icao_type_code ?? 'N/A') ?></td>
+                                    <td><?= Yii::$app->formatter->asDate($flight->creation_date, 'php:d/m/Y') ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <div class="mb-4">
-                    <h4 class="mb-3"><?=Yii::t('app', 'New pilots')?></h4>
-                    <table class="table table-striped table-hover table-sm">
-                        <thead class="table-light">
-                        <tr>
-                            <th><?= $pilotModel->getAttributeLabel('license') ?></th>
-                            <th><?= $pilotModel->getAttributeLabel('fullname') ?></th>
-                            <th><?= $pilotModel->getAttributeLabel('registration_date') ?></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <?php foreach ($lastPilots as $pilot): ?>
-                            <tr>
-                                <td><?= htmlspecialchars($pilot->license) ?></td>
-                                <td><?= htmlspecialchars($pilot->fullname) ?></td>
-                                <td><?= Yii::$app->formatter->asDate($pilot->registration_date, 'php:d/m/Y') ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                        </tbody>
-                    </table>
+                    <h4 class="mb-3"><?= Yii::t('app', 'New pilots') ?></h4>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover table-sm w-100">
+                            <thead class="table-light">
+                                <tr>
+                                    <th><?= $pilotModel->getAttributeLabel('license') ?></th>
+                                    <th><?= $pilotModel->getAttributeLabel('fullname') ?></th>
+                                    <th><?= $pilotModel->getAttributeLabel('registration_date') ?></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($lastPilots as $pilot): ?>
+                                    <tr>
+                                        <td><?= htmlspecialchars($pilot->license) ?></td>
+                                        <td><?= htmlspecialchars($pilot->fullname) ?></td>
+                                        <td><?= Yii::$app->formatter->asDate($pilot->registration_date, 'php:d/m/Y') ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-
             </div>
 
             <div class="col-md-4">

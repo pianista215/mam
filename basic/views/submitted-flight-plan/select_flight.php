@@ -127,6 +127,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h3><?=Yii::t('app', 'Routes')?></h3>
     <?= GridView::widget([
         'dataProvider' => $routeDataProvider,
+        'options' => ['class' => 'table-responsive'],
         'columns' => [
             [
                 'class' => 'yii\grid\SerialColumn',

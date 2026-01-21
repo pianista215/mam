@@ -28,6 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'options' => ['class' => 'table-responsive'],
         'rowOptions' => function ($model) {
                 $now = new \DateTime();
                 $start = new \DateTime($model->start);

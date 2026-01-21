@@ -35,6 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel'  => null, // we use our own dropdown instead
+        'options' => ['class' => 'table-responsive'],
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
 
