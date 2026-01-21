@@ -46,11 +46,13 @@ echo $this->render('@app/views/layouts/_openlayers');
         <?php endforeach; ?>
     </div>
 
-    <div id="liveFlightsMap" style="width: 100%; height: 400px; border-radius: 8px;"></div>
+    <div style="position: relative;">
+        <div id="liveFlightsMap" style="width: 100%; height: 400px; border-radius: 8px;"></div>
 
-    <div id="flightInfoPopup" class="card shadow-sm" style="display: none; position: absolute; z-index: 1000; min-width: 200px;">
-        <div class="card-body p-2">
-            <div id="popupContent"></div>
+        <div id="flightInfoPopup" class="card shadow-sm" style="display: none; position: absolute; top: 10px; right: 10px; z-index: 1000; min-width: 200px; max-width: 280px;">
+            <div class="card-body p-2">
+                <div id="popupContent"></div>
+            </div>
         </div>
     </div>
 </div>
@@ -71,6 +73,9 @@ foreach ($liveFlights as $position) {
     $pilot = $fpl->pilot;
     $entity = $fpl->getEntity();
 
+    $departureAirport = $entity ? $entity->departure0 : null;
+    $arrivalAirport = $entity ? $entity->arrival0 : null;
+
     $flightsData[] = [
         'id' => $position->submitted_flight_plan_id,
         'latitude' => $position->latitude,
@@ -82,6 +87,8 @@ foreach ($liveFlights as $position) {
         'pilotName' => $pilot->fullname,
         'departure' => $entity ? $entity->departure : '-',
         'arrival' => $entity ? $entity->arrival : '-',
+        'departureCoords' => $departureAirport ? [$departureAirport->longitude, $departureAirport->latitude] : null,
+        'arrivalCoords' => $arrivalAirport ? [$arrivalAirport->longitude, $arrivalAirport->latitude] : null,
     ];
 }
 
@@ -108,14 +115,17 @@ $this->registerJs(<<<JS
     });
 
     function createPlaneStyle(heading) {
-        const rotation = (heading * Math.PI) / 180;
+        // Icon is rotated 45° by default, so subtract 45° from heading
+        const rotation = ((heading - 45) * Math.PI) / 180;
         return new ol.style.Style({
-            image: new ol.style.RegularShape({
-                points: 3,
-                radius: 12,
+            image: new ol.style.Icon({
+                src: '/icons/airplane.svg',
                 rotation: rotation,
-                fill: new ol.style.Fill({ color: '#1976d2' }),
-                stroke: new ol.style.Stroke({ color: '#fff', width: 2 })
+                rotateWithView: true,
+                scale: 0.04,
+                anchor: [0.5, 0.5],
+                anchorXUnits: 'fraction',
+                anchorYUnits: 'fraction'
             })
         });
     }
@@ -126,6 +136,19 @@ $this->registerJs(<<<JS
             const data = feature.get('flightData');
             return createPlaneStyle(data.heading);
         }
+    });
+
+    // Route line layer
+    const routeSource = new ol.source.Vector();
+    const routeLayer = new ol.layer.Vector({
+        source: routeSource,
+        style: new ol.style.Style({
+            stroke: new ol.style.Stroke({
+                color: '#e91e63',
+                width: 2,
+                lineDash: [8, 8]
+            })
+        })
     });
 
     const extent = vectorSource.getExtent();
@@ -139,6 +162,7 @@ $this->registerJs(<<<JS
             new ol.layer.Tile({
                 source: new ol.source.OSM()
             }),
+            routeLayer,
             vectorLayer
         ],
         view: new ol.View({
@@ -154,16 +178,14 @@ $this->registerJs(<<<JS
     const popup = document.getElementById('flightInfoPopup');
     const popupContent = document.getElementById('popupContent');
 
-    function showPopup(pixel, data) {
+    function showPopup(data) {
         popupContent.innerHTML =
             '<strong>' + data.pilotLicense + '</strong><br>' +
             data.pilotName + '<br>' +
             '<small>' + data.departure + ' → ' + data.arrival + '</small><hr class="my-1">' +
             '<small>{$altitudeLabel}: ' + data.altitude.toLocaleString() + ' ft</small><br>' +
-            '<small>{$speedLabel}: ' + data.groundSpeed + ' kts</small>';
+            '<small>{$speedLabel}: ' + data.groundSpeed + ' Knots</small>';
 
-        popup.style.left = (pixel[0] + 15) + 'px';
-        popup.style.top = (pixel[1] - 15) + 'px';
         popup.style.display = 'block';
     }
 
@@ -171,20 +193,52 @@ $this->registerJs(<<<JS
         popup.style.display = 'none';
     }
 
+    function drawRoute(data) {
+        routeSource.clear();
+
+        if (!data.departureCoords || !data.arrivalCoords) return;
+
+        const depCoords = ol.proj.fromLonLat(data.departureCoords);
+        const planeCoords = ol.proj.fromLonLat([data.longitude, data.latitude]);
+        const arrCoords = ol.proj.fromLonLat(data.arrivalCoords);
+
+        const routeFeature = new ol.Feature({
+            geometry: new ol.geom.LineString([depCoords, planeCoords, arrCoords])
+        });
+        routeSource.addFeature(routeFeature);
+    }
+
+    function clearRoute() {
+        routeSource.clear();
+    }
+
+    function selectFlight(data) {
+        showPopup(data);
+        drawRoute(data);
+
+        document.querySelectorAll('.live-flight-row').forEach(row => {
+            row.classList.remove('active');
+            if (parseInt(row.dataset.flightId) === data.id) {
+                row.classList.add('active');
+            }
+        });
+    }
+
+    function deselectFlight() {
+        hidePopup();
+        clearRoute();
+        document.querySelectorAll('.live-flight-row').forEach(row => {
+            row.classList.remove('active');
+        });
+    }
+
     map.on('click', function(evt) {
         const feature = map.forEachFeatureAtPixel(evt.pixel, f => f);
-        if (feature) {
+        if (feature && feature.get('flightData')) {
             const data = feature.get('flightData');
-            showPopup(evt.pixel, data);
-
-            document.querySelectorAll('.live-flight-row').forEach(row => {
-                row.classList.remove('active');
-                if (parseInt(row.dataset.flightId) === data.id) {
-                    row.classList.add('active');
-                }
-            });
+            selectFlight(data);
         } else {
-            hidePopup();
+            deselectFlight();
         }
     });
 
@@ -206,11 +260,7 @@ $this->registerJs(<<<JS
                     duration: 500
                 });
 
-                document.querySelectorAll('.live-flight-row').forEach(r => r.classList.remove('active'));
-                this.classList.add('active');
-
-                const pixel = map.getPixelFromCoordinate(coords);
-                setTimeout(() => showPopup(pixel, flight), 600);
+                selectFlight(flight);
             }
         });
     });

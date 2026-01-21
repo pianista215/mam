@@ -79,8 +79,20 @@ class LiveFlightPosition extends \yii\db\ActiveRecord
         $cutoff = date('Y-m-d H:i:s', strtotime("-{$minutes} minutes"));
 
         return self::find()
-            ->with(['submittedFlightPlan.pilot', 'submittedFlightPlan.route0', 'submittedFlightPlan.tourStage', 'submittedFlightPlan.charterRoute'])
-            ->where(['>', 'updated_at', $cutoff])
+            ->alias('lfp')
+            ->innerJoin(['sfp' => 'submitted_flight_plan'], 'sfp.id = lfp.submitted_flight_plan_id')
+            ->innerJoin(['p' => 'pilot'], 'p.id = sfp.pilot_id')
+            ->with([
+                'submittedFlightPlan.pilot',
+                'submittedFlightPlan.route0.departure0',
+                'submittedFlightPlan.route0.arrival0',
+                'submittedFlightPlan.tourStage.departure0',
+                'submittedFlightPlan.tourStage.arrival0',
+                'submittedFlightPlan.charterRoute.departure0',
+                'submittedFlightPlan.charterRoute.arrival0',
+            ])
+            ->where(['>', 'lfp.updated_at', $cutoff])
+            ->orderBy(['p.license' => SORT_ASC])
             ->all();
     }
 }
