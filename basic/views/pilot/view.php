@@ -19,11 +19,11 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="pilot-view container py-3">
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3 gap-2">
         <h1 class="mb-0"><?= Html::encode($this->title) ?></h1>
 
         <?php if (Yii::$app->user->can(Permissions::USER_CRUD)): ?>
-            <div>
+            <div class="flex-shrink-0">
                 <?php if (isset($model->license)): ?>
                     <?= Html::a(Yii::t('app', 'Update'), ['update', 'id' => $model->id], ['class' => 'btn btn-primary me-2']) ?>
                 <?php else: ?>
@@ -42,49 +42,51 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
 
     <div class="card mb-4 shadow-sm">
-        <div class="card-body d-flex align-items-start">
-            <div class="pilot-photo me-4" style="min-width: 150px; text-align:center;">
-                <?= ImageMam::render(Image::TYPE_PILOT_PROFILE, $model->id) ?>
-            </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-12 col-md-auto text-center mb-3 mb-md-0">
+                    <?= ImageMam::render(Image::TYPE_PILOT_PROFILE, $model->id) ?>
+                </div>
 
-            <div class="pilot-data flex-fill me-4">
-                <dl class="row mb-0">
-                    <dt class="col-sm-4"><?=Yii::t('app', 'License')?></dt>
-                    <dd class="col-sm-8"><?= Html::encode($model->license ?? '(none)') ?></dd>
+                <div class="col-12 col-md">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4"><?=Yii::t('app', 'License')?></dt>
+                        <dd class="col-sm-8"><?= Html::encode($model->license ?? '(none)') ?></dd>
 
-                    <dt class="col-sm-4"><?=Yii::t('app', 'Name')?></dt>
-                    <dd class="col-sm-8"><?= Html::encode($model->name) ?></dd>
+                        <dt class="col-sm-4"><?=Yii::t('app', 'Name')?></dt>
+                        <dd class="col-sm-8"><?= Html::encode($model->name) ?></dd>
 
-                    <dt class="col-sm-4"><?=Yii::t('app', 'Surname')?></dt>
-                    <dd class="col-sm-8"><?= Html::encode($model->surname) ?></dd>
+                        <dt class="col-sm-4"><?=Yii::t('app', 'Surname')?></dt>
+                        <dd class="col-sm-8"><?= Html::encode($model->surname) ?></dd>
 
-                    <dt class="col-sm-4"><?=Yii::t('app', 'Registration Date')?></dt>
-                    <dd class="col-sm-8"><?= Html::encode($model->registration_date) ?></dd>
+                        <dt class="col-sm-4"><?=Yii::t('app', 'Registration Date')?></dt>
+                        <dd class="col-sm-8"><?= Html::encode($model->registration_date) ?></dd>
 
-                    <?php if (!empty($model->vatsim_id)): ?>
-                        <dt class="col-sm-4"><?=Yii::t('app', 'Vatsim ID')?></dt>
-                        <dd class="col-sm-8"><?= Html::encode($model->vatsim_id) ?></dd>
+                        <?php if (!empty($model->vatsim_id)): ?>
+                            <dt class="col-sm-4"><?=Yii::t('app', 'Vatsim ID')?></dt>
+                            <dd class="col-sm-8"><?= Html::encode($model->vatsim_id) ?></dd>
+                        <?php endif; ?>
+
+                        <?php if (!empty($model->ivao_id)): ?>
+                            <dt class="col-sm-4"><?=Yii::t('app', 'Ivao ID')?></dt>
+                            <dd class="col-sm-8"><?= Html::encode($model->ivao_id) ?></dd>
+                        <?php endif; ?>
+
+                        <dt class="col-sm-4"><?=Yii::t('app', 'Location')?></dt>
+                        <dd class="col-sm-8"><?= Html::encode($model->location ?? '') ?></dd>
+                    </dl>
+                </div>
+
+                <div class="col-12 col-md-auto text-center mt-3 mt-md-0">
+                    <?php if ($model->rank): ?>
+                        <div class="rank-image mb-1">
+                            <?= ImageMam::render(Image::TYPE_RANK_ICON, $model->rank->id, 0, ['class' => 'img-fluid']) ?>
+                        </div>
+                        <div class="rank-name fw-semibold"><?= Html::encode($model->rank->name) ?></div>
+                    <?php else: ?>
+                        <div class="text-muted fst-italic"><?=Yii::t('app', 'No rank')?></div>
                     <?php endif; ?>
-
-                    <?php if (!empty($model->ivao_id)): ?>
-                        <dt class="col-sm-4"><?=Yii::t('app', 'Ivao ID')?></dt>
-                        <dd class="col-sm-8"><?= Html::encode($model->ivao_id) ?></dd>
-                    <?php endif; ?>
-
-                    <dt class="col-sm-4"><?=Yii::t('app', 'Location')?></dt>
-                    <dd class="col-sm-8"><?= Html::encode($model->location ?? '') ?></dd>
-                </dl>
-            </div>
-
-            <div class="pilot-rank text-center" style="min-width: 120px;">
-                <?php if ($model->rank): ?>
-                    <div class="rank-image mb-1">
-                        <?= ImageMam::render(Image::TYPE_RANK_ICON, $model->rank->id, 0, ['class' => 'img-fluid']) ?>
-                    </div>
-                    <div class="rank-name fw-semibold"><?= Html::encode($model->rank->name) ?></div>
-                <?php else: ?>
-                    <div class="text-muted fst-italic"><?=Yii::t('app', 'No rank')?></div>
-                <?php endif; ?>
+                </div>
             </div>
         </div>
     </div>
