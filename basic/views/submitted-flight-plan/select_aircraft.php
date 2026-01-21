@@ -36,6 +36,7 @@ $this->params['entity_type'] = $type;
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
+        'options' => ['class' => 'table-responsive'],
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
             [

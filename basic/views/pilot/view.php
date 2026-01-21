@@ -139,6 +139,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $flightsProvider,
         'filterModel' => $flightSearch,
+        'options' => ['class' => 'table-responsive'],
         'summary' => "{count} flights",
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],

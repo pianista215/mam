@@ -21,6 +21,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
+        'options' => ['class' => 'table-responsive'],
         'columns' => [
             'pilot.fullname',
             [

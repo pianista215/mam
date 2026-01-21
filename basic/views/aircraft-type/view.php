@@ -64,6 +64,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h4><?=Yii::t('app', 'Aircraft Configurations')?></h4>
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
+        'options' => ['class' => 'table-responsive'],
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
             'name',

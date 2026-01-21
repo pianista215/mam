@@ -56,6 +56,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'pagination' => false,
             ]),
             'summary' => false,
+            'options' => ['class' => 'table-responsive'],
             'columns' => [
                 ['class' => 'yii\grid\SerialColumn'],
                 'license',
