@@ -67,4 +67,20 @@ class LiveFlightPosition extends \yii\db\ActiveRecord
     {
         return $this->hasOne(SubmittedFlightPlan::class, ['id' => 'submitted_flight_plan_id']);
     }
+
+    /**
+     * Find all active live flight positions (updated within the last X minutes)
+     *
+     * @param int $minutes Maximum age in minutes (default 2)
+     * @return LiveFlightPosition[]
+     */
+    public static function findActive($minutes = 2)
+    {
+        $cutoff = date('Y-m-d H:i:s', strtotime("-{$minutes} minutes"));
+
+        return self::find()
+            ->with(['submittedFlightPlan.pilot', 'submittedFlightPlan.route0', 'submittedFlightPlan.tourStage', 'submittedFlightPlan.charterRoute'])
+            ->where(['>', 'updated_at', $cutoff])
+            ->all();
+    }
 }

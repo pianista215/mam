@@ -169,6 +169,7 @@ return [
     'Level' => 'Nivel',
     'License' => 'Licencia',
     'List FPLs' => 'Listar FPLs',
+    'Live Flights' => 'Vuelos en Vivo',
     'Location' => 'Localización',
     'Login' => 'Login',
     'Logout' => 'Logout',

@@ -7,6 +7,7 @@ use app\models\Aircraft;
 use app\models\ContactForm;
 use app\models\EntryForm;
 use app\models\Flight;
+use app\models\LiveFlightPosition;
 use app\models\Page;
 use app\models\Pilot;
 use app\models\Route;
@@ -88,11 +89,13 @@ class SiteController extends Controller
         $totalRoutes = Route::find()->count();
         $totalFlights = Flight::find()->count();
 
+        $liveFlights = LiveFlightPosition::findActive();
 
         return $this->render('index', [
             'homePage' => $homePage,
             'lastFlights' => $lastFlights,
             'lastPilots' => $lastPilots,
+            'liveFlights' => $liveFlights,
             'flightModel' => new Flight(),
             'pilotModel' => new Pilot(),
             'totalPilots' => $totalPilots,
