@@ -439,5 +439,18 @@ CREATE TABLE `image` (
   UNIQUE KEY `image_unique_type_rel_elem` (`type`, `related_id`, `element`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `live_flight_position` (
+  `submitted_flight_plan_id` bigint(20) unsigned NOT NULL,
+  `latitude` double NOT NULL,
+  `longitude` double NOT NULL,
+  `altitude` int(10) unsigned NOT NULL,
+  `heading` smallint(5) unsigned NOT NULL,
+  `ground_speed` smallint(5) unsigned NOT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`submitted_flight_plan_id`),
+  CONSTRAINT `live_flight_position_sfp_FK` FOREIGN KEY (`submitted_flight_plan_id`)
+    REFERENCES `submitted_flight_plan` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 

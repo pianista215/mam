@@ -13,6 +13,9 @@ $this->title = CK::getAirlineName();
     </div>
 
     <div class="body-content">
+
+        <?= $this->render('_live_flights', ['liveFlights' => $liveFlights]) ?>
+
         <div class="row">
 
             <div class="col-md-8">
