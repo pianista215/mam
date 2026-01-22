@@ -54,7 +54,7 @@ if (file_exists($customCssPath)) {
     NavBar::begin([
         'brandLabel' => CK::getAirlineName(),
         'brandUrl' => Yii::$app->homeUrl,
-        'options' => ['class' => 'navbar-expand-md navbar-dark bg-dark fixed-top']
+        'options' => ['class' => 'navbar-expand-xl navbar-dark bg-dark fixed-top']
     ]);
 
     $items =
