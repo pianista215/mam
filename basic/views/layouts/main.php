@@ -97,7 +97,7 @@ if (file_exists($customCssPath)) {
             'items' => [
                 ['label' => Yii::t('app', 'Submit FPL'), 'url' => ['/submitted-flight-plan/my-fpl']],
                 ['label' => Yii::t('app', 'Move Pilot'), 'url' => ['/pilot/move']],
-                ['label' => Yii::t('app', 'Download ACARS'), 'url' => ['/velopack/installer']],
+                ['label' => Yii::t('app', 'Download ACARS'), 'url' => ['/acars-updater/installer']],
             ],
         ];
     }

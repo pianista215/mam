@@ -10,7 +10,7 @@ use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 
 /**
- * VelopackController serves ACARS application updates and installer downloads.
+ * AcarsUpdaterController serves ACARS application updates and installer downloads.
  *
  * Compatible with Velopack update system (https://velopack.io/).
  * Files should be placed in the configured ACARS releases path (Site Settings).
@@ -26,7 +26,7 @@ use yii\web\NotFoundHttpException;
  * - `installer`: For logged-in web users to download the setup executable
  * - `update`: For Velopack client with Bearer token (returns 404 if unauthorized)
  */
-class VelopackController extends Controller
+class AcarsUpdaterController extends Controller
 {
     public function behaviors()
     {
@@ -52,7 +52,7 @@ class VelopackController extends Controller
      * Downloads the installer executable.
      * Requires web session login.
      *
-     * GET /velopack/installer
+     * GET /acars-updater/installer
      */
     public function actionInstaller()
     {
@@ -74,9 +74,9 @@ class VelopackController extends Controller
      * Downloads update files for Velopack client.
      * Requires Bearer token. Returns 404 if unauthorized.
      *
-     * GET /velopack/update/releases.stable.json
-     * GET /velopack/update/RELEASES
-     * GET /velopack/update/MyApp-1.0.0-full.nupkg
+     * GET /acars-updater/update/releases.stable.json
+     * GET /acars-updater/update/RELEASES
+     * GET /acars-updater/update/MyApp-1.0.0-full.nupkg
      */
     public function actionUpdate($file)
     {
