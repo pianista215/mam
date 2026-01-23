@@ -19,6 +19,8 @@
 return [
     '2nd Altn Aerodrome' => 'Segundo Alternativo',
     'ACARS files received. Awaiting processing.' => 'Ficheros ACARS recibidos. Esperando a ser procesado.',
+    'ACARS installer filename' => 'Nombre del instalador del ACARS',
+    'ACARS releases path' => 'Path de versiones del ACARS',
     'About' => 'Acerca',
     'Access Token' => 'Access Token',
     'Actions' => 'Acciones',
@@ -100,6 +102,7 @@ return [
     'Detected Issues' => 'Incidencias Detectadas',
     'Distance' => 'Distancia',
     'Distance NM' => 'Distancia NM',
+    'Download ACARS' => 'Descargar ACARS',
     'Edit' => 'Editar',
     'Edit stage' => 'Editar etapa',
     'Editing' => 'Editando',
