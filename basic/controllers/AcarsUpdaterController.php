@@ -3,7 +3,7 @@
 namespace app\controllers;
 
 use app\config\ConfigHelper;
-use app\models\Pilot;
+use app\filters\SilentHttpBearerAuth;
 use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
@@ -44,6 +44,10 @@ class AcarsUpdaterController extends Controller
                         ],
                     ],
                 ],
+                'bearerAuth' => [
+                    'class' => SilentHttpBearerAuth::class,
+                    'only' => ['update'],
+                ],
             ]
         );
     }
@@ -80,10 +84,6 @@ class AcarsUpdaterController extends Controller
      */
     public function actionUpdate($file)
     {
-        if (!$this->authenticateBearer()) {
-            throw new NotFoundHttpException();
-        }
-
         if (empty($file)) {
             throw new NotFoundHttpException();
         }
@@ -109,19 +109,5 @@ class AcarsUpdaterController extends Controller
             'mimeType' => 'application/octet-stream',
             'inline' => false,
         ]);
-    }
-
-    private function authenticateBearer(): bool
-    {
-        $authHeader = Yii::$app->request->headers->get('Authorization');
-
-        if ($authHeader === null || !preg_match('/^Bearer\s+(.+)$/i', $authHeader, $matches)) {
-            return false;
-        }
-
-        $token = $matches[1];
-        $pilot = Pilot::findIdentityByAccessToken($token);
-
-        return $pilot !== null;
     }
 }

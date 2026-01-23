@@ -34,11 +34,14 @@ RUN mkdir -p /opt/mam/chunks \
     && mkdir -p /opt/mam/images/country_icon \
     && mkdir -p /opt/mam/images/aircraftType_image \
     && mkdir -p /opt/mam/images/page_image \
+    && mkdir -p /opt/mam/acars-releases \
     && chown -R www-data:www-data /var/www/html \
     && chown -R www-data:www-data /opt/mam/chunks \
     && chown -R www-data:www-data /opt/mam/images \
+    && chown -R www-data:www-data /opt/mam/acars-releases \
     && chmod -R 755 /var/www/html \
-    && chmod -R 755 /opt/mam/chunks
+    && chmod -R 755 /opt/mam/chunks \
+    && chmod -R 755 /opt/mam/acars-releases
 
 COPY initial_flags /tmp/initial_flags
 
