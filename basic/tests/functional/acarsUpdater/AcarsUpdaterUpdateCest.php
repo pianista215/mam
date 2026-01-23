@@ -149,7 +149,7 @@ class AcarsUpdaterUpdateCest
     {
         $token = $this->getAccessToken(1);
         $I->haveHttpHeader('Authorization', 'Bearer ' . $token);
-        $I->amOnRoute('acars-updater/update', ['file' => '../../../etc/passwd']);
+        $I->amOnRoute('acars-updater/update', ['file' => '../../../../../../../../../../etc/passwd']);
 
         $I->seeResponseCodeIs(404);
     }
