@@ -16,6 +16,8 @@ class SiteSettingsForm extends Model
 
     public $chunks_storage_path;
     public $images_storage_path;
+    public $acars_releases_path;
+    public $acars_installer_name;
 
     public $token_life_h;
     public $charter_ratio;
@@ -32,8 +34,9 @@ class SiteSettingsForm extends Model
     {
         return [
             [['registration_start','registration_end','registration_start_location',
-              'chunks_storage_path','images_storage_path','token_life_h','charter_ratio',
-              'airline_name','no_reply_mail','support_mail','x_url','instagram_url','facebook_url'], 'trim'],
+              'chunks_storage_path','images_storage_path','acars_releases_path','acars_installer_name',
+              'token_life_h','charter_ratio','airline_name','no_reply_mail','support_mail',
+              'x_url','instagram_url','facebook_url'], 'trim'],
 
             [['registration_start','registration_end'], 'date', 'format' => 'php:Y-m-d'],
             ['registration_start_location', 'filter', 'filter' => 'strtoupper'],
@@ -47,7 +50,7 @@ class SiteSettingsForm extends Model
                 'targetAttribute' => ['registration_start_location' => 'icao_code'],
             ],
 
-            [['chunks_storage_path','images_storage_path'], 'validatePath'],
+            [['chunks_storage_path','images_storage_path','acars_releases_path'], 'validatePath'],
 
             ['token_life_h', 'integer', 'min' => 1],
 
@@ -70,6 +73,8 @@ class SiteSettingsForm extends Model
 
             'chunks_storage_path' => Yii::t('app', 'Chunks storage path'),
             'images_storage_path' => Yii::t('app', 'Images storage path'),
+            'acars_releases_path' => Yii::t('app', 'ACARS releases path'),
+            'acars_installer_name' => Yii::t('app', 'ACARS installer filename'),
 
             'token_life_h' => Yii::t('app', 'Token lifetime (hours)'),
             'charter_ratio' => Yii::t('app', 'Charter ratio'),
@@ -92,6 +97,8 @@ class SiteSettingsForm extends Model
             CK::REGISTRATION_START_LOCATION,
             CK::CHUNKS_STORAGE_PATH,
             CK::IMAGES_STORAGE_PATH,
+            CK::ACARS_RELEASES_PATH,
+            CK::ACARS_INSTALLER_NAME,
             CK::TOKEN_LIFE_H,
             CK::CHARTER_RATIO,
             CK::AIRLINE_NAME,

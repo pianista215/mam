@@ -13,6 +13,8 @@ class ConfigHelper
     // Settings
     public const CHUNKS_STORAGE_PATH = 'chunks_storage_path';
     public const IMAGES_STORAGE_PATH = 'images_storage_path';
+    public const ACARS_RELEASES_PATH = 'acars_releases_path';
+    public const ACARS_INSTALLER_NAME = 'acars_installer_name';
     public const TOKEN_LIFE_H = 'token_life_h';
     public const CHARTER_RATIO = 'charter_ratio';
 
@@ -57,6 +59,16 @@ class ConfigHelper
     public static function getImagesStoragePath(): string
     {
         return Config::get(self::IMAGES_STORAGE_PATH) ?? '/opt/mam/images';
+    }
+
+    public static function getAcarsReleasesPath(): string
+    {
+        return Config::get(self::ACARS_RELEASES_PATH) ?? '/opt/mam/acars-releases';
+    }
+
+    public static function getAcarsInstallerName(): string
+    {
+        return Config::get(self::ACARS_INSTALLER_NAME) ?? 'Setup.exe';
     }
 
     public static function getTokenLifeH(): int

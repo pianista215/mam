@@ -48,6 +48,7 @@ return [
             'rules' => [
                 'page/edit' => 'page/edit',
                 'page/<code:[a-zA-Z0-9_\-]+>' => 'page/view',
+                'acars-updater/update/<file:.+>' => 'acars-updater/update',
                 [
                     'prefix' => 'api/v1',
                     'class' => 'yii\rest\UrlRule',

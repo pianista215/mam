@@ -40,6 +40,8 @@ $this->title = Yii::t('app', 'Site Settings');
 <h3><?= Yii::t('app', 'Other') ?></h3>
 <?= $form->field($model, 'chunks_storage_path') ?>
 <?= $form->field($model, 'images_storage_path') ?>
+<?= $form->field($model, 'acars_releases_path') ?>
+<?= $form->field($model, 'acars_installer_name') ?>
 <?= $form->field($model, 'token_life_h')->input('number') ?>
 <?= $form->field($model, 'charter_ratio')->input('number', ['step' => '0.01']) ?>
 

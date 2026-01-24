@@ -23,6 +23,7 @@ class SiteSettingsCest
         Config::set(CK::REGISTRATION_START_LOCATION, 'LEBL');
         $chunksPath = '/tmp/chunks';
         $imagesPath = '/tmp/images';
+        $acarsReleasesPath = '/tmp/acars-releases';
 
         if (!is_dir($chunksPath)) {
             mkdir($chunksPath, 0777, true);
@@ -31,8 +32,15 @@ class SiteSettingsCest
         if (!is_dir($imagesPath)) {
             mkdir($imagesPath, 0777, true);
         }
+
+        if (!is_dir($acarsReleasesPath)) {
+            mkdir($acarsReleasesPath, 0777, true);
+        }
+
         Config::set(CK::CHUNKS_STORAGE_PATH, $chunksPath);
         Config::set(CK::IMAGES_STORAGE_PATH, $imagesPath);
+        Config::set(CK::ACARS_RELEASES_PATH, $acarsReleasesPath);
+        Config::set(CK::ACARS_INSTALLER_NAME, 'Setup.exe');
         Yii::$app->cache->flush();
     }
 
