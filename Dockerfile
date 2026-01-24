@@ -8,9 +8,10 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     libpng-dev \
     libfreetype6-dev \
+    libicu-dev \
     zip \
     unzip \
-    && docker-php-ext-install pdo_mysql zip gd \
+    && docker-php-ext-install pdo_mysql zip gd intl \
     && apt-get clean
 
 RUN mkdir -p /var/run/mysqld && chown -R mysql:mysql /var/run/mysqld
