@@ -4,15 +4,12 @@ set -euo pipefail
 YII_BIN="/home/pianista/mios/mam/basic/yii"
 MAM_ANALYZER_HOME="/home/pianista/mios/mam-analyzer"
 
-# Activate Python virtualenv
-source "$MAM_ANALYZER_HOME/venv/bin/activate"
-
 # Call Yii to list and assemble acars chunks, then iterate over each report.json
 while read -r report_json; do
     report_dir="$(dirname "$report_json")"
 
     # Execute mam-analyzer over each report.json
-    python3 "$MAM_ANALYZER_HOME/scripts/run.py" "$report_json" "$report_dir/analysis.json"
+    uv run --project "$MAM_ANALYZER_HOME" python "$MAM_ANALYZER_HOME/scripts/run.py" "$report_json" "$report_dir/analysis.json"
 
     echo "Generated $report_dir/analysis.json"
     rm "$report_json"
