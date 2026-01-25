@@ -343,12 +343,11 @@ class FlightReportController extends Controller
     public function actionImportPendingReportsAnalysis()
     {
         $flightsPendingToAnalyze = \app\models\Flight::find()
-            ->where(['status' => 'S'])
-            ->all();
+            ->where(['status' => 'S']);
 
         $storagePath = CK::getChunksStoragePath();
 
-        foreach ($flightsPendingToAnalyze as $flight) {
+        foreach ($flightsPendingToAnalyze->each(1) as $flight) {
             $report = $flight->flightReport;
             $reportPath  = $storagePath . DIRECTORY_SEPARATOR . $report->id;
             $analysis  = $reportPath . DIRECTORY_SEPARATOR . 'analysis.json';
