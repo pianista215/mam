@@ -19,8 +19,8 @@ INSERT INTO issue_type(`code`, `penalty`) VALUES ('LandingAirportAlternative', N
 
 -- Descriptions with translations
 INSERT INTO issue_type_lang(issue_type_id, language, description) VALUES
-((SELECT id FROM issue_type WHERE code='LandingHardFpm'), 'en', 'Hard landing (<-700 fpm)'),
-((SELECT id FROM issue_type WHERE code='LandingHardFpm'), 'es', 'Hard landing (<-700 fpm)'),
+((SELECT id FROM issue_type WHERE code='LandingHardFpm'), 'en', 'Hard landing (<-450 fpm)'),
+((SELECT id FROM issue_type WHERE code='LandingHardFpm'), 'es', 'Hard landing (<-450 fpm)'),
 
 ((SELECT id FROM issue_type WHERE code='TaxiOverspeed'), 'en', 'Taxi overspeed (>25 knots)'),
 ((SELECT id FROM issue_type WHERE code='TaxiOverspeed'), 'es', 'Taxi overspeed (>25 nudos)'),
