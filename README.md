@@ -19,7 +19,7 @@ Modern Airlines Manager - A web application for virtual airline management with 
 ## Requirements
 
 - PHP 8.1.2+
-- PHP extensions: curl, xml, gd, mysql
+- PHP extensions: curl, xml, gd, mysql, intl
 - MariaDB/MySQL database
 - Composer
 
@@ -72,6 +72,79 @@ php yii migrate/up --interactive=0
 php yii migrate-rbac --interactive=0
 php yii migrate-custom-rbac --interactive=0
 ```
+
+### Storage directories
+
+Create the required storage directories and set proper permissions for the web server user (e.g., `www-data`):
+
+```bash
+# Create directories
+mkdir -p /opt/mam/chunks
+mkdir -p /opt/mam/images
+mkdir -p /opt/mam/acars-releases
+
+# Set ownership for web server
+chown -R www-data:www-data /opt/mam
+chmod -R 755 /opt/mam
+```
+
+| Directory | Purpose |
+|-----------|---------|
+| `/opt/mam/chunks` | Temporary storage for ACARS flight data uploads |
+| `/opt/mam/images` | Uploaded images (ranks, aircraft, pilots, etc.) |
+| `/opt/mam/acars-releases` | MAM ACARS installer files for auto-update |
+
+**ACARS releases:** Copy the Velopack output generated when building [MAM ACARS](https://github.com/pianista215/mam-acars) into the `acars-releases` directory. This enables the auto-update feature in the ACARS client.
+
+The paths can be customized via the admin panel in Site Settings.
+
+### First admin user
+
+If you are not migrating from VAM, you need to create the first user and assign admin privileges manually.
+
+**Option 1: Register via web and promote to admin**
+
+1. Register a new pilot through the web interface
+2. Assign a license via SQL (required to log in):
+
+```sql
+-- Get the pilot ID and assign license (replace with your email)
+UPDATE pilot SET license = 'ADM001' WHERE email = 'your@email.com';
+```
+
+3. Assign admin role and `assignAdmin` permission via SQL:
+
+```sql
+-- Get the pilot ID
+SELECT id FROM pilot WHERE email = 'your@email.com';
+
+-- Assign admin role (replace <pilot_id> with the actual ID)
+INSERT INTO auth_assignment (item_name, user_id, created_at)
+VALUES ('admin', '<pilot_id>', UNIX_TIMESTAMP());
+
+-- Grant permission to assign admin role to others
+INSERT INTO auth_assignment (item_name, user_id, created_at)
+VALUES ('assignAdmin', '<pilot_id>', UNIX_TIMESTAMP());
+```
+
+**Option 2: Create user directly in database**
+
+1. Insert the pilot with a placeholder password and license:
+
+```sql
+INSERT INTO pilot (license, name, surname, email, city, country_id, password, date_of_birth, location)
+VALUES ('ADM001', 'Admin', 'User', 'admin@yourairline.com', 'City', 1, 'placeholder', '1990-01-01', 'ICAO');
+```
+
+Note: Replace `country_id` with a valid ID from the `country` table, and `location` with a valid ICAO code from the `airport` table.
+
+2. Use the "Forgot password" feature on the login page to set a real password.
+
+3. Assign admin role and `assignAdmin` permission (see SQL above).
+
+**For existing users (migrated from VAM):**
+
+Run the same `INSERT INTO auth_assignment` statements to promote any pilot to admin.
 
 ### Web server configuration
 
