@@ -330,4 +330,4 @@ This means:
 - If you run a modified version as a network service, you must make the source code available to users
 - See [LICENSE](LICENSE) for the full text
 
-Copyright (c) 2026 Unai Sarasola Alvarez
+Copyright (c) 2026 Unai Sarasola Álvarez
