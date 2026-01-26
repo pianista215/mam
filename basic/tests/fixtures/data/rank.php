@@ -16,4 +16,9 @@ return [
         'name' => 'Rank 3',
         'position' => 3
     ],
+    [
+        'id' => 4,
+        'name' => 'Rank 4',
+        'position' => 4
+    ],
 ];

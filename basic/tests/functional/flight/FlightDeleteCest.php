@@ -4,6 +4,7 @@ namespace tests\functional\flight;
 
 use app\models\Flight;
 use tests\fixtures\AuthAssignmentFixture;
+use tests\fixtures\ConfigFixture;
 use tests\fixtures\FlightReportFixture;
 
 class FlightDeleteCest
@@ -12,6 +13,7 @@ class FlightDeleteCest
     {
         return [
             'authAssignment' => AuthAssignmentFixture::class,
+            'config' => ConfigFixture::class,
             'flightReport' => FlightReportFixture::class,
         ];
     }
@@ -106,5 +108,38 @@ class FlightDeleteCest
         $I->seeResponseCodeIsRedirection();
         $count = Flight::find()->where(['id' => 3])->count();
         $I->assertEquals(0, $count);
+    }
+
+    public function ownerCanDeleteFlightAndChunkFiles(\FunctionalTester $I)
+    {
+        // Setup: create chunks directory and test file
+        $chunksPath = '/tmp/mam_test_chunks/3';
+        if (!is_dir($chunksPath)) {
+            mkdir($chunksPath, 0777, true);
+        }
+        file_put_contents($chunksPath . '/test_chunk.dat', 'test data');
+
+        $I->assertTrue(is_dir($chunksPath));
+
+        // Execute delete
+        $I->amLoggedInAs(7);
+        $I->sendAjaxPostRequest('/flight/delete?id=3');
+
+        // Verify flight is deleted
+        $I->seeResponseCodeIsRedirection();
+        $count = Flight::find()->where(['id' => 3])->count();
+        $I->assertEquals(0, $count);
+
+        // Verify chunks directory was deleted
+        $I->assertFalse(is_dir($chunksPath));
+    }
+
+    public function guestCannotDeleteViaPOST(\FunctionalTester $I)
+    {
+        $I->sendAjaxPostRequest('/flight/delete?id=3');
+
+        $I->seeResponseCodeIsRedirection();
+        $count = Flight::find()->where(['id' => 3])->count();
+        $I->assertEquals(1, $count);
     }
 }
