@@ -61,7 +61,8 @@ class FlightDeletionRuleTest extends BaseUnitTest
         $aircraftType = new AircraftType([
             'id' => 1,
             'icao_type_code' => 'A320',
-            'name' => 'Airbus A320'
+            'name' => 'Airbus A320',
+            'max_nm_range' => 2950,
         ]);
         $aircraftType->save(false);
 
@@ -78,7 +79,8 @@ class FlightDeletionRuleTest extends BaseUnitTest
             'id' => 1,
             'registration' => 'EC-ABC',
             'aircraft_configuration_id' => 1,
-            'location' => 'LEMD'
+            'location' => 'LEMD',
+            'name' => '737-800 Mad',
         ]);
         $this->aircraft->save(false);
     }
