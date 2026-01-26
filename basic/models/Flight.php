@@ -283,6 +283,7 @@ class Flight extends \yii\db\ActiveRecord
 
     /**
      * Deletes the flight and its associated ACARS files.
+     * Reverts flight hours from pilot and aircraft if the flight was processed.
      * The directory is cleaned up after the database transaction commits.
      *
      * @return bool Whether the deletion was successful
@@ -290,13 +291,31 @@ class Flight extends \yii\db\ActiveRecord
      */
     public function deleteWithAcarsFiles(): bool
     {
-        // Get directory path before deletion
-        $reportDir = $this->flightReport?->getChunksDirectory();
+        $flightReport = $this->flightReport;
+        $reportDir = $flightReport?->getChunksDirectory();
+        $flightTimeMinutes = $flightReport->flight_time_minutes ?? null;
 
         $transaction = Yii::$app->db->beginTransaction();
 
         try {
-            // Delete flight (cascade deletes flight_report and acars_file records)
+            // Revert hours if flight was processed
+            if ($flightTimeMinutes !== null && $flightTimeMinutes > 0) {
+                $hoursToRevert = $flightTimeMinutes / 60;
+
+                $pilot = $this->pilot;
+                $pilot->hours_flown = max(0, ($pilot->hours_flown ?? 0) - $hoursToRevert);
+                if (!$pilot->save(false)) {
+                    throw new \RuntimeException('Failed to revert pilot hours');
+                }
+
+                $aircraft = $this->aircraft;
+                $aircraft->hours_flown = max(0, $aircraft->hours_flown - $hoursToRevert);
+                if (!$aircraft->save(false)) {
+                    throw new \RuntimeException('Failed to revert aircraft hours');
+                }
+            }
+
+            // Delete flight (cascade deletes flight_report, acars_file and flight_phase)
             $result = $this->delete();
             $transaction->commit();
         } catch (\Throwable $e) {
