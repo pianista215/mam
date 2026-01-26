@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\config\ConfigHelper as CK;
 use Yii;
 
 /**
@@ -118,5 +119,19 @@ class FlightReport extends \yii\db\ActiveRecord
     public function getFlightPhases()
     {
         return $this->hasMany(FlightPhase::class, ['flight_report_id' => 'id'])->orderBy(['id' => SORT_ASC]);;
+    }
+
+    /**
+     * Returns the directory path where ACARS chunk files are stored.
+     *
+     * @return string|null
+     */
+    public function getChunksDirectory(): ?string
+    {
+        if ($this->id === null) {
+            return null;
+        } else {
+            return CK::getChunksStoragePath() . DIRECTORY_SEPARATOR . $this->id;
+        }
     }
 }

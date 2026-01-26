@@ -2,7 +2,6 @@
 
 namespace app\models;
 
-use app\config\ConfigHelper as CK;
 use app\helpers\LoggerTrait;
 use Yii;
 
@@ -19,12 +18,6 @@ use Yii;
 class AcarsFile extends \yii\db\ActiveRecord
 {
     use LoggerTrait;
-
-    /**
-     * When true, afterDelete will not delete the physical file.
-     * Used by Flight::deleteWithAcarsFiles() to delete files after DB commit.
-     */
-    public static bool $skipFileDelete = false;
     /**
      * {@inheritdoc}
      */
@@ -54,19 +47,12 @@ class AcarsFile extends \yii\db\ActiveRecord
 
     public function getPath()
     {
-        $basePath = CK::getChunksStoragePath();
-        return $basePath . DIRECTORY_SEPARATOR
-            . $this->flight_report_id . DIRECTORY_SEPARATOR
-            . $this->chunk_id;
+        return $this->flightReport->getChunksDirectory() . DIRECTORY_SEPARATOR . $this->chunk_id;
     }
 
     public function afterDelete()
     {
         parent::afterDelete();
-
-        if (self::$skipFileDelete) {
-            return;
-        }
 
         $filePath = $this->getPath();
 

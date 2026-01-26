@@ -2,7 +2,6 @@
 
 namespace app\modules\api\controllers\v1;
 
-use app\config\ConfigHelper as CK;
 use app\helpers\GeoUtils;
 use app\helpers\LoggerTrait;
 use app\models\AcarsFile;
@@ -270,8 +269,6 @@ class FlightReportController extends Controller
 
     public function actionUploadChunk($flight_report_id, $chunk_id)
     {
-        $storagePath = CK::getChunksStoragePath();
-
         $flightReport = FlightReport::findOne(['id' => $flight_report_id]);
         if (!$flightReport) {
             $this->logError('Flight report not found', $flight_report_id);
@@ -299,7 +296,7 @@ class FlightReportController extends Controller
         $transaction = Yii::$app->db->beginTransaction();
         try {
 
-            $flightReportPath = $storagePath . DIRECTORY_SEPARATOR . $flight_report_id;
+            $flightReportPath = $flightReport->getChunksDirectory();
             $this->logInfo('Report path', $flightReportPath);
             if (!file_exists($flightReportPath)) {
                 if (!mkdir($flightReportPath, 0755, true)) {
