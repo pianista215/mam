@@ -179,6 +179,7 @@ return [
     'Longitude' => 'Longitud',
     'Longitude must be between -180 and 180.' => 'La longitud debe estar entre -180 y 180',
     'Manage Images' => 'Gestionar Imágenes',
+    'MAM Version' => 'Versión de MAM',
     'Max Range (NM)' => 'Máximo Alcance (NM)',
     'Move' => 'Mover',
     'Move Aircraft' => 'Mover Aeronave',
