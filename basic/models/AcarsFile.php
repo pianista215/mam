@@ -19,6 +19,12 @@ use Yii;
 class AcarsFile extends \yii\db\ActiveRecord
 {
     use LoggerTrait;
+
+    /**
+     * When true, afterDelete will not delete the physical file.
+     * Used by Flight::deleteWithAcarsFiles() to delete files after DB commit.
+     */
+    public static bool $skipFileDelete = false;
     /**
      * {@inheritdoc}
      */
@@ -57,6 +63,10 @@ class AcarsFile extends \yii\db\ActiveRecord
     public function afterDelete()
     {
         parent::afterDelete();
+
+        if (self::$skipFileDelete) {
+            return;
+        }
 
         $filePath = $this->getPath();
 

@@ -2,6 +2,8 @@
 
 namespace app\models;
 
+use app\config\ConfigHelper as CK;
+use app\helpers\LoggerTrait;
 use Yii;
 
 /**
@@ -46,6 +48,8 @@ use Yii;
  */
 class Flight extends \yii\db\ActiveRecord
 {
+    use LoggerTrait;
+
     /**
      * {@inheritdoc}
      */
@@ -277,4 +281,64 @@ class Flight extends \yii\db\ActiveRecord
    {
        return $this->hasOne(TourStage::class, ['id' => 'tour_stage_id']);
    }
+
+    /**
+     * Deletes the flight and its associated ACARS files.
+     * Files are deleted AFTER the database transaction commits for safety.
+     *
+     * @return bool Whether the deletion was successful
+     * @throws \Throwable If an error occurs during deletion
+     */
+    public function deleteWithAcarsFiles(): bool
+    {
+        // Collect file paths and directory before deletion
+        $filePaths = [];
+        $reportDir = null;
+
+        if ($this->flightReport) {
+            $reportDir = CK::getChunksStoragePath() . DIRECTORY_SEPARATOR . $this->flightReport->id;
+            foreach ($this->flightReport->acarsFiles as $acarsFile) {
+                $filePaths[] = $acarsFile->getPath();
+            }
+        }
+
+        $transaction = Yii::$app->db->beginTransaction();
+
+        try {
+            // Suppress file deletion in AcarsFile::afterDelete()
+            AcarsFile::$skipFileDelete = true;
+
+            // Delete flight (cascade deletes flight_report and acars_file records)
+            $result = $this->delete();
+
+            $transaction->commit();
+        } catch (\Throwable $e) {
+            $transaction->rollBack();
+            AcarsFile::$skipFileDelete = false;
+            throw $e;
+        }
+
+        AcarsFile::$skipFileDelete = false;
+
+        // Delete physical files AFTER successful commit
+        foreach ($filePaths as $path) {
+            if (file_exists($path)) {
+                if (!@unlink($path)) {
+                    $this->logWarn('Failed to delete ACARS file', ['path' => $path]);
+                }
+            }
+        }
+
+        // Try to remove the directory if empty
+        if ($reportDir && is_dir($reportDir)) {
+            $files = @scandir($reportDir);
+            if ($files !== false && count($files) === 2) { // Only . and ..
+                if (!@rmdir($reportDir)) {
+                    $this->logWarn('Failed to remove empty ACARS directory', ['dir' => $reportDir]);
+                }
+            }
+        }
+
+        return $result !== false;
+    }
 }
