@@ -59,7 +59,7 @@ class CountryUpdateCest
        $I->see('Iso2 Code cannot be blank.');
 
        $count = \app\models\Country::find()->count();
-       $I->assertEquals(1, $count);
+       $I->assertEquals(2, $count);
     }
 
     public function updateValidCountry(\FunctionalTester $I)
@@ -80,7 +80,7 @@ class CountryUpdateCest
        $I->assertEquals('Prueba2', $model->name);
 
        $count = \app\models\Country::find()->count();
-       $I->assertEquals(1, $count);
+       $I->assertEquals(2, $count);
     }
 
 }

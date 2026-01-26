@@ -55,7 +55,7 @@ class RankUpdateCest
        $I->see('Position cannot be blank.');
 
        $count = \app\models\Rank::find()->count();
-       $I->assertEquals(3, $count);
+       $I->assertEquals(4, $count);
     }
 
     public function updateValidRank(\FunctionalTester $I)
@@ -86,7 +86,7 @@ class RankUpdateCest
        $I->assertEquals(5, $model->position);
 
        $count = \app\models\Rank::find()->count();
-       $I->assertEquals(3, $count);
+       $I->assertEquals(4, $count);
     }
 
 }

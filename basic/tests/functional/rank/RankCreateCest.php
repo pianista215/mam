@@ -52,7 +52,7 @@ class RankCreateCest
        $I->see('Name cannot be blank.');
 
        $count = \app\models\Rank::find()->count();
-       $I->assertEquals(3, $count);
+       $I->assertEquals(5, $count);
     }
 
     public function submitValidRank(\FunctionalTester $I)
@@ -77,7 +77,7 @@ class RankCreateCest
        $I->assertEquals(6, $model->position);
 
        $count = \app\models\Rank::find()->count();
-       $I->assertEquals(4, $count);
+       $I->assertEquals(5, $count);
     }
 
     public function CantHaveTwoRankWithSamePosition(\FunctionalTester $I)
@@ -94,7 +94,7 @@ class RankCreateCest
        $I->see('Position "3" has already been taken.');
 
        $count = \app\models\Rank::find()->count();
-       $I->assertEquals(3, $count);
+       $I->assertEquals(5, $count);
     }
 
     public function ByDefaultLastPositionIsOffered(\FunctionalTester $I)
@@ -102,7 +102,7 @@ class RankCreateCest
        $I->amLoggedInAs(2);
 
        $I->amOnRoute('rank/create');
-       $I->seeInField('#rank-position','4');
+       $I->seeInField('#rank-position','5');
     }
 
 }
