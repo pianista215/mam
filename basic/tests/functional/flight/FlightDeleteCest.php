@@ -4,7 +4,7 @@ namespace tests\functional\flight;
 
 use app\models\Flight;
 use tests\fixtures\AuthAssignmentFixture;
-use tests\fixtures\FlightFixture;
+use tests\fixtures\FlightReportFixture;
 
 class FlightDeleteCest
 {
@@ -12,7 +12,7 @@ class FlightDeleteCest
     {
         return [
             'authAssignment' => AuthAssignmentFixture::class,
-            'flight' => FlightFixture::class,
+            'flightReport' => FlightReportFixture::class,
         ];
     }
 
