@@ -18,10 +18,15 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php if (Yii::$app->user->can(Permissions::CRUD_OWN_FPL, ['submittedFlightPlan' => $model])) : ?>
     <p>
         <?= Html::a(Yii::t('app', 'Update'), ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
+        <?php
+        $confirmMessage = $model->hasLiveFlightPosition()
+            ? Yii::t('app', 'This flight plan has recorded flight data. Do not delete if you are still flying or if the flight ended but ACARS could not send the data. If ACARS failed, restart it to complete the upload. If you continue, ALL flight data will be permanently lost. Are you sure?')
+            : Yii::t('app', 'Are you sure you want to delete this item?');
+        ?>
         <?= Html::a(Yii::t('app', 'Delete'), ['delete', 'id' => $model->id], [
             'class' => 'btn btn-danger',
             'data' => [
-                'confirm' => Yii::t('app', 'Are you sure you want to delete this item?'),
+                'confirm' => $confirmMessage,
                 'method' => 'post',
             ],
         ]) ?>
