@@ -3,6 +3,7 @@
 namespace tests\functional\submitFlightPlan;
 
 use tests\fixtures\AuthAssignmentFixture;
+use tests\fixtures\LiveFlightPositionFixture;
 use tests\fixtures\SubmittedFlightPlanFixture;
 use Yii;
 
@@ -13,6 +14,7 @@ class SubmittedFlightPlanIndexViewCest
         return [
             'authAssignment' => AuthAssignmentFixture::class,
             'submittedFlightPlan' => SubmittedFlightPlanFixture::class,
+            'liveFlightPosition' => LiveFlightPositionFixture::class,
         ];
     }
 
@@ -207,6 +209,22 @@ class SubmittedFlightPlanIndexViewCest
         $I->seeInField('select[name="SubmittedFlightPlan[flight_rules]"]', 'Z - VFR/IFR (VFR changing to IFR)');
 
         $this->cantSeeUpdateDeleteBtns($I);
+    }
+
+    // ACARS warning message tests
+
+    /**
+     * FPL 3 has live flight position, owner is pilot 7
+     * Delete button should show warning message about flight data
+     */
+    public function deleteButtonShowsWarningWhenFlightHasLivePosition(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(7);
+        $this->canSeeSubmittedFlightPlan($I, '3');
+        $this->canSeeUpdateDeleteBtns($I);
+
+        // Verify the delete button has the warning confirm message
+        $I->seeElement('a[data-confirm*="recorded flight data"]');
     }
 
 }
