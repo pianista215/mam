@@ -82,15 +82,25 @@ class SubmittedFlightPlanDeleteCest
      */
     public function ownerCannotDeleteWhenAcarsIsActive(\FunctionalTester $I)
     {
+        // Verify the FPL exists and has active ACARS position
+        $fpl = SubmittedFlightPlan::findOne(1);
+        $I->assertNotNull($fpl, 'FPL 1 should exist');
+        $I->assertTrue($fpl->hasLiveFlightPosition(), 'FPL 1 should have live position');
+        $I->assertTrue($fpl->isAcarsActive(), 'FPL 1 ACARS should be active');
+
         $I->amLoggedInAs(5);
         $I->sendAjaxPostRequest('/submitted-flight-plan/delete?id=1');
 
+        // Should redirect back to view (not delete)
         $I->seeResponseCodeIsRedirection();
-        $I->followRedirect();
-        $I->see('security reasons');
 
+        // FPL should NOT be deleted
         $count = SubmittedFlightPlan::find()->where(['id' => 1])->count();
         $I->assertEquals(1, $count);
+
+        // Navigate to view to verify flash message
+        $I->amOnRoute('submitted-flight-plan/view', ['id' => 1]);
+        $I->see('security reasons');
     }
 
     /**
