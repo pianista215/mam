@@ -512,7 +512,13 @@ class SubmittedFlightPlanController extends Controller
         $model = $this->findModel($id);
 
         if (Yii::$app->user->can(Permissions::CRUD_OWN_FPL, ['submittedFlightPlan' => $model])) {
-            $model = $this->findModel($id);
+
+            // Block deletion if ACARS is still active (position updated within last 2 minutes)
+            if ($model->isAcarsActive()) {
+                Yii::$app->session->setFlash('error', Yii::t('app', 'For security reasons, you must wait with ACARS turned off for more than 2 minutes before you can delete a flight plan that has already started.'));
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
+
             $tx = Yii::$app->db->beginTransaction();
             try {
                 $model->delete();

@@ -288,6 +288,45 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
        return $this->hasOne(CharterRoute::class, ['id' => 'charter_route_id']);
    }
 
+   /**
+    * Gets query for [[LiveFlightPosition]].
+    *
+    * @return \yii\db\ActiveQuery
+    */
+   public function getLiveFlightPosition()
+   {
+       return $this->hasOne(LiveFlightPosition::class, ['submitted_flight_plan_id' => 'id']);
+   }
+
+   /**
+    * Checks if ACARS is considered active (position updated within last X minutes)
+    *
+    * @param int $minutes Threshold in minutes (default 2)
+    * @return bool True if ACARS is active
+    */
+   public function isAcarsActive($minutes = 2)
+   {
+       $position = $this->liveFlightPosition;
+       if ($position === null) {
+           return false;
+       } else {
+           $cutoff = strtotime("-{$minutes} minutes");
+           $lastUpdate = strtotime($position->updated_at);
+
+           return $lastUpdate > $cutoff;
+       }
+   }
+
+   /**
+    * Checks if there was ever a live position recorded for this flight plan
+    *
+    * @return bool True if a live position exists
+    */
+   public function hasLiveFlightPosition()
+   {
+       return $this->liveFlightPosition !== null;
+   }
+
    public function getEntity()
    {
        if ($this->route_id) {

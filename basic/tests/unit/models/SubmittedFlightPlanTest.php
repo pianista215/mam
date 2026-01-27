@@ -15,6 +15,7 @@ use app\models\Route;
 use app\models\Tour;
 use app\models\TourStage;
 use app\models\SubmittedFlightPlan;
+use app\models\LiveFlightPosition;
 
 
 class SubmittedFlightPlanTest extends BaseUnitTest
@@ -525,6 +526,119 @@ class SubmittedFlightPlanTest extends BaseUnitTest
         $this->assertFalse($flightPlan1->save());
         $this->assertArrayHasKey('pilot_id', $flightPlan1->errors);
         $this->assertArrayHasKey('aircraft_id', $flightPlan1->errors);
+    }
+
+    // ACARS / LiveFlightPosition tests
+
+    public function testHasLiveFlightPositionReturnsFalseWhenNoPosition()
+    {
+        $data = $this->createBaseFlightPlanData();
+        $flightPlan = new SubmittedFlightPlan($data);
+        $flightPlan->save();
+
+        $this->assertFalse($flightPlan->hasLiveFlightPosition());
+    }
+
+    public function testHasLiveFlightPositionReturnsTrueWhenPositionExists()
+    {
+        $data = $this->createBaseFlightPlanData();
+        $flightPlan = new SubmittedFlightPlan($data);
+        $flightPlan->save();
+
+        $position = new LiveFlightPosition([
+            'submitted_flight_plan_id' => $flightPlan->id,
+            'latitude' => 40.4168,
+            'longitude' => -3.7038,
+            'altitude' => 35000,
+            'heading' => 270,
+            'ground_speed' => 450,
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+        $position->save();
+
+        // Refresh to reload relations
+        $flightPlan->refresh();
+
+        $this->assertTrue($flightPlan->hasLiveFlightPosition());
+    }
+
+    public function testIsAcarsActiveReturnsFalseWhenNoPosition()
+    {
+        $data = $this->createBaseFlightPlanData();
+        $flightPlan = new SubmittedFlightPlan($data);
+        $flightPlan->save();
+
+        $this->assertFalse($flightPlan->isAcarsActive());
+    }
+
+    public function testIsAcarsActiveReturnsTrueWhenPositionIsRecent()
+    {
+        $data = $this->createBaseFlightPlanData();
+        $flightPlan = new SubmittedFlightPlan($data);
+        $flightPlan->save();
+
+        $position = new LiveFlightPosition([
+            'submitted_flight_plan_id' => $flightPlan->id,
+            'latitude' => 40.4168,
+            'longitude' => -3.7038,
+            'altitude' => 35000,
+            'heading' => 270,
+            'ground_speed' => 450,
+            'updated_at' => date('Y-m-d H:i:s'), // Now
+        ]);
+        $position->save();
+
+        $flightPlan->refresh();
+
+        $this->assertTrue($flightPlan->isAcarsActive());
+    }
+
+    public function testIsAcarsActiveReturnsFalseWhenPositionIsStale()
+    {
+        $data = $this->createBaseFlightPlanData();
+        $flightPlan = new SubmittedFlightPlan($data);
+        $flightPlan->save();
+
+        $position = new LiveFlightPosition([
+            'submitted_flight_plan_id' => $flightPlan->id,
+            'latitude' => 40.4168,
+            'longitude' => -3.7038,
+            'altitude' => 35000,
+            'heading' => 270,
+            'ground_speed' => 450,
+            'updated_at' => date('Y-m-d H:i:s', strtotime('-5 minutes')), // 5 min ago
+        ]);
+        $position->save();
+
+        $flightPlan->refresh();
+
+        $this->assertFalse($flightPlan->isAcarsActive());
+    }
+
+    public function testIsAcarsActiveRespectsCustomMinutesParameter()
+    {
+        $data = $this->createBaseFlightPlanData();
+        $flightPlan = new SubmittedFlightPlan($data);
+        $flightPlan->save();
+
+        $position = new LiveFlightPosition([
+            'submitted_flight_plan_id' => $flightPlan->id,
+            'latitude' => 40.4168,
+            'longitude' => -3.7038,
+            'altitude' => 35000,
+            'heading' => 270,
+            'ground_speed' => 450,
+            'updated_at' => date('Y-m-d H:i:s', strtotime('-3 minutes')), // 3 min ago
+        ]);
+        $position->save();
+
+        $flightPlan->refresh();
+
+        // With default 2 minutes, should be inactive
+        $this->assertFalse($flightPlan->isAcarsActive(2));
+
+        // With 5 minutes threshold, should be active
+        $this->assertTrue($flightPlan->isAcarsActive(5));
     }
 
 }

@@ -4,6 +4,7 @@ namespace tests\functional\submitFlightPlan;
 
 use app\models\SubmittedFlightPlan;
 use tests\fixtures\AuthAssignmentFixture;
+use tests\fixtures\LiveFlightPositionFixture;
 use tests\fixtures\SubmittedFlightPlanFixture;
 
 class SubmittedFlightPlanDeleteCest
@@ -13,6 +14,7 @@ class SubmittedFlightPlanDeleteCest
         return [
             'authAssignment' => AuthAssignmentFixture::class,
             'submittedFlightPlan' => SubmittedFlightPlanFixture::class,
+            'liveFlightPosition' => LiveFlightPositionFixture::class,
         ];
     }
 
@@ -70,5 +72,48 @@ class SubmittedFlightPlanDeleteCest
         $I->seeResponseCodeIsRedirection();
         $count = SubmittedFlightPlan::find()->where(['id' => 3])->count();
         $I->assertEquals(1, $count);
+    }
+
+    // ACARS protection tests
+
+    /**
+     * FPL 1 has active ACARS (updated_at = now), owner is pilot 5
+     * Should NOT be able to delete
+     */
+    public function ownerCannotDeleteWhenAcarsIsActive(\FunctionalTester $I)
+    {
+        // Verify the FPL exists and has active ACARS position
+        $fpl = SubmittedFlightPlan::findOne(1);
+        $I->assertNotNull($fpl, 'FPL 1 should exist');
+        $I->assertTrue($fpl->hasLiveFlightPosition(), 'FPL 1 should have live position');
+        $I->assertTrue($fpl->isAcarsActive(), 'FPL 1 ACARS should be active');
+
+        $I->amLoggedInAs(5);
+        $I->sendAjaxPostRequest('/submitted-flight-plan/delete?id=1');
+
+        // Should redirect back to view (not delete)
+        $I->seeResponseCodeIsRedirection();
+
+        // FPL should NOT be deleted
+        $count = SubmittedFlightPlan::find()->where(['id' => 1])->count();
+        $I->assertEquals(1, $count);
+
+        // Navigate to view to verify flash message
+        $I->amOnRoute('submitted-flight-plan/view', ['id' => 1]);
+        $I->see('security reasons');
+    }
+
+    /**
+     * FPL 3 has stale ACARS (updated_at = 5 min ago), owner is pilot 7
+     * Should be able to delete
+     */
+    public function ownerCanDeleteWhenAcarsIsStale(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(7);
+        $I->sendAjaxPostRequest('/submitted-flight-plan/delete?id=3');
+
+        $I->seeResponseCodeIsRedirection();
+        $count = SubmittedFlightPlan::find()->where(['id' => 3])->count();
+        $I->assertEquals(0, $count);
     }
 }
