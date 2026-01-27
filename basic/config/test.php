@@ -7,6 +7,7 @@ $db = getenv('GITHUB_ACTIONS') ? require __DIR__ . '/test_db_github.php' : requi
  */
 return [
     'id' => 'basic-tests',
+    'version' => $params['version'],
     'basePath' => dirname(__DIR__),
     'aliases' => [
         '@bower' => '@vendor/bower-asset',

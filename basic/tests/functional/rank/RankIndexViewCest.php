@@ -17,10 +17,11 @@ class RankIndexViewCest
         $I->amOnRoute('rank/index');
 
         $I->see('Ranks');
-        $I->see('Showing 1-3 of 3 items.');
+        $I->see('Showing 1-4 of 4 items.');
         $I->see('Rank 1');
         $I->see('Rank 2');
         $I->see('Rank 3');
+        $I->see('Rank 4');
     }
 
     public function openRankIndexAsAdmin(\FunctionalTester $I)

@@ -2,7 +2,6 @@
 
 namespace app\models;
 
-use app\config\ConfigHelper as CK;
 use app\helpers\LoggerTrait;
 use Yii;
 
@@ -48,10 +47,7 @@ class AcarsFile extends \yii\db\ActiveRecord
 
     public function getPath()
     {
-        $basePath = CK::getChunksStoragePath();
-        return $basePath . DIRECTORY_SEPARATOR
-            . $this->flight_report_id . DIRECTORY_SEPARATOR
-            . $this->chunk_id;
+        return $this->flightReport->getChunksDirectory() . DIRECTORY_SEPARATOR . $this->chunk_id;
     }
 
     public function afterDelete()

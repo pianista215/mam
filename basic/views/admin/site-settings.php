@@ -7,6 +7,10 @@ $this->title = Yii::t('app', 'Site Settings');
 
 <h1><?= Html::encode($this->title) ?></h1>
 
+<div class="alert alert-info">
+    <strong><?= Yii::t('app', 'MAM Version') ?>:</strong> <?= Html::encode(Yii::$app->version) ?>
+</div>
+
 <?php $form = ActiveForm::begin(); ?>
 
 <?php if ($model->hasErrors()): ?>

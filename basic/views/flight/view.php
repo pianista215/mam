@@ -17,7 +17,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="container mb-3">
         <div class="row">
             <div class="col-md-12">
-                <div class="p-3 border rounded bg-light-subtle">
+                <div class="p-3 border rounded bg-light-subtle d-flex justify-content-between align-items-center">
                     <div class="fw-semibold fs-5 text-dark">
                         <?php if (!empty($model->tourStage)): ?>
                         <?= Html::encode($model->tourStage->fplDescription) ?>
@@ -27,6 +27,15 @@ $this->params['breadcrumbs'][] = $this->title;
                         <?= Html::encode(Yii::t('app', 'Route').' '.$model->code) ?>
                         <?php endif; ?>
                     </div>
+                    <?php if (Yii::$app->user->can(Permissions::DELETE_OWN_FLIGHT, ['flight' => $model])): ?>
+                    <?= Html::a(Yii::t('app', 'Delete flight'), ['delete', 'id' => $model->id], [
+                        'class' => 'btn btn-danger',
+                        'data' => [
+                            'confirm' => Yii::t('app', 'Are you sure you want to delete this flight? Once deleted, it cannot be recovered.'),
+                            'method' => 'post',
+                        ],
+                    ]) ?>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

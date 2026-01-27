@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\LoggerTrait;
 use Yii;
 
 /**
@@ -46,6 +47,8 @@ use Yii;
  */
 class Flight extends \yii\db\ActiveRecord
 {
+    use LoggerTrait;
+
     /**
      * {@inheritdoc}
      */
@@ -277,4 +280,67 @@ class Flight extends \yii\db\ActiveRecord
    {
        return $this->hasOne(TourStage::class, ['id' => 'tour_stage_id']);
    }
+
+    /**
+     * Deletes the flight and its associated ACARS files.
+     * Reverts flight hours from pilot and aircraft if the flight was processed.
+     * The directory is cleaned up after the database transaction commits.
+     *
+     * @return bool Whether the deletion was successful
+     * @throws \Throwable If an error occurs during deletion
+     */
+    public function deleteWithAcarsFiles(): bool
+    {
+        $flightReport = $this->flightReport;
+        $reportDir = $flightReport?->getChunksDirectory();
+        $flightTimeMinutes = $flightReport->flight_time_minutes ?? null;
+
+        $transaction = Yii::$app->db->beginTransaction();
+
+        try {
+            // Revert hours if flight was processed
+            if ($flightTimeMinutes !== null && $flightTimeMinutes > 0) {
+                $hoursToRevert = $flightTimeMinutes / 60;
+
+                $pilot = $this->pilot;
+                $pilot->hours_flown = max(0, ($pilot->hours_flown ?? 0) - $hoursToRevert);
+                if (!$pilot->save(false)) {
+                    throw new \RuntimeException('Failed to revert pilot hours');
+                }
+
+                $aircraft = $this->aircraft;
+                $aircraft->hours_flown = max(0, $aircraft->hours_flown - $hoursToRevert);
+                if (!$aircraft->save(false)) {
+                    throw new \RuntimeException('Failed to revert aircraft hours');
+                }
+            }
+
+            // Delete flight (cascade deletes flight_report, acars_file and flight_phase)
+            $result = $this->delete();
+            $transaction->commit();
+        } catch (\Throwable $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
+
+        // Clean up the directory after successful commit
+        if ($reportDir && is_dir($reportDir)) {
+            $files = @scandir($reportDir);
+            if ($files !== false) {
+                foreach ($files as $file) {
+                    if ($file !== '.' && $file !== '..') {
+                        $filePath = $reportDir . DIRECTORY_SEPARATOR . $file;
+                        if (is_file($filePath) && !@unlink($filePath)) {
+                            $this->logWarn('Failed to delete ACARS file', ['path' => $filePath]);
+                        }
+                    }
+                }
+            }
+            if (!@rmdir($reportDir)) {
+                $this->logWarn('Failed to remove ACARS directory', ['dir' => $reportDir]);
+            }
+        }
+
+        return $result !== false;
+    }
 }

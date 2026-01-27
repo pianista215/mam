@@ -6,8 +6,8 @@ return [
     ['key' => 'registration_start_location', 'value' => 'LEVD'],
 
     // Settings
-    ['key' => 'chunks_storage_path', 'value' => '/opt/mam/chunks'],
-    ['key' => 'images_storage_path', 'value' => '/opt/mam/images'],
+    ['key' => 'chunks_storage_path', 'value' => '/tmp/mam_test_chunks'],
+    ['key' => 'images_storage_path', 'value' => '/tmp/mam_test_images'],
     ['key' => 'token_life_h', 'value' => '24'],
 
     // Global config

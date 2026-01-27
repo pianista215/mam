@@ -5,6 +5,7 @@ $db = require __DIR__ . '/db.php';
 
 $config = [
     'id' => 'basic',
+    'version' => $params['version'],
     'language' => 'es-ES',
     'sourceLanguage' => 'en-US',
     'basePath' => dirname(__DIR__),

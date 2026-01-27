@@ -32,7 +32,7 @@ class FlightController extends Controller
             [
                 'access' => [
                     'class' => AccessControl::class,
-                    'only' => ['index', 'index-pending', 'view', 'validate'],
+                    'only' => ['index', 'index-pending', 'view', 'validate', 'delete'],
                     'rules' => [
                         [
                             'allow' => true,
@@ -196,6 +196,35 @@ class FlightController extends Controller
         return $this->redirect(['view', 'id' => $model->id]);
     }
 
+
+    /**
+     * Deletes a Flight model.
+     * Only the owner can delete their own flight when it's pending validation.
+     *
+     * @param string $id ID
+     * @return \yii\web\Response
+     * @throws NotFoundHttpException if the model cannot be found
+     * @throws ForbiddenHttpException if the user is not allowed to delete
+     */
+    public function actionDelete($id)
+    {
+        $model = $this->findModel($id);
+
+        if (!Yii::$app->user->can(Permissions::DELETE_OWN_FLIGHT, ['flight' => $model])) {
+            throw new ForbiddenHttpException();
+        }
+
+        try {
+            $model->deleteWithAcarsFiles();
+            Yii::$app->session->setFlash('success', Yii::t('app', 'Flight deleted successfully.'));
+        } catch (\Throwable $e) {
+            $this->logError('Error deleting flight', ['model' => $model, 'user' => Yii::$app->user->identity->license, 'ex' => $e]);
+            Yii::$app->session->setFlash('error', Yii::t('app', 'Error deleting flight.'));
+            return $this->redirect(['view', 'id' => $model->id]);
+        }
+
+        return $this->redirect(['index']);
+    }
 
     /**
      * Finds the Flight model based on its primary key value.

@@ -3,6 +3,7 @@
 use app\rbac\constants\Permissions;
 use app\rbac\constants\Roles;
 use app\rbac\rules\EditPageContentRule;
+use app\rbac\rules\FlightDeletionRule;
 use app\rbac\rules\ImageUploadRule;
 use app\rbac\rules\FlightValidationRule;
 use app\rbac\rules\SubmittedFlightPlanOwnerRule;
@@ -45,10 +46,19 @@ class m241202_180323_add_rbac_roles extends Migration
         $crudOwnFpl->ruleName = $ownerFplRule->name;
         $auth->add($crudOwnFpl);
 
+        // Flight deletion rule
+        $flightDeletionRule = new FlightDeletionRule();
+        $auth->add($flightDeletionRule);
+        $deleteOwnFlight = $auth->createPermission(Permissions::DELETE_OWN_FLIGHT);
+        $deleteOwnFlight->description = 'Delete own flight pending validation';
+        $deleteOwnFlight->ruleName = $flightDeletionRule->name;
+        $auth->add($deleteOwnFlight);
+
         $pilot = $auth->createRole(Roles::PILOT);
         $auth->add($pilot);
         $auth->addChild($pilot, $submitFpl);
         $auth->addChild($pilot, $crudOwnFpl);
+        $auth->addChild($pilot, $deleteOwnFlight);
         // All active pilots inherit this rule, so all "potentially" can upload images
         $auth->addChild($pilot, $uploadImage);
 

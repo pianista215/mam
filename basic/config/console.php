@@ -7,6 +7,7 @@ $db = getenv('GITHUB_ACTIONS') === 'true'
 
 $config = [
     'id' => 'basic-console',
+    'version' => $params['version'],
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'controllerNamespace' => 'app\commands',

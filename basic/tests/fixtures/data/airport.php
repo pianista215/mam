@@ -46,4 +46,13 @@ return [
         'longitude' => -0.5601802763545335,
         'city' => 'Alicante',
     ],
+    [
+        'id' => 6,
+        'country_id' => 1,
+        'icao_code' => 'LEZG',
+        'name' => 'Zaragoza',
+        'latitude' => 41.6662,
+        'longitude' => -1.0415,
+        'city' => 'Zaragoza',
+    ],
 ];

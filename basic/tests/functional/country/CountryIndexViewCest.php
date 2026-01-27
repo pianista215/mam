@@ -17,9 +17,11 @@ class CountryIndexViewCest
         $I->amOnRoute('country/index');
 
         $I->see('Countries');
-        $I->see('Showing 1-1 of 1 item');
+        $I->see('Showing 1-2 of 2 items.');
         $I->see('Spain');
         $I->see('ES');
+        $I->see('Portugal');
+        $I->see('PT');
     }
 
     public function openCountryIndexAsAdmin(\FunctionalTester $I)
