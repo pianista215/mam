@@ -452,5 +452,128 @@ CREATE TABLE `live_flight_position` (
     REFERENCES `submitted_flight_plan` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Statistics System Tables
+
+CREATE TABLE `statistic_period_type` (
+  `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+  `code` varchar(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `statistic_period_type_unique` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `statistic_period` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `period_type_id` smallint(5) unsigned NOT NULL,
+  `year` smallint(5) unsigned NOT NULL,
+  `month` tinyint(3) unsigned DEFAULT NULL,
+  `status` char(1) NOT NULL DEFAULT 'O',
+  `calculated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `statistic_period_unique` (`period_type_id`, `year`, `month`),
+  KEY `statistic_period_type_FK` (`period_type_id`),
+  CONSTRAINT `statistic_period_type_FK` FOREIGN KEY (`period_type_id`) REFERENCES `statistic_period_type` (`id`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `statistic_aggregate_type` (
+  `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+  `code` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `statistic_aggregate_type_unique` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `statistic_aggregate_type_lang` (
+  `id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
+  `aggregate_type_id` smallint(5) unsigned NOT NULL,
+  `language` char(2) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `description` varchar(200) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `statistic_aggregate_type_lang_unique` (`aggregate_type_id`, `language`),
+  CONSTRAINT `statistic_aggregate_type_lang_FK` FOREIGN KEY (`aggregate_type_id`) REFERENCES `statistic_aggregate_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `statistic_aggregate` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `period_id` int(10) unsigned NOT NULL,
+  `aggregate_type_id` smallint(5) unsigned NOT NULL,
+  `value` decimal(15,4) NOT NULL DEFAULT 0,
+  `variation_percent` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `statistic_aggregate_unique` (`period_id`, `aggregate_type_id`),
+  KEY `statistic_aggregate_type_FK` (`aggregate_type_id`),
+  CONSTRAINT `statistic_aggregate_period_FK` FOREIGN KEY (`period_id`) REFERENCES `statistic_period` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `statistic_aggregate_type_FK` FOREIGN KEY (`aggregate_type_id`) REFERENCES `statistic_aggregate_type` (`id`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `statistic_ranking_type` (
+  `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+  `code` varchar(50) NOT NULL,
+  `entity_type` varchar(20) NOT NULL,
+  `max_positions` tinyint(3) unsigned NOT NULL DEFAULT 5,
+  `sort_order` varchar(4) NOT NULL DEFAULT 'DESC',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `statistic_ranking_type_unique` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `statistic_ranking_type_lang` (
+  `id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
+  `ranking_type_id` smallint(5) unsigned NOT NULL,
+  `language` char(2) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `description` varchar(200) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `statistic_ranking_type_lang_unique` (`ranking_type_id`, `language`),
+  CONSTRAINT `statistic_ranking_type_lang_FK` FOREIGN KEY (`ranking_type_id`) REFERENCES `statistic_ranking_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `statistic_ranking` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `period_id` int(10) unsigned NOT NULL,
+  `ranking_type_id` smallint(5) unsigned NOT NULL,
+  `position` tinyint(3) unsigned NOT NULL,
+  `entity_id` bigint(20) unsigned NOT NULL,
+  `value` decimal(15,4) NOT NULL,
+  `previous_position` tinyint(3) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `statistic_ranking_unique` (`period_id`, `ranking_type_id`, `position`),
+  KEY `statistic_ranking_type_FK` (`ranking_type_id`),
+  CONSTRAINT `statistic_ranking_period_FK` FOREIGN KEY (`period_id`) REFERENCES `statistic_period` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `statistic_ranking_type_FK` FOREIGN KEY (`ranking_type_id`) REFERENCES `statistic_ranking_type` (`id`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `statistic_record_type` (
+  `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+  `code` varchar(50) NOT NULL,
+  `entity_type` varchar(20) NOT NULL,
+  `comparison` varchar(3) NOT NULL DEFAULT 'MAX',
+  `unit` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `statistic_record_type_unique` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `statistic_record_type_lang` (
+  `id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
+  `record_type_id` smallint(5) unsigned NOT NULL,
+  `language` char(2) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `description` varchar(200) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `statistic_record_type_lang_unique` (`record_type_id`, `language`),
+  CONSTRAINT `statistic_record_type_lang_FK` FOREIGN KEY (`record_type_id`) REFERENCES `statistic_record_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `statistic_record` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `period_id` int(10) unsigned NOT NULL,
+  `record_type_id` smallint(5) unsigned NOT NULL,
+  `entity_id` bigint(20) unsigned NOT NULL,
+  `value` decimal(15,4) NOT NULL,
+  `is_all_time_record` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `statistic_record_unique` (`period_id`, `record_type_id`),
+  KEY `statistic_record_type_FK` (`record_type_id`),
+  CONSTRAINT `statistic_record_period_FK` FOREIGN KEY (`period_id`) REFERENCES `statistic_period` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `statistic_record_type_FK` FOREIGN KEY (`record_type_id`) REFERENCES `statistic_record_type` (`id`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 

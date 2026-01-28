@@ -50,6 +50,7 @@ mysql -u <user> -p mam < db-model/config.sql
 mysql -u <user> -p mam < db-model/countries.sql
 mysql -u <user> -p mam < db-model/issues.sql
 mysql -u <user> -p mam < db-model/pages.sql
+mysql -u <user> -p mam < db-model/statistics.sql
 ```
 
 3. Configure the database connection in `basic/config/db.php`:
