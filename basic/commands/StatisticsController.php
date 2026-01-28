@@ -3,6 +3,9 @@
 namespace app\commands;
 
 use app\models\Flight;
+use app\models\FlightPhaseMetricType;
+use app\models\FlightPhaseType;
+use app\models\FlightReport;
 use app\models\StatisticAggregate;
 use app\models\StatisticAggregateType;
 use app\models\StatisticPeriod;
@@ -13,6 +16,7 @@ use app\models\StatisticRecord;
 use app\models\StatisticRecordType;
 use yii\console\Controller;
 use yii\console\ExitCode;
+use yii\db\Query;
 use Yii;
 
 /**
@@ -216,6 +220,20 @@ class StatisticsController extends Controller
     }
 
     /**
+     * Build base query for valid flights (approved with complete data).
+     */
+    private function buildBaseFlightQuery(string $startDate, string $endDate): Query
+    {
+        return (new Query())
+            ->from(['f' => Flight::tableName()])
+            ->innerJoin(['fr' => FlightReport::tableName()], 'fr.flight_id = f.id')
+            ->where(['f.status' => Flight::STATUS_FINISHED])
+            ->andWhere(['not', ['fr.flight_time_minutes' => null]])
+            ->andWhere(['>=', 'f.creation_date', $startDate])
+            ->andWhere(['<', 'f.creation_date', $endDate]);
+    }
+
+    /**
      * Calculate aggregate statistics for a period.
      */
     private function calculateAggregates(StatisticPeriod $period, string $startDate, string $endDate): void
@@ -255,41 +273,16 @@ class StatisticsController extends Controller
      */
     private function calculateAggregateValue(string $code, string $startDate, string $endDate): float
     {
-        $db = Yii::$app->db;
-
         switch ($code) {
             case StatisticAggregateType::CODE_TOTAL_FLIGHTS:
-                $result = $db->createCommand("
-                    SELECT COUNT(*)
-                    FROM flight f
-                    INNER JOIN flight_report fr ON fr.flight_id = f.id
-                    WHERE f.status IN (:statusF, :statusR)
-                      AND fr.flight_time_minutes IS NOT NULL
-                      AND f.creation_date >= :startDate
-                      AND f.creation_date < :endDate
-                ", [
-                    ':statusF' => Flight::STATUS_FINISHED,
-                    ':statusR' => Flight::STATUS_REJECTED,
-                    ':startDate' => $startDate,
-                    ':endDate' => $endDate,
-                ])->queryScalar();
+                $result = $this->buildBaseFlightQuery($startDate, $endDate)
+                    ->count();
                 return (float) ($result ?? 0);
 
             case StatisticAggregateType::CODE_TOTAL_FLIGHT_HOURS:
-                $result = $db->createCommand("
-                    SELECT COALESCE(SUM(fr.flight_time_minutes) / 60.0, 0)
-                    FROM flight f
-                    INNER JOIN flight_report fr ON fr.flight_id = f.id
-                    WHERE f.status IN (:statusF, :statusR)
-                      AND fr.flight_time_minutes IS NOT NULL
-                      AND f.creation_date >= :startDate
-                      AND f.creation_date < :endDate
-                ", [
-                    ':statusF' => Flight::STATUS_FINISHED,
-                    ':statusR' => Flight::STATUS_REJECTED,
-                    ':startDate' => $startDate,
-                    ':endDate' => $endDate,
-                ])->queryScalar();
+                $result = $this->buildBaseFlightQuery($startDate, $endDate)
+                    ->select(new \yii\db\Expression('COALESCE(SUM(fr.flight_time_minutes) / 60.0, 0)'))
+                    ->scalar();
                 return (float) ($result ?? 0);
 
             default:
@@ -353,95 +346,68 @@ class StatisticsController extends Controller
      */
     private function calculateRankingValues(StatisticRankingType $rankingType, string $startDate, string $endDate): array
     {
-        $db = Yii::$app->db;
         $limit = $rankingType->max_positions;
-        $order = $rankingType->sort_order;
+        $order = $rankingType->sort_order === 'DESC' ? SORT_DESC : SORT_ASC;
 
         switch ($rankingType->code) {
             case StatisticRankingType::CODE_TOP_PILOTS_BY_HOURS:
-                $results = $db->createCommand("
-                    SELECT f.pilot_id AS entity_id, SUM(fr.flight_time_minutes) / 60.0 AS value
-                    FROM flight f
-                    INNER JOIN flight_report fr ON fr.flight_id = f.id
-                    WHERE f.status IN (:statusF, :statusR)
-                      AND fr.flight_time_minutes IS NOT NULL
-                      AND f.creation_date >= :startDate
-                      AND f.creation_date < :endDate
-                    GROUP BY f.pilot_id
-                    ORDER BY value {$order}
-                    LIMIT :limit
-                ", [
-                    ':statusF' => Flight::STATUS_FINISHED,
-                    ':statusR' => Flight::STATUS_REJECTED,
-                    ':startDate' => $startDate,
-                    ':endDate' => $endDate,
-                    ':limit' => $limit,
-                ])->queryAll();
+                $results = $this->buildBaseFlightQuery($startDate, $endDate)
+                    ->select([
+                        'entity_id' => 'f.pilot_id',
+                        'value' => new \yii\db\Expression('SUM(fr.flight_time_minutes) / 60.0'),
+                    ])
+                    ->groupBy('f.pilot_id')
+                    ->orderBy(['value' => $order])
+                    ->limit($limit)
+                    ->all();
                 break;
 
             case StatisticRankingType::CODE_TOP_PILOTS_BY_FLIGHTS:
-                $results = $db->createCommand("
-                    SELECT f.pilot_id AS entity_id, COUNT(*) AS value
-                    FROM flight f
-                    INNER JOIN flight_report fr ON fr.flight_id = f.id
-                    WHERE f.status IN (:statusF, :statusR)
-                      AND fr.flight_time_minutes IS NOT NULL
-                      AND f.creation_date >= :startDate
-                      AND f.creation_date < :endDate
-                    GROUP BY f.pilot_id
-                    ORDER BY value {$order}
-                    LIMIT :limit
-                ", [
-                    ':statusF' => Flight::STATUS_FINISHED,
-                    ':statusR' => Flight::STATUS_REJECTED,
-                    ':startDate' => $startDate,
-                    ':endDate' => $endDate,
-                    ':limit' => $limit,
-                ])->queryAll();
+                $results = $this->buildBaseFlightQuery($startDate, $endDate)
+                    ->select([
+                        'entity_id' => 'f.pilot_id',
+                        'value' => new \yii\db\Expression('COUNT(*)'),
+                    ])
+                    ->groupBy('f.pilot_id')
+                    ->orderBy(['value' => $order])
+                    ->limit($limit)
+                    ->all();
                 break;
 
             case StatisticRankingType::CODE_TOP_AIRCRAFT_BY_FLIGHTS:
-                $results = $db->createCommand("
-                    SELECT f.aircraft_id AS entity_id, COUNT(*) AS value
-                    FROM flight f
-                    INNER JOIN flight_report fr ON fr.flight_id = f.id
-                    WHERE f.status IN (:statusF, :statusR)
-                      AND fr.flight_time_minutes IS NOT NULL
-                      AND f.creation_date >= :startDate
-                      AND f.creation_date < :endDate
-                    GROUP BY f.aircraft_id
-                    ORDER BY value {$order}
-                    LIMIT :limit
-                ", [
-                    ':statusF' => Flight::STATUS_FINISHED,
-                    ':statusR' => Flight::STATUS_REJECTED,
-                    ':startDate' => $startDate,
-                    ':endDate' => $endDate,
-                    ':limit' => $limit,
-                ])->queryAll();
+                $results = $this->buildBaseFlightQuery($startDate, $endDate)
+                    ->select([
+                        'entity_id' => 'f.aircraft_id',
+                        'value' => new \yii\db\Expression('COUNT(*)'),
+                    ])
+                    ->groupBy('f.aircraft_id')
+                    ->orderBy(['value' => $order])
+                    ->limit($limit)
+                    ->all();
                 break;
 
             case StatisticRankingType::CODE_SMOOTHEST_LANDINGS:
-                $results = $db->createCommand("
-                    SELECT f.id AS entity_id, ABS(CAST(fpm.value AS DECIMAL(10,2))) AS value
-                    FROM flight f
-                    INNER JOIN flight_report fr ON fr.flight_id = f.id
-                    INNER JOIN flight_phase fp ON fp.flight_report_id = fr.id
-                    INNER JOIN flight_phase_type fpt ON fpt.id = fp.flight_phase_type_id AND fpt.code = 'final_landing'
-                    INNER JOIN flight_phase_metric fpm ON fpm.flight_phase_id = fp.id
-                    INNER JOIN flight_phase_metric_type fpmt ON fpmt.id = fpm.metric_type_id AND fpmt.code = 'LandingVSFpm'
-                    WHERE f.status IN (:statusF, :statusR)
-                      AND f.creation_date >= :startDate
-                      AND f.creation_date < :endDate
-                    ORDER BY value {$order}
-                    LIMIT :limit
-                ", [
-                    ':statusF' => Flight::STATUS_FINISHED,
-                    ':statusR' => Flight::STATUS_REJECTED,
-                    ':startDate' => $startDate,
-                    ':endDate' => $endDate,
-                    ':limit' => $limit,
-                ])->queryAll();
+                $results = (new Query())
+                    ->select([
+                        'entity_id' => 'f.id',
+                        'value' => new \yii\db\Expression('ABS(CAST(fpm.value AS DECIMAL(10,2)))'),
+                    ])
+                    ->from(['f' => Flight::tableName()])
+                    ->innerJoin(['fr' => FlightReport::tableName()], 'fr.flight_id = f.id')
+                    ->innerJoin(['fp' => 'flight_phase'], 'fp.flight_report_id = fr.id')
+                    ->innerJoin(['fpt' => FlightPhaseType::tableName()], 'fpt.id = fp.flight_phase_type_id AND fpt.code = :phaseCode', [
+                        ':phaseCode' => FlightPhaseType::CODE_FINAL_LANDING,
+                    ])
+                    ->innerJoin(['fpm' => 'flight_phase_metric'], 'fpm.flight_phase_id = fp.id')
+                    ->innerJoin(['fpmt' => FlightPhaseMetricType::tableName()], 'fpmt.id = fpm.metric_type_id AND fpmt.code = :metricCode', [
+                        ':metricCode' => FlightPhaseMetricType::CODE_LANDING_VS_FPM,
+                    ])
+                    ->where(['f.status' => Flight::STATUS_FINISHED])
+                    ->andWhere(['>=', 'f.creation_date', $startDate])
+                    ->andWhere(['<', 'f.creation_date', $endDate])
+                    ->orderBy(['value' => $order])
+                    ->limit($limit)
+                    ->all();
                 break;
 
             default:
@@ -499,46 +465,35 @@ class StatisticsController extends Controller
      */
     private function calculateRecordValue(StatisticRecordType $recordType, string $startDate, string $endDate): ?array
     {
-        $db = Yii::$app->db;
-        $order = $recordType->isMax() ? 'DESC' : 'ASC';
+        $order = $recordType->isMax() ? SORT_DESC : SORT_ASC;
 
         switch ($recordType->code) {
             case StatisticRecordType::CODE_LONGEST_FLIGHT_TIME:
-                $result = $db->createCommand("
-                    SELECT f.id AS entity_id, fr.flight_time_minutes AS value
-                    FROM flight f
-                    INNER JOIN flight_report fr ON fr.flight_id = f.id
-                    WHERE f.status IN (:statusF, :statusR)
-                      AND fr.flight_time_minutes IS NOT NULL
-                      AND f.creation_date >= :startDate
-                      AND f.creation_date < :endDate
-                    ORDER BY fr.flight_time_minutes {$order}
-                    LIMIT 1
-                ", [
-                    ':statusF' => Flight::STATUS_FINISHED,
-                    ':statusR' => Flight::STATUS_REJECTED,
-                    ':startDate' => $startDate,
-                    ':endDate' => $endDate,
-                ])->queryOne();
+                $result = $this->buildBaseFlightQuery($startDate, $endDate)
+                    ->select([
+                        'entity_id' => 'f.id',
+                        'value' => 'fr.flight_time_minutes',
+                    ])
+                    ->orderBy(['fr.flight_time_minutes' => $order])
+                    ->limit(1)
+                    ->one();
                 break;
 
             case StatisticRecordType::CODE_LONGEST_FLIGHT_DISTANCE:
-                $result = $db->createCommand("
-                    SELECT f.id AS entity_id, fr.distance_nm AS value
-                    FROM flight f
-                    INNER JOIN flight_report fr ON fr.flight_id = f.id
-                    WHERE f.status IN (:statusF, :statusR)
-                      AND fr.distance_nm IS NOT NULL
-                      AND f.creation_date >= :startDate
-                      AND f.creation_date < :endDate
-                    ORDER BY fr.distance_nm {$order}
-                    LIMIT 1
-                ", [
-                    ':statusF' => Flight::STATUS_FINISHED,
-                    ':statusR' => Flight::STATUS_REJECTED,
-                    ':startDate' => $startDate,
-                    ':endDate' => $endDate,
-                ])->queryOne();
+                $result = (new Query())
+                    ->select([
+                        'entity_id' => 'f.id',
+                        'value' => 'fr.distance_nm',
+                    ])
+                    ->from(['f' => Flight::tableName()])
+                    ->innerJoin(['fr' => FlightReport::tableName()], 'fr.flight_id = f.id')
+                    ->where(['f.status' => Flight::STATUS_FINISHED])
+                    ->andWhere(['not', ['fr.distance_nm' => null]])
+                    ->andWhere(['>=', 'f.creation_date', $startDate])
+                    ->andWhere(['<', 'f.creation_date', $endDate])
+                    ->orderBy(['fr.distance_nm' => $order])
+                    ->limit(1)
+                    ->one();
                 break;
 
             default:
