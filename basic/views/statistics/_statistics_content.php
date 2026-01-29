@@ -58,6 +58,16 @@ use yii\helpers\Html;
                 <h3><?= Yii::t('app', 'Rankings') ?></h3>
             </div>
             <?php foreach ($rankings as $code => $data): ?>
+                <?php
+                // Determine column header based on ranking type
+                if ($code === StatisticRankingType::CODE_TOP_PILOTS_BY_HOURS) {
+                    $valueColumnHeader = Yii::t('app', 'Hours');
+                } elseif ($code === StatisticRankingType::CODE_SMOOTHEST_LANDINGS) {
+                    $valueColumnHeader = Yii::t('app', 'Landing Rate');
+                } else {
+                    $valueColumnHeader = Yii::t('app', 'Flights');
+                }
+                ?>
                 <div class="col-md-6 mb-3">
                     <div class="card h-100">
                         <div class="card-header">
@@ -69,7 +79,7 @@ use yii\helpers\Html;
                                     <tr>
                                         <th style="width: 50px;">#</th>
                                         <th><?= Yii::t('app', 'Name') ?></th>
-                                        <th class="text-end"><?= Yii::t('app', 'Value') ?></th>
+                                        <th class="text-end"><?= $valueColumnHeader ?></th>
                                         <th style="width: 60px;"></th>
                                     </tr>
                                 </thead>
