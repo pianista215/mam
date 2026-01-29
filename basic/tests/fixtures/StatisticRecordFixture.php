@@ -9,6 +9,6 @@ class StatisticRecordFixture extends ActiveFixture
     public $modelClass = 'app\models\StatisticRecord';
     public $depends = [
         'tests\fixtures\StatisticPeriodFixture',
-        'tests\fixtures\StatisticRecordTypeFixture',
+        // Note: StatisticRecordType is seed data from statistics.sql, not a fixture
     ];
 }

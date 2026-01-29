@@ -12,16 +12,9 @@ use tests\fixtures\FlightPhaseMetricFixture;
 use tests\fixtures\FlightReportFixture;
 use tests\fixtures\PilotFixture;
 use tests\fixtures\StatisticAggregateFixture;
-use tests\fixtures\StatisticAggregateTypeFixture;
-use tests\fixtures\StatisticAggregateTypeLangFixture;
 use tests\fixtures\StatisticPeriodFixture;
-use tests\fixtures\StatisticPeriodTypeFixture;
 use tests\fixtures\StatisticRankingFixture;
-use tests\fixtures\StatisticRankingTypeFixture;
-use tests\fixtures\StatisticRankingTypeLangFixture;
 use tests\fixtures\StatisticRecordFixture;
-use tests\fixtures\StatisticRecordTypeFixture;
-use tests\fixtures\StatisticRecordTypeLangFixture;
 use Yii;
 
 /**
@@ -82,15 +75,7 @@ class StatisticsViewCest
                 'class' => FlightPhaseMetricFixture::class,
                 'dataFile' => Yii::getAlias('@app/tests/fixtures/data/flight_phase_metric_for_statistics.php'),
             ],
-            // Types must be loaded before their dependent tables
-            'statisticPeriodTypes' => StatisticPeriodTypeFixture::class,
-            'statisticAggregateTypes' => StatisticAggregateTypeFixture::class,
-            'statisticAggregateTypeLangs' => StatisticAggregateTypeLangFixture::class,
-            'statisticRankingTypes' => StatisticRankingTypeFixture::class,
-            'statisticRankingTypeLangs' => StatisticRankingTypeLangFixture::class,
-            'statisticRecordTypes' => StatisticRecordTypeFixture::class,
-            'statisticRecordTypeLangs' => StatisticRecordTypeLangFixture::class,
-            // Data tables
+            // Note: statistic_*_type tables are seed data from statistics.sql, not fixtures
             'statisticPeriods' => StatisticPeriodFixture::class,
             'statisticAggregates' => StatisticAggregateFixture::class,
             'statisticRankings' => StatisticRankingFixture::class,

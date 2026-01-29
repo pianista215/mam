@@ -82,7 +82,7 @@ class PilotIndexViewCest
         $I->see('LEBL');
 
         $I->see('Recent flights');
-        $I->see('3 flights');
+        $I->see('6 flights');
 
         $I->see('Creation Date');
         $I->see('Departure');

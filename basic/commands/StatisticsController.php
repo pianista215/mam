@@ -728,6 +728,7 @@ class StatisticsController extends Controller
 
         $airlineName = ConfigHelper::getAirlineName();
         $fromEmail = ConfigHelper::getNoReplyMail();
+        $replyToEmail = ConfigHelper::getSupportMail();
 
         return Yii::$app->mailer->compose($template, [
             'airlineName' => $airlineName,
@@ -737,6 +738,7 @@ class StatisticsController extends Controller
             'rankings' => $rankings,
             'records' => $records,
         ])
+            ->setReplyTo($replyToEmail)
             ->setFrom($fromEmail)
             ->setTo($to)
             ->setSubject($airlineName . ' - ' . $subject)

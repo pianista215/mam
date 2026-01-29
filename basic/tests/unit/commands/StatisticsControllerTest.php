@@ -47,6 +47,8 @@ class StatisticsControllerTest extends BaseUnitTest
      */
     private function createTestData(): void
     {
+        // Note: statistic_*_type tables are seed data from statistics.sql
+
         // Create base entities
         $country = new \app\models\Country(['name' => 'Spain', 'iso2_code' => 'ES']);
         $country->save(false);
@@ -233,15 +235,15 @@ class StatisticsControllerTest extends BaseUnitTest
         $this->assertEquals(2, (int) $rankings[0]->value);
         $this->assertEquals(1, (int) $rankings[1]->value);
 
-        // Verify top_aircraft_by_flights (aircraft1: 2, aircraft2: 1)
-        $aircraftType = StatisticRankingType::findOne(['code' => StatisticRankingType::CODE_TOP_AIRCRAFT_BY_FLIGHTS]);
+        // Verify top_aircraft_types_by_flights (both aircraft use same type B738, so 3 flights total)
+        $aircraftTypeRanking = StatisticRankingType::findOne(['code' => StatisticRankingType::CODE_TOP_AIRCRAFT_TYPES_BY_FLIGHTS]);
         $rankings = StatisticRanking::find()
-            ->where(['period_id' => $period->id, 'ranking_type_id' => $aircraftType->id])
+            ->where(['period_id' => $period->id, 'ranking_type_id' => $aircraftTypeRanking->id])
             ->orderBy(['position' => SORT_ASC])
             ->all();
 
-        $this->assertCount(2, $rankings);
-        $this->assertEquals(2, (int) $rankings[0]->value);
+        $this->assertCount(1, $rankings); // Only one aircraft type (B738)
+        $this->assertEquals(3, (int) $rankings[0]->value); // All 3 flights use B738
     }
 
     public function testRecalculateCreatesCorrectRecords()
