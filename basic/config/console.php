@@ -4,6 +4,7 @@ $params = require __DIR__ . '/params.php';
 $db = getenv('GITHUB_ACTIONS') === 'true'
     ? require __DIR__ . '/test_db_github.php'
     : require __DIR__ . '/db.php';
+$mailer = require __DIR__ . '/mailer.php';
 
 $config = [
     'id' => 'basic-console',
@@ -33,6 +34,7 @@ $config = [
                 ],
             ],
         ],
+        'mailer' => $mailer,
         'db' => $db,
     ],
     'params' => $params,

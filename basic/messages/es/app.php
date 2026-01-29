@@ -298,6 +298,7 @@ return [
     'Stage' => 'Etapa',
     'Start' => 'Comienzo',
     'Statistics' => 'Estadísticas',
+    'Statistics email' => 'Email de estadísticas',
     'Status' => 'Estado',
     'Submit FPL' => 'Enviar FPL',
     'Submitted Flight Plan' => 'Plan de Vuelo',

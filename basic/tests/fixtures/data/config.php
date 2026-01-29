@@ -19,4 +19,7 @@ return [
     ['key' => 'x_url', 'value' => 'https://testx.com/'],
     ['key' => 'instagram_url', 'value' => 'https://testinstagram.com/'],
     ['key' => 'facebook_url', 'value' => 'https://testfacebook.com/'],
+
+    // Statistics
+    ['key' => 'statistics_email_list', 'value' => 'statistics@testairlines.com'],
 ];

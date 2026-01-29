@@ -28,6 +28,9 @@ class ConfigHelper
     public const INSTAGRAM_URL = 'instagram_url';
     public const FACEBOOK_URL = 'facebook_url';
 
+    // Statistics
+    public const STATISTICS_EMAIL_LIST = 'statistics_email_list';
+
     public static function getRegistrationStart(): ?DateTime
     {
         $value = Config::get(self::REGISTRATION_START);
@@ -109,6 +112,17 @@ class ConfigHelper
     public static function getFacebookUrl(): ?string
     {
         return Config::get(self::FACEBOOK_URL);
+    }
+
+    /**
+     * Get the email address for statistics notifications.
+     *
+     * @return string|null Email address or null if not configured
+     */
+    public static function getStatisticsEmail(): ?string
+    {
+        $value = Config::get(self::STATISTICS_EMAIL_LIST);
+        return !empty($value) ? $value : null;
     }
 
 }

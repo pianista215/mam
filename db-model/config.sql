@@ -20,3 +20,6 @@ INSERT INTO config(`key`, `value`) VALUES ('support_mail', 'support@mamairlines.
 INSERT INTO config(`key`, `value`) VALUES ('x_url', 'https://x.com/');
 INSERT INTO config(`key`, `value`) VALUES ('instagram_url', 'https://instagram.com/');
 INSERT INTO config(`key`, `value`) VALUES ('facebook_url', 'https://facebook.com/');
+
+-- Statistics
+INSERT INTO config(`key`, `value`) VALUES ('statistics_email_list', 'statistics@mamairlines.com');

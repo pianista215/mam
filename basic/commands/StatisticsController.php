@@ -2,10 +2,13 @@
 
 namespace app\commands;
 
+use app\config\ConfigHelper;
+use app\models\AircraftType;
 use app\models\Flight;
 use app\models\FlightPhaseMetricType;
 use app\models\FlightPhaseType;
 use app\models\FlightReport;
+use app\models\Pilot;
 use app\models\StatisticAggregate;
 use app\models\StatisticAggregateType;
 use app\models\StatisticPeriod;
@@ -566,5 +569,250 @@ class StatisticsController extends Controller
         }
 
         return $value < $existingRecord->value;
+    }
+
+    // ========================================
+    // Email sending actions
+    // ========================================
+
+    /**
+     * Send monthly statistics email.
+     * Intended to be scheduled on the 1st of each month to send previous month's statistics.
+     *
+     * @param int|null $year The year (defaults to previous month's year)
+     * @param int|null $month The month (defaults to previous month)
+     * @return int Exit code
+     */
+    public function actionSendMonthlyEmail(?int $year = null, ?int $month = null): int
+    {
+        $now = new \DateTimeImmutable();
+
+        // Default to previous month
+        if ($year === null || $month === null) {
+            $prevMonth = $now->modify('-1 month');
+            $year = $year ?? (int) $prevMonth->format('Y');
+            $month = $month ?? (int) $prevMonth->format('n');
+        }
+
+        $this->stdout("Sending monthly statistics email for {$year}-{$month}...\n");
+
+        $email = ConfigHelper::getStatisticsEmail();
+        if (empty($email)) {
+            $this->stderr("No statistics email configured. Set it in Site Settings.\n");
+            return ExitCode::CONFIG;
+        }
+
+        $period = $this->findPeriod(StatisticPeriodType::TYPE_MONTHLY, $year, $month);
+        if (!$period) {
+            $this->stderr("No statistics found for {$year}-{$month}.\n");
+            return ExitCode::DATAERR;
+        }
+
+        $monthName = (new \DateTimeImmutable("{$year}-{$month}-01"))->format('F');
+        $periodTitle = "{$monthName} {$year}";
+
+        $sent = $this->sendStatisticsEmail(
+            $email,
+            Yii::t('app', 'Monthly Statistics') . ' - ' . $periodTitle,
+            'monthlyStatistics',
+            $period,
+            $periodTitle
+        );
+
+        if ($sent) {
+            $this->stdout("Email sent successfully to {$email}\n");
+            return ExitCode::OK;
+        }
+
+        $this->stderr("Failed to send email.\n");
+        return ExitCode::UNAVAILABLE;
+    }
+
+    /**
+     * Send yearly statistics email.
+     * Intended to be scheduled on January 1st to send previous year's statistics.
+     *
+     * @param int|null $year The year (defaults to previous year)
+     * @return int Exit code
+     */
+    public function actionSendYearlyEmail(?int $year = null): int
+    {
+        $now = new \DateTimeImmutable();
+
+        // Default to previous year
+        if ($year === null) {
+            $year = (int) $now->format('Y') - 1;
+        }
+
+        $this->stdout("Sending yearly statistics email for {$year}...\n");
+
+        $email = ConfigHelper::getStatisticsEmail();
+        if (empty($email)) {
+            $this->stderr("No statistics email configured. Set it in Site Settings.\n");
+            return ExitCode::CONFIG;
+        }
+
+        $period = $this->findPeriod(StatisticPeriodType::TYPE_YEARLY, $year, null);
+        if (!$period) {
+            $this->stderr("No statistics found for year {$year}.\n");
+            return ExitCode::DATAERR;
+        }
+
+        $periodTitle = (string) $year;
+
+        $sent = $this->sendStatisticsEmail(
+            $email,
+            Yii::t('app', 'Yearly Statistics') . ' - ' . $periodTitle,
+            'yearlyStatistics',
+            $period,
+            $periodTitle
+        );
+
+        if ($sent) {
+            $this->stdout("Email sent successfully to {$email}\n");
+            return ExitCode::OK;
+        }
+
+        $this->stderr("Failed to send email.\n");
+        return ExitCode::UNAVAILABLE;
+    }
+
+    /**
+     * Find a period by type and date.
+     */
+    private function findPeriod(string $typeCode, ?int $year, ?int $month): ?StatisticPeriod
+    {
+        $periodType = StatisticPeriodType::findByCode($typeCode);
+        if (!$periodType) {
+            return null;
+        }
+
+        return StatisticPeriod::findOne([
+            'period_type_id' => $periodType->id,
+            'year' => $year,
+            'month' => $month,
+        ]);
+    }
+
+    /**
+     * Send statistics email.
+     */
+    private function sendStatisticsEmail(
+        string $to,
+        string $subject,
+        string $template,
+        StatisticPeriod $period,
+        string $periodTitle
+    ): bool {
+        $aggregates = $this->getAggregatesForPeriod($period);
+        $rankings = $this->getRankingsForPeriod($period);
+        $records = $this->getRecordsForPeriod($period);
+
+        $airlineName = ConfigHelper::getAirlineName();
+        $fromEmail = ConfigHelper::getNoReplyMail();
+
+        return Yii::$app->mailer->compose($template, [
+            'airlineName' => $airlineName,
+            'periodTitle' => $periodTitle,
+            'period' => $period,
+            'aggregates' => $aggregates,
+            'rankings' => $rankings,
+            'records' => $records,
+        ])
+            ->setFrom($fromEmail)
+            ->setTo($to)
+            ->setSubject($airlineName . ' - ' . $subject)
+            ->send();
+    }
+
+    /**
+     * Get aggregates for a period, indexed by type code.
+     */
+    private function getAggregatesForPeriod(StatisticPeriod $period): array
+    {
+        $aggregates = StatisticAggregate::find()
+            ->with(['aggregateType', 'aggregateType.lang'])
+            ->where(['period_id' => $period->id])
+            ->all();
+
+        $result = [];
+        foreach ($aggregates as $aggregate) {
+            $result[$aggregate->aggregateType->code] = $aggregate;
+        }
+        return $result;
+    }
+
+    /**
+     * Get rankings for a period, grouped by type code.
+     */
+    private function getRankingsForPeriod(StatisticPeriod $period): array
+    {
+        $rankings = StatisticRanking::find()
+            ->with(['rankingType', 'rankingType.lang'])
+            ->where(['period_id' => $period->id])
+            ->orderBy(['ranking_type_id' => SORT_ASC, 'position' => SORT_ASC])
+            ->all();
+
+        $result = [];
+        foreach ($rankings as $ranking) {
+            $code = $ranking->rankingType->code;
+            if (!isset($result[$code])) {
+                $result[$code] = [
+                    'type' => $ranking->rankingType,
+                    'entries' => [],
+                ];
+            }
+            $result[$code]['entries'][] = $ranking;
+        }
+
+        // Load related entities for display
+        foreach ($result as $code => &$data) {
+            $entityType = $data['type']->entity_type;
+            $entityIds = array_column($data['entries'], 'entity_id');
+
+            if ($entityType === StatisticRankingType::ENTITY_PILOT) {
+                $entities = Pilot::find()->where(['id' => $entityIds])->indexBy('id')->all();
+            } elseif ($entityType === StatisticRankingType::ENTITY_AIRCRAFT_TYPE) {
+                $entities = AircraftType::find()->where(['id' => $entityIds])->indexBy('id')->all();
+            } elseif ($entityType === StatisticRankingType::ENTITY_FLIGHT) {
+                $entities = Flight::find()
+                    ->with(['pilot', 'flightReport'])
+                    ->where(['id' => $entityIds])
+                    ->indexBy('id')
+                    ->all();
+            } else {
+                $entities = [];
+            }
+
+            $data['entities'] = $entities;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get records for a period, indexed by type code.
+     */
+    private function getRecordsForPeriod(StatisticPeriod $period): array
+    {
+        $records = StatisticRecord::find()
+            ->with(['recordType', 'recordType.lang'])
+            ->where(['period_id' => $period->id])
+            ->all();
+
+        $result = [];
+        foreach ($records as $record) {
+            $code = $record->recordType->code;
+            $flight = Flight::find()
+                ->with(['pilot', 'flightReport'])
+                ->where(['id' => $record->entity_id])
+                ->one();
+
+            $result[$code] = [
+                'record' => $record,
+                'flight' => $flight,
+            ];
+        }
+        return $result;
     }
 }
