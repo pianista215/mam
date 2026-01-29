@@ -37,6 +37,10 @@ abstract class BaseUnitTest extends \Codeception\Test\Unit
         Yii::$app->db->createCommand()->delete('flight_phase_metric_type')->execute();
         Yii::$app->db->createCommand()->delete('flight_event_attribute')->execute();
         Yii::$app->db->createCommand()->delete('issue_type')->execute();
+        Yii::$app->db->createCommand()->delete('statistic_record')->execute();
+        Yii::$app->db->createCommand()->delete('statistic_ranking')->execute();
+        Yii::$app->db->createCommand()->delete('statistic_aggregate')->execute();
+        Yii::$app->db->createCommand()->delete('statistic_period')->execute();
     }
 
 }

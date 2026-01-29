@@ -27,6 +27,9 @@ mysql yii2db < /issues.sql
 echo "Loading pages from /pages.sql"
 mysql yii2db < /pages.sql
 
+echo "Loading statistics types from /statistics.sql"
+mysql yii2db < /statistics.sql
+
 echo "Overwritting db conf for Yii"
 cp /db-docker.php /var/www/html/config/db.php
 

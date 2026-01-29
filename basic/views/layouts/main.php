@@ -76,6 +76,7 @@ if (file_exists($customCssPath)) {
          ['label' => Yii::t('app', 'Flights'), 'url' => ['/flight/index']];
     }
     $items[] =  ['label' => Yii::t('app', 'Tours'), 'url' => ['/tour/index']];
+    $items[] =  ['label' => Yii::t('app', 'Statistics'), 'url' => ['/statistics/month']];
     $items[] =
             [
                 'label' => Yii::t('app', 'Operations'),

@@ -26,6 +26,7 @@ COPY db-model/config.sql /
 COPY db-model/countries.sql /
 COPY db-model/issues.sql /
 COPY db-model/pages.sql /
+COPY db-model/statistics.sql /
 COPY docker-test/db-docker.php /
 
 RUN mkdir -p /opt/mam/chunks \
