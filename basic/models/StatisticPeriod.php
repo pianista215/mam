@@ -38,7 +38,7 @@ class StatisticPeriod extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['period_type_id', 'year'], 'required'],
+            [['period_type_id'], 'required'],
             [['period_type_id', 'year', 'month'], 'integer'],
             [['calculated_at'], 'safe'],
             [['status'], 'string', 'max' => 1],
@@ -120,7 +120,17 @@ class StatisticPeriod extends \yii\db\ActiveRecord
      */
     public function isYearly(): bool
     {
-        return $this->month === null;
+        return $this->year !== null && $this->month === null;
+    }
+
+    /**
+     * Check if this is an all-time period
+     *
+     * @return bool
+     */
+    public function isAllTime(): bool
+    {
+        return $this->year === null && $this->month === null;
     }
 
     /**
@@ -150,6 +160,9 @@ class StatisticPeriod extends \yii\db\ActiveRecord
      */
     public function getStartDate(): \DateTimeImmutable
     {
+        if ($this->isAllTime()) {
+            return new \DateTimeImmutable('2000-01-01 00:00:00');
+        }
         $month = $this->month ?? 1;
         return new \DateTimeImmutable("{$this->year}-{$month}-01 00:00:00");
     }
@@ -161,6 +174,9 @@ class StatisticPeriod extends \yii\db\ActiveRecord
      */
     public function getEndDate(): \DateTimeImmutable
     {
+        if ($this->isAllTime()) {
+            return new \DateTimeImmutable('2100-01-01 00:00:00');
+        }
         if ($this->isMonthly()) {
             return $this->getStartDate()->modify('+1 month');
         }
@@ -170,12 +186,12 @@ class StatisticPeriod extends \yii\db\ActiveRecord
     /**
      * Find or create a period
      *
-     * @param string $typeCode 'monthly' or 'yearly'
-     * @param int $year
+     * @param string $typeCode 'monthly', 'yearly', or 'all_time'
+     * @param int|null $year
      * @param int|null $month
      * @return static
      */
-    public static function findOrCreate(string $typeCode, int $year, ?int $month = null): self
+    public static function findOrCreate(string $typeCode, ?int $year, ?int $month = null): self
     {
         $periodType = StatisticPeriodType::findByCode($typeCode);
         if (!$periodType) {
@@ -210,6 +226,11 @@ class StatisticPeriod extends \yii\db\ActiveRecord
      */
     public function getPreviousPeriod(): ?self
     {
+        // All-time has no previous period
+        if ($this->isAllTime()) {
+            return null;
+        }
+
         if ($this->isMonthly()) {
             $prevMonth = $this->month - 1;
             $prevYear = $this->year;

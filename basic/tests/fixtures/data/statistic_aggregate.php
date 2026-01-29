@@ -76,4 +76,20 @@ return [
         'value' => 4.4167,
         'variation_percent' => 178.95,
     ],
+    // All-time - total_flights (1 + 3 = 4)
+    [
+        'id' => 9,
+        'period_id' => 5,
+        'aggregate_type_id' => 1, // total_flights
+        'value' => 4,
+        'variation_percent' => null, // No previous period for all-time
+    ],
+    // All-time - total_flight_hours (1.5833 + 4.4167 = 6)
+    [
+        'id' => 10,
+        'period_id' => 5,
+        'aggregate_type_id' => 2, // total_flight_hours
+        'value' => 6.0,
+        'variation_percent' => null,
+    ],
 ];

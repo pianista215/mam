@@ -8,6 +8,7 @@
  * - January 2025 monthly (open)
  * - 2024 yearly (closed)
  * - 2025 yearly (open)
+ * - All-time (always open)
  */
 
 return [
@@ -43,6 +44,15 @@ return [
         'id' => 4,
         'period_type_id' => 2, // yearly
         'year' => 2025,
+        'month' => null,
+        'status' => 'O',
+        'calculated_at' => '2025-01-28 00:30:00',
+    ],
+    // All-time - always open
+    [
+        'id' => 5,
+        'period_type_id' => 3, // all_time
+        'year' => null,
         'month' => null,
         'status' => 'O',
         'calculated_at' => '2025-01-28 00:30:00',

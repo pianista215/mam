@@ -71,11 +71,11 @@ return [
         'creation_date' => '2025-01-15 09:00:00',
         'flight_type' => 'R',
     ],
-    // Finished flight - pilot 7, aircraft 4 - January 2025
+    // Finished flight - pilot 7, aircraft 3 (C172) - January 2025
     [
         'id' => 103,
         'pilot_id' => 7,
-        'aircraft_id' => 4,
+        'aircraft_id' => 3, // C172 (aircraft_type_id=4)
         'code' => 'STAT003',
         'departure' => 'LEBL',
         'arrival' => 'LEVC',

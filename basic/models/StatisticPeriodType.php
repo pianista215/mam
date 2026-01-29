@@ -16,6 +16,7 @@ class StatisticPeriodType extends \yii\db\ActiveRecord
 {
     const TYPE_MONTHLY = 'monthly';
     const TYPE_YEARLY = 'yearly';
+    const TYPE_ALL_TIME = 'all_time';
 
     /**
      * {@inheritdoc}

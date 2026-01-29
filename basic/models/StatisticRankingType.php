@@ -21,11 +21,11 @@ class StatisticRankingType extends \yii\db\ActiveRecord
 {
     const CODE_TOP_PILOTS_BY_HOURS = 'top_pilots_by_hours';
     const CODE_TOP_PILOTS_BY_FLIGHTS = 'top_pilots_by_flights';
-    const CODE_TOP_AIRCRAFT_BY_FLIGHTS = 'top_aircraft_by_flights';
+    const CODE_TOP_AIRCRAFT_TYPES_BY_FLIGHTS = 'top_aircraft_types_by_flights';
     const CODE_SMOOTHEST_LANDINGS = 'smoothest_landings';
 
     const ENTITY_PILOT = 'pilot';
-    const ENTITY_AIRCRAFT = 'aircraft';
+    const ENTITY_AIRCRAFT_TYPE = 'aircraft_type';
     const ENTITY_FLIGHT = 'flight';
 
     const SORT_DESC = 'DESC';

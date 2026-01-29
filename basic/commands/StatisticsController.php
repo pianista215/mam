@@ -79,6 +79,14 @@ class StatisticsController extends Controller
             );
             $this->stdout("Yearly period: {$currentYear} (ID: {$yearlyPeriod->id})\n");
 
+            // Ensure all-time period exists
+            $allTimePeriod = StatisticPeriod::findOrCreate(
+                StatisticPeriodType::TYPE_ALL_TIME,
+                null,
+                null
+            );
+            $this->stdout("All-time period (ID: {$allTimePeriod->id})\n");
+
             // Recalculate all open periods
             $openPeriods = StatisticPeriod::find()
                 ->where(['status' => StatisticPeriod::STATUS_OPEN])
@@ -133,6 +141,33 @@ class StatisticsController extends Controller
     }
 
     /**
+     * Manually recalculate all-time statistics.
+     *
+     * @return int Exit code
+     */
+    public function actionRecalculateAllTime(): int
+    {
+        $this->stdout("Recalculating all-time statistics\n");
+
+        $transaction = Yii::$app->db->beginTransaction();
+
+        try {
+            $period = StatisticPeriod::findOrCreate(StatisticPeriodType::TYPE_ALL_TIME, null, null);
+            $this->calculatePeriod($period);
+
+            $transaction->commit();
+            $this->stdout("Recalculation completed successfully.\n");
+
+            return ExitCode::OK;
+        } catch (\Throwable $e) {
+            $transaction->rollBack();
+            $this->stderr("Error recalculating all-time statistics: " . $e->getMessage() . "\n");
+            $this->stderr($e->getTraceAsString() . "\n");
+            return ExitCode::UNSPECIFIED_ERROR;
+        }
+    }
+
+    /**
      * Consolidate all statistics - recalculate ALL periods (open and closed).
      * Useful for correcting statistics after logic changes or data fixes.
      *
@@ -156,7 +191,7 @@ class StatisticsController extends Controller
                 $transaction->commit();
             } catch (\Throwable $e) {
                 $transaction->rollBack();
-                $periodDesc = $period->month ? "{$period->year}-{$period->month}" : "{$period->year}";
+                $periodDesc = $period->isAllTime() ? 'ALL-TIME' : ($period->month ? "{$period->year}-{$period->month}" : "{$period->year}");
                 $this->stderr("Error consolidating period {$periodDesc}: " . $e->getMessage() . "\n");
             }
         }
@@ -197,7 +232,7 @@ class StatisticsController extends Controller
      */
     private function calculatePeriod(StatisticPeriod $period): void
     {
-        $periodDesc = $period->month ? "{$period->year}-{$period->month}" : "{$period->year}";
+        $periodDesc = $period->isAllTime() ? 'ALL-TIME' : ($period->month ? "{$period->year}-{$period->month}" : "{$period->year}");
         $this->stdout("Calculating period: {$periodDesc}\n");
 
         $startDate = $period->getStartDate()->format('Y-m-d H:i:s');
@@ -374,13 +409,15 @@ class StatisticsController extends Controller
                     ->all();
                 break;
 
-            case StatisticRankingType::CODE_TOP_AIRCRAFT_BY_FLIGHTS:
+            case StatisticRankingType::CODE_TOP_AIRCRAFT_TYPES_BY_FLIGHTS:
                 $results = $this->buildBaseFlightQuery($startDate, $endDate)
+                    ->innerJoin(['a' => 'aircraft'], 'a.id = f.aircraft_id')
+                    ->innerJoin(['ac' => 'aircraft_configuration'], 'ac.id = a.aircraft_configuration_id')
                     ->select([
-                        'entity_id' => 'f.aircraft_id',
+                        'entity_id' => 'ac.aircraft_type_id',
                         'value' => new \yii\db\Expression('COUNT(*)'),
                     ])
-                    ->groupBy('f.aircraft_id')
+                    ->groupBy('ac.aircraft_type_id')
                     ->orderBy(['value' => $order])
                     ->limit($limit)
                     ->all();

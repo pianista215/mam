@@ -56,4 +56,67 @@ return [
         'value' => 350,
         'is_all_time_record' => 1,
     ],
+
+    // === Year 2024 (period_id=3) ===
+
+    // longest_flight_time
+    [
+        'id' => 7,
+        'period_id' => 3,
+        'record_type_id' => 1,
+        'entity_id' => 108,
+        'value' => 95,
+        'is_all_time_record' => 0,
+    ],
+    // longest_flight_distance
+    [
+        'id' => 8,
+        'period_id' => 3,
+        'record_type_id' => 2,
+        'entity_id' => 108,
+        'value' => 280,
+        'is_all_time_record' => 0,
+    ],
+
+    // === Year 2025 (period_id=4) ===
+
+    // longest_flight_time
+    [
+        'id' => 9,
+        'period_id' => 4,
+        'record_type_id' => 1,
+        'entity_id' => 102,
+        'value' => 120,
+        'is_all_time_record' => 1,
+    ],
+    // longest_flight_distance
+    [
+        'id' => 10,
+        'period_id' => 4,
+        'record_type_id' => 2,
+        'entity_id' => 102,
+        'value' => 350,
+        'is_all_time_record' => 1,
+    ],
+
+    // === All-Time (period_id=5) ===
+
+    // longest_flight_time (same as January 2025 record)
+    [
+        'id' => 5,
+        'period_id' => 5,
+        'record_type_id' => 1,
+        'entity_id' => 102,
+        'value' => 120,
+        'is_all_time_record' => 1,
+    ],
+    // longest_flight_distance (same as January 2025 record)
+    [
+        'id' => 6,
+        'period_id' => 5,
+        'record_type_id' => 2,
+        'entity_id' => 102,
+        'value' => 350,
+        'is_all_time_record' => 1,
+    ],
 ];

@@ -9,5 +9,6 @@ class StatisticAggregateFixture extends ActiveFixture
     public $modelClass = 'app\models\StatisticAggregate';
     public $depends = [
         'tests\fixtures\StatisticPeriodFixture',
+        'tests\fixtures\StatisticAggregateTypeFixture',
     ];
 }
