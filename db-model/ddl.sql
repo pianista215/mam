@@ -464,7 +464,7 @@ CREATE TABLE `statistic_period_type` (
 CREATE TABLE `statistic_period` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `period_type_id` smallint(5) unsigned NOT NULL,
-  `year` smallint(5) unsigned NOT NULL,
+  `year` smallint(5) unsigned DEFAULT NULL,
   `month` tinyint(3) unsigned DEFAULT NULL,
   `status` char(1) NOT NULL DEFAULT 'O',
   `calculated_at` datetime DEFAULT NULL,

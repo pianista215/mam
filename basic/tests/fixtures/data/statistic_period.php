@@ -1,52 +1,62 @@
 <?php
 
 /**
- * Statistic period fixtures.
+ * Statistic period fixtures with dynamic dates.
  *
- * Pre-computed periods for testing web views:
- * - December 2024 monthly (closed)
- * - January 2025 monthly (open)
- * - 2024 yearly (closed)
- * - 2025 yearly (open)
- * - All-time (always open)
+ * Uses current month/year and previous month/year for realistic testing.
  */
 
+$now = new DateTimeImmutable();
+$currentYear = (int) $now->format('Y');
+$currentMonth = (int) $now->format('n');
+
+// Calculate previous month
+$prevMonth = $currentMonth - 1;
+$prevYear = $currentYear;
+if ($prevMonth < 1) {
+    $prevMonth = 12;
+    $prevYear--;
+}
+
+$calculatedAt = $now->format('Y-m-d H:i:s');
+$prevCalculatedAt = $now->modify('-1 month')->format('Y-m-d H:i:s');
+
 return [
-    // December 2024 - monthly, closed
+    // Previous month - monthly, closed
     [
         'id' => 1,
         'period_type_id' => 1, // monthly
-        'year' => 2024,
-        'month' => 12,
+        'year' => $prevYear,
+        'month' => $prevMonth,
         'status' => 'C',
-        'calculated_at' => '2025-01-01 00:30:00',
+        'calculated_at' => $prevCalculatedAt,
     ],
-    // January 2025 - monthly, open
+    // Current month - monthly, open
     [
         'id' => 2,
         'period_type_id' => 1, // monthly
-        'year' => 2025,
-        'month' => 1,
+        'year' => $currentYear,
+        'month' => $currentMonth,
         'status' => 'O',
-        'calculated_at' => '2025-01-28 00:30:00',
+        'calculated_at' => $calculatedAt,
     ],
-    // 2024 - yearly, closed
+    // Previous year - yearly, closed (only if we're in a new year)
     [
         'id' => 3,
         'period_type_id' => 2, // yearly
-        'year' => 2024,
+        'year' => $prevYear,
         'month' => null,
-        'status' => 'C',
-        'calculated_at' => '2025-01-01 00:30:00',
+        'status' => $prevYear < $currentYear ? 'C' : 'O',
+        'calculated_at' => $prevCalculatedAt,
     ],
-    // 2025 - yearly, open
+    // Current year - yearly, open
     [
         'id' => 4,
         'period_type_id' => 2, // yearly
-        'year' => 2025,
+        'year' => $currentYear,
         'month' => null,
         'status' => 'O',
-        'calculated_at' => '2025-01-28 00:30:00',
+        'calculated_at' => $calculatedAt,
     ],
     // All-time - always open
     [
@@ -55,6 +65,6 @@ return [
         'year' => null,
         'month' => null,
         'status' => 'O',
-        'calculated_at' => '2025-01-28 00:30:00',
+        'calculated_at' => $calculatedAt,
     ],
 ];

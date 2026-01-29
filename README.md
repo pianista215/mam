@@ -281,6 +281,76 @@ The script performs these steps:
 - Runs MAM Analyzer on each report to generate `analysis.json`
 - Calls `php yii flight-report/import-pending-reports-analysis` to import results
 
+## Statistics (Cron)
+
+MAM calculates flight statistics (aggregates, rankings, and records) periodically. Statistics are organized by periods: monthly, yearly, and all-time.
+
+### Available commands
+
+| Command | Description |
+|---------|-------------|
+| `php yii statistics/calculate-daily` | Daily calculation. Closes previous periods when needed and recalculates all open periods |
+| `php yii statistics/recalculate <year> [month]` | Manually recalculate a specific period (year or month) |
+| `php yii statistics/consolidate` | Recalculate ALL periods (useful after data corrections) |
+
+### Cron setup
+
+Add a daily cron job to calculate statistics automatically:
+
+```bash
+crontab -e
+```
+
+```cron
+# Daily statistics calculation at 00:30
+30 0 * * * cd /path/to/mam/basic && php yii statistics/calculate-daily >> /var/log/mam/statistics.log 2>&1
+
+# Optional: Monthly consolidation (day 2 at 03:00) to ensure data integrity
+0 3 2 * * cd /path/to/mam/basic && php yii statistics/consolidate >> /var/log/mam/statistics-consolidate.log 2>&1
+```
+
+### How it works
+
+The `calculate-daily` command:
+1. Detects if it's the 1st of the month → closes the previous month
+2. Detects if it's January 1st → closes the previous year
+3. Ensures current periods exist (current month + year)
+4. Recalculates all open periods with fresh data
+5. Calculates variation percentages compared to previous periods
+
+### Manual recalculation
+
+To manually recalculate statistics for a specific period:
+
+```bash
+cd basic
+
+# Recalculate a specific month
+php yii statistics/recalculate 2025 1    # January 2025
+
+# Recalculate a full year
+php yii statistics/recalculate 2025      # Year 2025
+
+# Recalculate everything (all periods)
+php yii statistics/consolidate
+```
+
+### What gets calculated
+
+**Aggregates:**
+- Total flights (finished flights with complete data)
+- Total flight hours
+
+**Rankings (top 5):**
+- Pilots by flight hours
+- Pilots by number of flights
+- Aircraft types by number of flights
+- Smoothest landings (lowest vertical speed)
+
+**Records:**
+- Longest flight (by time)
+- Longest flight (by distance)
+
 ## Running tests
 
 ```bash

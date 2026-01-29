@@ -9,6 +9,6 @@ class FlightPhaseFixture extends ActiveFixture
     public $modelClass = 'app\models\FlightPhase';
     public $depends = [
         'tests\fixtures\FlightReportFixture',
-        'tests\fixtures\FlightPhaseTypeFixture',
+        // Note: FlightPhaseType is seed data from DDL, not a fixture
     ];
 }

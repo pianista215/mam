@@ -2,7 +2,8 @@
 
 INSERT INTO `statistic_period_type` (`code`) VALUES
 ('monthly'),
-('yearly');
+('yearly'),
+('all_time');
 
 INSERT INTO `statistic_aggregate_type` (`code`) VALUES
 ('total_flights'),
@@ -17,7 +18,7 @@ INSERT INTO `statistic_aggregate_type_lang` (`aggregate_type_id`, `language`, `n
 INSERT INTO `statistic_ranking_type` (`code`, `entity_type`, `max_positions`, `sort_order`) VALUES
 ('top_pilots_by_hours', 'pilot', 5, 'DESC'),
 ('top_pilots_by_flights', 'pilot', 5, 'DESC'),
-('top_aircraft_by_flights', 'aircraft', 3, 'DESC'),
+('top_aircraft_types_by_flights', 'aircraft_type', 3, 'DESC'),
 ('smoothest_landings', 'flight', 3, 'ASC');
 
 INSERT INTO `statistic_ranking_type_lang` (`ranking_type_id`, `language`, `name`, `description`) VALUES
@@ -25,8 +26,8 @@ INSERT INTO `statistic_ranking_type_lang` (`ranking_type_id`, `language`, `name`
 ((SELECT id FROM statistic_ranking_type WHERE code = 'top_pilots_by_hours'), 'es', 'Top Pilotos por Horas', 'Pilotos con más horas de vuelo'),
 ((SELECT id FROM statistic_ranking_type WHERE code = 'top_pilots_by_flights'), 'en', 'Top Pilots by Flights', 'Pilots with most flights'),
 ((SELECT id FROM statistic_ranking_type WHERE code = 'top_pilots_by_flights'), 'es', 'Top Pilotos por Vuelos', 'Pilotos con más vuelos'),
-((SELECT id FROM statistic_ranking_type WHERE code = 'top_aircraft_by_flights'), 'en', 'Top Aircraft by Flights', 'Most used aircraft'),
-((SELECT id FROM statistic_ranking_type WHERE code = 'top_aircraft_by_flights'), 'es', 'Top Aeronaves por Vuelos', 'Aeronaves más utilizadas'),
+((SELECT id FROM statistic_ranking_type WHERE code = 'top_aircraft_types_by_flights'), 'en', 'Top Aircraft Types by Flights', 'Most used aircraft types'),
+((SELECT id FROM statistic_ranking_type WHERE code = 'top_aircraft_types_by_flights'), 'es', 'Top Tipos de Aeronave por Vuelos', 'Tipos de aeronave más utilizados'),
 ((SELECT id FROM statistic_ranking_type WHERE code = 'smoothest_landings'), 'en', 'Smoothest Landings', 'Flights with lowest landing rate'),
 ((SELECT id FROM statistic_ranking_type WHERE code = 'smoothest_landings'), 'es', 'Aterrizajes más Suaves', 'Vuelos con menor ratio de aterrizaje');
 

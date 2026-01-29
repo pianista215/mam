@@ -6,6 +6,7 @@
 /** @var array $rankings */
 /** @var array $records */
 
+use app\helpers\TimeHelper;
 use app\models\StatisticAggregateType;
 use app\models\StatisticRankingType;
 use app\models\StatisticRecordType;
@@ -28,7 +29,7 @@ use yii\helpers\Html;
                         <p class="display-6 mb-1">
                             <?php
                             if ($code === StatisticAggregateType::CODE_TOTAL_FLIGHT_HOURS) {
-                                echo number_format($aggregate->value, 1);
+                                echo TimeHelper::formatHoursMinutes($aggregate->value);
                             } else {
                                 echo number_format($aggregate->value);
                             }
@@ -89,7 +90,7 @@ use yii\helpers\Html;
 
                                         // Format value based on ranking type
                                         if ($code === StatisticRankingType::CODE_TOP_PILOTS_BY_HOURS) {
-                                            $entityValue = number_format($ranking->value, 1) . 'h';
+                                            $entityValue = TimeHelper::formatHoursMinutes($ranking->value);
                                         } elseif ($code === StatisticRankingType::CODE_SMOOTHEST_LANDINGS) {
                                             $entityValue = number_format($ranking->value, 0) . ' fpm';
                                         } else {
@@ -148,11 +149,10 @@ use yii\helpers\Html;
 
                 // Format value based on record type
                 if ($code === StatisticRecordType::CODE_LONGEST_FLIGHT_TIME) {
-                    $hours = floor($record->value / 60);
-                    $minutes = $record->value % 60;
-                    $formattedValue = sprintf('%dh %02dm', $hours, $minutes);
+                    // value is in minutes, convert to hours for TimeHelper
+                    $formattedValue = TimeHelper::formatHoursMinutes($record->value / 60);
                 } elseif ($code === StatisticRecordType::CODE_LONGEST_FLIGHT_DISTANCE) {
-                    $formattedValue = number_format($record->value) . ' nm';
+                    $formattedValue = number_format($record->value) . ' Nm';
                 } else {
                     $formattedValue = number_format($record->value);
                 }
