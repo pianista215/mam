@@ -30,6 +30,7 @@ class ConfigHelper
 
     // Statistics
     public const STATISTICS_EMAIL_LIST = 'statistics_email_list';
+    public const STATISTICS_EMAIL_LANGUAGE = 'statistics_email_language';
 
     public static function getRegistrationStart(): ?DateTime
     {
@@ -123,6 +124,17 @@ class ConfigHelper
     {
         $value = Config::get(self::STATISTICS_EMAIL_LIST);
         return !empty($value) ? $value : null;
+    }
+
+    /**
+     * Get the language for statistics emails.
+     *
+     * @return string Language code (e.g., 'en', 'es')
+     */
+    public static function getStatisticsEmailLanguage(): string
+    {
+        $value = Config::get(self::STATISTICS_EMAIL_LANGUAGE);
+        return !empty($value) ? $value : 'en';
     }
 
 }

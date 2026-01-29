@@ -608,8 +608,15 @@ class StatisticsController extends Controller
             return ExitCode::DATAERR;
         }
 
-        $monthName = (new \DateTimeImmutable("{$year}-{$month}-01"))->format('F');
-        $periodTitle = "{$monthName} {$year}";
+        // Set language for email
+        $originalLanguage = Yii::$app->language;
+        $emailLanguage = ConfigHelper::getStatisticsEmailLanguage();
+        Yii::$app->language = $emailLanguage === 'es' ? 'es-ES' : 'en-US';
+
+        // Get month name in the configured language
+        $date = new \DateTimeImmutable("{$year}-{$month}-01");
+        $monthName = Yii::$app->formatter->asDate($date, 'MMMM');
+        $periodTitle = ucfirst($monthName) . ' ' . $year;
 
         $sent = $this->sendStatisticsEmail(
             $email,
@@ -618,6 +625,9 @@ class StatisticsController extends Controller
             $period,
             $periodTitle
         );
+
+        // Restore original language
+        Yii::$app->language = $originalLanguage;
 
         if ($sent) {
             $this->stdout("Email sent successfully to {$email}\n");
@@ -658,6 +668,11 @@ class StatisticsController extends Controller
             return ExitCode::DATAERR;
         }
 
+        // Set language for email
+        $originalLanguage = Yii::$app->language;
+        $emailLanguage = ConfigHelper::getStatisticsEmailLanguage();
+        Yii::$app->language = $emailLanguage === 'es' ? 'es-ES' : 'en-US';
+
         $periodTitle = (string) $year;
 
         $sent = $this->sendStatisticsEmail(
@@ -667,6 +682,9 @@ class StatisticsController extends Controller
             $period,
             $periodTitle
         );
+
+        // Restore original language
+        Yii::$app->language = $originalLanguage;
 
         if ($sent) {
             $this->stdout("Email sent successfully to {$email}\n");

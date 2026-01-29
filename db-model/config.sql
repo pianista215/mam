@@ -23,3 +23,4 @@ INSERT INTO config(`key`, `value`) VALUES ('facebook_url', 'https://facebook.com
 
 -- Statistics
 INSERT INTO config(`key`, `value`) VALUES ('statistics_email_list', 'statistics@mamairlines.com');
+INSERT INTO config(`key`, `value`) VALUES ('statistics_email_language', 'en');

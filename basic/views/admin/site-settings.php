@@ -43,6 +43,7 @@ $this->title = Yii::t('app', 'Site Settings');
 
 <h3><?= Yii::t('app', 'Statistics') ?></h3>
 <?= $form->field($model, 'statistics_email_list') ?>
+<?= $form->field($model, 'statistics_email_language')->dropDownList(['en' => 'English', 'es' => 'Español']) ?>
 
 <h3><?= Yii::t('app', 'Other') ?></h3>
 <?= $form->field($model, 'chunks_storage_path') ?>

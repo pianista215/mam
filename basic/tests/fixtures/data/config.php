@@ -22,4 +22,5 @@ return [
 
     // Statistics
     ['key' => 'statistics_email_list', 'value' => 'statistics@testairlines.com'],
+    ['key' => 'statistics_email_language', 'value' => 'en'],
 ];

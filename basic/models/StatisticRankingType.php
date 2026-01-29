@@ -97,8 +97,9 @@ class StatisticRankingType extends \yii\db\ActiveRecord
      */
     public function getLang()
     {
+        $lang = substr(Yii::$app->language, 0, 2);
         return $this->hasOne(StatisticRankingTypeLang::class, ['ranking_type_id' => 'id'])
-            ->andWhere(['language' => Yii::$app->language]);
+            ->andWhere(['language' => $lang]);
     }
 
     /**

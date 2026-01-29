@@ -77,8 +77,9 @@ class StatisticAggregateType extends \yii\db\ActiveRecord
      */
     public function getLang()
     {
+        $lang = substr(Yii::$app->language, 0, 2);
         return $this->hasOne(StatisticAggregateTypeLang::class, ['aggregate_type_id' => 'id'])
-            ->andWhere(['language' => Yii::$app->language]);
+            ->andWhere(['language' => $lang]);
     }
 
     /**

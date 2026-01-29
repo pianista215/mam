@@ -299,6 +299,7 @@ return [
     'Start' => 'Comienzo',
     'Statistics' => 'Estadísticas',
     'Statistics email' => 'Email de estadísticas',
+    'Statistics email language' => 'Idioma del email de estadísticas',
     'Status' => 'Estado',
     'Submit FPL' => 'Enviar FPL',
     'Submitted Flight Plan' => 'Plan de Vuelo',
