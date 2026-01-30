@@ -171,20 +171,64 @@ class StatisticsController extends Controller
     }
 
     /**
-     * Consolidate all statistics - recalculate ALL periods (open and closed).
+     * Consolidate all statistics - detect flight date range and recalculate ALL periods.
+     * Creates any missing periods (monthly, yearly, all-time) based on actual flight data.
      * Useful for correcting statistics after logic changes or data fixes.
      *
      * @return int Exit code
      */
     public function actionConsolidate(): int
     {
-        $this->stdout("Starting statistics consolidation (all periods)...\n");
+        $this->stdout("Starting statistics consolidation...\n");
 
-        $periods = StatisticPeriod::find()
-            ->orderBy(['year' => SORT_ASC, 'month' => SORT_ASC])
-            ->all();
+        // Find the date range of finished flights with reports
+        $dateRange = (new Query())
+            ->select([
+                'min_date' => new \yii\db\Expression('MIN(f.creation_date)'),
+                'max_date' => new \yii\db\Expression('MAX(f.creation_date)'),
+            ])
+            ->from(['f' => Flight::tableName()])
+            ->innerJoin(['fr' => FlightReport::tableName()], 'fr.flight_id = f.id')
+            ->where(['f.status' => Flight::STATUS_FINISHED])
+            ->andWhere(['not', ['fr.flight_time_minutes' => null]])
+            ->one();
 
-        $this->stdout("Found " . count($periods) . " periods to consolidate.\n");
+        if (!$dateRange['min_date'] || !$dateRange['max_date']) {
+            $this->stdout("No finished flights with reports found. Nothing to consolidate.\n");
+            return ExitCode::OK;
+        }
+
+        $minDate = new \DateTimeImmutable($dateRange['min_date']);
+        $maxDate = new \DateTimeImmutable($dateRange['max_date']);
+
+        $this->stdout("Flight date range: {$minDate->format('Y-m-d')} to {$maxDate->format('Y-m-d')}\n");
+
+        // Collect all periods to process
+        $periods = [];
+
+        // Create/find all monthly periods in range
+        $current = new \DateTimeImmutable($minDate->format('Y-m') . '-01');
+        $end = new \DateTimeImmutable($maxDate->format('Y-m') . '-01');
+
+        while ($current <= $end) {
+            $year = (int) $current->format('Y');
+            $month = (int) $current->format('n');
+            $periods[] = StatisticPeriod::findOrCreate(StatisticPeriodType::TYPE_MONTHLY, $year, $month);
+            $current = $current->modify('+1 month');
+        }
+
+        // Create/find all yearly periods in range
+        $startYear = (int) $minDate->format('Y');
+        $endYear = (int) $maxDate->format('Y');
+
+        for ($year = $startYear; $year <= $endYear; $year++) {
+            $periods[] = StatisticPeriod::findOrCreate(StatisticPeriodType::TYPE_YEARLY, $year, null);
+        }
+
+        // Create/find all-time period
+        $periods[] = StatisticPeriod::findOrCreate(StatisticPeriodType::TYPE_ALL_TIME, null, null);
+
+        $this->stdout("Processing " . count($periods) . " periods...\n");
 
         foreach ($periods as $period) {
             $transaction = Yii::$app->db->beginTransaction();
@@ -199,9 +243,64 @@ class StatisticsController extends Controller
             }
         }
 
+        // Close past periods (as if cron had been running correctly)
+        $this->closePastPeriods();
+
         $this->stdout("Consolidation completed.\n");
 
         return ExitCode::OK;
+    }
+
+    /**
+     * Close all periods that should be closed based on current date.
+     * - Monthly periods before current month → closed
+     * - Yearly periods before current year → closed
+     * - Current month, current year, all-time → remain open
+     */
+    private function closePastPeriods(): void
+    {
+        $now = new \DateTimeImmutable();
+        $currentYear = (int) $now->format('Y');
+        $currentMonth = (int) $now->format('n');
+
+        $closedCount = 0;
+
+        $openPeriods = StatisticPeriod::find()
+            ->where(['status' => StatisticPeriod::STATUS_OPEN])
+            ->all();
+
+        foreach ($openPeriods as $period) {
+            // Never close all-time
+            if ($period->isAllTime()) {
+                continue;
+            }
+
+            $shouldClose = false;
+
+            if ($period->isMonthly()) {
+                // Close if before current month
+                if ($period->year < $currentYear ||
+                    ($period->year === $currentYear && $period->month < $currentMonth)) {
+                    $shouldClose = true;
+                }
+            } else {
+                // Yearly: close if before current year
+                if ($period->year < $currentYear) {
+                    $shouldClose = true;
+                }
+            }
+
+            if ($shouldClose) {
+                $period->status = StatisticPeriod::STATUS_CLOSED;
+                if ($period->save()) {
+                    $closedCount++;
+                }
+            }
+        }
+
+        if ($closedCount > 0) {
+            $this->stdout("Closed {$closedCount} past period(s).\n");
+        }
     }
 
     /**
