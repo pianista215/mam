@@ -28,8 +28,8 @@ $this->params['breadcrumbs'][] = $year;
                 'monthNames' => [],
             ]) ?>
         </div>
-        <div class="col-md-8 text-end">
-            <?= Html::a(Yii::t('app', 'View Monthly Statistics'), ['month'], ['class' => 'btn btn-outline-primary me-2']) ?>
+        <div class="col-md-8 d-flex flex-wrap align-items-center justify-content-center justify-content-md-end gap-2 mt-3 mt-md-0">
+            <?= Html::a(Yii::t('app', 'View Monthly Statistics'), ['month'], ['class' => 'btn btn-outline-primary']) ?>
             <?= Html::a(Yii::t('app', 'View All-Time Statistics'), ['all-time'], ['class' => 'btn btn-outline-secondary']) ?>
         </div>
     </div>
