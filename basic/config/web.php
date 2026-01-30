@@ -3,6 +3,7 @@
 $params = require __DIR__ . '/params.php';
 $db = require __DIR__ . '/db.php';
 $mailer = require __DIR__ . '/mailer.php';
+$secret = require __DIR__ . '/secret.php';
 
 $config = [
     'id' => 'basic',
@@ -23,8 +24,7 @@ $config = [
     ],
     'components' => [
         'request' => [
-            // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
-            'cookieValidationKey' => 'F2a3Qt0MteVFtvpTw-vVMnTjY7-mOSC_',
+            'cookieValidationKey' => $secret['cookieValidationKey'],
             'parsers' => [
                 'application/json' => 'yii\web\JsonParser',
             ],

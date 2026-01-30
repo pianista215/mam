@@ -199,6 +199,32 @@ This configuration is shared by both the web application and console commands (c
 
 The sender email addresses (no-reply, support) are configured via the admin panel (see Site Settings below).
 
+### Cookie validation key (secret)
+
+Each installation should have its own unique secret key for cookie validation and CSRF protection. Configure it in `basic/config/secret.php`:
+
+```php
+return [
+    'cookieValidationKey' => 'your_random_secret_key_here',
+];
+```
+
+Generate a new key with:
+
+```bash
+php -r "echo bin2hex(random_bytes(32));"
+```
+
+### Environment-specific files
+
+When deploying a new version, preserve these three configuration files as they contain environment-specific settings:
+
+| File | Purpose |
+|------|---------|
+| `basic/config/db.php` | Database credentials |
+| `basic/config/mailer.php` | SMTP configuration |
+| `basic/config/secret.php` | Cookie validation key |
+
 ### Site Settings (Admin panel)
 
 Administrators can configure the site at `/admin/site-settings`. Available settings:
