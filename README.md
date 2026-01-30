@@ -178,10 +178,10 @@ When debug mode is enabled, you get:
 
 ### Email configuration (SMTP)
 
-By default, emails are saved to files instead of being sent (development mode). To enable real email delivery in production, configure SMTP in `basic/config/web.php`, replacing the mailer component:
+By default, emails are saved to files instead of being sent (development mode). To enable real email delivery in production, configure SMTP in `basic/config/mailer.php`:
 
 ```php
-'mailer' => [
+return [
     'class' => \yii\symfonymailer\Mailer::class,
     'viewPath' => '@app/mail',
     'useFileTransport' => false,
@@ -192,8 +192,10 @@ By default, emails are saved to files instead of being sent (development mode). 
         'password' => 'your_password',
         'port' => 465,
     ],
-],
+];
 ```
+
+This configuration is shared by both the web application and console commands (cron jobs, statistics emails, etc.).
 
 The sender email addresses (no-reply, support) are configured via the admin panel (see Site Settings below).
 
