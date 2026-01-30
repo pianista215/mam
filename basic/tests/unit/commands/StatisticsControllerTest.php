@@ -361,6 +361,91 @@ class StatisticsControllerTest extends BaseUnitTest
         $this->assertEquals(3, (int) $aggregate->value);
     }
 
+    public function testConsolidateCreatesMissingPeriods()
+    {
+        // Start with no periods
+        $this->assertEquals(0, StatisticPeriod::find()->count());
+
+        // Run consolidate - should detect flights and create all needed periods
+        $exitCode = $this->controller->actionConsolidate();
+        $this->assertEquals(ExitCode::OK, $exitCode);
+
+        // Test data has flights in Dec 2024 and Jan 2025
+        // Should create: Dec 2024 monthly, Jan 2025 monthly, 2024 yearly, 2025 yearly, all-time
+        $monthlyType = StatisticPeriodType::findByCode(StatisticPeriodType::TYPE_MONTHLY);
+        $yearlyType = StatisticPeriodType::findByCode(StatisticPeriodType::TYPE_YEARLY);
+        $allTimeType = StatisticPeriodType::findByCode(StatisticPeriodType::TYPE_ALL_TIME);
+
+        // Verify monthly periods
+        $dec2024 = StatisticPeriod::findOne(['period_type_id' => $monthlyType->id, 'year' => 2024, 'month' => 12]);
+        $this->assertNotNull($dec2024, 'December 2024 monthly period should be created');
+
+        $jan2025 = StatisticPeriod::findOne(['period_type_id' => $monthlyType->id, 'year' => 2025, 'month' => 1]);
+        $this->assertNotNull($jan2025, 'January 2025 monthly period should be created');
+
+        // Verify yearly periods
+        $year2024 = StatisticPeriod::findOne(['period_type_id' => $yearlyType->id, 'year' => 2024, 'month' => null]);
+        $this->assertNotNull($year2024, '2024 yearly period should be created');
+
+        $year2025 = StatisticPeriod::findOne(['period_type_id' => $yearlyType->id, 'year' => 2025, 'month' => null]);
+        $this->assertNotNull($year2025, '2025 yearly period should be created');
+
+        // Verify all-time period
+        $allTime = StatisticPeriod::findOne(['period_type_id' => $allTimeType->id]);
+        $this->assertNotNull($allTime, 'All-time period should be created');
+
+        // Verify statistics were calculated
+        $totalFlightsType = StatisticAggregateType::findOne(['code' => StatisticAggregateType::CODE_TOTAL_FLIGHTS]);
+
+        $jan2025Flights = StatisticAggregate::findOne([
+            'period_id' => $jan2025->id,
+            'aggregate_type_id' => $totalFlightsType->id,
+        ]);
+        $this->assertEquals(3, (int) $jan2025Flights->value);
+
+        $allTimeFlights = StatisticAggregate::findOne([
+            'period_id' => $allTime->id,
+            'aggregate_type_id' => $totalFlightsType->id,
+        ]);
+        $this->assertEquals(4, (int) $allTimeFlights->value); // 3 Jan + 1 Dec
+    }
+
+    public function testConsolidateClosesPastPeriods()
+    {
+        // Run consolidate - creates periods for Dec 2024 and Jan 2025
+        $exitCode = $this->controller->actionConsolidate();
+        $this->assertEquals(ExitCode::OK, $exitCode);
+
+        $monthlyType = StatisticPeriodType::findByCode(StatisticPeriodType::TYPE_MONTHLY);
+        $yearlyType = StatisticPeriodType::findByCode(StatisticPeriodType::TYPE_YEARLY);
+        $allTimeType = StatisticPeriodType::findByCode(StatisticPeriodType::TYPE_ALL_TIME);
+
+        // Get current date to determine what should be closed
+        $now = new \DateTimeImmutable();
+        $currentYear = (int) $now->format('Y');
+        $currentMonth = (int) $now->format('n');
+
+        // December 2024 monthly should be closed (it's in the past)
+        $dec2024 = StatisticPeriod::findOne(['period_type_id' => $monthlyType->id, 'year' => 2024, 'month' => 12]);
+        $this->assertEquals(StatisticPeriod::STATUS_CLOSED, $dec2024->status, 'Dec 2024 should be closed');
+
+        // 2024 yearly should be closed (it's in the past)
+        $year2024 = StatisticPeriod::findOne(['period_type_id' => $yearlyType->id, 'year' => 2024]);
+        $this->assertEquals(StatisticPeriod::STATUS_CLOSED, $year2024->status, '2024 yearly should be closed');
+
+        // January 2025 - closed if we're past Jan 2025, open otherwise
+        $jan2025 = StatisticPeriod::findOne(['period_type_id' => $monthlyType->id, 'year' => 2025, 'month' => 1]);
+        if ($currentYear > 2025 || ($currentYear === 2025 && $currentMonth > 1)) {
+            $this->assertEquals(StatisticPeriod::STATUS_CLOSED, $jan2025->status, 'Jan 2025 should be closed');
+        } else {
+            $this->assertEquals(StatisticPeriod::STATUS_OPEN, $jan2025->status, 'Jan 2025 should be open');
+        }
+
+        // All-time should always be open
+        $allTime = StatisticPeriod::findOne(['period_type_id' => $allTimeType->id]);
+        $this->assertEquals(StatisticPeriod::STATUS_OPEN, $allTime->status, 'All-time should always be open');
+    }
+
     public function testYearlyPeriodCalculation()
     {
         // Calculate yearly 2025
