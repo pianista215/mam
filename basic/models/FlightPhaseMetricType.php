@@ -17,6 +17,8 @@ use Yii;
  */
 class FlightPhaseMetricType extends \yii\db\ActiveRecord
 {
+    const CODE_LANDING_VS_FPM = 'LandingVSFpm';
+
     /**
      * {@inheritdoc}
      */

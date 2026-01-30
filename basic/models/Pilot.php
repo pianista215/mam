@@ -314,10 +314,11 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 
     public function getSecureSurname()
     {
-        if (Yii::$app->user->isGuest) {
-            return $this->getSurnameInitials();
-        } else {
+        // In console applications or when user is logged in, show full surname
+        if (!Yii::$app->has('user') || !Yii::$app->user->isGuest) {
             return $this->surname;
+        } else {
+            return $this->getSurnameInitials();
         }
     }
 

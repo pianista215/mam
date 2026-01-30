@@ -50,6 +50,7 @@ mysql -u <user> -p mam < db-model/config.sql
 mysql -u <user> -p mam < db-model/countries.sql
 mysql -u <user> -p mam < db-model/issues.sql
 mysql -u <user> -p mam < db-model/pages.sql
+mysql -u <user> -p mam < db-model/statistics.sql
 ```
 
 3. Configure the database connection in `basic/config/db.php`:
@@ -279,6 +280,88 @@ The script performs these steps:
 - Calls `php yii flight-report/assemble-pending-acars` to prepare report files
 - Runs MAM Analyzer on each report to generate `analysis.json`
 - Calls `php yii flight-report/import-pending-reports-analysis` to import results
+
+## Statistics (Cron)
+
+MAM calculates flight statistics (aggregates, rankings, and records) periodically. Statistics are organized by periods: monthly, yearly, and all-time.
+
+### Available commands
+
+| Command | Description |
+|---------|-------------|
+| `php yii statistics/calculate-daily` | Daily calculation. Closes previous periods when needed and recalculates all open periods |
+| `php yii statistics/recalculate <year> [month]` | Manually recalculate a specific period (year or month) |
+| `php yii statistics/consolidate` | Recalculate ALL periods (useful after data corrections) |
+| `php yii statistics/send-monthly-email [year] [month]` | Send monthly statistics email (defaults to previous month) |
+| `php yii statistics/send-yearly-email [year]` | Send yearly statistics email (defaults to previous year) |
+
+### Cron setup
+
+Add cron jobs to calculate statistics and send email reports automatically:
+
+```bash
+crontab -e
+```
+
+```cron
+# Daily statistics calculation at 00:30
+30 0 * * * cd /path/to/mam/basic && php yii statistics/calculate-daily >> /var/log/mam/statistics.log 2>&1
+
+# Monthly statistics email (1st of each month at 08:00)
+0 8 1 * * cd /path/to/mam/basic && php yii statistics/send-monthly-email >> /var/log/mam/statistics-email.log 2>&1
+
+# Yearly statistics email (January 1st at 10:00)
+0 10 1 1 * cd /path/to/mam/basic && php yii statistics/send-yearly-email >> /var/log/mam/statistics-email.log 2>&1
+
+# Optional: Monthly consolidation (day 2 at 03:00) to ensure data integrity
+0 3 2 * * cd /path/to/mam/basic && php yii statistics/consolidate >> /var/log/mam/statistics-consolidate.log 2>&1
+```
+
+### Email configuration
+
+Configure the statistics email recipient in the admin panel (**Site Settings > Statistics**). This is the email address (typically a mailing list) that will receive the monthly and yearly statistics reports.
+
+### How it works
+
+The `calculate-daily` command:
+1. Detects if it's the 1st of the month → closes the previous month
+2. Detects if it's January 1st → closes the previous year
+3. Ensures current periods exist (current month + year)
+4. Recalculates all open periods with fresh data
+5. Calculates variation percentages compared to previous periods
+
+### Manual recalculation
+
+To manually recalculate statistics for a specific period:
+
+```bash
+cd basic
+
+# Recalculate a specific month
+php yii statistics/recalculate 2025 1    # January 2025
+
+# Recalculate a full year
+php yii statistics/recalculate 2025      # Year 2025
+
+# Recalculate everything (all periods)
+php yii statistics/consolidate
+```
+
+### What gets calculated
+
+**Aggregates:**
+- Total flights (finished flights with complete data)
+- Total flight hours
+
+**Rankings (top 5):**
+- Pilots by flight hours
+- Pilots by number of flights
+- Aircraft types by number of flights
+- Smoothest landings (lowest vertical speed)
+
+**Records:**
+- Longest flight (by time)
+- Longest flight (by distance)
 
 ## Running tests
 

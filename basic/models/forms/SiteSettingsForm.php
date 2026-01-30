@@ -30,13 +30,16 @@ class SiteSettingsForm extends Model
     public $instagram_url;
     public $facebook_url;
 
+    public $statistics_email_list;
+    public $statistics_email_language;
+
     public function rules()
     {
         return [
             [['registration_start','registration_end','registration_start_location',
               'chunks_storage_path','images_storage_path','acars_releases_path','acars_installer_name',
               'token_life_h','charter_ratio','airline_name','no_reply_mail','support_mail',
-              'x_url','instagram_url','facebook_url'], 'trim'],
+              'x_url','instagram_url','facebook_url','statistics_email_list','statistics_email_language'], 'trim'],
 
             [['registration_start','registration_end'], 'date', 'format' => 'php:Y-m-d'],
             ['registration_start_location', 'filter', 'filter' => 'strtoupper'],
@@ -61,6 +64,10 @@ class SiteSettingsForm extends Model
             [['no_reply_mail','support_mail'], 'email'],
 
             [['x_url','instagram_url','facebook_url'], 'url'],
+
+            ['statistics_email_list', 'email'],
+
+            ['statistics_email_language', 'in', 'range' => ['en', 'es']],
         ];
     }
 
@@ -86,6 +93,9 @@ class SiteSettingsForm extends Model
             'x_url' => Yii::t('app', 'X / Twitter URL'),
             'instagram_url' => Yii::t('app', 'Instagram URL'),
             'facebook_url' => Yii::t('app', 'Facebook URL'),
+
+            'statistics_email_list' => Yii::t('app', 'Statistics email'),
+            'statistics_email_language' => Yii::t('app', 'Statistics email language'),
         ];
     }
 
@@ -107,6 +117,8 @@ class SiteSettingsForm extends Model
             CK::X_URL,
             CK::INSTAGRAM_URL,
             CK::FACEBOOK_URL,
+            CK::STATISTICS_EMAIL_LIST,
+            CK::STATISTICS_EMAIL_LANGUAGE,
         ];
     }
 

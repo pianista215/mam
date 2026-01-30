@@ -15,6 +15,8 @@ use Yii;
  */
 class FlightPhaseType extends \yii\db\ActiveRecord
 {
+    const CODE_FINAL_LANDING = 'final_landing';
+
     /**
      * {@inheritdoc}
      */
