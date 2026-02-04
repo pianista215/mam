@@ -16,11 +16,12 @@ class m260203_121252_create_runway_tables extends Migration
         $this->createTable('runway', [
             'id' => $this->primaryKey()->unsigned(),
             'airport_icao' => $this->char(4)->notNull(),
+            'designators' => $this->string(7)->notNull(), // "14L/32R", "09/27"
             'width_m' => $this->decimal(4, 1)->notNull(),
             'length_m' => $this->decimal(6, 1)->notNull(),
         ], 'ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
 
-        $this->createIndex('runway_airport_FK', 'runway', 'airport_icao');
+        $this->createIndex('runway_unique', 'runway', ['airport_icao', 'designators'], true);
         $this->addForeignKey(
             'runway_airport_FK',
             'runway',
