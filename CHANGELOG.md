@@ -8,6 +8,7 @@
 
 ### Changed
 - Updated `AppHighVsBelow1000AGL` threshold from -1000 fpm to -1500 fpm
+- Aircraft type ICAO code now accepts 2 to 4 characters instead of exactly 4
 
 ## [1.0.0] - 2026-01-31
 

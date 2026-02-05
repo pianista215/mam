@@ -44,16 +44,37 @@ class AircraftTypeTest extends BaseUnitTest
         $this->assertArrayHasKey('max_nm_range', $aircraftType->errors);
     }
 
-    public function testCreateAircraftTypeWithInvalidIcaoTypeCodeLength()
+    public function testCreateAircraftTypeWithShortIcaoTypeCode()
     {
         $aircraftType = new AircraftType([
+            'icao_type_code' => 'DC3',
+            'name' => 'Douglas DC-3',
+            'max_nm_range' => 1300,
+        ]);
+
+        $this->assertTrue($aircraftType->save());
+        $this->assertEquals('DC3', $aircraftType->icao_type_code);
+    }
+
+    public function testCreateAircraftTypeWithInvalidIcaoTypeCodeLength()
+    {
+        $tooLong = new AircraftType([
             'icao_type_code' => 'ABCDE',
             'name' => 'Invalid Aircraft',
             'max_nm_range' => 1500,
         ]);
 
-        $this->assertFalse($aircraftType->save());
-        $this->assertArrayHasKey('icao_type_code', $aircraftType->errors);
+        $this->assertFalse($tooLong->save());
+        $this->assertArrayHasKey('icao_type_code', $tooLong->errors);
+
+        $tooShort = new AircraftType([
+            'icao_type_code' => 'A',
+            'name' => 'Invalid Aircraft',
+            'max_nm_range' => 1500,
+        ]);
+
+        $this->assertFalse($tooShort->save());
+        $this->assertArrayHasKey('icao_type_code', $tooShort->errors);
     }
 
     public function testCreateAircraftTypeWithDuplicateIcaoTypeCode()
