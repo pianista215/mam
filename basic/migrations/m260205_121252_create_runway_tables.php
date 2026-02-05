@@ -5,7 +5,7 @@ use yii\db\Migration;
 /**
  * Creates the runway and runway_end tables for storing airport runway information.
  */
-class m260203_121252_create_runway_tables extends Migration
+class m260205_121252_create_runway_tables extends Migration
 {
     /**
      * {@inheritdoc}
