@@ -49,14 +49,14 @@ class RunwayEnd extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => Yii::t('app', 'ID'),
-            'runway_id' => Yii::t('app', 'Runway ID'),
-            'designator' => Yii::t('app', 'Designator'),
-            'latitude' => Yii::t('app', 'Latitude'),
-            'longitude' => Yii::t('app', 'Longitude'),
-            'true_heading_deg' => Yii::t('app', 'True Heading Deg'),
-            'displaced_threshold_m' => Yii::t('app', 'Displaced Threshold M'),
-            'stopway_m' => Yii::t('app', 'Stopway M'),
+            'id' => 'ID',
+            'runway_id' => 'Runway ID',
+            'designator' => 'Designator',
+            'latitude' => 'Latitude',
+            'longitude' => 'Longitude',
+            'true_heading_deg' => 'True Heading Deg',
+            'displaced_threshold_m' => 'Displaced Threshold M',
+            'stopway_m' => 'Stopway M',
         ];
     }
 

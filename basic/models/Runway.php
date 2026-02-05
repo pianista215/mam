@@ -47,11 +47,11 @@ class Runway extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => Yii::t('app', 'ID'),
-            'airport_icao' => Yii::t('app', 'Airport Icao'),
-            'designators' => Yii::t('app', 'Designators'),
-            'width_m' => Yii::t('app', 'Width M'),
-            'length_m' => Yii::t('app', 'Length M'),
+            'id' => 'ID',
+            'airport_icao' => 'Airport Icao',
+            'designators' => 'Designators',
+            'width_m' => 'Width M',
+            'length_m' => 'Length M',
         ];
     }
 
