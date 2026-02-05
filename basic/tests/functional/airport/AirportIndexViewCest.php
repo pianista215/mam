@@ -3,13 +3,15 @@
 namespace tests\functional\airport;
 
 use tests\fixtures\AuthAssignmentFixture;
+use tests\fixtures\RunwayEndFixture;
 use Yii;
 
 class AirportIndexViewCest
 {
     public function _fixtures(){
         return [
-            'authAssignment' => AuthAssignmentFixture::class
+            'authAssignment' => AuthAssignmentFixture::class,
+            'runwayEnd' => RunwayEndFixture::class,
         ];
     }
 
@@ -126,5 +128,30 @@ class AirportIndexViewCest
         $I->see('Login');
     }
 
+    public function openAirportViewWithRunways(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(1);
+        $I->amOnRoute('airport/view', ['id' => '1']); // LEMD has runways
 
+        $I->see('Runways');
+        $I->see('14L');
+        $I->see('32R');
+        $I->see('18L');
+        $I->see('36R');
+        $I->see('142');
+        $I->see('322');
+        $I->see('180');
+        $I->see('360');
+        $I->seeElement('table.table-striped');
+    }
+
+    public function openAirportViewWithoutRunways(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(1);
+        $I->amOnRoute('airport/view', ['id' => '2']); // LEBL has no runways
+
+        $I->see('Barcelona-El Prat');
+        $I->dontSee('Runways');
+        $I->dontSeeElement('.airport-runways');
+    }
 }

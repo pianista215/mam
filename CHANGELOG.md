@@ -1,6 +1,14 @@
 # Changelog
 
-## [1.1.0] - Upcoming
+## [1.2.0] - Upcoming
+
+### Added
+- Runway and runway end support for airports (database tables, models, migration)
+- Airport view: display runway ends table with designator and heading when runways exist
+- Airport view: draw runway polygons on OpenLayers map (main surface, displaced thresholds, stopways, threshold markers)
+- Flight view: draw departure and landing airport runways on the flight map
+
+## [1.1.0] - 2026-02-04
 
 ### Added
 - New event attribute `VSLast3Avg` (Sampled VS) for stabilized vertical speed tracking
