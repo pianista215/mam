@@ -282,6 +282,7 @@ return [
     'Sim Aircraft Name' => 'Nombre del avión en el simulador',
     'Site Settings' => 'Configuración del Sitio',
     'Site settings successfully saved.' => 'Configuración del sitio guardada correctamente.',
+    'Sampled VS' => 'VS muestreada',
     'Staff' => 'Staff',
     'Stage' => 'Etapa',
     'Start' => 'Comienzo',
