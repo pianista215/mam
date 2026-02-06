@@ -7,6 +7,7 @@
 - Airport view: display runway ends table with designator and heading when runways exist
 - Airport view: draw runway polygons on OpenLayers map (main surface, displaced thresholds, stopways, threshold markers)
 - Flight view: draw departure and landing airport runways on the flight map
+- Flight view: startup and shutdown phases now show a colored circle marker at their first position on the map
 - Aircraft type ICAO code now accepts 2 to 4 characters instead of exactly 4
 - Flight list: `creation_date` filter now supports partial searches (e.g., "2025-02" for all February flights)
 - Flight list: Removed filter input for `status` column (sorting still available)

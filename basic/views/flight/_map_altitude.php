@@ -106,6 +106,7 @@ foreach ($report->flightPhases as $phase) {
         }
         $segments[] = [
             'phase' => $phase->flightPhaseType->lang->name,
+            'code'  => $phase->flightPhaseType->code,
             'color' => $colors[$phase->flightPhaseType->code],
             'coordinates' => $coordinates,
         ];
@@ -364,6 +365,25 @@ const layers = segments.map(seg => {
     });
 });
 
+const phaseMarkers = [];
+segments.forEach(seg => {
+    if ((seg.code === 'startup' || seg.code === 'shutdown') && seg.coordinates.length > 0) {
+        const coord = ol.proj.fromLonLat(seg.coordinates[0]);
+        const feature = new ol.Feature({ geometry: new ol.geom.Point(coord) });
+        feature.setStyle(new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: 7,
+                fill: new ol.style.Fill({ color: seg.color }),
+                stroke: new ol.style.Stroke({ color: '#000', width: 2 })
+            })
+        }));
+        phaseMarkers.push(feature);
+    }
+});
+const phaseMarkerLayer = new ol.layer.Vector({
+    source: new ol.source.Vector({ features: phaseMarkers })
+});
+
 const pointSource = new ol.source.Vector();
 const pointLayer = new ol.layer.Vector({
     source: pointSource,
@@ -554,7 +574,8 @@ const map = new ol.Map({
         }),
         ...runwayLayers,
         pointLayer,
-        ...layers
+        ...layers,
+        phaseMarkerLayer
     ],
     view: new ol.View({
         center: ol.proj.fromLonLat(segments[0].coordinates[0]),
