@@ -6,6 +6,7 @@ Modern Airlines Manager - A web application for virtual airline management with 
 
 - [MAM ACARS](https://github.com/pianista215/mam-acars) - Flight recorder that captures black box data
 - [MAM Analyzer](https://github.com/pianista215/mam-analyzer) - Analyzes flight data and generates reports
+- [X-Plane Runway Extractor](https://github.com/pianista215/xplane-runway-extractor) - Extracts runway data from X-Plane to load into MAM
 
 ## What it does
 
@@ -274,6 +275,12 @@ python migration/get_tours.py <host> <user> <password> <vam_db> <mam_db> [--incl
 ```
 
 **Note:** Migrated pilots will have a dummy password and will need to use the password reset feature.
+
+## Loading Runway Data (Optional)
+
+Airport runway data can be loaded from X-Plane scenery files using [X-Plane Runway Extractor](https://github.com/pianista215/xplane-runway-extractor). This enables the airport view to display runway ends with their headings and draw runway polygons on the map.
+
+Follow the instructions in the [X-Plane Runway Extractor README](https://github.com/pianista215/xplane-runway-extractor) to extract and import runway data for your airports.
 
 ## Flight Processing (Cron)
 
