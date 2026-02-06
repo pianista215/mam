@@ -66,6 +66,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h3 class="mt-4 mb-3"><?=Yii::t('app', 'Tour Stages')?></h3>
 
     <?php if (!empty($model->tourStages)): ?>
+        <div class="table-responsive">
         <table class="table table-hover align-middle">
             <thead class="table-light">
                 <tr>
@@ -167,6 +168,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
 
         <?php if (Yii::$app->user->can(Permissions::TOUR_CRUD) && !$model->getFlights()->exists()): ?>
             <div class="text-end mt-2">
@@ -195,6 +197,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="card-body">
                 <h4 class="card-title mb-3">🏆 <?=Yii::t('app', 'Hall of Fame')?></h4>
 
+                <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
@@ -213,6 +216,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         <?php endforeach; ?>
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
     <?php endif; ?>

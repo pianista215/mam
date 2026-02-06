@@ -14,6 +14,9 @@
 - Tour list: `start` and `end` filters now support partial searches
 - Statistics: Rankings by flight count now use total flight hours as tiebreaker
 
+### Fixed
+- Tour view: Tables now scroll horizontally on mobile instead of breaking layout
+
 ## [1.0.0] - 2026-01-31
 
 - Initial version
