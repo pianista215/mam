@@ -514,12 +514,16 @@ if (airportRunways.length > 0) {
             zone: 'runway', label: rwy.designators
         }));
 
+        const th1L = offsetPoint(end1.lat, end1.lon, perpLeft, halfWidth);
+        const th1R = offsetPoint(end1.lat, end1.lon, perpRight, halfWidth);
         rwyFeatures.push(new ol.Feature({
-            geometry: new ol.geom.Point(ol.proj.fromLonLat([end1.lon, end1.lat])),
+            geometry: new ol.geom.LineString([toMapCoord(th1L), toMapCoord(th1R)]),
             zone: 'threshold', label: end1.designator
         }));
+        const th2L = offsetPoint(end2.lat, end2.lon, perpLeft, halfWidth);
+        const th2R = offsetPoint(end2.lat, end2.lon, perpRight, halfWidth);
         rwyFeatures.push(new ol.Feature({
-            geometry: new ol.geom.Point(ol.proj.fromLonLat([end2.lon, end2.lat])),
+            geometry: new ol.geom.LineString([toMapCoord(th2L), toMapCoord(th2R)]),
             zone: 'threshold', label: end2.designator
         }));
     });
@@ -544,20 +548,21 @@ if (airportRunways.length > 0) {
         style: function(feature) {
             const zone = feature.get('zone');
             if (zone === 'threshold') {
-                return new ol.style.Style({
-                    image: new ol.style.Circle({
-                        radius: 6,
-                        fill: new ol.style.Fill({ color: '#4caf50' }),
-                        stroke: new ol.style.Stroke({ color: '#1b5e20', width: 2 })
+                return [
+                    new ol.style.Style({
+                        stroke: new ol.style.Stroke({ color: '#1b5e20', width: 6 })
                     }),
-                    text: new ol.style.Text({
-                        text: feature.get('label'),
-                        font: 'bold 12px sans-serif',
-                        offsetY: -15,
-                        fill: new ol.style.Fill({ color: '#1b5e20' }),
-                        stroke: new ol.style.Stroke({ color: '#fff', width: 3 })
+                    new ol.style.Style({
+                        stroke: new ol.style.Stroke({ color: '#4caf50', width: 3 }),
+                        text: new ol.style.Text({
+                            text: feature.get('label'),
+                            font: 'bold 12px sans-serif',
+                            offsetY: -15,
+                            fill: new ol.style.Fill({ color: '#1b5e20' }),
+                            stroke: new ol.style.Stroke({ color: '#fff', width: 3 })
+                        })
                     })
-                });
+                ];
             }
             return rwyStyles[zone];
         }
