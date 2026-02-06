@@ -105,6 +105,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'creation_date',
             [
                 'attribute' => 'status',
+                'filter' => false,
                 'format' => 'raw', //Important for allow html
                 'value' => function ($model) {
                     $icons = [
