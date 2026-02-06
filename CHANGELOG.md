@@ -9,6 +9,8 @@
 ### Changed
 - Updated `AppHighVsBelow1000AGL` threshold from -1000 fpm to -1500 fpm
 - Aircraft type ICAO code now accepts 2 to 4 characters instead of exactly 4
+- Flight list: `creation_date` filter now supports partial searches (e.g., "2025-02" for all February flights)
+- Flight list: Removed filter input for `status` column (sorting still available)
 
 ## [1.0.0] - 2026-01-31
 
