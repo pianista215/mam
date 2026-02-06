@@ -504,9 +504,10 @@ class StatisticsController extends Controller
                     ->select([
                         'entity_id' => 'f.pilot_id',
                         'value' => new \yii\db\Expression('COUNT(*)'),
+                        'total_hours' => new \yii\db\Expression('SUM(fr.flight_time_minutes)'),
                     ])
                     ->groupBy('f.pilot_id')
-                    ->orderBy(['value' => $order])
+                    ->orderBy(['value' => $order, 'total_hours' => $order])
                     ->limit($limit)
                     ->all();
                 break;
@@ -518,9 +519,10 @@ class StatisticsController extends Controller
                     ->select([
                         'entity_id' => 'ac.aircraft_type_id',
                         'value' => new \yii\db\Expression('COUNT(*)'),
+                        'total_hours' => new \yii\db\Expression('SUM(fr.flight_time_minutes)'),
                     ])
                     ->groupBy('ac.aircraft_type_id')
-                    ->orderBy(['value' => $order])
+                    ->orderBy(['value' => $order, 'total_hours' => $order])
                     ->limit($limit)
                     ->all();
                 break;
