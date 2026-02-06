@@ -106,6 +106,7 @@ foreach ($report->flightPhases as $phase) {
         }
         $segments[] = [
             'phase' => $phase->flightPhaseType->lang->name,
+            'code'  => $phase->flightPhaseType->code,
             'color' => $colors[$phase->flightPhaseType->code],
             'coordinates' => $coordinates,
         ];
@@ -364,6 +365,25 @@ const layers = segments.map(seg => {
     });
 });
 
+const phaseMarkers = [];
+segments.forEach(seg => {
+    if ((seg.code === 'startup' || seg.code === 'shutdown') && seg.coordinates.length > 0) {
+        const coord = ol.proj.fromLonLat(seg.coordinates[0]);
+        const feature = new ol.Feature({ geometry: new ol.geom.Point(coord) });
+        feature.setStyle(new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: 7,
+                fill: new ol.style.Fill({ color: seg.color }),
+                stroke: new ol.style.Stroke({ color: '#000', width: 2 })
+            })
+        }));
+        phaseMarkers.push(feature);
+    }
+});
+const phaseMarkerLayer = new ol.layer.Vector({
+    source: new ol.source.Vector({ features: phaseMarkers })
+});
+
 const pointSource = new ol.source.Vector();
 const pointLayer = new ol.layer.Vector({
     source: pointSource,
@@ -494,12 +514,16 @@ if (airportRunways.length > 0) {
             zone: 'runway', label: rwy.designators
         }));
 
+        const th1L = offsetPoint(end1.lat, end1.lon, perpLeft, halfWidth);
+        const th1R = offsetPoint(end1.lat, end1.lon, perpRight, halfWidth);
         rwyFeatures.push(new ol.Feature({
-            geometry: new ol.geom.Point(ol.proj.fromLonLat([end1.lon, end1.lat])),
+            geometry: new ol.geom.LineString([toMapCoord(th1L), toMapCoord(th1R)]),
             zone: 'threshold', label: end1.designator
         }));
+        const th2L = offsetPoint(end2.lat, end2.lon, perpLeft, halfWidth);
+        const th2R = offsetPoint(end2.lat, end2.lon, perpRight, halfWidth);
         rwyFeatures.push(new ol.Feature({
-            geometry: new ol.geom.Point(ol.proj.fromLonLat([end2.lon, end2.lat])),
+            geometry: new ol.geom.LineString([toMapCoord(th2L), toMapCoord(th2R)]),
             zone: 'threshold', label: end2.designator
         }));
     });
@@ -524,20 +548,21 @@ if (airportRunways.length > 0) {
         style: function(feature) {
             const zone = feature.get('zone');
             if (zone === 'threshold') {
-                return new ol.style.Style({
-                    image: new ol.style.Circle({
-                        radius: 6,
-                        fill: new ol.style.Fill({ color: '#4caf50' }),
-                        stroke: new ol.style.Stroke({ color: '#1b5e20', width: 2 })
+                return [
+                    new ol.style.Style({
+                        stroke: new ol.style.Stroke({ color: '#1b5e20', width: 6 })
                     }),
-                    text: new ol.style.Text({
-                        text: feature.get('label'),
-                        font: 'bold 12px sans-serif',
-                        offsetY: -15,
-                        fill: new ol.style.Fill({ color: '#1b5e20' }),
-                        stroke: new ol.style.Stroke({ color: '#fff', width: 3 })
+                    new ol.style.Style({
+                        stroke: new ol.style.Stroke({ color: '#4caf50', width: 3 }),
+                        text: new ol.style.Text({
+                            text: feature.get('label'),
+                            font: 'bold 12px sans-serif',
+                            offsetY: -15,
+                            fill: new ol.style.Fill({ color: '#1b5e20' }),
+                            stroke: new ol.style.Stroke({ color: '#fff', width: 3 })
+                        })
                     })
-                });
+                ];
             }
             return rwyStyles[zone];
         }
@@ -554,7 +579,8 @@ const map = new ol.Map({
         }),
         ...runwayLayers,
         pointLayer,
-        ...layers
+        ...layers,
+        phaseMarkerLayer
     ],
     view: new ol.View({
         center: ol.proj.fromLonLat(segments[0].coordinates[0]),

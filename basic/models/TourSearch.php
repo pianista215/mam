@@ -65,12 +65,12 @@ class TourSearch extends Tour
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'start' => $this->start,
-            'end' => $this->end,
         ]);
 
         $query->andFilterWhere(['like', 'name', $this->name])
-            ->andFilterWhere(['like', 'description', $this->description]);
+            ->andFilterWhere(['like', 'description', $this->description])
+            ->andFilterWhere(['like', 'start', $this->start])
+            ->andFilterWhere(['like', 'end', $this->end]);
 
         return $dataProvider;
     }

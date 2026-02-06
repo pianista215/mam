@@ -42,7 +42,7 @@ class AircraftType extends \yii\db\ActiveRecord
             [['icao_type_code', 'name', 'max_nm_range'], 'required'],
             [['icao_type_code'], 'filter', 'filter' => [CustomRules::class, 'removeSpaces']],
             [['max_nm_range'], 'integer'],
-            [['icao_type_code'], 'string', 'length' => 4],
+            [['icao_type_code'], 'string', 'min' => 2, 'max' => 4],
             [['name'], 'string', 'max' => 60],
             [['name'], 'trim'],
             [['icao_type_code'], 'unique'],

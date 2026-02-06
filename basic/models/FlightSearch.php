@@ -76,8 +76,9 @@ class FlightSearch extends Flight
             'id' => $this->id,
             'pilot_id' => $this->pilot_id,
             'aircraft_id' => $this->aircraft_id,
-            'creation_date' => $this->creation_date,
         ]);
+
+        $query->andFilterWhere(['like', 'creation_date', $this->creation_date]);
 
         $query->andFilterWhere(['like', 'code', $this->code])
             ->andFilterWhere(['like', 'departure', $this->departure])
