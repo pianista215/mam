@@ -7,6 +7,14 @@
 - Airport view: display runway ends table with designator and heading when runways exist
 - Airport view: draw runway polygons on OpenLayers map (main surface, displaced thresholds, stopways, threshold markers)
 - Flight view: draw departure and landing airport runways on the flight map
+- Aircraft type ICAO code now accepts 2 to 4 characters instead of exactly 4
+- Flight list: `creation_date` filter now supports partial searches (e.g., "2025-02" for all February flights)
+- Flight list: Removed filter input for `status` column (sorting still available)
+- Tour list: `start` and `end` filters now support partial searches
+- Statistics: Rankings by flight count now use total flight hours as tiebreaker
+
+### Fixed
+- Tour view: Tables now scroll horizontally on mobile instead of breaking layout
 
 ## [1.1.0] - 2026-02-04
 
@@ -16,14 +24,6 @@
 
 ### Changed
 - Updated `AppHighVsBelow1000AGL` threshold from -1000 fpm to -1500 fpm
-- Aircraft type ICAO code now accepts 2 to 4 characters instead of exactly 4
-- Flight list: `creation_date` filter now supports partial searches (e.g., "2025-02" for all February flights)
-- Flight list: Removed filter input for `status` column (sorting still available)
-- Tour list: `start` and `end` filters now support partial searches
-- Statistics: Rankings by flight count now use total flight hours as tiebreaker
-
-### Fixed
-- Tour view: Tables now scroll horizontally on mobile instead of breaking layout
 
 ## [1.0.0] - 2026-01-31
 
