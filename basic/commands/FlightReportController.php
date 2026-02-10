@@ -93,6 +93,55 @@ class FlightReportController extends Controller
         return $outputFile;
     }
 
+    protected function buildAirportWithRunways($airport)
+    {
+        if ($airport === null) {
+            return null;
+        }
+
+        $runwaysData = [];
+        foreach ($airport->runways as $runway) {
+            $endsData = [];
+            foreach ($runway->runwayEnds as $end) {
+                $endsData[] = [
+                    'designator' => $end->designator,
+                    'latitude' => (float)$end->latitude,
+                    'longitude' => (float)$end->longitude,
+                    'true_heading_deg' => (float)$end->true_heading_deg,
+                    'displaced_threshold_m' => (float)($end->displaced_threshold_m ?? 0.0),
+                    'stopway_m' => (float)($end->stopway_m ?? 0.0),
+                ];
+            }
+            $runwaysData[] = [
+                'designators' => $runway->designators,
+                'width_m' => (float)$runway->width_m,
+                'length_m' => (float)$runway->length_m,
+                'ends' => $endsData,
+            ];
+        }
+
+        return [
+            'icao' => $airport->icao_code,
+            'runways' => $runwaysData,
+        ];
+    }
+
+    protected function generateFlightContext($flight, $report)
+    {
+        $context = [
+            'departure' => $this->buildAirportWithRunways($flight->departure0),
+            'destination' => ['icao' => $flight->arrival],
+            'alternative1' => ['icao' => $flight->alternative1_icao],
+            'alternative2' => $flight->alternative2_icao !== null ? ['icao' => $flight->alternative2_icao] : null,
+            'landing' => $this->buildAirportWithRunways($report->landingAirport),
+        ];
+
+        $contextPath = $report->getChunksDirectory() . DIRECTORY_SEPARATOR . 'context.json';
+        file_put_contents($contextPath, json_encode($context, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+        return $contextPath;
+    }
+
     /**
      * Assemble pending reports acars file to be analyze by mam-analyzer
      * @return int Exit code
@@ -113,6 +162,7 @@ class FlightReportController extends Controller
             $finalPath = $this->decompress($gzipFile, $report);
             # Remove gzip file
             unlink($gzipFile);
+            $this->generateFlightContext($flight, $report);
             $this->stdout("{$finalPath}\n");
         }
 
@@ -138,59 +188,11 @@ class FlightReportController extends Controller
         }
 
         $phaseAnalysisIssues = $phaseAnalysis['issues'];
-        $this->importPhaseIssues($phase, $phaseType, $phaseAnalysisIssues);
+        $this->importPhaseIssues($phase, $phaseAnalysisIssues);
     }
 
-    protected function checkLandingInAirport($phase)
+    protected function importPhaseIssues($phase, $issues)
     {
-        $report = $phase->flightReport;
-        $flight = $report->flight;
-
-        $landing_icao = $report->landing_airport;
-        $arrival = $flight->arrival;
-        $alt1 = $flight->alternative1_icao;
-        $alt2 = $flight->alternative2_icao;
-
-        $issue_code = null;
-        $value = null;
-
-        if($landing_icao == null){
-            // Add landing issue in middle of no where
-            $issue_code = 'LandingOutOfAirport';
-        } else {
-            if($landing_icao != $arrival){
-                // Add warning that one of the alternatives were used or if a different one was used
-                $value = $landing_icao;
-                if($landing_icao == $alt1){
-                    $issue_code = 'LandingAirportAlternative';
-                } else if($alt2 !== null && $landing_icao == $alt2){
-                    $issue_code = 'LandingAirportAlternative';
-                } else {
-                    $issue_code = 'LandingAirportNotPlanned';
-                }
-            }
-        }
-
-        if($issue_code !== null){
-            $issueType = IssueType::findOne(['code' => $issue_code]);
-            $phaseIssue = new FlightPhaseIssue([
-                'phase_id' => $phase->id,
-                'issue_type_id' => $issueType->id,
-                'timestamp' => $phase->start,
-                'value' => $value
-            ]);
-
-            if (!$phaseIssue->save()) {
-                throw new \Exception("Error saving PhaseIssue airport alternative: " . json_encode($phaseIssue->errors));
-            }
-        }
-    }
-
-    protected function importPhaseIssues($phase, $phaseType, $issues)
-    {
-        if($phaseType->code == 'final_landing'){
-            $this->checkLandingInAirport($phase);
-        }
         foreach($issues as $issue){
             $code = $issue['code'];
             $timestamp = $issue['timestamp'] ?? null;

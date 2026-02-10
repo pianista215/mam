@@ -1,6 +1,11 @@
 # Changelog
 
-## [1.2.0] - Upcoming
+## [1.3.0] - Upcoming
+
+### Added
+- Generate `context.json` with flight context (departure/destination/alternatives/landing airports and runway data) for mam-analyzer
+
+## [1.2.0] - 2026-02-06
 
 ### Added
 - Runway and runway end support for airports (database tables, models, migration)
