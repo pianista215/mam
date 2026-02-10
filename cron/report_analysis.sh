@@ -13,6 +13,7 @@ while read -r report_json; do
 
     echo "Generated $report_dir/analysis.json"
     rm "$report_json"
+    rm -f "$report_dir/context.json"
 done < <(php "$YII_BIN" flight-report/assemble-pending-acars)
 
 # Call Yii to process all generated analysis.json
