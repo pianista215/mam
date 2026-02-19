@@ -9,7 +9,7 @@ while read -r report_json; do
     report_dir="$(dirname "$report_json")"
 
     # Execute mam-analyzer over each report.json
-    uv run --project "$MAM_ANALYZER_HOME" python "$MAM_ANALYZER_HOME/scripts/run.py" "$report_json" "$report_dir/analysis.json"
+    uv run --project "$MAM_ANALYZER_HOME" python "$MAM_ANALYZER_HOME/scripts/run.py" "$report_json" "$report_dir/analysis.json" --context "$report_dir/context.json"
 
     echo "Generated $report_dir/analysis.json"
     rm "$report_json"
