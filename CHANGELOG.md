@@ -4,6 +4,7 @@
 
 ### Added
 - Generate `context.json` with flight context (departure/destination/alternatives/landing airports and runway data) for mam-analyzer
+- New phase metrics: `TakeoffRunway` and `TakeoffRunwayRemainingPct` for the takeoff phase, `LandingRunway` and `LandingRunwayTouchdownPct` for the final landing phase
 
 ## [1.2.0] - 2026-02-06
 
