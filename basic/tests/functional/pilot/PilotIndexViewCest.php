@@ -23,7 +23,7 @@ class PilotIndexViewCest
         $I->see('AB1234');
         $I->see('John');
         $I->see('Doe');
-        $I->see('Rank 1');
+        $I->seeElement('[title="Rank 1"]');
 
         $I->dontSee('nonactivated');
     }
@@ -62,7 +62,7 @@ class PilotIndexViewCest
         $I->see('John');
         $I->dontSee('Doe');
         $I->see('D.');
-        $I->see('Rank 1');
+        $I->seeElement('[title="Rank 1"]');
 
         $I->dontSee('nonactivated');
 
