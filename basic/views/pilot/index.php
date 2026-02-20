@@ -26,6 +26,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php endif; ?>
 
+    <?php $this->registerCss('.pilot-index th { vertical-align: middle; }'); ?>
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => null,
@@ -33,23 +34,38 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             [
                 'class' => 'yii\grid\SerialColumn',
-                'contentOptions' => ['style' => 'width:5%;']
+                'contentOptions' => ['style' => 'width:5%; vertical-align:middle;']
             ],
             [
                 'attribute' => 'license',
-                'contentOptions' => ['style' => 'width:10%;']
+                'contentOptions' => ['style' => 'width:10%; vertical-align:middle;']
             ],
-            'fullname',
+            [
+                'attribute' => 'fullname',
+                'contentOptions' => ['style' => 'vertical-align:middle;']
+            ],
             [
                 'label' => Yii::t('app', 'Rank'),
                 'attribute' => 'rank_name',
-                'value' => fn($model) => $model->rank->name ?? '-',
+                'value' => function ($model) {
+                    if ($model->rank === null) {
+                        return '-';
+                    }
+                    return Html::tag('div',
+                        ImageMam::render(Image::TYPE_RANK_ICON, $model->rank->id, 0, [
+                            'title' => $model->rank->name,
+                            'style' => 'max-height:50px; width:auto;',
+                        ]),
+                        ['title' => $model->rank->name]
+                    );
+                },
                 'enableSorting' => true,
-                'format' => 'text',
+                'format' => 'raw',
+                'contentOptions' => ['style' => 'vertical-align:middle; text-align:center;'],
             ],
             [
                 'attribute' => 'location',
-                'label' => Yii::t('app', 'Departure'),
+                'label' => Yii::t('app', 'Location'),
                 'format' => 'raw',
                 'value' => function($model) {
 
@@ -91,7 +107,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return TimeHelper::formatHoursMinutes($model->hours_flown);
                 },
                 'format' => 'text',
-                'contentOptions' => ['style' => 'width:10%;']
+                'contentOptions' => ['style' => 'width:10%; vertical-align:middle;']
             ],
             [
                 'class' => ActionColumn::className(),
@@ -106,7 +122,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'urlCreator' => function ($action, Pilot $model, $key, $index, $column) {
                     return Url::toRoute([$action, 'id' => $model->id]);
                  },
-                 'contentOptions' => ['style' => 'width:10%; text-align:center;']
+                 'contentOptions' => ['style' => 'width:10%; text-align:center; vertical-align:middle;']
             ],
         ],
         'tableOptions' => ['class' => 'table table-striped table-bordered'],
