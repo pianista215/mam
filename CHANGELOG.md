@@ -2,6 +2,9 @@
 
 ## [1.3.0] - Upcoming
 
+### Changed
+- Pilot list: rank column now shows the rank image with the rank name as tooltip instead of plain text
+
 ### Added
 - Generate `context.json` with flight context (departure/destination/alternatives/landing airports and runway data) for mam-analyzer
 - New phase metrics: `TakeoffRunway` and `TakeoffRunwayRemainingPct` for the takeoff phase, `LandingRunway` and `LandingRunwayTouchdownPct` for the final landing phase

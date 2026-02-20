@@ -610,7 +610,7 @@ const myChart = new Chart(ctx, {
     labels: labels,
     datasets: [
     {
-            label: 'Plane',
+            label: '" . Yii::t('app', 'Plane') . "',
             data: altitudePoints,
             segment: {
                 borderColor: ctx => {
@@ -626,7 +626,7 @@ const myChart = new Chart(ctx, {
             pointHoverRadius: 10,
           },
           {
-            label: 'Terrain',
+            label: '" . Yii::t('app', 'Terrain') . "',
             data: groundPoints,
             borderColor: 'brown',
             fill: false,
