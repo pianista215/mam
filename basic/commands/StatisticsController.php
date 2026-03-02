@@ -42,7 +42,7 @@ class StatisticsController extends Controller
     {
         $this->stdout("Starting daily statistics calculation...\n");
 
-        $now = new \DateTimeImmutable();
+        $now = $this->getCurrentDate();
         $currentYear = (int) $now->format('Y');
         $currentMonth = (int) $now->format('n');
         $currentDay = (int) $now->format('j');
@@ -50,23 +50,6 @@ class StatisticsController extends Controller
         $transaction = Yii::$app->db->beginTransaction();
 
         try {
-            // Close previous month if it's day 1
-            if ($currentDay === 1) {
-                $prevMonth = $currentMonth - 1;
-                $prevYear = $currentYear;
-                if ($prevMonth < 1) {
-                    $prevMonth = 12;
-                    $prevYear--;
-                }
-
-                $this->closePeriodIfExists(StatisticPeriodType::TYPE_MONTHLY, $prevYear, $prevMonth);
-
-                // Close previous year if it's January 1st
-                if ($currentMonth === 1) {
-                    $this->closePeriodIfExists(StatisticPeriodType::TYPE_YEARLY, $prevYear, null);
-                }
-            }
-
             // Ensure current periods exist
             $monthlyPeriod = StatisticPeriod::findOrCreate(
                 StatisticPeriodType::TYPE_MONTHLY,
@@ -90,13 +73,30 @@ class StatisticsController extends Controller
             );
             $this->stdout("All-time period (ID: {$allTimePeriod->id})\n");
 
-            // Recalculate all open periods
+            // Recalculate all open periods (including previous month if still open)
             $openPeriods = StatisticPeriod::find()
                 ->where(['status' => StatisticPeriod::STATUS_OPEN])
                 ->all();
 
             foreach ($openPeriods as $period) {
                 $this->calculatePeriod($period);
+            }
+
+            // Close previous month if it's day 1 (after recalculation)
+            if ($currentDay === 1) {
+                $prevMonth = $currentMonth - 1;
+                $prevYear = $currentYear;
+                if ($prevMonth < 1) {
+                    $prevMonth = 12;
+                    $prevYear--;
+                }
+
+                $this->closePeriodIfExists(StatisticPeriodType::TYPE_MONTHLY, $prevYear, $prevMonth);
+
+                // Close previous year if it's January 1st
+                if ($currentMonth === 1) {
+                    $this->closePeriodIfExists(StatisticPeriodType::TYPE_YEARLY, $prevYear, null);
+                }
             }
 
             $transaction->commit();
@@ -670,6 +670,11 @@ class StatisticsController extends Controller
         }
 
         return $value < $existingRecord->value;
+    }
+
+    protected function getCurrentDate(): \DateTimeImmutable
+    {
+        return new \DateTimeImmutable();
     }
 
     // ========================================

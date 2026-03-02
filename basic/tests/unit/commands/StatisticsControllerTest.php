@@ -470,4 +470,51 @@ class StatisticsControllerTest extends BaseUnitTest
         // Should match January data (only month in 2025)
         $this->assertEquals(3, (int) $totalFlights->value);
     }
+
+    /**
+     * On the 1st of the month, actionCalculateDaily must recalculate all open periods
+     * (including the previous month) before closing it, so any flights finalised
+     * after the last daily run are captured in the final statistics.
+     */
+    public function testFirstDayOfMonth_PreviousMonthIsRecalculatedBeforeBeingClosed()
+    {
+        // Use a subclass that simulates running on January 1st, 2025
+        $controller = new class('statistics', Yii::$app) extends StatisticsController {
+            protected function getCurrentDate(): \DateTimeImmutable
+            {
+                return new \DateTimeImmutable('2025-01-01');
+            }
+        };
+
+        // December 2024 is open with stale statistics (simulates data finalised
+        // after the last daily run on Dec 31st)
+        $controller->actionRecalculate(2024, 12);
+
+        $monthlyType = StatisticPeriodType::findByCode(StatisticPeriodType::TYPE_MONTHLY);
+        $dec2024 = StatisticPeriod::findOne([
+            'period_type_id' => $monthlyType->id,
+            'year' => 2024,
+            'month' => 12,
+        ]);
+        $totalFlightsType = StatisticAggregateType::findOne([
+            'code' => StatisticAggregateType::CODE_TOTAL_FLIGHTS,
+        ]);
+        $aggregate = StatisticAggregate::findOne([
+            'period_id' => $dec2024->id,
+            'aggregate_type_id' => $totalFlightsType->id,
+        ]);
+        $aggregate->value = 0;
+        $aggregate->save(false);
+
+        $exitCode = $controller->actionCalculateDaily();
+        $this->assertEquals(ExitCode::OK, $exitCode);
+
+        $dec2024->refresh();
+        $aggregate->refresh();
+
+        $this->assertEquals(StatisticPeriod::STATUS_CLOSED, $dec2024->status,
+            'December should be closed after the January 1st daily run');
+        $this->assertEquals(1, (int) $aggregate->value,
+            'December stats should be correct after being recalculated before closing');
+    }
 }
