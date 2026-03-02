@@ -1,6 +1,11 @@
 # Changelog
 
-## [1.3.0] - Upcoming
+## [1.3.1] - 2026-03-02
+
+### Fixed
+- Statistics: Daily cron on the 1st of the month now recalculates all open periods before closing the previous month, preventing stale statistics when flights are finalised after the last daily run
+
+## [1.3.0] - 2026-02-20
 
 ### Changed
 - Pilot list: rank column now shows the rank image with the rank name as tooltip instead of plain text
