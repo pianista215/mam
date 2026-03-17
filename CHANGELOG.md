@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.4.0] - 2026-03-17
+
+### Changed
+- TaxiOverspeed issue description updated from >25 knots to >30 knots
+
 ## [1.3.1] - 2026-03-02
 
 ### Fixed
