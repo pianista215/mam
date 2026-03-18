@@ -186,7 +186,7 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
      */
     public function getPilotTourCompletions()
     {
-        return $this->hasMany(PilotTourCompletion::class, ['pilot_id' => 'id']);
+        return $this->hasMany(PilotTourCompletion::class, ['pilot_id' => 'id'])->orderBy(['completed_at' => SORT_ASC]);
     }
 
     /**

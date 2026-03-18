@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.5.1] - 2026-03-18
+
+### Fixed
+- Pilot profile: tour badges now display ordered by completion date
+
 ## [1.5.0] - 2026-03-18
 
 ### Added
