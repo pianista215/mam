@@ -138,7 +138,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <div class="card mb-4 shadow-sm">
         <div class="card-body">
-            <h5 class="card-title mb-3"><?= Yii::t('app', 'Tour Badges') ?></h5>
+            <h5 class="card-title mb-3"><?= Yii::t('app', 'Completed Tours') ?></h5>
 
             <?php if (!empty($model->pilotTourCompletions)): ?>
                 <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 150px)); gap:1rem;"><?php foreach ($model->pilotTourCompletions as $completion) {
@@ -152,7 +152,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ));
                 } ?></div>
             <?php else: ?>
-                <p class="text-muted mb-0"><?= Yii::t('app', 'No tour badges yet') ?></p>
+                <p class="text-muted mb-0"><?= Yii::t('app', 'No tours completed yet') ?></p>
             <?php endif; ?>
         </div>
     </div>
