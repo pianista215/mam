@@ -36,6 +36,9 @@ class ImageUploadRule extends Rule
             case Image::TYPE_TOUR_IMAGE:
                 return Yii::$app->user->can(Permissions::TOUR_CRUD);
 
+            case Image::TYPE_TOUR_BADGE:
+                return Yii::$app->user->can(Permissions::TOUR_CRUD);
+
             case Image::TYPE_COUNTRY_ICON:
                 return Yii::$app->user->can(Permissions::COUNTRY_CRUD);
 

@@ -110,6 +110,7 @@ class ImageTest extends BaseUnitTest
             Image::TYPE_PILOT_PROFILE      => $this->pilot,
             Image::TYPE_RANK_ICON          => $this->rank,
             Image::TYPE_TOUR_IMAGE         => $this->tour,
+            Image::TYPE_TOUR_BADGE         => $this->tour,
             Image::TYPE_COUNTRY_ICON       => $this->country,
             Image::TYPE_AIRCRAFT_TYPE_IMAGE => $this->aircraftType,
             default                        => null,
@@ -268,6 +269,24 @@ class ImageTest extends BaseUnitTest
 
         $this->assertFalse($img2->save(), 'Duplicate type+related_id+element should not be allowed');
         $this->assertArrayHasKey('type', $img2->errors);
+    }
+
+    public function testTourBadgeValidImageIsSaved()
+    {
+        $type = Image::TYPE_TOUR_BADGE;
+        $related = $this->getRelatedModel($type);
+        $this->assertNotNull($related);
+
+        $path = $this->prepareImage($type, 'badge_ok.png');
+
+        $image = new Image([
+            'type' => $type,
+            'related_id' => $related->id,
+            'filename' => 'badge_ok.png',
+            'element' => 0
+        ]);
+
+        $this->assertTrue($image->save(), 'Tour badge image must be saved because it is valid');
     }
 
     public function testAfterDeleteRemovesFile()

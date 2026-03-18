@@ -182,6 +182,27 @@ class ImageUploadRuleTest extends BaseUnitTest
     }
 
 
+    public function testTourBadgeWithoutPermission()
+    {
+        $pilot = $this->createPilot(8);
+        $this->login($pilot);
+
+        $img = $this->img(Image::TYPE_TOUR_BADGE, 55);
+
+        $this->assertFalse(Yii::$app->user->can('imageUpload', ['image' => $img]));
+    }
+
+    public function testTourBadgeWithPermission()
+    {
+        $pilot = $this->createPilot(8);
+        $this->login($pilot);
+        $this->assign(Permissions::TOUR_CRUD, 8);
+
+        $img = $this->img(Image::TYPE_TOUR_BADGE, 55);
+
+        $this->assertTrue(Yii::$app->user->can('imageUpload', ['image' => $img]));
+    }
+
     public function testCountryIconWithoutPermission()
     {
         $pilot = $this->createPilot(9);

@@ -50,15 +50,24 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <div class="card shadow-sm mb-4">
         <div class="card-body">
-            <p class="text-muted mb-1">
-                <strong><?=Yii::t('app', 'Start')?>:</strong> <?= Yii::$app->formatter->asDate($model->start) ?> &nbsp; | &nbsp;
-                <strong><?=Yii::t('app', 'End')?>:</strong> <?= Yii::$app->formatter->asDate($model->end) ?>
-            </p>
+            <div class="d-flex flex-wrap align-items-start gap-3">
+                <div class="flex-grow-1">
+                    <p class="text-muted mb-1">
+                        <strong><?=Yii::t('app', 'Start')?>:</strong> <?= Yii::$app->formatter->asDate($model->start) ?> &nbsp; | &nbsp;
+                        <strong><?=Yii::t('app', 'End')?>:</strong> <?= Yii::$app->formatter->asDate($model->end) ?>
+                    </p>
 
-            <hr>
+                    <hr>
 
-            <div class="tour-page-content">
-                <?= PageContentMam::render($model->getPageCode(), Page::TYPE_TOUR, ['fallbackText' => $model->description]); ?>
+                    <div class="tour-page-content">
+                        <?= PageContentMam::render($model->getPageCode(), Page::TYPE_TOUR, ['fallbackText' => $model->description]); ?>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <div class="text-muted small mb-1"><?=Yii::t('app', 'Badge')?></div>
+                    <?= ImageMam::render(Image::TYPE_TOUR_BADGE, $model->id, 0, ['class' => 'img-fluid rounded', 'style' => 'max-width:150px;']) ?>
+                </div>
             </div>
         </div>
     </div>

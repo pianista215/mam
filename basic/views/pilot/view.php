@@ -136,6 +136,28 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
     </div>
 
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title mb-3"><?= Yii::t('app', 'Tour Badges') ?></h5>
+
+            <?php if (!empty($model->pilotTourCompletions)): ?>
+                <div class="d-flex flex-wrap gap-3">
+                    <?php foreach ($model->pilotTourCompletions as $completion): ?>
+                        <div class="text-center">
+                            <?= Html::a(
+                                ImageMam::render(Image::TYPE_TOUR_BADGE, $completion->tour_id, 0, ['class' => 'img-fluid rounded', 'style' => 'max-width:150px;']),
+                                ['/tour/view', 'id' => $completion->tour_id]
+                            ) ?>
+                            <div class="small mt-1"><?= Html::encode($completion->tour->name) ?></div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php else: ?>
+                <p class="text-muted mb-0"><?= Yii::t('app', 'No tour badges yet') ?></p>
+            <?php endif; ?>
+        </div>
+    </div>
+
     <h4 class="mb-3"><?=Yii::t('app', 'Recent flights')?></h4>
 
     <?= GridView::widget([
