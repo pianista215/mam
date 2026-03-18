@@ -198,6 +198,7 @@ return [
     'Move' => 'Mover',
     'Move Aircraft' => 'Mover Aeronave',
     'Move Pilot' => 'Mover Piloto',
+    'My Profile' => 'Perfil',
     'Name' => 'Nombre',
     'Network' => 'Red',
     'New pilots' => 'Nuevos pilotos',
