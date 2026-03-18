@@ -163,4 +163,29 @@ class ImageUploadCest
         $I->see('Uploading image for page:');
         $I->see('Upload Image', 'button');
     }
+
+    public function tourManagerCanUploadTourBadgeImage(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(10); // Tour Manager
+        $I->amOnRoute('image/upload', [
+            'type' => Image::TYPE_TOUR_BADGE,
+            'related_id' => 1,
+            'element' => 0,
+        ]);
+
+        $I->seeResponseCodeIs(200);
+        $I->see('Upload Image', 'button');
+    }
+
+    public function regularUserCannotUploadTourBadge(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(1); // Regular pilot
+        $I->amOnRoute('image/upload', [
+            'type' => Image::TYPE_TOUR_BADGE,
+            'related_id' => 1,
+            'element' => 0,
+        ]);
+
+        $I->seeResponseCodeIs(403);
+    }
 }

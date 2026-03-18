@@ -50,10 +50,17 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <div class="card shadow-sm mb-4">
         <div class="card-body">
-            <p class="text-muted mb-1">
-                <strong><?=Yii::t('app', 'Start')?>:</strong> <?= Yii::$app->formatter->asDate($model->start) ?> &nbsp; | &nbsp;
-                <strong><?=Yii::t('app', 'End')?>:</strong> <?= Yii::$app->formatter->asDate($model->end) ?>
-            </p>
+            <div class="row g-3 align-items-center">
+                <div class="col-12 col-md-auto text-center">
+                    <?= ImageMam::render(Image::TYPE_TOUR_BADGE, $model->id, 0, ['class' => 'rounded', 'style' => 'width:150px; height:150px; object-fit:contain;']) ?>
+                </div>
+                <div class="col-12 col-md text-center text-md-start">
+                    <p class="text-muted mb-0">
+                        <strong><?=Yii::t('app', 'Start')?>:</strong> <?= Yii::$app->formatter->asDate($model->start) ?> &nbsp; | &nbsp;
+                        <strong><?=Yii::t('app', 'End')?>:</strong> <?= Yii::$app->formatter->asDate($model->end) ?>
+                    </p>
+                </div>
+            </div>
 
             <hr>
 

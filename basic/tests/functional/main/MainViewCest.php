@@ -68,7 +68,9 @@ class MainViewCest
         $I->seeLink('Actions');
         $I->dontSeeLink('Validations');
         $I->dontSeeLink('Admin');
-        $I->see('Logout (AB1234)', 'button');
+        $I->see('AB1234');
+        $I->seeLink('My Profile');
+        $I->seeLink('Logout');
     }
 
     public function checkMainAsVfrValidator(\FunctionalTester $I)
@@ -88,7 +90,9 @@ class MainViewCest
         $I->seeLink('Actions');
         $I->seeLink('Validations');
         $I->dontSeeLink('Admin');
-        $I->see('Logout (AB2345)', 'button');
+        $I->see('AB2345');
+        $I->seeLink('My Profile');
+        $I->seeLink('Logout');
     }
 
     public function checkMainAsIfrValidator(\FunctionalTester $I)
@@ -108,7 +112,9 @@ class MainViewCest
         $I->seeLink('Actions');
         $I->seeLink('Validations');
         $I->dontSeeLink('Admin');
-        $I->see('Logout (AB3456)', 'button');
+        $I->see('AB3456');
+        $I->seeLink('My Profile');
+        $I->seeLink('Logout');
     }
 
     public function checkMainAsAdmin(\FunctionalTester $I)
@@ -128,7 +134,9 @@ class MainViewCest
         $I->seeLink('Actions');
         $I->seeLink('Validations');
         $I->seeLink('Admin');
-        $I->see('Logout (ADM123)', 'button');
+        $I->see('ADM123');
+        $I->seeLink('My Profile');
+        $I->seeLink('Logout');
     }
 
     public function checkLanguageChangeViaForm(\FunctionalTester $I)

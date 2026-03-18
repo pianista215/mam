@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.5.0] - 2026-03-18
+
+### Added
+- Tour badges: each tour now has a 150×150px badge (medal image) visible on the tour page and on pilot profile pages to showcase completed tours
+- Navigation: logged-in pilots now have a user dropdown in the header (showing their license) with quick access to their profile and logout
+
 ## [1.4.0] - 2026-03-17
 
 ### Changed

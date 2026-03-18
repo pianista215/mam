@@ -26,7 +26,8 @@ class LoginFormCest
     {
         $I->amLoggedInAs(1);
         $I->amOnPage('/');
-        $I->see('Logout (AB1234)');
+        $I->see('AB1234');
+        $I->seeLink('Logout');
     }
 
     // demonstrates `amLoggedInAs` method
@@ -34,7 +35,8 @@ class LoginFormCest
     {
         $I->amLoggedInAs(\app\models\Pilot::findByLicense('AB1234'));
         $I->amOnPage('/');
-        $I->see('Logout (AB1234)');
+        $I->see('AB1234');
+        $I->seeLink('Logout');
     }
 
     public function loginWithEmptyCredentials(\FunctionalTester $I)
@@ -61,8 +63,9 @@ class LoginFormCest
             'LoginForm[username]' => 'AB1234',
             'LoginForm[password]' => 'SecurePass123!',
         ]);
-        $I->see('Logout (AB1234)');
-        $I->dontSeeElement('form#login-form');              
+        $I->see('AB1234');
+        $I->seeLink('Logout');
+        $I->dontSeeElement('form#login-form');
     }
 
     public function loginCaseInsensitiveSuccessfully(\FunctionalTester $I)
@@ -71,7 +74,8 @@ class LoginFormCest
             'LoginForm[username]' => 'ab1234',
             'LoginForm[password]' => 'SecurePass123!',
         ]);
-        $I->see('Logout (AB1234)');
+        $I->see('AB1234');
+        $I->seeLink('Logout');
         $I->dontSeeElement('form#login-form');
     }
 }

@@ -33,6 +33,7 @@ RUN mkdir -p /opt/mam/chunks \
     && mkdir -p /opt/mam/images/rank_icon \
     && mkdir -p /opt/mam/images/pilot_profile \
     && mkdir -p /opt/mam/images/tour_image \
+    && mkdir -p /opt/mam/images/tour_badge \
     && mkdir -p /opt/mam/images/country_icon \
     && mkdir -p /opt/mam/images/aircraftType_image \
     && mkdir -p /opt/mam/images/page_image \

@@ -23,6 +23,7 @@ class Image extends \yii\db\ActiveRecord
     public const TYPE_RANK_ICON = 'rank_icon';
     public const TYPE_PILOT_PROFILE = 'pilot_profile';
     public const TYPE_TOUR_IMAGE = 'tour_image';
+    public const TYPE_TOUR_BADGE = 'tour_badge';
     public const TYPE_COUNTRY_ICON = 'country_icon';
     public const TYPE_AIRCRAFT_TYPE_IMAGE = 'aircraftType_image';
     public const TYPE_PAGE_IMAGE = 'page_image';
@@ -97,6 +98,7 @@ class Image extends \yii\db\ActiveRecord
             self::TYPE_RANK_ICON          => ['width' => 174, 'height' => 76, 'relatedModel' => Rank::class],
             self::TYPE_PILOT_PROFILE      => ['width' => 200, 'height' => 250, 'relatedModel' => Pilot::class],
             self::TYPE_TOUR_IMAGE         => ['width' => 1200, 'height' => 400, 'relatedModel' => Tour::class],
+            self::TYPE_TOUR_BADGE         => ['width' => 150, 'height' => 150, 'relatedModel' => Tour::class],
             self::TYPE_COUNTRY_ICON       => ['width' => 44, 'height' => 33, 'relatedModel' => Country::class],
             self::TYPE_AIRCRAFT_TYPE_IMAGE=> ['width' => 1200, 'height' => 400, 'relatedModel' => AircraftType::class],
             self::TYPE_PAGE_IMAGE         => ['width' => null, 'height' => null, 'relatedModel' => Page::class],
@@ -109,6 +111,7 @@ class Image extends \yii\db\ActiveRecord
             self::TYPE_RANK_ICON => '@app/web/images/placeholders/rank_icon.png',
             self::TYPE_PILOT_PROFILE => '@app/web/images/placeholders/pilot_profile.png',
             self::TYPE_TOUR_IMAGE => '@app/web/images/placeholders/tour_image.png',
+            self::TYPE_TOUR_BADGE => '@app/web/images/placeholders/tour_badge.png',
             self::TYPE_COUNTRY_ICON => '@app/web/images/placeholders/country_icon.png',
             self::TYPE_AIRCRAFT_TYPE_IMAGE => '@app/web/images/placeholders/aircraftType_image.png',
         ];
