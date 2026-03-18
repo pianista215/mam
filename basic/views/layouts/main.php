@@ -126,16 +126,18 @@ if (file_exists($customCssPath)) {
         ];
     }
 
-    $items[] = Yii::$app->user->isGuest
-        ? ['label' => Yii::t('app', 'Login'), 'url' => ['/site/login']]
-        : '<li class="nav-item">'
-            . Html::beginForm(['/site/logout'])
-            . Html::submitButton(
-                Yii::t('app', 'Logout'). ' (' . Yii::$app->user->identity->license . ')',
-                ['class' => 'nav-link btn btn-link logout']
-            )
-            . Html::endForm()
-            . '</li>';
+    if (Yii::$app->user->isGuest) {
+        $items[] = ['label' => Yii::t('app', 'Login'), 'url' => ['/site/login']];
+    } else {
+        $items[] = [
+            'label' => '<i class="fa-regular fa-circle-user"></i> ' . Html::encode(Yii::$app->user->identity->license),
+            'encode' => false,
+            'items' => [
+                ['label' => Yii::t('app', 'My Profile'), 'url' => ['/pilot/view', 'id' => Yii::$app->user->id]],
+                ['label' => Yii::t('app', 'Logout'), 'url' => ['/site/logout'], 'linkOptions' => ['data-method' => 'post']],
+            ],
+        ];
+    }
 
     echo Nav::widget([
         'options' => ['class' => 'navbar-nav'],
