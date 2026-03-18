@@ -141,17 +141,16 @@ $this->params['breadcrumbs'][] = $this->title;
             <h5 class="card-title mb-3"><?= Yii::t('app', 'Tour Badges') ?></h5>
 
             <?php if (!empty($model->pilotTourCompletions)): ?>
-                <div class="d-flex flex-wrap gap-3">
-                    <?php foreach ($model->pilotTourCompletions as $completion): ?>
-                        <div class="text-center">
-                            <?= Html::a(
-                                ImageMam::render(Image::TYPE_TOUR_BADGE, $completion->tour_id, 0, ['class' => 'img-fluid rounded', 'style' => 'max-width:150px;']),
-                                ['/tour/view', 'id' => $completion->tour_id]
-                            ) ?>
-                            <div class="small mt-1"><?= Html::encode($completion->tour->name) ?></div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 150px)); gap:1rem;"><?php foreach ($model->pilotTourCompletions as $completion) {
+                    echo Html::tag('div', Html::a(
+                        ImageMam::render(Image::TYPE_TOUR_BADGE, $completion->tour_id, 0, [
+                            'class' => 'rounded',
+                            'style' => 'width:150px; height:150px; object-fit:contain;',
+                            'title' => $completion->tour->name,
+                        ]),
+                        ['/tour/view', 'id' => $completion->tour_id]
+                    ));
+                } ?></div>
             <?php else: ?>
                 <p class="text-muted mb-0"><?= Yii::t('app', 'No tour badges yet') ?></p>
             <?php endif; ?>
