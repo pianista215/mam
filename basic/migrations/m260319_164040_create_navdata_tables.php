@@ -3,7 +3,7 @@
 use yii\db\Migration;
 
 /**
- * Creates nav_point, navaid and airway_segment tables for storing X-Plane navdata
+ * Creates nav_point, navaid and airway_segment tables for storing navdata
  * (fixes, NDBs, VORs, DMEs, ILS components and airways).
  */
 class m260319_164040_create_navdata_tables extends Migration
