@@ -20,7 +20,7 @@ class m260319_164040_create_navdata_tables extends Migration
             'longitude'  => $this->double()->notNull(),
             'identifier' => $this->string(10)->notNull(),
             'name'       => $this->string(60)->notNull(),
-            'point_type' => "enum('FIX','NDB','VOR','DME','ILS-LOC','LOC','GS','OM','MM','IM') NOT NULL",
+            'point_type' => $this->string(10)->notNull()->comment('FIX, NDB, VOR, DME, ILS-LOC, LOC'),
         ], 'ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
 
         $this->createIndex('nav_point_identifier_type', 'nav_point', ['identifier', 'point_type']);
@@ -30,8 +30,8 @@ class m260319_164040_create_navdata_tables extends Migration
         $this->createTable('navaid', [
             'id'                => $this->primaryKey()->unsigned(),
             'nav_point_id'      => $this->integer()->unsigned()->notNull(),
-            'frequency'         => $this->integer()->unsigned()->notNull()
-                                     ->comment('kHz for NDB; MHz*100 for VOR/ILS/DME (e.g. 11680 = 116.80 MHz)'),
+            'frequency'         => $this->string(8)->notNull()
+                                     ->comment('Formatted frequency: kHz for NDB (e.g. 362), MHz for VOR/ILS/DME (e.g. 116.80)'),
             'range_nm'          => $this->smallInteger()->unsigned()->null()->defaultValue(null),
             'true_bearing_deg'  => 'decimal(6,3) DEFAULT NULL',
             'glideslope_deg'    => 'decimal(4,2) DEFAULT NULL',
@@ -65,8 +65,8 @@ class m260319_164040_create_navdata_tables extends Migration
             'id'                => $this->primaryKey()->unsigned(),
             'from_nav_point_id' => $this->integer()->unsigned()->notNull(),
             'to_nav_point_id'   => $this->integer()->unsigned()->notNull(),
-            'direction'         => "enum('BOTH','FORWARD') NOT NULL DEFAULT 'BOTH'",
-            'airway_type'       => "enum('LOW','HIGH') NOT NULL",
+            'direction'         => $this->string(8)->notNull()->defaultValue('BOTH')->comment('BOTH or FORWARD'),
+            'airway_type'       => $this->string(4)->notNull()->comment('LOW or HIGH'),
             'base_alt_ft'       => $this->integer()->unsigned()->notNull(),
             'top_alt_ft'        => $this->integer()->unsigned()->notNull(),
             'airway_names'      => $this->string(100)->notNull(),
