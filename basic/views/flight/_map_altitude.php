@@ -3,8 +3,13 @@
 use yii\helpers\Html;
 use yii\helpers\Json;
 use yii\widgets\ActiveForm;
+use app\assets\NavaidMapAsset;
+use app\helpers\GeoUtils;
+use app\models\NavPoint;
+use app\models\AirwaySegment;
 
 echo $this->render('@app/views/layouts/_openlayers');
+NavaidMapAsset::register($this);
 
 $this->registerJsFile(
     'https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js',
@@ -134,6 +139,92 @@ foreach ($report->flightPhases as $phase) {
     }
 }
 
+// Collect route coordinates as [lon, lat] pairs
+$routeCoords = [];
+foreach ($segments as $seg) {
+    foreach ($seg['coordinates'] as $coord) {
+        $routeCoords[] = $coord;
+    }
+}
+
+/** Returns the minimum distance (km) from a point to any recorded route point. */
+$minDistToRouteKm = function(float $npLat, float $npLon) use ($routeCoords): float {
+    $min = PHP_FLOAT_MAX;
+    foreach ($routeCoords as $coord) {
+        $d = GeoUtils::haversine($npLat, $npLon, $coord[1], $coord[0]);
+        if ($d < $min) $min = $d;
+    }
+    return $min;
+};
+
+$navPointsJson = '[]';
+$airwaySegmentsJson = '[]';
+if (!empty($routeCoords)) {
+    $allLats = array_column($routeCoords, 1);
+    $allLons = array_column($routeCoords, 0);
+    // Generous bbox margin for SQL pre-filter (~110 km); fine filtering is done in PHP
+    $margin = 1.0;
+    $minLat = min($allLats) - $margin;
+    $maxLat = max($allLats) + $margin;
+    $minLon = min($allLons) - $margin;
+    $maxLon = max($allLons) + $margin;
+
+    $candidates = NavPoint::find()
+        ->where(['between', 'latitude', $minLat, $maxLat])
+        ->andWhere(['between', 'longitude', $minLon, $maxLon])
+        ->with('navaids')
+        ->all();
+
+    // Fine filter: keep only points within 10 km of any route segment
+    $navPoints = array_filter($candidates, fn($np) =>
+        $minDistToRouteKm((float)$np->latitude, (float)$np->longitude) <= 10.0
+    );
+
+    $npById = [];
+    $navPointsData = [];
+    foreach ($navPoints as $np) {
+        $npById[$np->id] = $np;
+        $navaidsData = [];
+        foreach ($np->navaids as $navaid) {
+            $navaidsData[] = [
+                'frequency' => $navaid->frequency,
+            ];
+        }
+        $navPointsData[] = [
+            'id'         => $np->id,
+            'lat'        => (float)$np->latitude,
+            'lon'        => (float)$np->longitude,
+            'identifier' => $np->identifier,
+            'name'       => $np->name,
+            'point_type' => $np->point_type,
+            'navaids'    => $navaidsData,
+        ];
+    }
+    $navPointsJson = Json::encode($navPointsData);
+
+    $navPointIds = array_keys($npById);
+    if (!empty($navPointIds)) {
+        $airwaySegments = AirwaySegment::find()
+            ->where(['from_nav_point_id' => $navPointIds])
+            ->andWhere(['to_nav_point_id' => $navPointIds])
+            ->all();
+
+        $airwaySegmentsData = [];
+        foreach ($airwaySegments as $seg2) {
+            $from = $npById[$seg2->from_nav_point_id];
+            $to   = $npById[$seg2->to_nav_point_id];
+            $airwaySegmentsData[] = [
+                'from_lon'     => (float)$from->longitude,
+                'from_lat'     => (float)$from->latitude,
+                'to_lon'       => (float)$to->longitude,
+                'to_lat'       => (float)$to->latitude,
+                'airway_names' => $seg2->airway_names,
+            ];
+        }
+        $airwaySegmentsJson = Json::encode($airwaySegmentsData);
+    }
+}
+
 $airportRunways = [];
 $runwayAirports = [$report->flight->departure0];
 if ($report->landingAirport !== null) {
@@ -234,7 +325,45 @@ $airportRunwaysJson = Json::encode($airportRunways);
 
 
 <div class="container">
-    <div id="map" style="width: 100%; height: 600px;"></div>
+    <div style="position: relative;">
+        <div style="position: absolute; top: 8px; right: 8px; z-index: 1000;">
+            <div class="btn-group btn-group-sm shadow-sm" role="group">
+                <button id="mapStyleOSM" class="btn" style="background:var(--brand);color:var(--bg-white);border-color:var(--brand-dark);">VFR</button>
+                <button id="mapStyleIFR" class="btn" style="background:var(--bg-white);color:var(--brand);border-color:var(--brand);">IFR</button>
+            </div>
+        </div>
+        <div style="position: absolute; top: 8px; left: 8px; z-index: 1000;
+                    background: var(--bg-white); border: 1px solid #ccc; border-radius: 4px;
+                    padding: 6px 10px; font-size: 11px; line-height: 1.8;">
+            <div style="font-weight: bold; margin-bottom: 2px; color: var(--text-dark);"><?= Yii::t('app', 'Nav Points') ?></div>
+            <label style="display:flex; align-items:center; gap:5px; cursor:pointer; color:var(--text-dark);">
+                <input type="checkbox" id="airwayFilterCheck" checked>
+                <span style="display:inline-block; width:10px; height:3px;
+                             background:rgba(60,60,200,0.65); flex-shrink:0;"></span>
+                <?= Yii::t('app', 'Airways') ?>
+            </label>
+            <hr style="margin: 3px 0;">
+            <?php
+            $navTypes = [
+                'VOR'     => '#2255ff',
+                'NDB'     => '#ff8800',
+                'DME'     => '#00aacc',
+                'ILS-LOC' => '#00cc44',
+                'LOC'     => '#00cc44',
+                'FIX'     => '#666666',
+            ];
+            foreach ($navTypes as $type => $color):
+            ?>
+            <label style="display:flex; align-items:center; gap:5px; cursor:pointer; color:var(--text-dark);">
+                <input type="checkbox" class="nav-filter-check" data-type="<?= $type ?>" checked>
+                <span style="display:inline-block; width:10px; height:10px; border-radius:50%;
+                             background:<?= $color ?>; border:1px solid rgba(0,0,0,0.2); flex-shrink:0;"></span>
+                <?= $type ?>
+            </label>
+            <?php endforeach; ?>
+        </div>
+        <div id="map" style="width: 100%; height: 600px;"></div>
+    </div>
     <canvas id="altitudeChart" width="800" height="400"></canvas>
     <div class="mt-4">
         <h5><?=Yii::t('app', 'Raw Event Viewer')?></h5>
@@ -571,13 +700,87 @@ if (airportRunways.length > 0) {
     runwayLayers.push(rwyLayer);
 }
 
+const navPoints = " . $navPointsJson . ";
+const airwaySegments = " . $airwaySegmentsJson . ";
+
+const navTypeVisible = { 'VOR': true, 'NDB': true, 'DME': true, 'ILS-LOC': true, 'LOC': true, 'FIX': true };
+
+const navFeatures = navPoints.map(np => {
+    const feature = new ol.Feature({
+        geometry: new ol.geom.Point(ol.proj.fromLonLat([np.lon, np.lat]))
+    });
+    feature.set('np', np);
+    return feature;
+});
+const navSource = new ol.source.Vector({ features: navFeatures });
+const navLayer = new ol.layer.Vector({
+    source: navSource,
+    style: function(feature) {
+        const np = feature.get('np');
+        if (!navTypeVisible[np.point_type]) return null;
+        return makeNavStyle(np);
+    }
+});
+
+document.querySelectorAll('.nav-filter-check').forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        navTypeVisible[this.dataset.type] = this.checked;
+        navSource.changed();
+    });
+});
+
+document.getElementById('airwayFilterCheck').addEventListener('change', function() {
+    airwayLayer.setVisible(this.checked);
+});
+
+const airwayFeatures = airwaySegments.map(seg => {
+    const feature = new ol.Feature({
+        geometry: new ol.geom.LineString([
+            ol.proj.fromLonLat([seg.from_lon, seg.from_lat]),
+            ol.proj.fromLonLat([seg.to_lon, seg.to_lat])
+        ])
+    });
+    feature.set('airway_names', seg.airway_names);
+    return feature;
+});
+const airwayLayer = new ol.layer.Vector({
+    source: new ol.source.Vector({ features: airwayFeatures }),
+    declutter: true,
+    style: function(feature) {
+        return [
+            new ol.style.Style({
+                stroke: new ol.style.Stroke({ color: 'rgba(60,60,200,0.65)', width: 3 })
+            }),
+            new ol.style.Style({
+                text: new ol.style.Text({
+                    text: feature.get('airway_names'),
+                    font: 'bold 11px sans-serif',
+                    placement: 'line',
+                    fill: new ol.style.Fill({ color: '#1a1aaa' }),
+                    stroke: new ol.style.Stroke({ color: '#fff', width: 3 }),
+                    overflow: true
+                })
+            })
+        ];
+    }
+});
+
 const map = new ol.Map({
     target: 'map',
     layers: [
         new ol.layer.Tile({
             source: new ol.source.OSM()
         }),
+        new ol.layer.Tile({
+            source: new ol.source.XYZ({
+                url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+                attributions: 'Tiles &copy; <a href=\"https://www.esri.com/\">Esri</a>'
+            }),
+            visible: false
+        }),
         ...runwayLayers,
+        airwayLayer,
+        navLayer,
         pointLayer,
         ...layers,
         phaseMarkerLayer
@@ -709,5 +912,23 @@ function triggerChartPointByTimestamp(timestamp) {
 }
 
 showRawEvent(0);
+
+const mapLayers = map.getLayers().getArray();
+const osmLayer = mapLayers[0];
+const ifrLayer = mapLayers[1];
+
+function setActiveMapBtn(activeId) {
+    const btns = { mapStyleOSM: osmLayer, mapStyleIFR: ifrLayer };
+    Object.entries(btns).forEach(([id, layer]) => {
+        const btn = document.getElementById(id);
+        const active = id === activeId;
+        layer.setVisible(active);
+        btn.style.background    = active ? 'var(--brand)'    : 'var(--bg-white)';
+        btn.style.color         = active ? 'var(--bg-white)' : 'var(--brand)';
+        btn.style.borderColor   = active ? 'var(--brand-dark)' : 'var(--brand)';
+    });
+}
+document.getElementById('mapStyleOSM').addEventListener('click', () => setActiveMapBtn('mapStyleOSM'));
+document.getElementById('mapStyleIFR').addEventListener('click', () => setActiveMapBtn('mapStyleIFR'));
 ");
 ?>

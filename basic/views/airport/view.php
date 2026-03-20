@@ -1,5 +1,6 @@
 <?php
 
+use app\models\Navaid;
 use app\rbac\constants\Permissions;
 use yii\helpers\Html;
 use yii\helpers\Json;
@@ -16,6 +17,7 @@ $this->registerCssFile(
     'https://cdn.jsdelivr.net/npm/ol@v10.6.0/ol.css',
     ['rel' => 'stylesheet']
 );
+\app\assets\NavaidMapAsset::register($this);
 
 $this->title = $model->name;
 $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Airports'), 'url' => ['index']];
@@ -102,6 +104,39 @@ $runwayDataJson = Json::encode($runwayData);
     </div>
     <?php endif; ?>
 
+    <?php
+    $navaids = Navaid::find()
+        ->with('navPoint')
+        ->where(['airport_icao' => $model->icao_code])
+        ->orderBy(['nav_point_id' => SORT_ASC])
+        ->all();
+    ?>
+    <?php if (!empty($navaids)): ?>
+    <div class="airport-navaids mt-4">
+        <h4><?= Yii::t('app', 'Navaids') ?></h4>
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th><?= Yii::t('app', 'Type') ?></th>
+                    <th><?= Yii::t('app', 'Identifier') ?></th>
+                    <th><?= Yii::t('app', 'Frequency') ?></th>
+                    <th><?= Yii::t('app', 'Runway') ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($navaids as $navaid): ?>
+                <tr>
+                    <td><?= Html::encode($navaid->navPoint->point_type) ?></td>
+                    <td><strong><?= Html::encode($navaid->navPoint->identifier) ?></strong></td>
+                    <td><?= Html::encode($navaid->frequency) ?></td>
+                    <td><?= Html::encode($navaid->runway_designator ?? '—') ?></td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+    <?php endif; ?>
+
     <div class="airport-map mt-4">
         <h4><?=Yii::t('app', 'Airport Location')?></h4>
         <div id="map" style="width: 100%; height: 500px;"></div>
@@ -110,6 +145,19 @@ $runwayDataJson = Json::encode($runwayData);
     <?php
     $lat = $model->latitude;
     $lon = $model->longitude;
+
+    $airportNavPointsData = [];
+    foreach ($navaids as $navaid) {
+        $airportNavPointsData[] = [
+            'lat'        => (float)$navaid->navPoint->latitude,
+            'lon'        => (float)$navaid->navPoint->longitude,
+            'identifier' => $navaid->navPoint->identifier,
+            'name'       => $navaid->navPoint->name,
+            'point_type' => $navaid->navPoint->point_type,
+            'frequency'  => $navaid->frequency,
+        ];
+    }
+    $airportNavPointsJson = Json::encode($airportNavPointsData);
 
     $this->registerJs("
         const runwayData = $runwayDataJson;
@@ -337,6 +385,85 @@ $runwayDataJson = Json::encode($runwayData);
 
             layers.push(runwayLayer);
         }
+
+        const airportNavPoints = " . $airportNavPointsJson . ";
+
+        const NAV_SVG = {
+            'VOR': [
+                `<svg xmlns='http://www.w3.org/2000/svg' viewBox='-12 -12 24 24' width='24' height='24'>` +
+                `<polygon points='11,0 5.5,9.5 -5.5,9.5 -11,0 -5.5,-9.5 5.5,-9.5' fill='none' stroke='#2255ff' stroke-width='2'/>` +
+                `<circle cx='0' cy='0' r='2.5' fill='#2255ff'/></svg>`, 24, 24],
+            'NDB': [
+                `<svg xmlns='http://www.w3.org/2000/svg' viewBox='-11 -11 22 22' width='22' height='22'>` +
+                `<circle cx='0' cy='0' r='10' fill='none' stroke='#ff8800' stroke-width='2'/>` +
+                `<circle cx='0' cy='0' r='5.5' fill='none' stroke='#ff8800' stroke-width='1.5'/>` +
+                `<circle cx='0' cy='0' r='2.5' fill='#ff8800'/></svg>`, 22, 22],
+            'DME': [
+                `<svg xmlns='http://www.w3.org/2000/svg' viewBox='-10 -10 20 20' width='20' height='20'>` +
+                `<rect x='-9' y='-9' width='18' height='18' fill='none' stroke='#00aacc' stroke-width='2'/>` +
+                `<circle cx='0' cy='0' r='2.5' fill='#00aacc'/></svg>`, 20, 20],
+            'ILS-LOC': [
+                `<svg xmlns='http://www.w3.org/2000/svg' viewBox='-11 -11 22 22' width='22' height='22'>` +
+                `<polygon points='0,-10 10,0 0,10 -10,0' fill='none' stroke='#00cc44' stroke-width='2'/>` +
+                `<circle cx='0' cy='0' r='2.5' fill='#00cc44'/></svg>`, 22, 22],
+            'LOC': [
+                `<svg xmlns='http://www.w3.org/2000/svg' viewBox='-11 -11 22 22' width='22' height='22'>` +
+                `<polygon points='0,-10 10,0 0,10 -10,0' fill='none' stroke='#00cc44' stroke-width='2'/>` +
+                `<circle cx='0' cy='0' r='2.5' fill='#00cc44'/></svg>`, 22, 22],
+        };
+        const NAV_SVG_DEFAULT = [
+            `<svg xmlns='http://www.w3.org/2000/svg' viewBox='-10 -10 20 20' width='20' height='20'>` +
+            `<polygon points='0,-9 8,7 -8,7' fill='none' stroke='#666666' stroke-width='1.8'/></svg>`, 20, 20];
+
+        function makeNavStyle(np) {
+            const [svgStr, , iconH] = NAV_SVG[np.point_type] || NAV_SVG_DEFAULT;
+            const src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
+            const baseOffsetY = Math.round(iconH / 2) + 9;
+            const styles = [
+                new ol.style.Style({
+                    image: new ol.style.Icon({
+                        src: src,
+                        anchor: [0.5, 0.5],
+                        anchorXUnits: 'fraction',
+                        anchorYUnits: 'fraction',
+                    })
+                }),
+                new ol.style.Style({
+                    text: new ol.style.Text({
+                        text: np.identifier,
+                        font: 'bold 10px sans-serif',
+                        offsetY: baseOffsetY,
+                        textAlign: 'center',
+                        fill: new ol.style.Fill({ color: '#222' }),
+                        stroke: new ol.style.Stroke({ color: '#fff', width: 2 })
+                    })
+                })
+            ];
+            if (np.frequency) {
+                styles.push(new ol.style.Style({
+                    text: new ol.style.Text({
+                        text: np.frequency,
+                        font: 'bold 11px sans-serif',
+                        offsetY: baseOffsetY + 12,
+                        textAlign: 'center',
+                        fill: new ol.style.Fill({ color: '#555' }),
+                        stroke: new ol.style.Stroke({ color: '#fff', width: 2 })
+                    })
+                }));
+            }
+            return styles;
+        }
+
+        const navFeatures = airportNavPoints.map(np => {
+            const feature = new ol.Feature({
+                geometry: new ol.geom.Point(ol.proj.fromLonLat([np.lon, np.lat]))
+            });
+            feature.setStyle(makeNavStyle(np));
+            return feature;
+        });
+        layers.push(new ol.layer.Vector({
+            source: new ol.source.Vector({ features: navFeatures })
+        }));
 
         const map = new ol.Map({
             target: 'map',

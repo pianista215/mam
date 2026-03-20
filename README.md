@@ -6,7 +6,7 @@ Modern Airlines Manager - A web application for virtual airline management with 
 
 - [MAM ACARS](https://github.com/pianista215/mam-acars) - Flight recorder that captures black box data
 - [MAM Analyzer](https://github.com/pianista215/mam-analyzer) - Analyzes flight data and generates reports
-- [X-Plane Runway Extractor](https://github.com/pianista215/xplane-runway-extractor) - Extracts runway data from X-Plane to load into MAM
+- [X-Plane Extractor](https://github.com/pianista215/xplane-extractor) - Extracts runway and navaid data from X-Plane to load into MAM
 
 ## What it does
 

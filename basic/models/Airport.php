@@ -23,6 +23,7 @@ use Yii;
  * @property Route[] $routes
  * @property Route[] $routes0
  * @property Runway[] $runways
+ * @property Navaid[] $navaids
  */
 class Airport extends \yii\db\ActiveRecord
 {
@@ -142,6 +143,16 @@ class Airport extends \yii\db\ActiveRecord
    public function getRunways()
    {
        return $this->hasMany(Runway::class, ['airport_icao' => 'icao_code']);
+   }
+
+   /**
+    * Gets query for [[Navaids]].
+    *
+    * @return \yii\db\ActiveQuery
+    */
+   public function getNavaids()
+   {
+       return $this->hasMany(Navaid::class, ['airport_icao' => 'icao_code']);
    }
 
     public function beforeSave($insert)
