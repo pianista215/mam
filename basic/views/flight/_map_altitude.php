@@ -357,7 +357,7 @@ $airportRunwaysJson = Json::encode($airportRunways);
         <div style="position: absolute; top: 8px; left: 8px; z-index: 1000;
                     background: var(--bg-white); border: 1px solid #ccc; border-radius: 4px;
                     padding: 6px 10px; font-size: 11px; line-height: 1.8;">
-            <div style="font-weight: bold; margin-bottom: 2px; color: var(--text-dark);">Nav Points</div>
+            <div style="font-weight: bold; margin-bottom: 2px; color: var(--text-dark);"><?= Yii::t('app', 'Nav Points') ?></div>
             <label style="display:flex; align-items:center; gap:5px; cursor:pointer; color:var(--text-dark);">
                 <input type="checkbox" id="airwayFilterCheck" checked>
                 <span style="display:inline-block; width:10px; height:3px;
