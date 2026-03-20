@@ -32,9 +32,6 @@ class m260319_164040_create_navdata_tables extends Migration
             'nav_point_id'      => $this->integer()->unsigned()->notNull(),
             'frequency'         => $this->string(8)->notNull()
                                      ->comment('Formatted frequency: kHz for NDB (e.g. 362), MHz for VOR/ILS/DME (e.g. 116.80)'),
-            'range_nm'          => $this->smallInteger()->unsigned()->null()->defaultValue(null),
-            'true_bearing_deg'  => 'decimal(6,3) DEFAULT NULL',
-            'glideslope_deg'    => 'decimal(4,2) DEFAULT NULL',
             'airport_icao'      => $this->char(4)->null()->defaultValue(null),
             'runway_designator' => $this->string(6)->null()->defaultValue(null),
         ], 'ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
