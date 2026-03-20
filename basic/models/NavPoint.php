@@ -16,7 +16,7 @@ use Yii;
  *
  * @property AirwaySegment[] $airwaySegments
  * @property AirwaySegment[] $airwaySegments0
- * @property Navaid[] $navas
+ * @property Navaid[] $navaids
  */
 class NavPoint extends \yii\db\ActiveRecord
 {
@@ -77,11 +77,11 @@ class NavPoint extends \yii\db\ActiveRecord
     }
 
     /**
-     * Gets query for [[Navas]].
+     * Gets query for [[Navaids]].
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getNavas()
+    public function getNavaids()
     {
         return $this->hasMany(Navaid::class, ['nav_point_id' => 'id']);
     }

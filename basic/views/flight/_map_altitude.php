@@ -3,6 +3,8 @@
 use yii\helpers\Html;
 use yii\helpers\Json;
 use yii\widgets\ActiveForm;
+use app\models\NavPoint;
+use app\models\AirwaySegment;
 
 echo $this->render('@app/views/layouts/_openlayers');
 
@@ -131,6 +133,117 @@ foreach ($report->flightPhases as $phase) {
             'fill' => false,
             'tension' => 0.1,
         ];
+    }
+}
+
+// Collect route coordinates as [lon, lat] pairs
+$routeCoords = [];
+foreach ($segments as $seg) {
+    foreach ($seg['coordinates'] as $coord) {
+        $routeCoords[] = $coord;
+    }
+}
+
+/**
+ * Distance (km) from point P to segment AB using flat-earth approximation
+ * (accurate enough for distances under ~200 km).
+ */
+$pointToSegmentKm = function(float $pLat, float $pLon, float $aLat, float $aLon, float $bLat, float $bLon): float {
+    $cosLat = cos(deg2rad(($aLat + $bLat) / 2));
+    $px = ($pLon - $aLon) * 111.0 * $cosLat;
+    $py = ($pLat - $aLat) * 111.0;
+    $bx = ($bLon - $aLon) * 111.0 * $cosLat;
+    $by = ($bLat - $aLat) * 111.0;
+    $lenSq = $bx * $bx + $by * $by;
+    if ($lenSq < 1e-10) {
+        return sqrt($px * $px + $py * $py);
+    }
+    $t = max(0.0, min(1.0, ($px * $bx + $py * $by) / $lenSq));
+    $dx = $px - $t * $bx;
+    $dy = $py - $t * $by;
+    return sqrt($dx * $dx + $dy * $dy);
+};
+
+/** Returns the minimum distance (km) from a point to the flight route polyline. */
+$minDistToRouteKm = function(float $npLat, float $npLon) use ($routeCoords, $pointToSegmentKm): float {
+    $min = PHP_FLOAT_MAX;
+    $n = count($routeCoords);
+    for ($i = 0; $i < $n - 1; $i++) {
+        $d = $pointToSegmentKm(
+            $npLat, $npLon,
+            $routeCoords[$i][1],   $routeCoords[$i][0],
+            $routeCoords[$i + 1][1], $routeCoords[$i + 1][0]
+        );
+        if ($d < $min) $min = $d;
+    }
+    return $min;
+};
+
+$navPointsJson = '[]';
+$airwaySegmentsJson = '[]';
+if (!empty($routeCoords)) {
+    $allLats = array_column($routeCoords, 1);
+    $allLons = array_column($routeCoords, 0);
+    // Generous bbox margin for SQL pre-filter (~110 km); fine filtering is done in PHP
+    $margin = 1.0;
+    $minLat = min($allLats) - $margin;
+    $maxLat = max($allLats) + $margin;
+    $minLon = min($allLons) - $margin;
+    $maxLon = max($allLons) + $margin;
+
+    $candidates = NavPoint::find()
+        ->where(['between', 'latitude', $minLat, $maxLat])
+        ->andWhere(['between', 'longitude', $minLon, $maxLon])
+        ->with('navaids')
+        ->all();
+
+    // Fine filter: keep only points within 50 km of any route segment
+    $navPoints = array_filter($candidates, fn($np) =>
+        $minDistToRouteKm((float)$np->latitude, (float)$np->longitude) <= 10.0
+    );
+
+    $npById = [];
+    $navPointsData = [];
+    foreach ($navPoints as $np) {
+        $npById[$np->id] = $np;
+        $navaidsData = [];
+        foreach ($np->navaids as $navaid) {
+            $navaidsData[] = [
+                'frequency' => $navaid->frequency,
+            ];
+        }
+        $navPointsData[] = [
+            'id'         => $np->id,
+            'lat'        => (float)$np->latitude,
+            'lon'        => (float)$np->longitude,
+            'identifier' => $np->identifier,
+            'name'       => $np->name,
+            'point_type' => $np->point_type,
+            'navaids'    => $navaidsData,
+        ];
+    }
+    $navPointsJson = Json::encode($navPointsData);
+
+    $navPointIds = array_keys($npById);
+    if (!empty($navPointIds)) {
+        $airwaySegments = AirwaySegment::find()
+            ->where(['from_nav_point_id' => $navPointIds])
+            ->andWhere(['to_nav_point_id' => $navPointIds])
+            ->all();
+
+        $airwaySegmentsData = [];
+        foreach ($airwaySegments as $seg2) {
+            $from = $npById[$seg2->from_nav_point_id];
+            $to   = $npById[$seg2->to_nav_point_id];
+            $airwaySegmentsData[] = [
+                'from_lon'     => (float)$from->longitude,
+                'from_lat'     => (float)$from->latitude,
+                'to_lon'       => (float)$to->longitude,
+                'to_lat'       => (float)$to->latitude,
+                'airway_names' => $seg2->airway_names,
+            ];
+        }
+        $airwaySegmentsJson = Json::encode($airwaySegmentsData);
     }
 }
 
@@ -571,6 +684,86 @@ if (airportRunways.length > 0) {
     runwayLayers.push(rwyLayer);
 }
 
+const navPoints = " . $navPointsJson . ";
+const airwaySegments = " . $airwaySegmentsJson . ";
+
+function makeNavStyle(np) {
+    const type = np.point_type;
+    let color = '#aaaaaa';
+    let radius = 3;
+    if (type === 'VOR') { color = '#2255ff'; radius = 8; }
+    else if (type === 'NDB') { color = '#ff8800'; radius = 7; }
+    else if (type === 'DME') { color = '#00aacc'; radius = 6; }
+    else if (type === 'ILS-LOC') { color = '#00cc44'; radius = 7; }
+    else if (type === 'LOC') { color = '#00cc44'; radius = 6; }
+    else if (type === 'GS') { color = '#88cc44'; radius = 5; }
+    else if (type === 'OM' || type === 'MM' || type === 'IM') { color = '#9944cc'; radius = 4; }
+    return [
+        new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: radius,
+                fill: new ol.style.Fill({ color: color }),
+                stroke: new ol.style.Stroke({ color: '#000', width: 1 })
+            })
+        }),
+        new ol.style.Style({
+            text: new ol.style.Text({
+                text: np.identifier,
+                font: '10px sans-serif',
+                offsetX: radius + 4,
+                offsetY: 0,
+                textAlign: 'left',
+                fill: new ol.style.Fill({ color: '#222' }),
+                stroke: new ol.style.Stroke({ color: '#fff', width: 2 })
+            })
+        })
+    ];
+}
+
+const navFeatures = navPoints.map(np => {
+    const feature = new ol.Feature({
+        geometry: new ol.geom.Point(ol.proj.fromLonLat([np.lon, np.lat]))
+    });
+    feature.setStyle(makeNavStyle(np));
+    return feature;
+});
+const navLayer = new ol.layer.Vector({
+    source: new ol.source.Vector({ features: navFeatures }),
+    declutter: true
+});
+
+const airwayFeatures = airwaySegments.map(seg => {
+    const feature = new ol.Feature({
+        geometry: new ol.geom.LineString([
+            ol.proj.fromLonLat([seg.from_lon, seg.from_lat]),
+            ol.proj.fromLonLat([seg.to_lon, seg.to_lat])
+        ])
+    });
+    feature.set('airway_names', seg.airway_names);
+    return feature;
+});
+const airwayLayer = new ol.layer.Vector({
+    source: new ol.source.Vector({ features: airwayFeatures }),
+    declutter: true,
+    style: function(feature) {
+        return [
+            new ol.style.Style({
+                stroke: new ol.style.Stroke({ color: 'rgba(60,60,200,0.65)', width: 3 })
+            }),
+            new ol.style.Style({
+                text: new ol.style.Text({
+                    text: feature.get('airway_names'),
+                    font: 'bold 11px sans-serif',
+                    placement: 'line',
+                    fill: new ol.style.Fill({ color: '#1a1aaa' }),
+                    stroke: new ol.style.Stroke({ color: '#fff', width: 3 }),
+                    overflow: true
+                })
+            })
+        ];
+    }
+});
+
 const map = new ol.Map({
     target: 'map',
     layers: [
@@ -578,6 +771,8 @@ const map = new ol.Map({
             source: new ol.source.OSM()
         }),
         ...runwayLayers,
+        airwayLayer,
+        navLayer,
         pointLayer,
         ...layers,
         phaseMarkerLayer
