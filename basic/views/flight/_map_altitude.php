@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\helpers\Json;
 use yii\widgets\ActiveForm;
 use app\assets\NavaidMapAsset;
+use app\helpers\GeoUtils;
 use app\models\NavPoint;
 use app\models\AirwaySegment;
 
@@ -146,36 +147,11 @@ foreach ($segments as $seg) {
     }
 }
 
-/**
- * Distance (km) from point P to segment AB using flat-earth approximation
- * (accurate enough for distances under ~200 km).
- */
-$pointToSegmentKm = function(float $pLat, float $pLon, float $aLat, float $aLon, float $bLat, float $bLon): float {
-    $cosLat = cos(deg2rad(($aLat + $bLat) / 2));
-    $px = ($pLon - $aLon) * 111.0 * $cosLat;
-    $py = ($pLat - $aLat) * 111.0;
-    $bx = ($bLon - $aLon) * 111.0 * $cosLat;
-    $by = ($bLat - $aLat) * 111.0;
-    $lenSq = $bx * $bx + $by * $by;
-    if ($lenSq < 1e-10) {
-        return sqrt($px * $px + $py * $py);
-    }
-    $t = max(0.0, min(1.0, ($px * $bx + $py * $by) / $lenSq));
-    $dx = $px - $t * $bx;
-    $dy = $py - $t * $by;
-    return sqrt($dx * $dx + $dy * $dy);
-};
-
-/** Returns the minimum distance (km) from a point to the flight route polyline. */
-$minDistToRouteKm = function(float $npLat, float $npLon) use ($routeCoords, $pointToSegmentKm): float {
+/** Returns the minimum distance (km) from a point to any recorded route point. */
+$minDistToRouteKm = function(float $npLat, float $npLon) use ($routeCoords): float {
     $min = PHP_FLOAT_MAX;
-    $n = count($routeCoords);
-    for ($i = 0; $i < $n - 1; $i++) {
-        $d = $pointToSegmentKm(
-            $npLat, $npLon,
-            $routeCoords[$i][1],   $routeCoords[$i][0],
-            $routeCoords[$i + 1][1], $routeCoords[$i + 1][0]
-        );
+    foreach ($routeCoords as $coord) {
+        $d = GeoUtils::haversine($npLat, $npLon, $coord[1], $coord[0]);
         if ($d < $min) $min = $d;
     }
     return $min;
