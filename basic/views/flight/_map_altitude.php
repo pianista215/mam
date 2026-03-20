@@ -347,7 +347,45 @@ $airportRunwaysJson = Json::encode($airportRunways);
 
 
 <div class="container">
-    <div id="map" style="width: 100%; height: 600px;"></div>
+    <div style="position: relative;">
+        <div style="position: absolute; top: 8px; right: 8px; z-index: 1000;">
+            <div class="btn-group btn-group-sm shadow-sm" role="group">
+                <button id="mapStyleOSM" class="btn" style="background:var(--brand);color:var(--bg-white);border-color:var(--brand-dark);">VFR</button>
+                <button id="mapStyleIFR" class="btn" style="background:var(--bg-white);color:var(--brand);border-color:var(--brand);">IFR</button>
+            </div>
+        </div>
+        <div style="position: absolute; top: 8px; left: 8px; z-index: 1000;
+                    background: var(--bg-white); border: 1px solid #ccc; border-radius: 4px;
+                    padding: 6px 10px; font-size: 11px; line-height: 1.8;">
+            <div style="font-weight: bold; margin-bottom: 2px; color: var(--text-dark);">Nav Points</div>
+            <label style="display:flex; align-items:center; gap:5px; cursor:pointer; color:var(--text-dark);">
+                <input type="checkbox" id="airwayFilterCheck" checked>
+                <span style="display:inline-block; width:10px; height:3px;
+                             background:rgba(60,60,200,0.65); flex-shrink:0;"></span>
+                <?= Yii::t('app', 'Airways') ?>
+            </label>
+            <hr style="margin: 3px 0;">
+            <?php
+            $navTypes = [
+                'VOR'     => '#2255ff',
+                'NDB'     => '#ff8800',
+                'DME'     => '#00aacc',
+                'ILS-LOC' => '#00cc44',
+                'LOC'     => '#00cc44',
+                'FIX'     => '#666666',
+            ];
+            foreach ($navTypes as $type => $color):
+            ?>
+            <label style="display:flex; align-items:center; gap:5px; cursor:pointer; color:var(--text-dark);">
+                <input type="checkbox" class="nav-filter-check" data-type="<?= $type ?>" checked>
+                <span style="display:inline-block; width:10px; height:10px; border-radius:50%;
+                             background:<?= $color ?>; border:1px solid rgba(0,0,0,0.2); flex-shrink:0;"></span>
+                <?= $type ?>
+            </label>
+            <?php endforeach; ?>
+        </div>
+        <div id="map" style="width: 100%; height: 600px;"></div>
+    </div>
     <canvas id="altitudeChart" width="800" height="400"></canvas>
     <div class="mt-4">
         <h5><?=Yii::t('app', 'Raw Event Viewer')?></h5>
@@ -761,15 +799,34 @@ function makeNavStyle(np) {
     return styles;
 }
 
+const navTypeVisible = { 'VOR': true, 'NDB': true, 'DME': true, 'ILS-LOC': true, 'LOC': true, 'FIX': true };
+
 const navFeatures = navPoints.map(np => {
     const feature = new ol.Feature({
         geometry: new ol.geom.Point(ol.proj.fromLonLat([np.lon, np.lat]))
     });
-    feature.setStyle(makeNavStyle(np));
+    feature.set('np', np);
     return feature;
 });
+const navSource = new ol.source.Vector({ features: navFeatures });
 const navLayer = new ol.layer.Vector({
-    source: new ol.source.Vector({ features: navFeatures })
+    source: navSource,
+    style: function(feature) {
+        const np = feature.get('np');
+        if (!navTypeVisible[np.point_type]) return null;
+        return makeNavStyle(np);
+    }
+});
+
+document.querySelectorAll('.nav-filter-check').forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        navTypeVisible[this.dataset.type] = this.checked;
+        navSource.changed();
+    });
+});
+
+document.getElementById('airwayFilterCheck').addEventListener('change', function() {
+    airwayLayer.setVisible(this.checked);
 });
 
 const airwayFeatures = airwaySegments.map(seg => {
@@ -809,6 +866,13 @@ const map = new ol.Map({
     layers: [
         new ol.layer.Tile({
             source: new ol.source.OSM()
+        }),
+        new ol.layer.Tile({
+            source: new ol.source.XYZ({
+                url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+                attributions: 'Tiles &copy; <a href=\"https://www.esri.com/\">Esri</a>'
+            }),
+            visible: false
         }),
         ...runwayLayers,
         airwayLayer,
@@ -944,5 +1008,23 @@ function triggerChartPointByTimestamp(timestamp) {
 }
 
 showRawEvent(0);
+
+const mapLayers = map.getLayers().getArray();
+const osmLayer = mapLayers[0];
+const ifrLayer = mapLayers[1];
+
+function setActiveMapBtn(activeId) {
+    const btns = { mapStyleOSM: osmLayer, mapStyleIFR: ifrLayer };
+    Object.entries(btns).forEach(([id, layer]) => {
+        const btn = document.getElementById(id);
+        const active = id === activeId;
+        layer.setVisible(active);
+        btn.style.background    = active ? 'var(--brand)'    : 'var(--bg-white)';
+        btn.style.color         = active ? 'var(--bg-white)' : 'var(--brand)';
+        btn.style.borderColor   = active ? 'var(--brand-dark)' : 'var(--brand)';
+    });
+}
+document.getElementById('mapStyleOSM').addEventListener('click', () => setActiveMapBtn('mapStyleOSM'));
+document.getElementById('mapStyleIFR').addEventListener('click', () => setActiveMapBtn('mapStyleIFR'));
 ");
 ?>
