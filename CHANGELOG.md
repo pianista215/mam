@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.7.0] - 2026-03-21
+
+### Added
+- Runway end: new optional `glideslope_deg` field to store the glideslope angle (in degrees) for each runway end
+
 ## [1.6.0] - 2026-03-20
 
 ### Added
