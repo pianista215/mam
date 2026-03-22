@@ -110,6 +110,7 @@ class FlightReportController extends Controller
                     'true_heading_deg' => (float)$end->true_heading_deg,
                     'displaced_threshold_m' => (float)($end->displaced_threshold_m ?? 0.0),
                     'stopway_m' => (float)($end->stopway_m ?? 0.0),
+                    'max_glideslope_deg' => (float)$end->max_glideslope_deg,
                 ];
             }
             $runwaysData[] = [

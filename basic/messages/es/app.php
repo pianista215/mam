@@ -196,6 +196,7 @@ return [
     'Longitude must be between -180 and 180.' => 'La longitud debe estar entre -180 y 180',
     'MAM Version' => 'Versión de MAM',
     'Manage Images' => 'Gestionar Imágenes',
+    'Max Glideslope' => 'Senda máxima',
     'Max Range (NM)' => 'Máximo Alcance (NM)',
     'Monthly Statistics' => 'Estadísticas Mensuales',
     'Move' => 'Mover',

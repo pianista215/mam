@@ -15,6 +15,7 @@ use Yii;
  * @property float $true_heading_deg
  * @property float $displaced_threshold_m
  * @property float $stopway_m
+ * @property float $max_glideslope_deg
  *
  * @property Runway $runway
  */
@@ -37,6 +38,7 @@ class RunwayEnd extends \yii\db\ActiveRecord
             [['runway_id', 'designator', 'latitude', 'longitude', 'true_heading_deg'], 'required'],
             [['runway_id'], 'integer'],
             [['latitude', 'longitude', 'true_heading_deg', 'displaced_threshold_m', 'stopway_m'], 'number'],
+            [['max_glideslope_deg'], 'number', 'min' => 0, 'max' => 9.99],
             [['designator'], 'string', 'max' => 3],
             [['runway_id', 'designator'], 'unique', 'targetAttribute' => ['runway_id', 'designator']],
             [['runway_id'], 'exist', 'skipOnError' => true, 'targetClass' => Runway::class, 'targetAttribute' => ['runway_id' => 'id']],
@@ -57,6 +59,7 @@ class RunwayEnd extends \yii\db\ActiveRecord
             'true_heading_deg' => 'True Heading Deg',
             'displaced_threshold_m' => 'Displaced Threshold M',
             'stopway_m' => 'Stopway M',
+            'max_glideslope_deg' => 'Max Glideslope Deg',
         ];
     }
 
