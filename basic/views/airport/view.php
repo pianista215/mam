@@ -88,6 +88,7 @@ $runwayDataJson = Json::encode($runwayData);
                 <tr>
                     <th><?= Yii::t('app', 'Designator') ?></th>
                     <th><?= Yii::t('app', 'Heading') ?> (&deg;)</th>
+                    <th><?= Yii::t('app', 'Max Glideslope') ?> (&deg;)</th>
                 </tr>
             </thead>
             <tbody>
@@ -96,6 +97,7 @@ $runwayDataJson = Json::encode($runwayData);
                         <tr>
                             <td><?= Html::encode($end->designator) ?></td>
                             <td><?= round($end->true_heading_deg) ?></td>
+                            <td><?= $end->max_glideslope_deg ?></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php endforeach; ?>

@@ -59,7 +59,7 @@ class RunwayEnd extends \yii\db\ActiveRecord
             'true_heading_deg' => 'True Heading Deg',
             'displaced_threshold_m' => 'Displaced Threshold M',
             'stopway_m' => 'Stopway M',
-            'glideslope_deg' => 'Glideslope Deg',
+            'max_glideslope_deg' => 'Max Glideslope Deg',
         ];
     }
 
