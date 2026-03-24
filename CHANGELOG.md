@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.8.0] - 2026-03-24
+
+### Changed
+- Issue `AppHighVsBelow2000AGL`: description now uses a dynamic limit placeholder. When the flight analysis sends a third parameter in the issue value (e.g. `-1900|1500|-1800`), that value replaces the default `-2000` fpm threshold in the displayed message
+
 ## [1.7.0] - 2026-03-21
 
 ### Added
