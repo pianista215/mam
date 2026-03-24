@@ -68,11 +68,20 @@ class FlightPhaseIssue extends \yii\db\ActiveRecord
             $to_add = $value . ' fpm';
         } else if($issue_code == 'TaxiOverspeed'){
             $to_add = $value. ' knots';
-        } else if($issue_code == 'AppHighVsBelow1000AGL' || $issue_code == 'AppHighVsBelow2000AGL'){
-            $parts = explode('|', $value);
+        } else if($issue_code == 'AppHighVsBelow1000AGL'){
+            $parts = array_map('trim', explode('|', $value));
+            $limit = isset($parts[2]) ? $parts[2] : '-1500';
+            $description = str_replace('{limit}', $limit, $description);
+            $to_add = $parts[0]. ' fpm '. Yii::t('app','and'). ' '. $parts[1]. ' AGL';
+        } else if($issue_code == 'AppHighVsBelow2000AGL'){
+            $parts = array_map('trim', explode('|', $value));
+            $limit = isset($parts[2]) ? $parts[2] : '-2000';
+            $description = str_replace('{limit}', $limit, $description);
             $to_add = $parts[0]. ' fpm '. Yii::t('app','and'). ' '. $parts[1]. ' AGL';
         } else if($issue_code == 'AppHighVsAvgBelow1000AGL'){
-            $parts = explode('|', $value);
+            $parts = array_map('trim', explode('|', $value));
+            $limit = isset($parts[2]) ? $parts[2] : '-1150';
+            $description = str_replace('{limit}', $limit, $description);
             $to_add = Yii::t('app', 'Sampled VS') . ': ' . $parts[0]. ' fpm '. Yii::t('app','and'). ' '. $parts[1]. ' AGL';
         } else if($issue_code == 'Refueling' || $issue_code == 'ZfwModified'){
             $to_add = $value. ' Kg';
