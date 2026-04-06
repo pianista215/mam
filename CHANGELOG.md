@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.9.0] - 2026-04-06
+
+### Added
+- Issues `AppHighVsBelow500AGL` and `AppHighVsAvgBelow500AGL`: detect high descent rate below 500 AGL, mirroring the existing 1000 AGL variants with dynamic `{limit}` placeholder support
+
 ## [1.8.0] - 2026-03-24
 
 ### Changed
