@@ -26,6 +26,12 @@ class CredentialType extends \yii\db\ActiveRecord
     const TYPE_RATING        = 2;
     const TYPE_CERTIFICATION = 3;
 
+    /** @var int[] IDs of parent credential types (prerequisites), managed via junction table */
+    public $prerequisiteIds = [];
+
+    /** @var int[] IDs of aircraft types this credential unlocks, managed via junction table */
+    public $aircraftTypeIds = [];
+
     /**
      * {@inheritdoc}
      */
@@ -49,6 +55,7 @@ class CredentialType extends \yii\db\ActiveRecord
             [['name'], 'trim'],
             [['code'], 'trim'],
             [['code'], 'unique'],
+            [['prerequisiteIds', 'aircraftTypeIds'], 'safe'],
         ];
     }
 

@@ -3,9 +3,12 @@
 namespace app\controllers;
 
 use app\helpers\LoggerTrait;
+use app\models\AircraftType;
 use app\models\CredentialType;
+use app\models\CredentialTypePrerequisite;
 use app\models\CredentialTypeSearch;
 use app\rbac\constants\Permissions;
+use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
@@ -96,17 +99,26 @@ class CredentialTypeController extends Controller
 
         $model = new CredentialType();
 
-        if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                $this->logInfo('Created credential type', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
-                return $this->redirect(['view', 'id' => $model->id]);
+        if ($this->request->isPost && $model->load($this->request->post())) {
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                if ($model->save()) {
+                    $this->syncRelations($model);
+                    $transaction->commit();
+                    $this->logInfo('Created credential type', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
+                    return $this->redirect(['view', 'id' => $model->id]);
+                }
+                $transaction->rollBack();
+            } catch (\Throwable $e) {
+                $transaction->rollBack();
+                throw $e;
             }
-        } else {
-            $model->loadDefaultValues();
         }
 
         return $this->render('create', [
-            'model' => $model,
+            'model'            => $model,
+            'credentialTypes'  => $this->getCredentialTypeOptions(),
+            'aircraftTypes'    => $this->getAircraftTypeOptions(),
         ]);
     }
 
@@ -125,13 +137,30 @@ class CredentialTypeController extends Controller
 
         $model = $this->findModel($id);
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            $this->logInfo('Updated credential type', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
-            return $this->redirect(['view', 'id' => $model->id]);
+        if ($this->request->isPost && $model->load($this->request->post())) {
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                if ($model->save()) {
+                    $this->syncRelations($model);
+                    $transaction->commit();
+                    $this->logInfo('Updated credential type', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
+                    return $this->redirect(['view', 'id' => $model->id]);
+                }
+                $transaction->rollBack();
+            } catch (\Throwable $e) {
+                $transaction->rollBack();
+                throw $e;
+            }
+        } else {
+            // Pre-populate virtual properties from existing relations
+            $model->prerequisiteIds = ArrayHelper::getColumn($model->prerequisites, 'parent_id');
+            $model->aircraftTypeIds = ArrayHelper::getColumn($model->aircraftTypes, 'id');
         }
 
         return $this->render('update', [
-            'model' => $model,
+            'model'           => $model,
+            'credentialTypes' => $this->getCredentialTypeOptions($model->id),
+            'aircraftTypes'   => $this->getAircraftTypeOptions(),
         ]);
     }
 
@@ -153,6 +182,62 @@ class CredentialTypeController extends Controller
         $this->logInfo('Deleted credential type', ['id' => $id, 'user' => Yii::$app->user->identity->license]);
 
         return $this->redirect(['index']);
+    }
+
+    /**
+     * Syncs the prerequisite and aircraft type junction tables for a credential type.
+     */
+    protected function syncRelations(CredentialType $model): void
+    {
+        // Sync prerequisites
+        CredentialTypePrerequisite::deleteAll(['child_id' => $model->id]);
+        foreach (array_filter((array) $model->prerequisiteIds) as $parentId) {
+            $prereq = new CredentialTypePrerequisite();
+            $prereq->parent_id = (int) $parentId;
+            $prereq->child_id  = $model->id;
+            $prereq->save();
+        }
+
+        // Sync aircraft types
+        Yii::$app->db->createCommand()
+            ->delete('credential_type_aircraft_type', ['credential_type_id' => $model->id])
+            ->execute();
+        foreach (array_filter((array) $model->aircraftTypeIds) as $aircraftTypeId) {
+            Yii::$app->db->createCommand()
+                ->insert('credential_type_aircraft_type', [
+                    'credential_type_id' => $model->id,
+                    'aircraft_type_id'   => (int) $aircraftTypeId,
+                ])
+                ->execute();
+        }
+    }
+
+    /**
+     * Returns credential types as id => label map, optionally excluding one (self).
+     */
+    protected function getCredentialTypeOptions(?int $excludeId = null): array
+    {
+        $query = CredentialType::find()->orderBy(['type' => SORT_ASC, 'name' => SORT_ASC]);
+        if ($excludeId !== null) {
+            $query->andWhere(['<>', 'id', $excludeId]);
+        }
+        return ArrayHelper::map(
+            $query->all(),
+            'id',
+            fn(CredentialType $ct) => '[' . $ct->getTypeLabel() . '] ' . $ct->name
+        );
+    }
+
+    /**
+     * Returns aircraft types as id => name map.
+     */
+    protected function getAircraftTypeOptions(): array
+    {
+        return ArrayHelper::map(
+            AircraftType::find()->orderBy(['name' => SORT_ASC])->all(),
+            'id',
+            'name'
+        );
     }
 
     /**
