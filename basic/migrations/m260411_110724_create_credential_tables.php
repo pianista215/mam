@@ -20,7 +20,6 @@ class m260411_110724_create_credential_tables extends Migration
             'name'          => $this->string(100)->notNull(),
             'type'          => $this->tinyInteger()->unsigned()->notNull(), // 1=license, 2=rating, 3=certification
             'description'   => $this->text()->null(),
-            'display_order' => $this->smallInteger()->unsigned()->notNull()->defaultValue(0),
         ], 'ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
 
         $this->createIndex('credential_type_code_unique', 'credential_type', 'code', true);

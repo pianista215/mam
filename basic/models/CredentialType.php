@@ -12,7 +12,6 @@ use Yii;
  * @property string $name
  * @property int $type
  * @property string|null $description
- * @property int $display_order
  *
  * @property CredentialTypePrerequisite[] $prerequisites
  * @property CredentialTypePrerequisite[] $dependents
@@ -42,7 +41,7 @@ class CredentialType extends \yii\db\ActiveRecord
     {
         return [
             [['code', 'name', 'type'], 'required'],
-            [['type', 'display_order'], 'integer'],
+            [['type'], 'integer'],
             [['type'], 'in', 'range' => [self::TYPE_LICENSE, self::TYPE_RATING, self::TYPE_CERTIFICATION]],
             [['description'], 'string'],
             [['code'], 'string', 'max' => 30],
@@ -64,7 +63,6 @@ class CredentialType extends \yii\db\ActiveRecord
             'name'          => Yii::t('app', 'Name'),
             'type'          => Yii::t('app', 'Type'),
             'description'   => Yii::t('app', 'Description'),
-            'display_order' => Yii::t('app', 'Display Order'),
         ];
     }
 
