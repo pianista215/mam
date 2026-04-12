@@ -10,6 +10,7 @@ use yii\helpers\Url;
 /** @var yii\web\View $this */
 /** @var app\models\CredentialTypeSearch $searchModel */
 /** @var yii\data\ActiveDataProvider $dataProvider */
+/** @var string $mermaidGraph */
 
 $this->title = Yii::t('app', 'Credential Types');
 $this->params['breadcrumbs'][] = $this->title;
@@ -58,5 +59,24 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
         'summaryOptions' => ['class' => 'text-muted'],
     ]); ?>
+
+    <?php if ($mermaidGraph): ?>
+    <div class="card mt-4 mb-4">
+        <div class="card-header fw-semibold"><?= Yii::t('app', 'Career Graph') ?></div>
+        <div class="card-body overflow-auto text-center">
+            <pre class="mermaid d-inline-block text-start"><?= $mermaidGraph ?></pre>
+        </div>
+    </div>
+    <?php $this->registerJsFile(
+        'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js',
+        ['position' => \yii\web\View::POS_END]
+    ); ?>
+    <?php $this->registerJs('mermaid.initialize({ startOnLoad: true, theme: "default" });'); ?>
+    <?php $this->registerCss('
+        .mermaid svg { min-width: 600px; width: 100%; height: auto; }
+        .mermaid svg .label div,
+        .mermaid svg .nodeLabel { font-size: 56px !important; line-height: 1.5; }
+    '); ?>
+    <?php endif; ?>
 
 </div>

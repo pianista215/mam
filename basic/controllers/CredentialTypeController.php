@@ -66,9 +66,16 @@ class CredentialTypeController extends Controller
             'name' => SORT_ASC,
         ];
 
+        $allCredentials = CredentialType::find()
+            ->with('aircraftTypes')
+            ->orderBy(['type' => SORT_ASC, 'name' => SORT_ASC])
+            ->all();
+        $edges = CredentialTypePrerequisite::find()->all();
+
         return $this->render('index', [
-            'searchModel'  => $searchModel,
-            'dataProvider' => $dataProvider,
+            'searchModel'   => $searchModel,
+            'dataProvider'  => $dataProvider,
+            'mermaidGraph'  => $this->generateMermaidGraph($allCredentials, $edges),
         ]);
     }
 
@@ -238,6 +245,54 @@ class CredentialTypeController extends Controller
             'id',
             'name'
         );
+    }
+
+    /**
+     * Builds a Mermaid graph definition (TD) for the credential DAG.
+     * Nodes that share the same parent are placed side by side automatically
+     * by dagre's layout engine.
+     *
+     * @param CredentialType[] $credentials
+     * @param CredentialTypePrerequisite[] $edges
+     */
+    protected function generateMermaidGraph(array $credentials, array $edges): string
+    {
+        if (empty($credentials)) {
+            return '';
+        }
+
+        $cssClasses = [
+            CredentialType::TYPE_LICENSE       => 'license',
+            CredentialType::TYPE_RATING        => 'rating',
+            CredentialType::TYPE_CERTIFICATION => 'certification',
+        ];
+
+        $lines   = ['---'];
+        $lines[] = 'config:';
+        $lines[] = '  flowchart:';
+        $lines[] = '    nodeSpacing: 120';
+        $lines[] = '    rankSpacing: 150';
+        $lines[] = '---';
+        $lines[] = 'graph TD';
+        $lines[] = '    classDef license fill:#4e73df,color:#fff,stroke:#2e59d9';
+        $lines[] = '    classDef rating fill:#1cc88a,color:#fff,stroke:#17a673';
+        $lines[] = '    classDef certification fill:#f6c23e,color:#333,stroke:#dda20a';
+
+        foreach ($credentials as $ct) {
+            $cssClass     = $cssClasses[$ct->type] ?? 'license';
+            $label        = addslashes($ct->name);
+            $aircraftNames = array_map(fn($at) => $at->icao_type_code, $ct->aircraftTypes);
+            if (!empty($aircraftNames)) {
+                $label .= '&lt;br/&gt;──────────&lt;br/&gt;' . implode('&lt;br/&gt;', array_map('addslashes', $aircraftNames));
+            }
+            $lines[] = '    n' . $ct->id . '["' . $label . '"]:::' . $cssClass;
+        }
+
+        foreach ($edges as $edge) {
+            $lines[] = '    n' . $edge->parent_id . ' --> n' . $edge->child_id;
+        }
+
+        return implode("\n", $lines);
     }
 
     /**

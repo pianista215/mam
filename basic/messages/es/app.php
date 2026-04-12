@@ -64,6 +64,7 @@ return [
     'Back to Login' => 'Volver al Login',
     'Block time' => 'Block time',
     'Can\'t find image' => 'No se pudo encontrar la imagen',
+    'Career Graph' => 'Grafo de Carrera',
     'Cancel' => 'Cancelar',
     'Cargo Capacity' => 'Capacidad de Cargo',
     'Certification' => 'Certificación',
