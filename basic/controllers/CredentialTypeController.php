@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\helpers\LoggerTrait;
 use app\models\AircraftType;
 use app\models\CredentialType;
+use app\models\CredentialTypeAirportAircraft;
 use app\models\CredentialTypePrerequisite;
 use app\models\CredentialTypeSearch;
 use app\rbac\constants\Permissions;
@@ -110,7 +111,11 @@ class CredentialTypeController extends Controller
             $transaction = Yii::$app->db->beginTransaction();
             try {
                 if ($model->save()) {
-                    $this->syncRelations($model);
+                    $this->syncRelations(
+                        $model,
+                        $this->request->post('airportIcaos', []),
+                        $this->request->post('restrictionAircraftTypeIds', [])
+                    );
                     $transaction->commit();
                     $this->logInfo('Created credential type', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
                     return $this->redirect(['view', 'id' => $model->id]);
@@ -123,9 +128,11 @@ class CredentialTypeController extends Controller
         }
 
         return $this->render('create', [
-            'model'            => $model,
-            'credentialTypes'  => $this->getCredentialTypeOptions(),
-            'aircraftTypes'    => $this->getAircraftTypeOptions(),
+            'model'                      => $model,
+            'credentialTypes'            => $this->getCredentialTypeOptions(),
+            'aircraftTypes'              => $this->getAircraftTypeOptions(),
+            'restrictionAirports'        => [],
+            'restrictionAircraftTypeIds' => [],
         ]);
     }
 
@@ -148,7 +155,11 @@ class CredentialTypeController extends Controller
             $transaction = Yii::$app->db->beginTransaction();
             try {
                 if ($model->save()) {
-                    $this->syncRelations($model);
+                    $this->syncRelations(
+                        $model,
+                        $this->request->post('airportIcaos', []),
+                        $this->request->post('restrictionAircraftTypeIds', [])
+                    );
                     $transaction->commit();
                     $this->logInfo('Updated credential type', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
                     return $this->redirect(['view', 'id' => $model->id]);
@@ -164,10 +175,16 @@ class CredentialTypeController extends Controller
             $model->aircraftTypeIds = ArrayHelper::getColumn($model->aircraftTypes, 'id');
         }
 
+        $existingRestrictions       = $model->airportAircraftRestrictions;
+        $restrictionAirports        = array_values(array_unique(ArrayHelper::getColumn($existingRestrictions, 'airport_icao')));
+        $restrictionAircraftTypeIds = array_values(array_unique(ArrayHelper::getColumn($existingRestrictions, 'aircraft_type_id')));
+
         return $this->render('update', [
-            'model'           => $model,
-            'credentialTypes' => $this->getCredentialTypeOptions($model->id),
-            'aircraftTypes'   => $this->getAircraftTypeOptions(),
+            'model'                      => $model,
+            'credentialTypes'            => $this->getCredentialTypeOptions($model->id),
+            'aircraftTypes'              => $this->getAircraftTypeOptions(),
+            'restrictionAirports'        => $restrictionAirports,
+            'restrictionAircraftTypeIds' => $restrictionAircraftTypeIds,
         ]);
     }
 
@@ -192,9 +209,13 @@ class CredentialTypeController extends Controller
     }
 
     /**
-     * Syncs the prerequisite and aircraft type junction tables for a credential type.
+     * Syncs the prerequisite, aircraft type, and airport-aircraft restriction tables for a credential type.
+     * Airport restrictions are stored as the cross-product of $airportIcaos × $restrictionAircraftTypeIds.
+     *
+     * @param string[] $airportIcaos              ICAO codes from POST (airportIcaos[])
+     * @param int[]    $restrictionAircraftTypeIds aircraft type IDs from POST (restrictionAircraftTypeIds[])
      */
-    protected function syncRelations(CredentialType $model): void
+    protected function syncRelations(CredentialType $model, array $airportIcaos = [], array $restrictionAircraftTypeIds = []): void
     {
         // Sync prerequisites
         CredentialTypePrerequisite::deleteAll(['child_id' => $model->id]);
@@ -216,6 +237,23 @@ class CredentialTypeController extends Controller
                     'aircraft_type_id'   => (int) $aircraftTypeId,
                 ])
                 ->execute();
+        }
+
+        // Sync airport-aircraft restrictions: cross-product of airports × aircraft types
+        CredentialTypeAirportAircraft::deleteAll(['credential_type_id' => $model->id]);
+        $icaos = array_unique(array_filter(
+            array_map(fn($s) => strtoupper(trim($s)), $airportIcaos),
+            fn($s) => strlen($s) === 4
+        ));
+        $acIds = array_unique(array_filter(array_map('intval', $restrictionAircraftTypeIds)));
+        foreach ($icaos as $icao) {
+            foreach ($acIds as $acId) {
+                $r = new CredentialTypeAirportAircraft();
+                $r->credential_type_id = $model->id;
+                $r->aircraft_type_id   = $acId;
+                $r->airport_icao       = $icao;
+                $r->save();
+            }
         }
     }
 
@@ -246,6 +284,7 @@ class CredentialTypeController extends Controller
             'name'
         );
     }
+
 
     /**
      * Builds a Mermaid graph definition (TD) for the credential DAG.

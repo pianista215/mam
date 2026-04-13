@@ -146,6 +146,15 @@ class CredentialType extends \yii\db\ActiveRecord
     }
 
     /**
+     * Gets airport-aircraft restrictions defined by this credential type.
+     */
+    public function getAirportAircraftRestrictions()
+    {
+        return $this->hasMany(CredentialTypeAirportAircraft::class, ['credential_type_id' => 'id'])
+            ->orderBy(['airport_icao' => SORT_ASC, 'aircraft_type_id' => SORT_ASC]);
+    }
+
+    /**
      * Gets pilot credentials of this type.
      */
     public function getPilotCredentials()

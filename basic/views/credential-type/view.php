@@ -95,17 +95,62 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="card shadow-sm mb-4">
         <div class="card-header"><?= Yii::t('app', 'Unlocked Aircraft Types') ?></div>
         <div class="card-body">
-            <?php $aircraftTypes = $model->aircraftTypes; ?>
-            <?php if (empty($aircraftTypes)): ?>
+            <?php $unlockedAircraftTypes = $model->aircraftTypes; ?>
+            <?php if (empty($unlockedAircraftTypes)): ?>
                 <p class="text-muted mb-0"><?= Yii::t('app', 'None') ?></p>
             <?php else: ?>
                 <ul class="list-unstyled mb-0">
-                    <?php foreach ($aircraftTypes as $aircraftType): ?>
+                    <?php foreach ($unlockedAircraftTypes as $aircraftType): ?>
                         <li><?= Html::encode($aircraftType->name) ?></li>
                     <?php endforeach; ?>
                 </ul>
             <?php endif; ?>
         </div>
     </div>
+
+    <?php $restrictions = $model->airportAircraftRestrictions; ?>
+    <?php if (!empty($restrictions)): ?>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header"><?= Yii::t('app', 'Affected Airports') ?></div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <?php
+                        $seenAirports = [];
+                        foreach ($restrictions as $r):
+                            if (isset($seenAirports[$r->airport_icao])) continue;
+                            $seenAirports[$r->airport_icao] = true;
+                        ?>
+                        <li>
+                            <code><?= Html::encode($r->airport_icao) ?></code>
+                            <?php if ($r->airport): ?>
+                                — <?= Html::encode($r->airport->name) ?>
+                            <?php endif; ?>
+                        </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header"><?= Yii::t('app', 'Restricted Aircraft Types') ?></div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <?php
+                        $seenAircraft = [];
+                        foreach ($restrictions as $r):
+                            if (isset($seenAircraft[$r->aircraft_type_id])) continue;
+                            $seenAircraft[$r->aircraft_type_id] = true;
+                        ?>
+                        <li><?= $r->aircraftType ? Html::encode($r->aircraftType->name) : Html::encode($r->aircraft_type_id) ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
 
 </div>
