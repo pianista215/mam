@@ -277,6 +277,7 @@ class CredentialTypeController extends Controller
         $lines[] = '    classDef license fill:#4e73df,color:#fff,stroke:#2e59d9';
         $lines[] = '    classDef rating fill:#1cc88a,color:#fff,stroke:#17a673';
         $lines[] = '    classDef certification fill:#f6c23e,color:#333,stroke:#dda20a';
+        $lines[] = '    linkStyle default stroke:#555,stroke-width:3px';
 
         foreach ($credentials as $ct) {
             $cssClass     = $cssClasses[$ct->type] ?? 'license';
