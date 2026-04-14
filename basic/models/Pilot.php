@@ -7,6 +7,7 @@ use app\helpers\CustomRules;
 use app\models\traits\ImageRelated;
 use app\models\traits\PasswordRulesTrait;
 use Yii;
+use yii\db\ActiveQuery;
 
 /**
  * This is the model class for table "pilot".
@@ -197,6 +198,18 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     public function getRank()
     {
         return $this->hasOne(Rank::class, ['id' => 'rank_id']);
+    }
+
+    /**
+     * Gets current (non-superseded) pilot credentials ordered by issued date descending.
+     *
+     * @return ActiveQuery
+     */
+    public function getPilotCredentials(): ActiveQuery
+    {
+        return $this->hasMany(PilotCredential::class, ['pilot_id' => 'id'])
+            ->where(['superseded_at' => null])
+            ->orderBy(['issued_date' => SORT_DESC]);
     }
 
     /**

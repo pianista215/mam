@@ -2,7 +2,9 @@
 
 use app\helpers\TimeHelper;
 use app\helpers\ImageMam;
+use app\models\CredentialType;
 use app\models\Image;
+use app\models\PilotCredential;
 use app\rbac\constants\Permissions;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -133,6 +135,179 @@ $this->params['breadcrumbs'][] = $this->title;
                 </div>
 
             </div>
+        </div>
+    </div>
+
+    <?php
+    $currentCredentials = $model->pilotCredentials;
+
+    // Collect all aircraft types unlocked by the pilot's currently valid credentials
+    $authorizedAircraft = [];
+    foreach ($currentCredentials as $pc) {
+        if ($pc->isValid()) {
+            foreach ($pc->credentialType->aircraftTypes as $at) {
+                $authorizedAircraft[$at->id] = $at;
+            }
+        }
+    }
+
+    // Separate licenses from ratings/certifications
+    $licenses         = array_values(array_filter($currentCredentials, fn($pc) => $pc->credentialType->isLicense()));
+    $otherCredentials = array_values(array_filter($currentCredentials, fn($pc) => !$pc->credentialType->isLicense()));
+
+    // Infer the highest license from the prerequisite graph:
+    // the highest is the one whose type is NOT a parent of any other current license type.
+    $highestLicense = null;
+    if (!empty($licenses)) {
+        $licenseTypeIds = array_map(fn($pc) => (int)$pc->credential_type_id, $licenses);
+        // Which of those type IDs are parents of another current license type?
+        $parentTypeIds = array_map('intval', \app\models\CredentialTypePrerequisite::find()
+            ->select('parent_id')
+            ->where(['in', 'child_id', $licenseTypeIds])
+            ->andWhere(['in', 'parent_id', $licenseTypeIds])
+            ->column());
+        foreach ($licenses as $pc) {
+            if (!in_array((int)$pc->credential_type_id, $parentTypeIds, true)) {
+                $highestLicense = $pc;
+                break;
+            }
+        }
+        // Fallback: if no prerequisites defined between current licenses, pick the first
+        if ($highestLicense === null) {
+            $highestLicense = $licenses[0];
+        }
+    }
+
+    // Lower current licenses (anything that is not the highest) — treat as history
+    $lowerCurrent = array_values(array_filter($licenses, fn($pc) => $pc !== $highestLicense));
+
+    // Fetch all superseded license records for this pilot
+    $supersededLicenses = PilotCredential::find()
+        ->where(['pilot_id' => $model->id])
+        ->andWhere(['IS NOT', 'superseded_at', null])
+        ->andWhere(['in', 'credential_type_id',
+            CredentialType::find()->select('id')->where(['type' => CredentialType::TYPE_LICENSE])->column()
+        ])
+        ->with('credentialType')
+        ->orderBy(['superseded_at' => SORT_DESC])
+        ->all();
+
+    // History = lower current licenses first (no superseded_at), then superseded records
+    $licenseHistory = array_merge($lowerCurrent, $supersededLicenses);
+
+    $makeBadge = function($pc) {
+        if ($pc->isStudent()) {
+            return '<span class="badge bg-info">' . Yii::t('app', 'Student') . '</span>';
+        } elseif ($pc->expiry_date !== null && $pc->expiry_date < date('Y-m-d')) {
+            return '<span class="badge bg-danger">' . Yii::t('app', 'Expired') . '</span>';
+        }
+        return '<span class="badge bg-success">' . Yii::t('app', 'Active') . '</span>';
+    };
+    ?>
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="card-title mb-0"><?= Yii::t('app', 'Credentials') ?></h5>
+                <?php if (Yii::$app->user->can(Permissions::ISSUE_CREDENTIAL)): ?>
+                    <?= Html::a(
+                        '+ ' . Yii::t('app', 'Issue Credential'),
+                        ['/pilot-credential/issue', 'pilotId' => $model->id],
+                        ['class' => 'btn btn-sm btn-outline-primary']
+                    ) ?>
+                <?php endif; ?>
+            </div>
+
+            <?php if (empty($currentCredentials) && empty($licenseHistory)): ?>
+                <p class="text-muted mb-0"><?= Yii::t('app', 'No credentials issued yet.') ?></p>
+            <?php else: ?>
+            <table class="table table-sm table-bordered mb-3">
+                <thead class="table-light">
+                    <tr>
+                        <th><?= Yii::t('app', 'Credential Type') ?></th>
+                        <th><?= Yii::t('app', 'Status') ?></th>
+                        <th><?= Yii::t('app', 'Issued Date') ?></th>
+                        <th><?= Yii::t('app', 'Expiry Date') ?></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if ($highestLicense): ?>
+                    <tr>
+                        <td>
+                            <?= Html::encode($highestLicense->credentialType->name) ?>
+                            <span class="badge bg-secondary ms-1"><?= Html::encode($highestLicense->credentialType->getTypeLabel()) ?></span>
+                            <?php if (!empty($licenseHistory)): ?>
+                                <a data-bs-toggle="collapse" href="#licenseHistory" role="button"
+                                   class="ms-1 text-muted small text-decoration-none">
+                                    &#9662; <?= count($licenseHistory) ?> <?= Yii::t('app', 'previous') ?>
+                                </a>
+                            <?php endif; ?>
+                        </td>
+                        <td><?= $makeBadge($highestLicense) ?></td>
+                        <td><?= Html::encode($highestLicense->issued_date) ?></td>
+                        <td><?= $highestLicense->expiry_date ? Html::encode($highestLicense->expiry_date) : '<span class="text-muted">—</span>' ?></td>
+                        <td><?= Html::a(Yii::t('app', 'View'), ['/pilot-credential/view', 'id' => $highestLicense->id], ['class' => 'btn btn-outline-secondary btn-sm']) ?></td>
+                    </tr>
+                    <?php endif; ?>
+
+                    <?php if (!empty($licenseHistory)): ?>
+                    <tr class="collapse" id="licenseHistory">
+                        <td colspan="5" class="p-0 border-0">
+                            <table class="table table-sm mb-0 bg-light">
+                                <thead class="table-secondary">
+                                    <tr>
+                                        <th><?= Yii::t('app', 'Credential Type') ?></th>
+                                        <th><?= Yii::t('app', 'Status') ?></th>
+                                        <th><?= Yii::t('app', 'Issued Date') ?></th>
+                                        <th><?= Yii::t('app', 'Expiry Date') ?></th>
+                                        <th><?= Yii::t('app', 'Superseded') ?></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($licenseHistory as $h): ?>
+                                    <tr>
+                                        <td>
+                                            <?= Html::encode($h->credentialType->name) ?>
+                                            <span class="badge bg-secondary ms-1"><?= Html::encode($h->credentialType->getTypeLabel()) ?></span>
+                                        </td>
+                                        <td><?= $h->superseded_at
+                                            ? '<span class="badge bg-secondary">' . Yii::t('app', 'Revoked') . '</span>'
+                                            : $makeBadge($h) ?></td>
+                                        <td><?= Html::encode($h->issued_date) ?></td>
+                                        <td><?= $h->expiry_date ? Html::encode($h->expiry_date) : '<span class="text-muted">—</span>' ?></td>
+                                        <td><?= $h->superseded_at ? Html::encode(substr($h->superseded_at, 0, 10)) : '<span class="text-muted">—</span>' ?></td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                    <?php endif; ?>
+
+                    <?php foreach ($otherCredentials as $pc): ?>
+                    <tr>
+                        <td>
+                            <?= Html::encode($pc->credentialType->name) ?>
+                            <span class="badge bg-secondary ms-1"><?= Html::encode($pc->credentialType->getTypeLabel()) ?></span>
+                        </td>
+                        <td><?= $makeBadge($pc) ?></td>
+                        <td><?= Html::encode($pc->issued_date) ?></td>
+                        <td><?= $pc->expiry_date ? Html::encode($pc->expiry_date) : '<span class="text-muted">—</span>' ?></td>
+                        <td><?= Html::a(Yii::t('app', 'View'), ['/pilot-credential/view', 'id' => $pc->id], ['class' => 'btn btn-outline-secondary btn-sm']) ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+            <?php endif; ?>
+
+            <?php if (!empty($authorizedAircraft)): ?>
+            <div>
+                <span class="text-muted small fw-semibold"><?= Yii::t('app', 'Authorized Aircraft Types') ?>:</span>
+                <?php foreach ($authorizedAircraft as $at): ?>
+                    <span class="badge bg-light text-dark border ms-1"><?= Html::encode($at->name) ?></span>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
         </div>
     </div>
 

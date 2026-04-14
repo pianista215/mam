@@ -137,4 +137,18 @@ class PilotCredential extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Pilot::class, ['id' => 'issued_by']);
     }
+
+    /**
+     * Returns all superseded (historical) records for the same pilot + credential type pair,
+     * ordered by supersession date descending (most recent first).
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getHistory()
+    {
+        return static::find()
+            ->where(['pilot_id' => $this->pilot_id, 'credential_type_id' => $this->credential_type_id])
+            ->andWhere(['IS NOT', 'superseded_at', null])
+            ->orderBy(['superseded_at' => SORT_DESC]);
+    }
 }

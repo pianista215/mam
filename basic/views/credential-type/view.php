@@ -168,6 +168,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         <th><?= Yii::t('app', 'Status') ?></th>
                         <th><?= Yii::t('app', 'Issued Date') ?></th>
                         <th><?= Yii::t('app', 'Expiry Date') ?></th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -186,6 +187,23 @@ $this->params['breadcrumbs'][] = $this->title;
                         <td><?= $badge ?></td>
                         <td><?= Html::encode($pc->issued_date) ?></td>
                         <td><?= $pc->expiry_date ? Html::encode($pc->expiry_date) : '<span class="text-muted">—</span>' ?></td>
+                        <td class="text-nowrap">
+                            <?= Html::a(Yii::t('app', 'View'), ['/pilot-credential/view', 'id' => $pc->id], ['class' => 'btn btn-sm btn-outline-secondary me-1']) ?>
+                            <?php if (Yii::$app->user->can(Permissions::ISSUE_CREDENTIAL)): ?>
+                                <?= Html::a(
+                                    $pc->isStudent() ? Yii::t('app', 'Issue') : Yii::t('app', 'Renew'),
+                                    ['/pilot-credential/renew', 'id' => $pc->id],
+                                    ['class' => 'btn btn-sm btn-outline-primary me-1']
+                                ) ?>
+                                <?= Html::a(Yii::t('app', 'Revoke'), ['/pilot-credential/revoke', 'id' => $pc->id], [
+                                    'class' => 'btn btn-sm btn-outline-danger',
+                                    'data'  => [
+                                        'confirm' => Yii::t('app', 'This action will close the current credential record. Are you sure?'),
+                                        'method'  => 'post',
+                                    ],
+                                ]) ?>
+                            <?php endif; ?>
+                        </td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>
