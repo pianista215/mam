@@ -8,6 +8,7 @@ use app\models\CredentialType;
 use app\models\CredentialTypeAirportAircraft;
 use app\models\CredentialTypePrerequisite;
 use app\models\CredentialTypeSearch;
+use app\models\PilotCredential;
 use app\rbac\constants\Permissions;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
@@ -89,8 +90,17 @@ class CredentialTypeController extends Controller
      */
     public function actionView($id)
     {
+        $model = $this->findModel($id);
+
+        $currentCredentials = PilotCredential::find()
+            ->with('pilot')
+            ->where(['credential_type_id' => $model->id, 'superseded_at' => null])
+            ->orderBy(['status' => SORT_ASC, 'expiry_date' => SORT_ASC])
+            ->all();
+
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model'              => $model,
+            'currentCredentials' => $currentCredentials,
         ]);
     }
 

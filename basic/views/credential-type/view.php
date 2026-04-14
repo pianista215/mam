@@ -1,11 +1,13 @@
 <?php
 
 use app\models\CredentialType;
+use app\models\PilotCredential;
 use app\rbac\constants\Permissions;
 use yii\helpers\Html;
 
 /** @var yii\web\View $this */
 /** @var app\models\CredentialType $model */
+/** @var app\models\PilotCredential[] $currentCredentials */
 
 $this->title = $model->name;
 $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Credential Types'), 'url' => ['index']];
@@ -152,5 +154,44 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
     </div>
     <?php endif; ?>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header"><?= Yii::t('app', 'Pilots') ?></div>
+        <div class="card-body">
+            <?php if (empty($currentCredentials)): ?>
+                <p class="text-muted mb-0"><?= Yii::t('app', 'None') ?></p>
+            <?php else: ?>
+            <table class="table table-sm table-bordered mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th><?= Yii::t('app', 'Pilot') ?></th>
+                        <th><?= Yii::t('app', 'Status') ?></th>
+                        <th><?= Yii::t('app', 'Issued Date') ?></th>
+                        <th><?= Yii::t('app', 'Expiry Date') ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($currentCredentials as $pc): ?>
+                    <?php
+                        if ($pc->isStudent()) {
+                            $badge = '<span class="badge bg-info">' . Yii::t('app', 'Student') . '</span>';
+                        } elseif ($pc->expiry_date !== null && $pc->expiry_date < date('Y-m-d')) {
+                            $badge = '<span class="badge bg-danger">' . Yii::t('app', 'Expired') . '</span>';
+                        } else {
+                            $badge = '<span class="badge bg-success">' . Yii::t('app', 'Active') . '</span>';
+                        }
+                    ?>
+                    <tr>
+                        <td><?= Html::a(Html::encode($pc->pilot->getFullName()), ['/pilot/view', 'id' => $pc->pilot_id]) ?></td>
+                        <td><?= $badge ?></td>
+                        <td><?= Html::encode($pc->issued_date) ?></td>
+                        <td><?= $pc->expiry_date ? Html::encode($pc->expiry_date) : '<span class="text-muted">—</span>' ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+            <?php endif; ?>
+        </div>
+    </div>
 
 </div>

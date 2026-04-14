@@ -138,6 +138,7 @@ return [
     'Error validating flight.' => 'Error validando el vuelo.',
     'Estimated Time' => 'Estimated Time',
     'Ex: LEMD' => 'Ej: LEMD',
+    'Expired' => 'Caducada',
     'Expiry Date' => 'Fecha de Caducidad',
     'Facebook URL' => 'URL de Facebook',
     'Filename' => 'Fichero',
