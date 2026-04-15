@@ -94,7 +94,7 @@ class CredentialTypeController extends Controller
 
         $currentCredentials = PilotCredential::find()
             ->with('pilot')
-            ->where(['credential_type_id' => $model->id, 'superseded_at' => null])
+            ->where(['credential_type_id' => $model->id])
             ->orderBy(['status' => SORT_ASC, 'expiry_date' => SORT_ASC])
             ->all();
 

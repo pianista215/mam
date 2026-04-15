@@ -208,7 +208,6 @@ class Pilot extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     public function getPilotCredentials(): ActiveQuery
     {
         return $this->hasMany(PilotCredential::class, ['pilot_id' => 'id'])
-            ->where(['superseded_at' => null])
             ->orderBy(['issued_date' => SORT_DESC]);
     }
 

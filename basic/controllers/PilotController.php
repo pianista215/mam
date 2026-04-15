@@ -7,6 +7,7 @@ use app\config\ConfigHelper as CK;
 use app\models\forms\ChangePasswordForm;
 use app\models\forms\ForgotPasswordForm;
 use app\models\Country;
+use app\models\CredentialTypePrerequisite;
 use app\models\FlightSearch;
 use app\models\Pilot;
 use app\models\PilotSearch;
@@ -114,11 +115,59 @@ class PilotController extends Controller
         $stats = $model->getFlightStats();
         $stats['hours_flown'] = $model->hours_flown;
 
+        $credentials = $model->pilotCredentials;
+
+        // Split student from earned (active/expired)
+        $studentCredentials = array_values(array_filter($credentials, fn($pc) => $pc->isStudent()));
+        $earnedCredentials  = array_values(array_filter($credentials, fn($pc) => !$pc->isStudent()));
+
+        // Within earned: separate licenses from ratings/certifications
+        $earnedLicenses = array_values(array_filter($earnedCredentials, fn($pc) => $pc->credentialType->isLicense()));
+        $earnedOther    = array_values(array_filter($earnedCredentials, fn($pc) => !$pc->credentialType->isLicense()));
+
+        // Infer the highest earned license via prerequisite graph:
+        // the highest is the license whose type is NOT a parent of any other current earned license type.
+        $highestLicense = null;
+        if (!empty($earnedLicenses)) {
+            $licenseTypeIds = array_map(fn($pc) => (int)$pc->credential_type_id, $earnedLicenses);
+            $parentTypeIds  = array_map('intval', CredentialTypePrerequisite::find()
+                ->select('parent_id')
+                ->where(['in', 'child_id', $licenseTypeIds])
+                ->andWhere(['in', 'parent_id', $licenseTypeIds])
+                ->column());
+            foreach ($earnedLicenses as $pc) {
+                if (!in_array((int)$pc->credential_type_id, $parentTypeIds, true)) {
+                    $highestLicense = $pc;
+                    break;
+                }
+            }
+            if ($highestLicense === null) {
+                $highestLicense = $earnedLicenses[0];
+            }
+        }
+        $lowerLicenses = array_values(array_filter($earnedLicenses, fn($pc) => $pc !== $highestLicense));
+
+        // Collect aircraft types unlocked by credentials that grant aircraft access
+        // (both active and student credentials count, as long as they are not expired)
+        $authorizedAircraft = [];
+        foreach ($credentials as $pc) {
+            if ($pc->grantsAircraftAccess()) {
+                foreach ($pc->credentialType->aircraftTypes as $at) {
+                    $authorizedAircraft[$at->id] = $at;
+                }
+            }
+        }
+
         return $this->render('view', [
-            'model' => $model,
-            'flightSearch' => $flightSearch,
-            'flightsProvider' => $flightsProvider,
-            'stats' => $stats
+            'model'              => $model,
+            'flightSearch'       => $flightSearch,
+            'flightsProvider'    => $flightsProvider,
+            'stats'              => $stats,
+            'highestLicense'     => $highestLicense,
+            'lowerLicenses'      => $lowerLicenses,
+            'earnedOther'        => $earnedOther,
+            'studentCredentials' => $studentCredentials,
+            'authorizedAircraft' => $authorizedAircraft,
         ]);
     }
 

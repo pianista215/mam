@@ -25,8 +25,6 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'expiry_date')->input('date')->hint(Yii::t('app', 'Leave empty if the credential does not expire.')) ?>
 
-    <?= $form->field($model, 'notes')->textarea(['rows' => 3]) ?>
-
     <?= Html::hiddenInput('PilotCredential[pilot_id]', $model->pilot_id) ?>
     <?= Html::hiddenInput('PilotCredential[issued_by]', Yii::$app->user->id) ?>
 

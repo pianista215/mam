@@ -62,7 +62,7 @@ class m260411_110724_create_credential_tables extends Migration
         $this->addForeignKey('ctaa_aircraft_type_FK', 'credential_type_airport_aircraft', 'aircraft_type_id', 'aircraft_type', 'id', 'CASCADE', 'CASCADE');
         $this->addForeignKey('ctaa_airport_FK', 'credential_type_airport_aircraft', 'airport_icao', 'airport', 'icao_code', 'CASCADE', 'CASCADE');
 
-        // Pilot credentials with full history (superseded_at IS NULL = current record)
+        // Current pilot credentials — one record per pilot+credential_type
         $this->createTable('pilot_credential', [
             'id'                 => $this->primaryKey()->unsigned(),
             'pilot_id'           => $this->integer()->unsigned()->notNull(),
@@ -70,13 +70,10 @@ class m260411_110724_create_credential_tables extends Migration
             'status'             => $this->tinyInteger()->unsigned()->notNull()->defaultValue(1), // 1=student, 2=active
             'issued_date'        => $this->date()->notNull(),
             'expiry_date'        => $this->date()->null(),
-            'superseded_at'      => $this->dateTime()->null(),
-            'created_at'         => $this->timestamp()->notNull()->defaultExpression('current_timestamp()'),
-            'notes'              => $this->string(255)->null(),
             'issued_by'          => $this->integer()->unsigned()->null(),
         ], 'ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
 
-        $this->createIndex('pc_current_lookup', 'pilot_credential', ['pilot_id', 'credential_type_id', 'superseded_at']);
+        $this->createIndex('pc_pilot_credential_unique', 'pilot_credential', ['pilot_id', 'credential_type_id'], true);
         $this->createIndex('pc_credential_type_FK', 'pilot_credential', 'credential_type_id');
         $this->createIndex('pc_issued_by_FK', 'pilot_credential', 'issued_by');
         $this->addForeignKey('pc_pilot_FK', 'pilot_credential', 'pilot_id', 'pilot', 'id', 'CASCADE', 'CASCADE');

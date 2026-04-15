@@ -17,7 +17,7 @@ use Yii;
 
 /**
  * PilotCredentialController manages the lifecycle of pilot credentials:
- * issuing, viewing, renewing, and revoking.
+ * issuing, viewing, renewing (update in place), and revoking (delete).
  */
 class PilotCredentialController extends Controller
 {
@@ -51,31 +51,15 @@ class PilotCredentialController extends Controller
     }
 
     /**
-     * Displays a single pilot credential with its full history for the same
-     * pilot + credential type pair.
-     *
-     * @param int $id
-     * @return string
-     * @throws NotFoundHttpException
+     * Displays a single pilot credential.
      */
     public function actionView($id)
     {
-        $model   = $this->findModel($id);
-        $history = $model->getHistory()->all();
-
-        return $this->render('view', [
-            'model'   => $model,
-            'history' => $history,
-        ]);
+        return $this->render('view', ['model' => $this->findModel($id)]);
     }
 
     /**
      * Issues a new credential to a pilot.
-     *
-     * @param int $pilotId
-     * @return string|\yii\web\Response
-     * @throws ForbiddenHttpException
-     * @throws NotFoundHttpException
      */
     public function actionIssue($pilotId)
     {
@@ -85,10 +69,10 @@ class PilotCredentialController extends Controller
 
         $pilot = $this->findPilot($pilotId);
 
-        $model            = new PilotCredential();
-        $model->pilot_id  = $pilot->id;
-        $model->status    = PilotCredential::STATUS_ACTIVE;
-        $model->issued_by = Yii::$app->user->id;
+        $model                     = new PilotCredential();
+        $model->pilot_id           = $pilot->id;
+        $model->status             = PilotCredential::STATUS_ACTIVE;
+        $model->issued_by          = Yii::$app->user->id;
 
         if ($this->request->isPost && $model->load($this->request->post())) {
             if ($model->save()) {
@@ -97,13 +81,12 @@ class PilotCredentialController extends Controller
             }
         }
 
-        // Credential types the pilot does not already hold (current records only)
+        // Credential types the pilot does not already hold
         $existingTypeIds = array_map('intval', PilotCredential::find()
             ->select('credential_type_id')
-            ->where(['pilot_id' => $pilot->id, 'superseded_at' => null])
+            ->where(['pilot_id' => $pilot->id])
             ->column());
 
-        // Load candidates not yet held
         $query = CredentialType::find()->orderBy(['type' => SORT_ASC, 'name' => SORT_ASC]);
         if (!empty($existingTypeIds)) {
             $query->andWhere(['not in', 'id', $existingTypeIds]);
@@ -137,12 +120,7 @@ class PilotCredentialController extends Controller
     }
 
     /**
-     * Renews an existing credential: closes the current record and creates a new one.
-     *
-     * @param int $id
-     * @return string|\yii\web\Response
-     * @throws ForbiddenHttpException
-     * @throws NotFoundHttpException
+     * Renews (or issues from student to active) a credential: updates the existing record in place.
      */
     public function actionRenew($id)
     {
@@ -150,52 +128,21 @@ class PilotCredentialController extends Controller
             throw new ForbiddenHttpException();
         }
 
-        $current = $this->findModel($id);
-
-        $model                      = new PilotCredential();
-        $model->pilot_id            = $current->pilot_id;
-        $model->credential_type_id  = $current->credential_type_id;
-        $model->status              = $current->status;
-        $model->issued_date         = date('Y-m-d');
-        $model->expiry_date         = $current->expiry_date;
-        $model->notes               = $current->notes;
-        $model->issued_by           = Yii::$app->user->id;
+        $model = $this->findModel($id);
+        $model->issued_by = Yii::$app->user->id;
 
         if ($this->request->isPost && $model->load($this->request->post())) {
-            $transaction = Yii::$app->db->beginTransaction();
-            try {
-                $now = date('Y-m-d H:i:s');
-                Yii::$app->db->createCommand()->update(
-                    'pilot_credential',
-                    ['superseded_at' => $now],
-                    ['id' => $current->id]
-                )->execute();
-
-                if ($model->save()) {
-                    $transaction->commit();
-                    $this->logInfo('Renewed credential', ['old_id' => $current->id, 'new_id' => $model->id]);
-                    return $this->redirect(['view', 'id' => $model->id]);
-                }
-                $transaction->rollBack();
-            } catch (\Throwable $e) {
-                $transaction->rollBack();
-                throw $e;
+            if ($model->save()) {
+                $this->logInfo('Renewed credential', ['id' => $model->id]);
+                return $this->redirect(['view', 'id' => $model->id]);
             }
         }
 
-        return $this->render('renew', [
-            'model'   => $model,
-            'current' => $current,
-        ]);
+        return $this->render('renew', ['model' => $model]);
     }
 
     /**
-     * Revokes a credential by setting superseded_at to NOW().
-     *
-     * @param int $id
-     * @return \yii\web\Response
-     * @throws ForbiddenHttpException
-     * @throws NotFoundHttpException
+     * Revokes a credential by deleting it.
      */
     public function actionRevoke($id)
     {
@@ -203,16 +150,11 @@ class PilotCredentialController extends Controller
             throw new ForbiddenHttpException();
         }
 
-        $model = $this->findModel($id);
+        $model   = $this->findModel($id);
         $pilotId = $model->pilot_id;
+        $model->delete();
 
-        Yii::$app->db->createCommand()->update(
-            'pilot_credential',
-            ['superseded_at' => date('Y-m-d H:i:s')],
-            ['id' => $model->id]
-        )->execute();
-
-        $this->logInfo('Revoked credential', ['id' => $model->id, 'pilot_id' => $pilotId]);
+        $this->logInfo('Revoked credential', ['id' => $id, 'pilot_id' => $pilotId]);
 
         return $this->redirect(['/pilot/view', 'id' => $pilotId]);
     }
@@ -220,9 +162,6 @@ class PilotCredentialController extends Controller
     /**
      * Traverses the prerequisite graph upward (BFS) and returns all ancestor
      * credential type IDs for the given type.
-     *
-     * @param int $credentialTypeId
-     * @return int[]
      */
     private function getAncestorTypeIds(int $credentialTypeId): array
     {
@@ -244,13 +183,6 @@ class PilotCredentialController extends Controller
         return $ancestors;
     }
 
-    /**
-     * Finds a PilotCredential by primary key.
-     *
-     * @param int $id
-     * @return PilotCredential
-     * @throws NotFoundHttpException
-     */
     protected function findModel($id)
     {
         $model = PilotCredential::findOne(['id' => $id]);
@@ -260,13 +192,6 @@ class PilotCredentialController extends Controller
         return $model;
     }
 
-    /**
-     * Finds a Pilot by primary key.
-     *
-     * @param int $id
-     * @return Pilot
-     * @throws NotFoundHttpException
-     */
     protected function findPilot($id)
     {
         $pilot = Pilot::findOne(['id' => $id]);

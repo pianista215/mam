@@ -10,20 +10,22 @@ use yii\widgets\ActiveForm;
 /** @var array $aircraftTypes               id => name map of available aircraft types */
 /** @var string[] $restrictionAirports      ICAO codes of restricted airports */
 /** @var int[] $restrictionAircraftTypeIds  aircraft type IDs involved in restrictions */
-/** @var yii\widgets\ActiveForm $form */
+
+$showAircraft     = !empty($model->aircraftTypeIds);
+$showRestrictions = !empty($restrictionAirports) || !empty($restrictionAircraftTypeIds);
 ?>
 <div class="credential-type-form">
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'code')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
-
     <?= $form->field($model, 'type')->dropDownList(
         CredentialType::typeLabels(),
         ['prompt' => '']
     ) ?>
+
+    <?= $form->field($model, 'code')->textInput(['maxlength' => true]) ?>
+
+    <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'description')->textarea(['rows' => 4]) ?>
 
@@ -36,46 +38,61 @@ use yii\widgets\ActiveForm;
 
     <hr>
 
-    <?= $form->field($model, 'aircraftTypeIds')->checkboxList(
-        $aircraftTypes,
-        ['separator' => '<br>']
-    )->label(Yii::t('app', 'Unlocked Aircraft Types')) ?>
+    <div class="mb-3">
+        <div class="d-flex justify-content-between align-items-center"
+             style="cursor:pointer" data-bs-toggle="collapse" data-bs-target="#collapseAircraft" aria-expanded="<?= $showAircraft ? 'true' : 'false' ?>">
+            <strong><?= Yii::t('app', 'Unlocked Aircraft Types') ?></strong>
+            <span class="text-muted small">&#9662;</span>
+        </div>
+        <div id="collapseAircraft" class="collapse <?= $showAircraft ? 'show' : '' ?> mt-2">
+            <?= $form->field($model, 'aircraftTypeIds')->checkboxList(
+                $aircraftTypes,
+                ['separator' => '<br>']
+            )->label(false) ?>
+        </div>
+    </div>
 
     <hr>
 
     <div class="mb-3">
-        <label class="form-label fw-semibold"><?= Yii::t('app', 'Airport–Aircraft Restrictions') ?></label>
-        <p class="text-muted small mb-2"><?= Yii::t('app', 'Aircraft types that require this credential to fly to specific airports. All selected aircraft × all selected airports generate restrictions. If no restriction is defined for a (aircraft, airport) pair, access is free.') ?></p>
+        <div class="d-flex justify-content-between align-items-center"
+             style="cursor:pointer" data-bs-toggle="collapse" data-bs-target="#collapseRestrictions" aria-expanded="<?= $showRestrictions ? 'true' : 'false' ?>">
+            <strong><?= Yii::t('app', 'Airport Restrictions') ?></strong>
+            <span class="text-muted small">&#9662;</span>
+        </div>
+        <div id="collapseRestrictions" class="collapse <?= $showRestrictions ? 'show' : '' ?> mt-2">
+            <p class="text-muted small mb-3"><?= Yii::t('app', 'Aircraft types that require this credential to fly to specific airports. If no restriction is defined for a (aircraft, airport) pair, access is free.') ?></p>
 
-        <label class="form-label"><?= Yii::t('app', 'Restricted Airports') ?></label>
-        <div id="js-airport-tags" class="d-flex flex-wrap gap-1 mb-2 p-2 border rounded" style="min-height:2.5rem">
-            <?php foreach ($restrictionAirports as $icao): ?>
-            <span class="badge bg-secondary d-inline-flex align-items-center gap-1 fs-6">
-                <?= Html::encode($icao) ?>
-                <?= Html::hiddenInput('airportIcaos[]', $icao) ?>
-                <button type="button" class="btn-close btn-close-white js-remove-airport" style="font-size:0.65em" aria-label="Remove"></button>
-            </span>
+            <label class="form-label"><?= Yii::t('app', 'Restricted Airports') ?></label>
+            <div id="js-airport-tags" class="d-flex flex-wrap gap-1 mb-2 p-2 border rounded" style="min-height:2.5rem">
+                <?php foreach ($restrictionAirports as $icao): ?>
+                <span class="badge bg-secondary d-inline-flex align-items-center gap-1 fs-6">
+                    <?= Html::encode($icao) ?>
+                    <?= Html::hiddenInput('airportIcaos[]', $icao) ?>
+                    <button type="button" class="btn-close btn-close-white js-remove-airport" style="font-size:0.65em" aria-label="Remove"></button>
+                </span>
+                <?php endforeach; ?>
+            </div>
+            <div class="input-group mb-3" style="max-width:280px">
+                <input id="js-icao-input" type="text" class="form-control" maxlength="4"
+                       placeholder="VQPR" style="text-transform:uppercase">
+                <button type="button" id="js-add-airport" class="btn btn-outline-secondary">
+                    + <?= Yii::t('app', 'Add') ?>
+                </button>
+            </div>
+
+            <label class="form-label"><?= Yii::t('app', 'Restricted Aircraft Types') ?></label>
+            <?php foreach ($aircraftTypes as $atId => $atName): ?>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox"
+                       name="restrictionAircraftTypeIds[]"
+                       value="<?= Html::encode($atId) ?>"
+                       id="rat_<?= $atId ?>"
+                       <?= in_array($atId, $restrictionAircraftTypeIds) ? 'checked' : '' ?>>
+                <label class="form-check-label" for="rat_<?= $atId ?>"><?= Html::encode($atName) ?></label>
+            </div>
             <?php endforeach; ?>
         </div>
-        <div class="input-group mb-3" style="max-width:280px">
-            <input id="js-icao-input" type="text" class="form-control" maxlength="4"
-                   placeholder="VQPR" style="text-transform:uppercase">
-            <button type="button" id="js-add-airport" class="btn btn-outline-secondary">
-                + <?= Yii::t('app', 'Add') ?>
-            </button>
-        </div>
-
-        <label class="form-label"><?= Yii::t('app', 'Aircraft types requiring this credential at above airports') ?></label>
-        <?php foreach ($aircraftTypes as $atId => $atName): ?>
-        <div class="form-check">
-            <input class="form-check-input" type="checkbox"
-                   name="restrictionAircraftTypeIds[]"
-                   value="<?= Html::encode($atId) ?>"
-                   id="rat_<?= $atId ?>"
-                   <?= in_array($atId, $restrictionAircraftTypeIds) ? 'checked' : '' ?>>
-            <label class="form-check-label" for="rat_<?= $atId ?>"><?= Html::encode($atName) ?></label>
-        </div>
-        <?php endforeach; ?>
     </div>
 
     <div class="form-group mt-3">

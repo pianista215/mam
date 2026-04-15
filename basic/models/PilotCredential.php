@@ -7,14 +7,11 @@ use Yii;
 /**
  * This is the model class for table "pilot_credential".
  *
- * History model: each row is an issuance event. The current record for a given
- * (pilot_id, credential_type_id) is the one where superseded_at IS NULL.
- * When renewing or changing status, close the previous record (set superseded_at = NOW())
- * and insert a new one, within a transaction.
+ * One row per (pilot_id, credential_type_id). Revoking deletes the row.
+ * Renewing updates the row in place (issued_date, expiry_date, status).
  *
  * A credential is considered valid when:
- *   status = STATUS_ACTIVE AND superseded_at IS NULL
- *   AND (expiry_date IS NULL OR expiry_date >= TODAY)
+ *   status = STATUS_ACTIVE AND (expiry_date IS NULL OR expiry_date >= TODAY)
  *
  * @property int $id
  * @property int $pilot_id
@@ -22,9 +19,6 @@ use Yii;
  * @property int $status
  * @property string $issued_date
  * @property string|null $expiry_date
- * @property string|null $superseded_at
- * @property string $created_at
- * @property string|null $notes
  * @property int|null $issued_by
  *
  * @property Pilot $pilot
@@ -55,8 +49,6 @@ class PilotCredential extends \yii\db\ActiveRecord
             [['status'], 'integer'],
             [['status'], 'in', 'range' => [self::STATUS_STUDENT, self::STATUS_ACTIVE]],
             [['issued_date', 'expiry_date'], 'date', 'format' => 'php:Y-m-d'],
-            [['superseded_at'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
-            [['notes'], 'string', 'max' => 255],
             [['pilot_id'], 'exist', 'targetClass' => Pilot::class, 'targetAttribute' => 'id'],
             [['credential_type_id'], 'exist', 'targetClass' => CredentialType::class, 'targetAttribute' => 'id'],
             [['issued_by'], 'exist', 'targetClass' => Pilot::class, 'targetAttribute' => 'id'],
@@ -75,9 +67,6 @@ class PilotCredential extends \yii\db\ActiveRecord
             'status'             => Yii::t('app', 'Status'),
             'issued_date'        => Yii::t('app', 'Issued Date'),
             'expiry_date'        => Yii::t('app', 'Expiry Date'),
-            'superseded_at'      => Yii::t('app', 'Superseded At'),
-            'created_at'         => Yii::t('app', 'Created At'),
-            'notes'              => Yii::t('app', 'Notes'),
             'issued_by'          => Yii::t('app', 'Issued By'),
         ];
     }
@@ -106,21 +95,22 @@ class PilotCredential extends \yii\db\ActiveRecord
     }
 
     /**
-     * Whether this credential record is currently valid (active, not expired, not superseded).
+     * Whether this credential is currently valid (active and not expired).
      */
     public function isValid(): bool
     {
         return $this->isActive()
-            && $this->superseded_at === null
             && ($this->expiry_date === null || $this->expiry_date >= date('Y-m-d'));
     }
 
     /**
-     * Whether this is the current record for this pilot+credential (not yet superseded).
+     * Whether this credential grants access to fly the associated aircraft types.
+     * Both active and student credentials grant access as long as they are not expired.
      */
-    public function isCurrent(): bool
+    public function grantsAircraftAccess(): bool
     {
-        return $this->superseded_at === null;
+        return ($this->isActive() || $this->isStudent())
+            && ($this->expiry_date === null || $this->expiry_date >= date('Y-m-d'));
     }
 
     public function getPilot()
@@ -136,19 +126,5 @@ class PilotCredential extends \yii\db\ActiveRecord
     public function getIssuer()
     {
         return $this->hasOne(Pilot::class, ['id' => 'issued_by']);
-    }
-
-    /**
-     * Returns all superseded (historical) records for the same pilot + credential type pair,
-     * ordered by supersession date descending (most recent first).
-     *
-     * @return \yii\db\ActiveQuery
-     */
-    public function getHistory()
-    {
-        return static::find()
-            ->where(['pilot_id' => $this->pilot_id, 'credential_type_id' => $this->credential_type_id])
-            ->andWhere(['IS NOT', 'superseded_at', null])
-            ->orderBy(['superseded_at' => SORT_DESC]);
     }
 }
