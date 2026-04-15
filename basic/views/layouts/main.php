@@ -80,15 +80,20 @@ if (file_exists($customCssPath)) {
     $items[] =
             [
                 'label' => Yii::t('app', 'Operations'),
-                'items' => [
-                    ['label' => Yii::t('app', 'Aircraft Types'), 'url' => ['/aircraft-type/index']],
-                    ['label' => Yii::t('app', 'Aircraft Configurations'), 'url' => ['/aircraft-configuration/index']],
-                    ['label' => Yii::t('app', 'Aircrafts'), 'url' => ['/aircraft/index']],
-                    ['label' => Yii::t('app', 'Airports'), 'url' => ['/airport/index']],
-                    ['label' => Yii::t('app', 'Countries'), 'url' => ['/country/index']],
-                    ['label' => Yii::t('app', 'Ranks'), 'url' => ['/rank/index']],
-                    ['label' => Yii::t('app', 'Routes'), 'url' => ['/route/index']],
-                ],
+                'items' => (function () {
+                    $items = [
+                        ['label' => Yii::t('app', 'Aircrafts'), 'url' => ['/aircraft/index']],
+                        ['label' => Yii::t('app', 'Airports'), 'url' => ['/airport/index']],
+                        ['label' => Yii::t('app', 'Aircraft Configurations'), 'url' => ['/aircraft-configuration/index']],
+                        ['label' => Yii::t('app', 'Countries'), 'url' => ['/country/index']],
+                        ['label' => Yii::t('app', 'Ranks'), 'url' => ['/rank/index']],
+                        ['label' => Yii::t('app', 'Routes'), 'url' => ['/route/index']],
+                        ['label' => Yii::t('app', 'Aircraft Types'), 'url' => ['/aircraft-type/index']],
+                        ['label' => Yii::t('app', 'Credentials'), 'url' => ['/credential-type/index']],
+                    ];
+                    usort($items, fn($a, $b) => strcoll($a['label'], $b['label']));
+                    return $items;
+                })(),
             ];
 
     if (Yii::$app->user->can(Permissions::SUBMIT_FPL)) {
