@@ -322,7 +322,7 @@ class CredentialTypeController extends Controller
         $lines[] = '  flowchart:';
         $lines[] = '    nodeSpacing: 200';
         $lines[] = '    rankSpacing: 150';
-        $lines[] = '    curve: linear';
+        $lines[] = '    curve: natural';
         $lines[] = '---';
         $lines[] = 'graph TD';
         $lines[] = '    classDef license fill:#4e73df,color:#fff,stroke:#2e59d9';
