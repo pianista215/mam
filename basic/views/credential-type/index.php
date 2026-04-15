@@ -72,10 +72,24 @@ $this->params['breadcrumbs'][] = $this->title;
         ['position' => \yii\web\View::POS_END]
     ); ?>
     <?php $this->registerJs('mermaid.initialize({ startOnLoad: true, theme: "default" });'); ?>
-    <?php $this->registerCss('
-        .mermaid svg { min-width: 600px; width: 100%; height: auto; }
-        .mermaid svg .label div,
-        .mermaid svg .nodeLabel { font-size: 56px !important; line-height: 1.5; }
+    <?php $this->registerJs('
+        mermaid.initialize({ startOnLoad: false, theme: "default" });
+        mermaid.run({ querySelector: ".mermaid" }).then(function() {
+            var svg = document.querySelector(".mermaid svg");
+            if (svg) {
+                var vb = svg.viewBox.baseVal;
+                if (vb && vb.width > 0) {
+                    var cardBody = svg.closest(".card-body");
+                    var style = window.getComputedStyle(cardBody);
+                    var padding = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+                    var containerWidth = cardBody.clientWidth - padding;
+                    var scale = containerWidth / vb.width;
+                    svg.setAttribute("width",  containerWidth);
+                    svg.setAttribute("height", vb.height * scale);
+                    svg.style.maxWidth = "none";
+                }
+            }
+        });
     '); ?>
     <?php endif; ?>
 

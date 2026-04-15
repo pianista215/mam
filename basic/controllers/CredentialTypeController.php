@@ -318,19 +318,21 @@ class CredentialTypeController extends Controller
 
         $lines   = ['---'];
         $lines[] = 'config:';
+        $lines[] = '  look: neo';
         $lines[] = '  flowchart:';
-        $lines[] = '    nodeSpacing: 120';
+        $lines[] = '    nodeSpacing: 200';
         $lines[] = '    rankSpacing: 150';
+        $lines[] = '    curve: linear';
         $lines[] = '---';
         $lines[] = 'graph TD';
         $lines[] = '    classDef license fill:#4e73df,color:#fff,stroke:#2e59d9';
         $lines[] = '    classDef rating fill:#1cc88a,color:#fff,stroke:#17a673';
         $lines[] = '    classDef certification fill:#f6c23e,color:#333,stroke:#dda20a';
-        $lines[] = '    linkStyle default stroke:#555,stroke-width:3px';
+        $lines[] = '    linkStyle default stroke:#555,stroke-width:5px';
 
         foreach ($credentials as $ct) {
-            $cssClass     = $cssClasses[$ct->type] ?? 'license';
-            $label        = addslashes($ct->name);
+            $cssClass      = $cssClasses[$ct->type] ?? 'license';
+            $label         = addslashes($ct->name);
             $aircraftNames = array_map(fn($at) => $at->icao_type_code, $ct->aircraftTypes);
             if (!empty($aircraftNames)) {
                 $label .= '&lt;br/&gt;──────────&lt;br/&gt;' . implode('&lt;br/&gt;', array_map('addslashes', $aircraftNames));
