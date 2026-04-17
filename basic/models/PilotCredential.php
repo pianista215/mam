@@ -105,12 +105,12 @@ class PilotCredential extends \yii\db\ActiveRecord
 
     /**
      * Whether this credential grants access to fly the associated aircraft types.
-     * Both active and student credentials grant access as long as they are not expired.
+     * Any existing credential (active or student, regardless of expiry) grants access.
+     * Access is only removed when the credential is revoked (row deleted).
      */
     public function grantsAircraftAccess(): bool
     {
-        return ($this->isActive() || $this->isStudent())
-            && ($this->expiry_date === null || $this->expiry_date >= date('Y-m-d'));
+        return $this->isActive() || $this->isStudent();
     }
 
     public function getPilot()
