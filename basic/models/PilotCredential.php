@@ -84,6 +84,20 @@ class PilotCredential extends \yii\db\ActiveRecord
         return self::statusLabels()[$this->status] ?? '';
     }
 
+    public function getIssuedDateLabel(): string
+    {
+        return $this->isStudent()
+            ? Yii::t('app', 'Training Start Date')
+            : Yii::t('app', 'Issued Date');
+    }
+
+    public function getExpiryDateLabel(): string
+    {
+        return $this->isStudent()
+            ? Yii::t('app', 'Training End Date')
+            : Yii::t('app', 'Expiry Date');
+    }
+
     public function isStudent(): bool
     {
         return $this->status === self::STATUS_STUDENT;

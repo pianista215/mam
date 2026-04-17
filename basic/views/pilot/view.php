@@ -246,8 +246,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     <tr>
                         <th><?= Yii::t('app', 'Credential Type') ?></th>
                         <th><?= Yii::t('app', 'Status') ?></th>
-                        <th><?= Yii::t('app', 'Issued Date') ?></th>
-                        <th><?= Yii::t('app', 'Expiry Date') ?></th>
+                        <th><?= Yii::t('app', 'Training Start Date') ?></th>
+                        <th><?= Yii::t('app', 'Training End Date') ?></th>
                         <th></th>
                     </tr>
                 </thead>

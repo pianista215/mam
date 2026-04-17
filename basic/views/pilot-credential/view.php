@@ -72,10 +72,10 @@ if ($model->isStudent()) {
                 <dt class="col-sm-3"><?= Yii::t('app', 'Status') ?></dt>
                 <dd class="col-sm-9"><span class="badge <?= $badgeClass ?>"><?= $badgeLabel ?></span></dd>
 
-                <dt class="col-sm-3"><?= Yii::t('app', 'Issued Date') ?></dt>
+                <dt class="col-sm-3"><?= Html::encode($model->getIssuedDateLabel()) ?></dt>
                 <dd class="col-sm-9"><?= Html::encode($model->issued_date) ?></dd>
 
-                <dt class="col-sm-3"><?= Yii::t('app', 'Expiry Date') ?></dt>
+                <dt class="col-sm-3"><?= Html::encode($model->getExpiryDateLabel()) ?></dt>
                 <dd class="col-sm-9">
                     <?= $model->expiry_date ? Html::encode($model->expiry_date) : '<span class="text-muted">—</span>' ?>
                 </dd>

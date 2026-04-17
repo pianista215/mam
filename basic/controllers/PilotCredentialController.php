@@ -131,7 +131,14 @@ class PilotCredentialController extends Controller
         $model = $this->findModel($id);
         $model->issued_by = Yii::$app->user->id;
 
+        // Capture pre-load state: if credential is already active, issued_date must not change.
+        $originalIssuedDate   = $model->issued_date;
+        $wasActiveBeforeRenew = $model->isActive();
+
         if ($this->request->isPost && $model->load($this->request->post())) {
+            if ($wasActiveBeforeRenew) {
+                $model->issued_date = $originalIssuedDate;
+            }
             if ($model->save()) {
                 $this->logInfo('Renewed credential', ['id' => $model->id]);
                 return $this->redirect(['view', 'id' => $model->id]);

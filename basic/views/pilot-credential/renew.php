@@ -27,6 +27,7 @@ $this->params['breadcrumbs'][] = $actionLabel;
     <?= $this->render('_form', [
         'model'         => $model,
         'showTypeField' => false,
+        'isRenew'       => true,
     ]) ?>
 
 </div>

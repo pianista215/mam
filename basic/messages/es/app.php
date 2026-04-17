@@ -367,6 +367,8 @@ return [
     'Tour Stages' => 'Etapas de Tour',
     'Tour page' => 'Página de Tour',
     'Tours' => 'Tours',
+    'Training End Date' => 'Fecha de Fin de Formación',
+    'Training Start Date' => 'Fecha de Inicio de Formación',
     'Type' => 'Tipo',
     'Unknown' => 'Desconocido',
     'Unlocked Aircraft Types' => 'Tipos de aeronave que desbloquea',
