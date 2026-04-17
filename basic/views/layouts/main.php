@@ -89,7 +89,7 @@ if (file_exists($customCssPath)) {
                         ['label' => Yii::t('app', 'Ranks'), 'url' => ['/rank/index']],
                         ['label' => Yii::t('app', 'Routes'), 'url' => ['/route/index']],
                         ['label' => Yii::t('app', 'Aircraft Types'), 'url' => ['/aircraft-type/index']],
-                        ['label' => Yii::t('app', 'Credentials'), 'url' => ['/credential-type/index']],
+                        ['label' => Yii::t('app', 'Credential Types'), 'url' => ['/credential-type/index']],
                     ];
                     usort($items, fn($a, $b) => strcoll($a['label'], $b['label']));
                     return $items;
