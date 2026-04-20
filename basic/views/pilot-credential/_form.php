@@ -52,7 +52,7 @@ $lockIssuedDate = $isRenew && $model->isActive();
             'data-label-active'  => Yii::t('app', 'Expiry Date'),
             'data-label-student' => Yii::t('app', 'Training End Date'),
         ],
-    ])->input('date')->hint(Yii::t('app', 'Leave empty if the credential does not expire.')) ?>
+    ])->input('date', ['value' => $model->expiry_date ?: date('Y-12-31')])->hint(Yii::t('app', 'Leave empty if the credential does not expire.')) ?>
 
     <?= Html::hiddenInput('PilotCredential[pilot_id]', $model->pilot_id) ?>
     <?= Html::hiddenInput('PilotCredential[issued_by]', Yii::$app->user->id) ?>

@@ -101,7 +101,72 @@ class CredentialTypeController extends Controller
         return $this->render('view', [
             'model'              => $model,
             'currentCredentials' => $currentCredentials,
+            'credentialMeta'     => $this->buildCredentialMeta($model, $currentCredentials),
         ]);
+    }
+
+    /**
+     * Precomputes canRenew, canRevoke, and cascadeNames for each PilotCredential in a list
+     * using bulk queries to avoid N+1. All credentials must belong to the same CredentialType.
+     *
+     * @param CredentialType    $credentialType Shared type for all credentials in the list
+     * @param PilotCredential[] $credentials
+     * @return array<int, array{canRenew: bool, canRevoke: bool, cascadeNames: string[]}>
+     */
+    protected function buildCredentialMeta(CredentialType $credentialType, array $credentials): array
+    {
+        $meta = [];
+        foreach ($credentials as $pc) {
+            $meta[$pc->id] = [
+                'canRenew'     => $pc->isStudent() || $pc->expiry_date !== null,
+                'canRevoke'    => true,
+                'cascadeNames' => [],
+            ];
+        }
+
+        if (empty($credentials)) {
+            return $meta;
+        }
+
+        $descendantTypeIds = $credentialType->getDescendantTypeIds();
+        $pilotIds          = array_unique(array_map(fn($pc) => $pc->pilot_id, $credentials));
+
+        // Bulk-fetch cascade names for all pilots in one query
+        if (!empty($descendantTypeIds)) {
+            $cascadedAll    = PilotCredential::find()
+                ->with('credentialType')
+                ->where(['pilot_id' => $pilotIds, 'credential_type_id' => $descendantTypeIds])
+                ->all();
+            $cascadeByPilot = [];
+            foreach ($cascadedAll as $cascaded) {
+                $cascadeByPilot[$cascaded->pilot_id][] =
+                    $cascaded->credentialType->code . ' — ' . $cascaded->credentialType->name;
+            }
+            foreach ($credentials as $pc) {
+                $meta[$pc->id]['cascadeNames'] = $cascadeByPilot[$pc->pilot_id] ?? [];
+            }
+        }
+
+        // Bulk-compute canRevoke: only relevant when this type is a LICENSE with child licenses
+        if ($credentialType->isLicense() && !empty($descendantTypeIds)) {
+            $childLicenseIds = CredentialType::find()
+                ->select('id')
+                ->where(['id' => $descendantTypeIds, 'type' => CredentialType::TYPE_LICENSE])
+                ->column();
+            if (!empty($childLicenseIds)) {
+                $blockedPilotIds = array_map('intval', PilotCredential::find()
+                    ->select('pilot_id')
+                    ->where(['pilot_id' => $pilotIds, 'credential_type_id' => $childLicenseIds])
+                    ->column());
+                foreach ($credentials as $pc) {
+                    if (in_array($pc->pilot_id, $blockedPilotIds, true)) {
+                        $meta[$pc->id]['canRevoke'] = false;
+                    }
+                }
+            }
+        }
+
+        return $meta;
     }
 
     /**

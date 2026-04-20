@@ -100,12 +100,12 @@ class PilotCredential extends \yii\db\ActiveRecord
 
     public function isStudent(): bool
     {
-        return $this->status === self::STATUS_STUDENT;
+        return (int)$this->status === self::STATUS_STUDENT;
     }
 
     public function isActive(): bool
     {
-        return $this->status === self::STATUS_ACTIVE;
+        return (int)$this->status === self::STATUS_ACTIVE;
     }
 
     /**
@@ -125,6 +125,64 @@ class PilotCredential extends \yii\db\ActiveRecord
     public function grantsAircraftAccess(): bool
     {
         return $this->isActive() || $this->isStudent();
+    }
+
+    /**
+     * Whether this credential can be renewed.
+     * Students can always be issued (promoted to active) regardless of expiry date.
+     * Active credentials can only be renewed if they have an expiry date to update.
+     */
+    public function canRenew(): bool
+    {
+        if ($this->isStudent()) {
+            return true;
+        }
+        return $this->expiry_date !== null;
+    }
+
+    /**
+     * Whether this credential can be revoked.
+     * A LICENSE cannot be revoked if the pilot holds another LICENSE that is a descendant
+     * in the prerequisite DAG (revoking it would leave a higher license without its base).
+     */
+    public function canRevoke(): bool
+    {
+        if (!$this->credentialType->isLicense()) {
+            return true;
+        }
+        $descendantIds = $this->credentialType->getDescendantTypeIds();
+        if (empty($descendantIds)) {
+            return true;
+        }
+        $childLicenseIds = CredentialType::find()
+            ->select('id')
+            ->where(['id' => $descendantIds, 'type' => CredentialType::TYPE_LICENSE])
+            ->column();
+        if (empty($childLicenseIds)) {
+            return true;
+        }
+        return !static::find()
+            ->where(['pilot_id' => $this->pilot_id, 'credential_type_id' => $childLicenseIds])
+            ->exists();
+    }
+
+    /**
+     * Returns the display names of credentials that would be cascade-revoked along with this one.
+     */
+    public function getCascadeCredentialNames(): array
+    {
+        $descendantIds = $this->credentialType->getDescendantTypeIds();
+        if (empty($descendantIds)) {
+            return [];
+        }
+        $dependents = static::find()
+            ->with('credentialType')
+            ->where(['pilot_id' => $this->pilot_id, 'credential_type_id' => $descendantIds])
+            ->all();
+        return array_map(
+            fn($pc) => $pc->credentialType->code . ' — ' . $pc->credentialType->name,
+            $dependents
+        );
     }
 
     public function getPilot()

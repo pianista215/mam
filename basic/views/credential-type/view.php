@@ -8,6 +8,7 @@ use yii\helpers\Html;
 /** @var yii\web\View $this */
 /** @var app\models\CredentialType $model */
 /** @var app\models\PilotCredential[] $currentCredentials */
+/** @var array<int, array{canRenew: bool, canRevoke: bool, cascadeNames: string[]}> $credentialMeta */
 
 $this->title = $model->name;
 $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Credential Types'), 'url' => ['index']];
@@ -181,6 +182,11 @@ $this->params['breadcrumbs'][] = $this->title;
                         } else {
                             $badge = '<span class="badge bg-success">' . Yii::t('app', 'Active') . '</span>';
                         }
+                        $pcMeta       = $credentialMeta[$pc->id] ?? ['canRenew' => true, 'canRevoke' => true, 'cascadeNames' => []];
+                        $cascadeNames = $pcMeta['cascadeNames'];
+                        $revokeConfirm = empty($cascadeNames)
+                            ? Yii::t('app', 'Are you sure you want to revoke this credential? This action cannot be undone.')
+                            : Yii::t('app', 'Are you sure you want to revoke this credential? The following credentials will also be revoked: {names}. This action cannot be undone.', ['names' => implode(', ', $cascadeNames)]);
                     ?>
                     <tr>
                         <td><?= Html::a(Html::encode($pc->pilot->getFullName()), ['/pilot/view', 'id' => $pc->pilot_id]) ?></td>
@@ -190,18 +196,22 @@ $this->params['breadcrumbs'][] = $this->title;
                         <td class="text-nowrap">
                             <?= Html::a(Yii::t('app', 'View'), ['/pilot-credential/view', 'id' => $pc->id], ['class' => 'btn btn-sm btn-outline-secondary me-1']) ?>
                             <?php if (Yii::$app->user->can(Permissions::ISSUE_CREDENTIAL)): ?>
+                                <?php if ($pcMeta['canRenew']): ?>
                                 <?= Html::a(
                                     $pc->isStudent() ? Yii::t('app', 'Issue') : Yii::t('app', 'Renew'),
                                     ['/pilot-credential/renew', 'id' => $pc->id],
                                     ['class' => 'btn btn-sm btn-outline-primary me-1']
                                 ) ?>
+                                <?php endif; ?>
+                                <?php if ($pcMeta['canRevoke']): ?>
                                 <?= Html::a(Yii::t('app', 'Revoke'), ['/pilot-credential/revoke', 'id' => $pc->id], [
                                     'class' => 'btn btn-sm btn-outline-danger',
                                     'data'  => [
-                                        'confirm' => Yii::t('app', 'This action will close the current credential record. Are you sure?'),
+                                        'confirm' => $revokeConfirm,
                                         'method'  => 'post',
                                     ],
                                 ]) ?>
+                                <?php endif; ?>
                             <?php endif; ?>
                         </td>
                     </tr>

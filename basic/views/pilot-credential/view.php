@@ -5,6 +5,9 @@ use yii\helpers\Html;
 
 /** @var yii\web\View $this */
 /** @var app\models\PilotCredential $model */
+/** @var bool $canRenew */
+/** @var bool $canRevoke */
+/** @var string[] $cascadeNames */
 
 $pilot          = $model->pilot;
 $credentialType = $model->credentialType;
@@ -36,18 +39,27 @@ if ($model->isStudent()) {
 
         <?php if (Yii::$app->user->can(Permissions::ISSUE_CREDENTIAL)): ?>
         <div class="flex-shrink-0">
+            <?php if ($canRenew): ?>
             <?= Html::a(
                 $model->isStudent() ? Yii::t('app', 'Issue') : Yii::t('app', 'Renew'),
                 ['renew', 'id' => $model->id],
                 ['class' => 'btn btn-primary me-2']
             ) ?>
+            <?php endif; ?>
+            <?php if ($canRevoke): ?>
+            <?php
+            $revokeConfirm = empty($cascadeNames)
+                ? Yii::t('app', 'Are you sure you want to revoke this credential? This action cannot be undone.')
+                : Yii::t('app', 'Are you sure you want to revoke this credential? The following credentials will also be revoked: {names}. This action cannot be undone.', ['names' => implode(', ', $cascadeNames)]);
+            ?>
             <?= Html::a(Yii::t('app', 'Revoke'), ['revoke', 'id' => $model->id], [
                 'class' => 'btn btn-danger',
                 'data'  => [
-                    'confirm' => Yii::t('app', 'Are you sure you want to revoke this credential?'),
+                    'confirm' => $revokeConfirm,
                     'method'  => 'post',
                 ],
             ]) ?>
+            <?php endif; ?>
         </div>
         <?php endif; ?>
     </div>

@@ -51,11 +51,17 @@ class PilotCredentialController extends Controller
     }
 
     /**
-     * Displays a single pilot credential.
+     * Displays a single pilot credential with pre-computed action availability.
      */
     public function actionView($id)
     {
-        return $this->render('view', ['model' => $this->findModel($id)]);
+        $model = $this->findModel($id);
+        return $this->render('view', [
+            'model'        => $model,
+            'canRenew'     => $model->canRenew(),
+            'canRevoke'    => $model->canRevoke(),
+            'cascadeNames' => $model->getCascadeCredentialNames(),
+        ]);
     }
 
     /**
@@ -69,15 +75,55 @@ class PilotCredentialController extends Controller
 
         $pilot = $this->findPilot($pilotId);
 
-        $model                     = new PilotCredential();
-        $model->pilot_id           = $pilot->id;
-        $model->status             = PilotCredential::STATUS_ACTIVE;
-        $model->issued_by          = Yii::$app->user->id;
+        $model            = new PilotCredential();
+        $model->pilot_id  = $pilot->id;
+        $model->status    = PilotCredential::STATUS_ACTIVE;
+        $model->issued_by = Yii::$app->user->id;
 
         if ($this->request->isPost && $model->load($this->request->post())) {
-            if ($model->save()) {
-                $this->logInfo('Issued credential', ['pilot_id' => $pilot->id, 'credential_type_id' => $model->credential_type_id]);
-                return $this->redirect(['/pilot/view', 'id' => $pilot->id]);
+            // Server-side: validate prerequisites are met (guards against injected credential_type_id)
+            if ($model->credential_type_id) {
+                $parentIds = array_map('intval', CredentialTypePrerequisite::find()
+                    ->select('parent_id')
+                    ->where(['child_id' => $model->credential_type_id])
+                    ->column());
+                if (!empty($parentIds)) {
+                    $hasMet = PilotCredential::find()
+                        ->where(['pilot_id' => $model->pilot_id, 'credential_type_id' => $parentIds])
+                        ->exists();
+                    if (!$hasMet) {
+                        $model->addError('credential_type_id', Yii::t('app', 'Prerequisites for this credential type are not met.'));
+                        $this->logWarn('Attempted to issue credential without meeting prerequisites', [
+                            'pilot_id'           => $pilot->id,
+                            'credential_type_id' => $model->credential_type_id,
+                            'user'               => Yii::$app->user->identity->license,
+                        ]);
+                    }
+                }
+            }
+
+            if (!$model->hasErrors()) {
+                $transaction = Yii::$app->db->beginTransaction();
+                try {
+                    if ($model->save()) {
+                        // When issuing an active LICENSE, clear expiry_date on ancestor licenses
+                        // so only the highest license in the chain retains an active expiry
+                        if ($model->isActive() && $model->credentialType->isLicense()) {
+                            $this->clearAncestorLicenseExpiries($model);
+                        }
+                        $transaction->commit();
+                        $this->logInfo('Issued credential', [
+                            'pilot_id'           => $pilot->id,
+                            'credential_type_id' => $model->credential_type_id,
+                            'user'               => Yii::$app->user->identity->license,
+                        ]);
+                        return $this->redirect(['/pilot/view', 'id' => $pilot->id]);
+                    }
+                    $transaction->rollBack();
+                } catch (\Throwable $e) {
+                    $transaction->rollBack();
+                    throw $e;
+                }
             }
         }
 
@@ -121,6 +167,7 @@ class PilotCredentialController extends Controller
 
     /**
      * Renews (or issues from student to active) a credential: updates the existing record in place.
+     * When renewing an active LICENSE, also auto-renews active descendant RATING credentials.
      */
     public function actionRenew($id)
     {
@@ -129,19 +176,53 @@ class PilotCredentialController extends Controller
         }
 
         $model = $this->findModel($id);
+
+        // Guard: cannot renew a credential with no expiry date (students are always issuable)
+        if (!$model->canRenew()) {
+            $this->logWarn('Attempted to renew non-expiring credential', [
+                'id'   => $id,
+                'user' => Yii::$app->user->identity->license,
+            ]);
+            throw new ForbiddenHttpException(Yii::t('app', 'This credential has no expiry date and cannot be renewed.'));
+        }
+
         $model->issued_by = Yii::$app->user->id;
 
-        // Capture pre-load state: if credential is already active, issued_date must not change.
+        // Capture pre-load state before POST overwrites the model
         $originalIssuedDate   = $model->issued_date;
         $wasActiveBeforeRenew = $model->isActive();
 
         if ($this->request->isPost && $model->load($this->request->post())) {
+            // Active credential: issued_date is immutable after first issue
             if ($wasActiveBeforeRenew) {
                 $model->issued_date = $originalIssuedDate;
             }
-            if ($model->save()) {
-                $this->logInfo('Renewed credential', ['id' => $model->id]);
-                return $this->redirect(['view', 'id' => $model->id]);
+
+            // When renewing an active credential, expiry date must be in the future
+            if ($wasActiveBeforeRenew && $model->expiry_date !== null && $model->expiry_date <= date('Y-m-d')) {
+                $model->addError('expiry_date', Yii::t('app', 'Expiry date must be after today.'));
+            }
+
+            if (!$model->hasErrors()) {
+                $transaction = Yii::$app->db->beginTransaction();
+                try {
+                    if ($model->save()) {
+                        // Auto-renew active descendant RATING credentials when renewing an active LICENSE
+                        if ($wasActiveBeforeRenew && $model->credentialType->isLicense() && $model->expiry_date !== null) {
+                            $this->autoRenewDescendantRatings($model);
+                        }
+                        $transaction->commit();
+                        $this->logInfo('Renewed credential', [
+                            'id'   => $model->id,
+                            'user' => Yii::$app->user->identity->license,
+                        ]);
+                        return $this->redirect(['view', 'id' => $model->id]);
+                    }
+                    $transaction->rollBack();
+                } catch (\Throwable $e) {
+                    $transaction->rollBack();
+                    throw $e;
+                }
             }
         }
 
@@ -149,7 +230,8 @@ class PilotCredentialController extends Controller
     }
 
     /**
-     * Revokes a credential by deleting it.
+     * Revokes a credential by deleting it and cascade-deleting all descendant credentials
+     * the pilot holds. Cannot revoke a LICENSE if the pilot holds a higher LICENSE that depends on it.
      */
     public function actionRevoke($id)
     {
@@ -157,13 +239,142 @@ class PilotCredentialController extends Controller
             throw new ForbiddenHttpException();
         }
 
-        $model   = $this->findModel($id);
-        $pilotId = $model->pilot_id;
-        $model->delete();
+        $model = $this->findModel($id);
 
-        $this->logInfo('Revoked credential', ['id' => $id, 'pilot_id' => $pilotId]);
+        // Guard: cannot revoke a LICENSE that is a prerequisite of another LICENSE the pilot holds
+        if (!$model->canRevoke()) {
+            $this->logWarn('Attempted to revoke blocked license', [
+                'id'                 => $id,
+                'pilot_id'           => $model->pilot_id,
+                'credential_type_id' => $model->credential_type_id,
+                'user'               => Yii::$app->user->identity->license,
+            ]);
+            throw new ForbiddenHttpException(Yii::t('app', 'This credential cannot be revoked because the pilot holds a higher license that depends on it.'));
+        }
+
+        $pilotId           = $model->pilot_id;
+        $descendantTypeIds = $model->credentialType->getDescendantTypeIds();
+
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            if (!empty($descendantTypeIds)) {
+                $cascadeDeleted = PilotCredential::deleteAll([
+                    'pilot_id'           => $pilotId,
+                    'credential_type_id' => $descendantTypeIds,
+                ]);
+                if ($cascadeDeleted > 0) {
+                    $this->logInfo('Cascade revoked credentials', [
+                        'parent_id'        => $id,
+                        'pilot_id'         => $pilotId,
+                        'cascade_type_ids' => $descendantTypeIds,
+                        'deleted'          => $cascadeDeleted,
+                        'user'             => Yii::$app->user->identity->license,
+                    ]);
+                }
+            }
+            $model->delete();
+            $transaction->commit();
+            $this->logInfo('Revoked credential', [
+                'id'       => $id,
+                'pilot_id' => $pilotId,
+                'user'     => Yii::$app->user->identity->license,
+            ]);
+        } catch (\Throwable $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
 
         return $this->redirect(['/pilot/view', 'id' => $pilotId]);
+    }
+
+    /**
+     * Auto-renews active descendant RATING credentials when a LICENSE is renewed.
+     * Includes ratings that are descendants of any ancestor license in the chain
+     * (e.g. renewing ATPL also renews ratings hanging off CPL or PPL).
+     * Student-status ratings are intentionally excluded.
+     * Must be called inside an open transaction.
+     */
+    private function autoRenewDescendantRatings(PilotCredential $license): void
+    {
+        // Collect descendant type IDs from the renewed license itself
+        $allDescendantIds = $license->credentialType->getDescendantTypeIds();
+
+        // Also collect descendants from every ancestor license in the chain
+        $ancestorIds = $this->getAncestorTypeIds($license->credential_type_id);
+        if (!empty($ancestorIds)) {
+            $ancestorModels = CredentialType::findAll($ancestorIds);
+            foreach ($ancestorModels as $ancestor) {
+                foreach ($ancestor->getDescendantTypeIds() as $did) {
+                    if (!in_array($did, $allDescendantIds, true)) {
+                        $allDescendantIds[] = $did;
+                    }
+                }
+            }
+        }
+
+        if (empty($allDescendantIds)) {
+            return;
+        }
+
+        $ratingTypeIds = CredentialType::find()
+            ->select('id')
+            ->where(['id' => $allDescendantIds, 'type' => CredentialType::TYPE_RATING])
+            ->column();
+        if (empty($ratingTypeIds)) {
+            return;
+        }
+        $updated = PilotCredential::updateAll(
+            ['expiry_date' => $license->expiry_date],
+            [
+                'pilot_id'           => $license->pilot_id,
+                'credential_type_id' => $ratingTypeIds,
+                'status'             => PilotCredential::STATUS_ACTIVE,
+            ]
+        );
+        if ($updated > 0) {
+            $this->logInfo('Auto-renewed descendant ratings', [
+                'license_id'      => $license->id,
+                'rating_type_ids' => $ratingTypeIds,
+                'updated'         => $updated,
+                'user'            => Yii::$app->user->identity->license,
+            ]);
+        }
+    }
+
+    /**
+     * Clears expiry_date on all ancestor LICENSE credentials the pilot holds
+     * when a new higher active LICENSE is issued.
+     * Must be called inside an open transaction.
+     */
+    private function clearAncestorLicenseExpiries(PilotCredential $newLicense): void
+    {
+        $ancestorIds = $this->getAncestorTypeIds($newLicense->credential_type_id);
+        if (empty($ancestorIds)) {
+            return;
+        }
+        $ancestorLicenseIds = CredentialType::find()
+            ->select('id')
+            ->where(['id' => $ancestorIds, 'type' => CredentialType::TYPE_LICENSE])
+            ->column();
+        if (empty($ancestorLicenseIds)) {
+            return;
+        }
+        $updated = PilotCredential::updateAll(
+            ['expiry_date' => null],
+            [
+                'pilot_id'           => $newLicense->pilot_id,
+                'credential_type_id' => $ancestorLicenseIds,
+                'status'             => PilotCredential::STATUS_ACTIVE,
+            ]
+        );
+        if ($updated > 0) {
+            $this->logInfo('Cleared expiry on ancestor licenses after issuing higher license', [
+                'new_license_id'      => $newLicense->id,
+                'ancestor_type_ids'   => $ancestorLicenseIds,
+                'updated'             => $updated,
+                'user'                => Yii::$app->user->identity->license,
+            ]);
+        }
     }
 
     /**

@@ -161,4 +161,35 @@ class CredentialType extends \yii\db\ActiveRecord
     {
         return $this->hasMany(PilotCredential::class, ['credential_type_id' => 'id']);
     }
+
+    /** @var int[]|null Cached descendant type IDs to avoid repeated BFS queries. */
+    private $_descendantTypeIds = null;
+
+    /**
+     * Returns all descendant credential type IDs via BFS down the prerequisite DAG.
+     * Result is memoized on the instance to avoid repeated queries in loops.
+     */
+    public function getDescendantTypeIds(): array
+    {
+        if ($this->_descendantTypeIds !== null) {
+            return $this->_descendantTypeIds;
+        }
+        $descendants = [];
+        $queue = [$this->id];
+        while (!empty($queue)) {
+            $current  = array_shift($queue);
+            $childIds = CredentialTypePrerequisite::find()
+                ->select('child_id')
+                ->where(['parent_id' => $current])
+                ->column();
+            foreach ($childIds as $cid) {
+                $cid = (int) $cid;
+                if (!in_array($cid, $descendants, true)) {
+                    $descendants[] = $cid;
+                    $queue[]       = $cid;
+                }
+            }
+        }
+        return $this->_descendantTypeIds = $descendants;
+    }
 }
