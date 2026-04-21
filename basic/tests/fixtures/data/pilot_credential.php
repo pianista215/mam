@@ -43,4 +43,64 @@ return [
         'expiry_date'        => '2023-05-01',
         'issued_by'          => 2,
     ],
+    [
+        // Pilot 5 (Ifr Validator), PPL, Active con expiry → será limpiado al activar CPL (id=6)
+        'id'                 => 5,
+        'pilot_id'           => 5,
+        'credential_type_id' => 1,
+        'status'             => PilotCredential::STATUS_ACTIVE,
+        'issued_date'        => '2023-01-01',
+        'expiry_date'        => '2026-12-31',
+        'issued_by'          => 2,
+    ],
+    [
+        // Pilot 5 (Ifr Validator), CPL, Student → para test actionActivate + ancestor clear
+        'id'                 => 6,
+        'pilot_id'           => 5,
+        'credential_type_id' => 3,
+        'status'             => PilotCredential::STATUS_STUDENT,
+        'issued_date'        => '2025-01-01',
+        'expiry_date'        => null,
+        'issued_by'          => 2,
+    ],
+    [
+        // Pilot 6 (Vfr School), PPL, Active sin expiry → base de la cadena
+        'id'                 => 7,
+        'pilot_id'           => 6,
+        'credential_type_id' => 1,
+        'status'             => PilotCredential::STATUS_ACTIVE,
+        'issued_date'        => '2022-01-01',
+        'expiry_date'        => null,
+        'issued_by'          => 2,
+    ],
+    [
+        // Pilot 6 (Vfr School), CPL, Active con expiry → para cascade renew + revoke tests
+        'id'                 => 8,
+        'pilot_id'           => 6,
+        'credential_type_id' => 3,
+        'status'             => PilotCredential::STATUS_ACTIVE,
+        'issued_date'        => '2024-01-01',
+        'expiry_date'        => '2026-06-01',
+        'issued_by'          => 2,
+    ],
+    [
+        // Pilot 6 (Vfr School), IR, Active con expiry → será cascade-renovado al renovar CPL
+        'id'                 => 9,
+        'pilot_id'           => 6,
+        'credential_type_id' => 2,
+        'status'             => PilotCredential::STATUS_ACTIVE,
+        'issued_date'        => '2024-01-01',
+        'expiry_date'        => '2025-12-31',
+        'issued_by'          => 2,
+    ],
+    [
+        // Pilot 7 (Ifr School), PPL, Active con expiry → será limpiado al emitir CPL activo
+        'id'                 => 10,
+        'pilot_id'           => 7,
+        'credential_type_id' => 1,
+        'status'             => PilotCredential::STATUS_ACTIVE,
+        'issued_date'        => '2023-01-01',
+        'expiry_date'        => '2026-06-01',
+        'issued_by'          => 2,
+    ],
 ];

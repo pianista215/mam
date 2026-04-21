@@ -48,6 +48,7 @@ class PilotCredential extends \yii\db\ActiveRecord
             [['pilot_id', 'credential_type_id', 'issued_by'], 'integer'],
             [['status'], 'integer'],
             [['status'], 'in', 'range' => [self::STATUS_STUDENT, self::STATUS_ACTIVE]],
+            [['expiry_date'], 'default', 'value' => null],
             [['issued_date', 'expiry_date'], 'date', 'format' => 'php:Y-m-d'],
             [['pilot_id'], 'exist', 'targetClass' => Pilot::class, 'targetAttribute' => 'id'],
             [['credential_type_id'], 'exist', 'targetClass' => CredentialType::class, 'targetAttribute' => 'id'],
@@ -129,15 +130,36 @@ class PilotCredential extends \yii\db\ActiveRecord
 
     /**
      * Whether this credential can be renewed.
-     * Students can always be issued (promoted to active) regardless of expiry date.
-     * Active credentials can only be renewed if they have an expiry date to update.
+     * Students can always be activated (promoted to active).
+     * Active non-license credentials (ratings, certifications) can always be renewed.
+     * Active LICENSE credentials can only be renewed if the pilot holds no higher (descendant) license —
+     * the highest license in the chain is the one that carries the active expiry date.
      */
     public function canRenew(): bool
     {
         if ($this->isStudent()) {
             return true;
         }
-        return $this->expiry_date !== null;
+        if (!$this->isActive()) {
+            return false;
+        }
+        if (!$this->credentialType->isLicense()) {
+            return true;
+        }
+        $descendantIds = $this->credentialType->getDescendantTypeIds();
+        if (empty($descendantIds)) {
+            return true;
+        }
+        $descendantLicenseIds = CredentialType::find()
+            ->select('id')
+            ->where(['id' => $descendantIds, 'type' => CredentialType::TYPE_LICENSE])
+            ->column();
+        if (empty($descendantLicenseIds)) {
+            return true;
+        }
+        return !static::find()
+            ->where(['pilot_id' => $this->pilot_id, 'credential_type_id' => $descendantLicenseIds])
+            ->exists();
     }
 
     /**

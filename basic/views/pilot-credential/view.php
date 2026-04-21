@@ -42,7 +42,7 @@ if ($model->isStudent()) {
             <?php if ($canRenew): ?>
             <?= Html::a(
                 $model->isStudent() ? Yii::t('app', 'Issue') : Yii::t('app', 'Renew'),
-                ['renew', 'id' => $model->id],
+                $model->isStudent() ? ['activate', 'id' => $model->id] : ['renew', 'id' => $model->id],
                 ['class' => 'btn btn-primary me-2']
             ) ?>
             <?php endif; ?>

@@ -6,6 +6,7 @@ use yii\helpers\Html;
 /** @var app\models\PilotCredential $model */
 /** @var app\models\Pilot $pilot */
 /** @var array $credentialTypes */
+/** @var int[] $studentOnlyTypeIds  type IDs that can only be issued as Student */
 
 $this->title = Yii::t('app', 'Issue Credential to {name}', ['name' => $pilot->fullName]);
 $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Pilots'), 'url' => ['/pilot/index']];
@@ -17,9 +18,10 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Issue Credential');
     <h1><?= Html::encode($this->title) ?></h1>
 
     <?= $this->render('_form', [
-        'model'           => $model,
-        'credentialTypes' => $credentialTypes,
-        'showTypeField'   => true,
+        'model'              => $model,
+        'credentialTypes'    => $credentialTypes,
+        'showTypeField'      => true,
+        'studentOnlyTypeIds' => $studentOnlyTypeIds,
     ]) ?>
 
 </div>

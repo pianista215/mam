@@ -199,7 +199,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <?php if ($pcMeta['canRenew']): ?>
                                 <?= Html::a(
                                     $pc->isStudent() ? Yii::t('app', 'Issue') : Yii::t('app', 'Renew'),
-                                    ['/pilot-credential/renew', 'id' => $pc->id],
+                                    $pc->isStudent() ? ['/pilot-credential/activate', 'id' => $pc->id] : ['/pilot-credential/renew', 'id' => $pc->id],
                                     ['class' => 'btn btn-sm btn-outline-primary me-1']
                                 ) ?>
                                 <?php endif; ?>
