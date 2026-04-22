@@ -168,11 +168,11 @@ class PilotCredentialController extends Controller
                 ->where(['child_id' => $ct->id])
                 ->column());
             if (empty($parentIds)) {
-                $credentialTypes[$ct->id] = '[' . $ct->getTypeLabel() . '] ' . $ct->name;
+                $credentialTypes[$ct->id] = $ct->code . ' — ' . $ct->name . ' [' . $ct->getTypeLabel() . ']';
             } else {
                 foreach ($parentIds as $pid) {
                     if (in_array($pid, $existingTypeIds, true)) {
-                        $credentialTypes[$ct->id] = '[' . $ct->getTypeLabel() . '] ' . $ct->name;
+                        $credentialTypes[$ct->id] = $ct->code . ' — ' . $ct->name . ' [' . $ct->getTypeLabel() . ']';
                         break;
                     }
                 }

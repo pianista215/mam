@@ -53,8 +53,9 @@ $studentOnlyTypeIds = $studentOnlyTypeIds ?? [];
     <?php endif; ?>
 
     <?php
-    $noExpiry    = ($model->expiry_date === null && !$model->isNewRecord);
-    $expiryValue = $model->expiry_date ?: date('Y-12-31');
+    $noExpiry         = ($model->expiry_date === null && !$model->isNewRecord);
+    $expiryValue      = $model->expiry_date ?: date('Y-12-31');
+    $expiryInputValue = $noExpiry ? '' : $expiryValue;
     ?>
     <div class="mb-3">
         <label class="form-label"
@@ -74,12 +75,10 @@ $studentOnlyTypeIds = $studentOnlyTypeIds ?? [];
             <input type="date"
                    id="pilotcredential-expiry_date"
                    name="PilotCredential[expiry_date]"
-                   value="<?= Html::encode($expiryValue) ?>"
-                   class="form-control<?= $model->hasErrors('expiry_date') ? ' is-invalid' : '' ?>"
-                   <?= $noExpiry ? 'disabled' : '' ?>>
+                   value="<?= Html::encode($expiryInputValue) ?>"
+                   data-default-value="<?= Html::encode($expiryValue) ?>"
+                   class="form-control<?= $model->hasErrors('expiry_date') ? ' is-invalid' : '' ?>">
         </div>
-        <input type="hidden" id="expiry-date-clear" name="PilotCredential[expiry_date]" value=""
-               <?= $noExpiry ? '' : 'disabled' ?>>
         <?php if ($model->hasErrors('expiry_date')): ?>
             <div class="invalid-feedback d-block">
                 <?= Html::encode(implode(', ', $model->getErrors('expiry_date'))) ?>
@@ -120,12 +119,17 @@ $studentOnlyTypeIds = $studentOnlyTypeIds ?? [];
     var noExpiryCb  = document.getElementById('no-expiry-checkbox');
     var expiryWrap  = document.getElementById('expiry-date-wrapper');
     var expiryInput = expiryWrap ? expiryWrap.querySelector('input[type="date"]') : null;
-    var expiryClear = document.getElementById('expiry-date-clear');
     function syncNoExpiry() {
         var off = noExpiryCb && noExpiryCb.checked;
-        if (expiryWrap)  expiryWrap.style.display = off ? 'none' : '';
-        if (expiryInput) expiryInput.disabled      = !!off;
-        if (expiryClear) expiryClear.disabled       = !off;
+        if (expiryWrap) expiryWrap.style.display = off ? 'none' : '';
+        if (expiryInput) {
+            if (off) {
+                expiryInput.dataset.savedValue = expiryInput.value || expiryInput.dataset.defaultValue;
+                expiryInput.value = '';
+            } else {
+                expiryInput.value = expiryInput.dataset.savedValue || expiryInput.dataset.defaultValue || '';
+            }
+        }
     }
     if (noExpiryCb) {
         noExpiryCb.addEventListener('change', syncNoExpiry);

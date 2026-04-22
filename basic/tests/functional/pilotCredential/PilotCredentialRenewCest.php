@@ -151,7 +151,10 @@ class PilotCredentialRenewCest
 
     public function studentRatingsNotCascadeRenewed(\FunctionalTester $I)
     {
-        // Insert a student IR for pilot 6 in the DB before the test
+        // Delete existing active IR first (unique constraint per pilot+type)
+        PilotCredential::findOne(9)->delete();
+
+        // Insert a student IR for pilot 6 in its place
         $studentIr = new PilotCredential();
         $studentIr->pilot_id           = 6;
         $studentIr->credential_type_id = 2;
@@ -161,9 +164,6 @@ class PilotCredentialRenewCest
         $studentIr->issued_by          = 2;
         $studentIr->save(false);
         $studentIrId = $studentIr->id;
-
-        // Delete existing active IR first (unique constraint per pilot+type)
-        PilotCredential::findOne(9)->delete();
 
         $I->amLoggedInAs(2);
         $I->amOnRoute('pilot-credential/renew', ['id' => 8]);
