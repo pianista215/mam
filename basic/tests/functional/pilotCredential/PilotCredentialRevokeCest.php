@@ -92,6 +92,6 @@ class PilotCredentialRevokeCest
         $I->amOnRoute('pilot-credential/view', ['id' => 8]);
 
         $I->seeResponseCodeIs(200);
-        $I->see('IR — Instrument Rating');
+        $I->seeInSource('IR — Instrument Rating');
     }
 }

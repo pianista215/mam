@@ -62,8 +62,8 @@ class PilotCredentialIssueCest
         $I->amLoggedInAs(2);
         $I->amOnRoute('pilot-credential/issue', ['pilotId' => 7]);
 
-        $I->selectOption('#pilotcredential-credential_type_id', 3);
-        $I->selectOption('[name="PilotCredential[status]"]', PilotCredential::STATUS_ACTIVE);
+        $I->selectOption('#pilotcredential-credential_type_id', '3');
+        $I->selectOption('input[type="radio"][name="PilotCredential[status]"]', (string) PilotCredential::STATUS_ACTIVE);
         $I->fillField('#pilotcredential-issued_date', '2026-01-01');
         $I->fillField('#pilotcredential-expiry_date', '2028-12-31');
         $I->click('Save', 'button');
@@ -88,8 +88,8 @@ class PilotCredentialIssueCest
         $I->amLoggedInAs(2);
         $I->amOnRoute('pilot-credential/issue', ['pilotId' => 7]);
 
-        $I->selectOption('#pilotcredential-credential_type_id', 4);
-        $I->selectOption('[name="PilotCredential[status]"]', PilotCredential::STATUS_STUDENT);
+        $I->selectOption('#pilotcredential-credential_type_id', '4');
+        $I->selectOption('input[type="radio"][name="PilotCredential[status]"]', (string) PilotCredential::STATUS_STUDENT);
         $I->fillField('#pilotcredential-issued_date', '2026-01-01');
         $I->click('Save', 'button');
 
@@ -111,8 +111,8 @@ class PilotCredentialIssueCest
         $I->amLoggedInAs(2);
         $I->amOnRoute('pilot-credential/issue', ['pilotId' => 4]);
 
-        $I->selectOption('#pilotcredential-credential_type_id', 3);
-        $I->selectOption('[name="PilotCredential[status]"]', PilotCredential::STATUS_STUDENT);
+        $I->selectOption('#pilotcredential-credential_type_id', '3');
+        $I->selectOption('input[type="radio"][name="PilotCredential[status]"]', (string) PilotCredential::STATUS_STUDENT);
         $I->fillField('#pilotcredential-issued_date', '2026-01-01');
         $I->click('Save', 'button');
 
@@ -130,8 +130,8 @@ class PilotCredentialIssueCest
         $I->amLoggedInAs(2);
         $I->amOnRoute('pilot-credential/issue', ['pilotId' => 4]);
 
-        $I->selectOption('#pilotcredential-credential_type_id', 3);
-        $I->selectOption('[name="PilotCredential[status]"]', PilotCredential::STATUS_ACTIVE);
+        $I->selectOption('#pilotcredential-credential_type_id', '3');
+        $I->selectOption('input[type="radio"][name="PilotCredential[status]"]', (string) PilotCredential::STATUS_ACTIVE);
         $I->fillField('#pilotcredential-issued_date', '2026-01-01');
         $I->fillField('#pilotcredential-expiry_date', '2028-12-31');
         $I->click('Save', 'button');
