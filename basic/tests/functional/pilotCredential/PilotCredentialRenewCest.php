@@ -149,6 +149,13 @@ class PilotCredentialRenewCest
         $I->assertEquals('2028-01-01', $ir->expiry_date);
     }
 
+    public function renewNonExistent(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(2);
+        $I->amOnRoute('pilot-credential/renew', ['id' => 999]);
+        $I->seeResponseCodeIs(404);
+    }
+
     public function studentRatingsNotCascadeRenewed(\FunctionalTester $I)
     {
         // Delete existing active IR first (unique constraint per pilot+type)

@@ -543,13 +543,6 @@ class SubmittedFlightPlanController extends Controller
         }
     }
 
-    /**
-     * Finds the SubmittedFlightPlan model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param string $id ID
-     * @return SubmittedFlightPlan the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
     private function applyCredentialFilter(\yii\db\ActiveQuery $query, int $pilotId, string $arrivalIcao): void
     {
         $validCredTypeIds = PilotCredential::find()

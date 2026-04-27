@@ -129,11 +129,11 @@ class PilotCredential extends \yii\db\ActiveRecord
     }
 
     /**
-     * Whether this credential can be renewed.
-     * Students can always be activated (promoted to active).
-     * Active non-license credentials (ratings, certifications) can always be renewed.
-     * Active LICENSE credentials can only be renewed if the pilot holds no higher (descendant) license —
-     * the highest license in the chain is the one that carries the active expiry date.
+     * Whether the "action" button should be shown for this credential.
+     * For students: returns true so the "Issue" (activate) button appears in the view.
+     * For active non-license credentials: always true (renew is always available).
+     * For active LICENSE credentials: true only when no higher (descendant) license is held,
+     * because the highest license in the chain owns the active expiry date.
      */
     public function canRenew(): bool
     {

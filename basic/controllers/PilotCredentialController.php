@@ -230,6 +230,7 @@ class PilotCredentialController extends Controller
         $model->status    = PilotCredential::STATUS_ACTIVE;
 
         if ($this->request->isPost && $model->load($this->request->post())) {
+            $model->status = PilotCredential::STATUS_ACTIVE;
             $transaction = Yii::$app->db->beginTransaction();
             try {
                 if ($model->save()) {

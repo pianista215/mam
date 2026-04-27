@@ -178,4 +178,37 @@ class SelectAircraftCredentialFilterCest
         $I->seeResponseCodeIs(200);
         $I->see('Flight Plan Submission');
     }
+
+    // -------------------------------------------------------------------------
+    // Credential validity edge cases (these tests run last and mutate fixture data)
+    // -------------------------------------------------------------------------
+
+    public function pilotWithExpiredCredentialCannotSeeRestrictedAircraft(\FunctionalTester $I)
+    {
+        // Pilot 1 has PPL active with no expiry (id=1). Expire it to verify expired credentials
+        // are not counted by applyCredentialFilter (only expiry_date IS NULL OR >= today qualify).
+        \app\models\PilotCredential::updateAll(['expiry_date' => '2020-01-01'], ['id' => 1]);
+
+        $I->amLoggedInAs(1);
+        $I->amOnRoute('submitted-flight-plan/select-aircraft-route', ['route_id' => '1']);
+
+        $I->seeResponseCodeIs(200);
+        $I->dontSee('EC-BBB');
+        $I->dontSee('Boeing Name Cargo');
+        $I->see('EC-UUU');
+    }
+
+    public function pilotWithOnlyStudentCredentialCannotSeeRestrictedAircraft(\FunctionalTester $I)
+    {
+        // Demote pilot 1's PPL (id=1) to student — student credentials must not unlock restricted aircraft.
+        \app\models\PilotCredential::updateAll(['status' => \app\models\PilotCredential::STATUS_STUDENT, 'expiry_date' => null], ['id' => 1]);
+
+        $I->amLoggedInAs(1);
+        $I->amOnRoute('submitted-flight-plan/select-aircraft-route', ['route_id' => '1']);
+
+        $I->seeResponseCodeIs(200);
+        $I->dontSee('EC-BBB');
+        $I->dontSee('Boeing Name Cargo');
+        $I->see('EC-UUU');
+    }
 }

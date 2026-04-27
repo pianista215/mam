@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.10.0] - 2026-04-21
+## [1.10.0] - 2026-04-27
 
 ### Added
 - Credential type catalogue: create, view, update and delete credential types (licenses, ratings, certifications) with a prerequisite DAG and aircraft-type/airport-restriction mappings
@@ -13,6 +13,8 @@
 - Credential status badges (Active, Expired, Student) in pilot view and credential-type view
 - "Does not expire" checkbox in the issue/renew/activate forms with correct default state
 - RBAC roles CREDENTIAL_MANAGER and CREDENTIAL_AUTHORITY with corresponding permissions
+- FPL aircraft selection filtered by pilot credentials: aircraft types requiring credentials are hidden from the select-aircraft step; aircraft restricted to specific airports by certification are also hidden when the pilot lacks the required credential
+- Credential bypass prevention: all three FPL preparation endpoints (route, tour, charter) validate server-side that the pilot holds the required credentials for the chosen aircraft type and destination airport, returning 403 if not
 
 ## [1.9.0] - 2026-04-06
 

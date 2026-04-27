@@ -85,6 +85,24 @@ class PilotCredentialRevokeCest
         $I->assertEquals('2026-06-01', $ppl->expiry_date);
     }
 
+    public function revokeNonExistent(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(2);
+        $I->sendAjaxPostRequest('/pilot-credential/revoke?id=999');
+        $I->seeResponseCodeIs(404);
+    }
+
+    public function revokeStudentCredential(\FunctionalTester $I)
+    {
+        // id=2: Vfr Validator, PPL, Student — student credentials have no cascade restrictions,
+        // so revoking is allowed (canRevoke() = true for any non-blocking case).
+        $I->amLoggedInAs(2);
+        $I->sendAjaxPostRequest('/pilot-credential/revoke?id=2');
+        $I->seeResponseCodeIsRedirection();
+
+        $I->assertNull(PilotCredential::findOne(2));
+    }
+
     public function revokeViewShowsCascadeNames(\FunctionalTester $I)
     {
         // id=8: pilot 6 CPL — view should show IR in the revoke confirm message
