@@ -408,7 +408,7 @@ class PilotController extends Controller
         $model->setScenario(Pilot::SCENARIO_MOVE);
 
         if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            Yii::$app->session->setFlash('success', 'Now you are at ' . $model->location. ' airport.');
+            Yii::$app->session->setFlash('success', Yii::t('app', 'Now you are at {airport} airport.', ['airport' => $model->location]));
             return $this->redirect(['view', 'id' => $model->id]);
         }
 

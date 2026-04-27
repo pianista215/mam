@@ -23,6 +23,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php if (Yii::$app->user->can(Permissions::CREDENTIAL_CRUD)): ?>
         <div>
             <?= Html::a(Yii::t('app', 'Update'), ['update', 'id' => $model->id], ['class' => 'btn btn-primary me-2']) ?>
+            <?php if ($model->canDelete()): ?>
             <?= Html::a(Yii::t('app', 'Delete'), ['delete', 'id' => $model->id], [
                 'class' => 'btn btn-danger',
                 'data'  => [
@@ -30,6 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'method'  => 'post',
                 ],
             ]) ?>
+            <?php endif; ?>
         </div>
         <?php endif; ?>
     </div>

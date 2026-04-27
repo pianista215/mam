@@ -42,7 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'class' => ActionColumn::class,
                 'visibleButtons' => [
-                    'delete' => fn($model) => Yii::$app->user->can(Permissions::CREDENTIAL_CRUD),
+                    'delete' => fn(CredentialType $model) => Yii::$app->user->can(Permissions::CREDENTIAL_CRUD) && $model->canDelete(),
                     'update' => fn($model) => Yii::$app->user->can(Permissions::CREDENTIAL_CRUD),
                 ],
                 'urlCreator' => fn($action, CredentialType $model, $key, $index, $column) =>

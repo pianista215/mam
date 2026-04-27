@@ -245,6 +245,7 @@ return [
     'No statistics available yet.' => 'Aún no hay estadísticas disponibles.',
     'No tours completed yet' => 'Aún no hay tours completados',
     'No-reply email' => 'Email de no-reply',
+    'Now you are at {airport} airport.' => 'Ahora te encuentras en el aeropuerto {airport}.',
     'None' => 'Ninguno',
     'Only one of route, tour stage or charter route can be associated.' => 'Solo una ruta, etapa o chárter puede estar asociado a la vez.',
     'Only superadmins can edit admin users' => 'Solo los superadministradores pueden editar usuario administradores',

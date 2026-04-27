@@ -162,6 +162,11 @@ class CredentialType extends \yii\db\ActiveRecord
         return $this->hasMany(PilotCredential::class, ['credential_type_id' => 'id']);
     }
 
+    public function canDelete(): bool
+    {
+        return !$this->getDependents()->exists() && !$this->getPilotCredentials()->exists();
+    }
+
     /** @var int[]|null Cached descendant type IDs to avoid repeated BFS queries. */
     private $_descendantTypeIds = null;
 

@@ -277,6 +277,11 @@ class CredentialTypeController extends Controller
         }
 
         $model = $this->findModel($id);
+
+        if (!$model->canDelete()) {
+            throw new ForbiddenHttpException();
+        }
+
         $model->delete();
         $this->logInfo('Deleted credential type', ['id' => $id, 'user' => Yii::$app->user->identity->license]);
 
