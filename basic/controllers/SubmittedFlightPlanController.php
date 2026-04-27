@@ -7,6 +7,9 @@ use app\helpers\GeoUtils;
 use app\helpers\LoggerTrait;
 use app\models\Aircraft;
 use app\models\AircraftSearch;
+use app\models\CredentialTypeAircraftType;
+use app\models\CredentialTypeAirportAircraft;
+use app\models\PilotCredential;
 use app\models\Airport;
 use app\models\CharterRoute;
 use app\models\Route;
@@ -221,6 +224,7 @@ class SubmittedFlightPlanController extends Controller
 
         $searchModel = new AircraftSearch();
         $dataProvider = $searchModel->searchAvailableAircraftsInLocationWithRange($departure, $distance);
+        $this->applyCredentialFilter($dataProvider->query, (int) Yii::$app->user->id, $arrival);
 
         $this->logInfo('User selecting aircraft', [
             'entity' => $type,
@@ -317,10 +321,14 @@ class SubmittedFlightPlanController extends Controller
 
     protected function prepareFplGeneric($entity, $aircraft, $entityType)
     {
+        $aircraftTypeId = $aircraft->aircraftConfiguration->aircraft_type_id;
+
         if (!$this->checkEntityIsUserLocation($entity)
             || !$this->checkAircraftIsOnLocation($aircraft, $entity->departure)
             || !$this->checkAircraftHaveValidRange($aircraft, $entity->distance_nm)
-            || !$this->checkAircraftIsAvailable($aircraft)) {
+            || !$this->checkAircraftIsAvailable($aircraft)
+            || !$this->checkPilotCanFlyAircraftType((int) Yii::$app->user->id, $aircraftTypeId)
+            || !$this->checkPilotCanFlyToAirport((int) Yii::$app->user->id, $aircraftTypeId, $entity->arrival)) {
             throw new ForbiddenHttpException();
         }
 
@@ -542,6 +550,75 @@ class SubmittedFlightPlanController extends Controller
      * @return SubmittedFlightPlan the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
+    private function applyCredentialFilter(\yii\db\ActiveQuery $query, int $pilotId, string $arrivalIcao): void
+    {
+        $validCredTypeIds = PilotCredential::find()
+            ->select('credential_type_id')
+            ->where(['pilot_id' => $pilotId, 'status' => PilotCredential::STATUS_ACTIVE])
+            ->andWhere(['OR', ['expiry_date' => null], ['>=', 'expiry_date', date('Y-m-d')]])
+            ->column();
+
+        $restrictedTypeIds = CredentialTypeAircraftType::find()
+            ->select('aircraft_type_id')->distinct()->column();
+        if (!empty($restrictedTypeIds)) {
+            $allowedTypeIds = empty($validCredTypeIds) ? [] :
+                CredentialTypeAircraftType::find()
+                    ->select('aircraft_type_id')->distinct()
+                    ->where(['credential_type_id' => $validCredTypeIds])
+                    ->column();
+            $query->andWhere(['or',
+                ['not in', 'aircraft_type.id', $restrictedTypeIds],
+                ['in', 'aircraft_type.id', $allowedTypeIds],
+            ]);
+        }
+
+        $airportTypeIds = CredentialTypeAirportAircraft::find()
+            ->select('aircraft_type_id')->distinct()
+            ->where(['airport_icao' => strtoupper($arrivalIcao)])
+            ->column();
+        if (!empty($airportTypeIds)) {
+            $allowedAirportTypeIds = empty($validCredTypeIds) ? [] :
+                CredentialTypeAirportAircraft::find()
+                    ->select('aircraft_type_id')->distinct()
+                    ->where(['airport_icao' => strtoupper($arrivalIcao), 'credential_type_id' => $validCredTypeIds])
+                    ->column();
+            $query->andWhere(['or',
+                ['not in', 'aircraft_type.id', $airportTypeIds],
+                ['in', 'aircraft_type.id', $allowedAirportTypeIds],
+            ]);
+        }
+    }
+
+    protected function checkPilotCanFlyAircraftType(int $pilotId, int $aircraftTypeId): bool
+    {
+        $credTypeIds = CredentialTypeAircraftType::find()
+            ->select('credential_type_id')
+            ->where(['aircraft_type_id' => $aircraftTypeId])
+            ->column();
+        if (empty($credTypeIds)) {
+            return true;
+        }
+        return PilotCredential::find()
+            ->where(['pilot_id' => $pilotId, 'credential_type_id' => $credTypeIds, 'status' => PilotCredential::STATUS_ACTIVE])
+            ->andWhere(['OR', ['expiry_date' => null], ['>=', 'expiry_date', date('Y-m-d')]])
+            ->exists();
+    }
+
+    protected function checkPilotCanFlyToAirport(int $pilotId, int $aircraftTypeId, string $airportIcao): bool
+    {
+        $credTypeIds = CredentialTypeAirportAircraft::find()
+            ->select('credential_type_id')
+            ->where(['aircraft_type_id' => $aircraftTypeId, 'airport_icao' => strtoupper($airportIcao)])
+            ->column();
+        if (empty($credTypeIds)) {
+            return true;
+        }
+        return PilotCredential::find()
+            ->where(['pilot_id' => $pilotId, 'credential_type_id' => $credTypeIds, 'status' => PilotCredential::STATUS_ACTIVE])
+            ->andWhere(['OR', ['expiry_date' => null], ['>=', 'expiry_date', date('Y-m-d')]])
+            ->exists();
+    }
+
     protected function findModel($id)
     {
         // TODO: May be refactor that to not disclose to a visitor that one model doesn't exist
