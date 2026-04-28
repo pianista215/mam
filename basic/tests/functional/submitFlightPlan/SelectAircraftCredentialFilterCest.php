@@ -11,6 +11,7 @@ use tests\fixtures\CredentialTypeFixture;
 use tests\fixtures\CredentialTypePrerequisiteFixture;
 use tests\fixtures\PilotCredentialFixture;
 use tests\fixtures\RouteFixture;
+use tests\fixtures\SubmittedFlightPlanFixture;
 use tests\fixtures\TourStageFixture;
 
 /**
@@ -34,6 +35,7 @@ class SelectAircraftCredentialFilterCest
             'charterRoute'                => CharterRouteFixture::class,
             'route'                       => RouteFixture::class,
             'tourStage'                   => TourStageFixture::class,
+            'submittedFlightPlan'         => SubmittedFlightPlanFixture::class,
             'credentialType'              => CredentialTypeFixture::class,
             'credentialTypePrerequisite'  => CredentialTypePrerequisiteFixture::class,
             'credentialTypeAircraftType'  => CredentialTypeAircraftTypeFixture::class,
@@ -46,9 +48,9 @@ class SelectAircraftCredentialFilterCest
     // Aircraft-type credential filter (select-aircraft-route)
     // -------------------------------------------------------------------------
 
-    public function pilotWithActivePplSeesB738(\FunctionalTester $I)
+    public function pilotWithActivePplSeesB738AndC172(\FunctionalTester $I)
     {
-        // Pilot 1 has PPL active → B738 (EC-BBB) must appear for LEBL→LEVC
+        // Pilot 1 has PPL active → B738 (EC-BBB) and C172 (EC-UUU) must appear for LEBL→LEVC
         $I->amLoggedInAs(1);
         $I->amOnRoute('submitted-flight-plan/select-aircraft-route', ['route_id' => '1']);
 
@@ -59,17 +61,17 @@ class SelectAircraftCredentialFilterCest
         $I->see('C172 Std');
     }
 
-    public function pilotWithoutCredentialDoesNotSeeB738(\FunctionalTester $I)
+    public function pilotWithoutCredentialSeesNoAircraft(\FunctionalTester $I)
     {
-        // Pilot 8 has NO credentials → B738 (requires PPL) must be hidden; C172 is unrestricted
+        // Pilot 8 has NO credentials → all aircraft hidden (both B738 and C172 require PPL)
         $I->amLoggedInAs(8);
         $I->amOnRoute('submitted-flight-plan/select-aircraft-route', ['route_id' => '1']);
 
         $I->seeResponseCodeIs(200);
         $I->dontSee('EC-BBB');
         $I->dontSee('Boeing Name Cargo');
-        $I->see('EC-UUU');
-        $I->see('C172 Std');
+        $I->dontSee('EC-UUU');
+        $I->dontSee('C172 Std');
     }
 
     // -------------------------------------------------------------------------
@@ -114,10 +116,19 @@ class SelectAircraftCredentialFilterCest
         $I->seeResponseCodeIs(403);
     }
 
-    public function prepareFplRouteAllowedForUnrestrictedAircraft(\FunctionalTester $I)
+    public function prepareFplRouteBlockedForPilotLackingC172Credential(\FunctionalTester $I)
     {
-        // Pilot 8 (no credentials) can still fly C172 (no type restriction) on route 1
+        // Pilot 8 (no credentials) bypasses the UI and tries aircraft 3 (C172) on route 1 — must be 403
         $I->amLoggedInAs(8);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-route', ['route_id' => '1', 'aircraft_id' => '3']);
+
+        $I->seeResponseCodeIs(403);
+    }
+
+    public function prepareFplRouteAllowedForPilotWithCredential(\FunctionalTester $I)
+    {
+        // Pilot 1 (PPL → C172 requires PPL) can proceed with aircraft 3 (C172) on route 1
+        $I->amLoggedInAs(1);
         $I->amOnRoute('submitted-flight-plan/prepare-fpl-route', ['route_id' => '1', 'aircraft_id' => '3']);
 
         $I->seeResponseCodeIs(200);
@@ -146,10 +157,10 @@ class SelectAircraftCredentialFilterCest
         $I->seeResponseCodeIs(403);
     }
 
-    public function prepareFplTourAllowedForUnrestrictedAircraft(\FunctionalTester $I)
+    public function prepareFplTourAllowedForPilotWithCredential(\FunctionalTester $I)
     {
-        // Pilot 8 can fly C172 (no restriction) on tour stage 2 (LEBL→LEMD)
-        $I->amLoggedInAs(8);
+        // Pilot 1 (PPL → C172 requires PPL) can fly aircraft 3 (C172) on tour stage 2
+        $I->amLoggedInAs(1);
         $I->amOnRoute('submitted-flight-plan/prepare-fpl-tour', ['tour_stage_id' => '2', 'aircraft_id' => '3']);
 
         $I->seeResponseCodeIs(200);
@@ -169,10 +180,10 @@ class SelectAircraftCredentialFilterCest
         $I->seeResponseCodeIs(403);
     }
 
-    public function prepareFplCharterAllowedForUnrestrictedAircraft(\FunctionalTester $I)
+    public function prepareFplCharterAllowedForPilotWithCredential(\FunctionalTester $I)
     {
-        // Pilot 8 can fly C172 (no restriction) on a charter to LEMD
-        $I->amLoggedInAs(8);
+        // Pilot 1 (PPL → C172 requires PPL) can fly aircraft 3 (C172) on a charter to LEMD
+        $I->amLoggedInAs(1);
         $I->amOnRoute('submitted-flight-plan/prepare-fpl-charter', ['arrival' => 'lemd', 'aircraft_id' => '3']);
 
         $I->seeResponseCodeIs(200);
@@ -183,32 +194,34 @@ class SelectAircraftCredentialFilterCest
     // Credential validity edge cases (these tests run last and mutate fixture data)
     // -------------------------------------------------------------------------
 
-    public function pilotWithExpiredCredentialCannotSeeRestrictedAircraft(\FunctionalTester $I)
+    public function pilotWithExpiredCredentialCanStillSeeAircraft(\FunctionalTester $I)
     {
-        // Pilot 1 has PPL active with no expiry (id=1). Expire it to verify expired credentials
-        // are not counted by applyCredentialFilter (only expiry_date IS NULL OR >= today qualify).
+        // Pilot 1 has PPL active with no expiry (id=1). Expire it: an expired but non-revoked
+        // credential (status=ACTIVE, superseded_at=NULL) still allows flying so the pilot can
+        // complete a renewal flight. Only revoking a credential removes access.
         \app\models\PilotCredential::updateAll(['expiry_date' => '2020-01-01'], ['id' => 1]);
 
         $I->amLoggedInAs(1);
         $I->amOnRoute('submitted-flight-plan/select-aircraft-route', ['route_id' => '1']);
 
         $I->seeResponseCodeIs(200);
-        $I->dontSee('EC-BBB');
-        $I->dontSee('Boeing Name Cargo');
+        $I->see('EC-BBB');
+        $I->see('Boeing Name Cargo');
         $I->see('EC-UUU');
     }
 
-    public function pilotWithOnlyStudentCredentialCannotSeeRestrictedAircraft(\FunctionalTester $I)
+    public function pilotWithStudentCredentialCanStillSeeAircraft(\FunctionalTester $I)
     {
-        // Demote pilot 1's PPL (id=1) to student — student credentials must not unlock restricted aircraft.
+        // Demote pilot 1's PPL (id=1) to student — student credentials still grant aircraft access
+        // so the pilot can complete training flights. Access is only removed by revoking (deleting) the credential.
         \app\models\PilotCredential::updateAll(['status' => \app\models\PilotCredential::STATUS_STUDENT, 'expiry_date' => null], ['id' => 1]);
 
         $I->amLoggedInAs(1);
         $I->amOnRoute('submitted-flight-plan/select-aircraft-route', ['route_id' => '1']);
 
         $I->seeResponseCodeIs(200);
-        $I->dontSee('EC-BBB');
-        $I->dontSee('Boeing Name Cargo');
+        $I->see('EC-BBB');
+        $I->see('Boeing Name Cargo');
         $I->see('EC-UUU');
     }
 }

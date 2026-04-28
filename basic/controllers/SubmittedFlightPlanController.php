@@ -223,8 +223,7 @@ class SubmittedFlightPlanController extends Controller
         }
 
         $searchModel = new AircraftSearch();
-        $dataProvider = $searchModel->searchAvailableAircraftsInLocationWithRange($departure, $distance);
-        $this->applyCredentialFilter($dataProvider->query, (int) Yii::$app->user->id, $arrival);
+        $dataProvider = $searchModel->searchAvailableAircraftsInLocationWithRange($departure, $distance, (int) Yii::$app->user->id, $arrival);
 
         $this->logInfo('User selecting aircraft', [
             'entity' => $type,
@@ -543,45 +542,6 @@ class SubmittedFlightPlanController extends Controller
         }
     }
 
-    private function applyCredentialFilter(\yii\db\ActiveQuery $query, int $pilotId, string $arrivalIcao): void
-    {
-        $validCredTypeIds = PilotCredential::find()
-            ->select('credential_type_id')
-            ->where(['pilot_id' => $pilotId, 'status' => PilotCredential::STATUS_ACTIVE])
-            ->andWhere(['OR', ['expiry_date' => null], ['>=', 'expiry_date', date('Y-m-d')]])
-            ->column();
-
-        $restrictedTypeIds = CredentialTypeAircraftType::find()
-            ->select('aircraft_type_id')->distinct()->column();
-        if (!empty($restrictedTypeIds)) {
-            $allowedTypeIds = empty($validCredTypeIds) ? [] :
-                CredentialTypeAircraftType::find()
-                    ->select('aircraft_type_id')->distinct()
-                    ->where(['credential_type_id' => $validCredTypeIds])
-                    ->column();
-            $query->andWhere(['or',
-                ['not in', 'aircraft_type.id', $restrictedTypeIds],
-                ['in', 'aircraft_type.id', $allowedTypeIds],
-            ]);
-        }
-
-        $airportTypeIds = CredentialTypeAirportAircraft::find()
-            ->select('aircraft_type_id')->distinct()
-            ->where(['airport_icao' => strtoupper($arrivalIcao)])
-            ->column();
-        if (!empty($airportTypeIds)) {
-            $allowedAirportTypeIds = empty($validCredTypeIds) ? [] :
-                CredentialTypeAirportAircraft::find()
-                    ->select('aircraft_type_id')->distinct()
-                    ->where(['airport_icao' => strtoupper($arrivalIcao), 'credential_type_id' => $validCredTypeIds])
-                    ->column();
-            $query->andWhere(['or',
-                ['not in', 'aircraft_type.id', $airportTypeIds],
-                ['in', 'aircraft_type.id', $allowedAirportTypeIds],
-            ]);
-        }
-    }
-
     protected function checkPilotCanFlyAircraftType(int $pilotId, int $aircraftTypeId): bool
     {
         $credTypeIds = CredentialTypeAircraftType::find()
@@ -589,11 +549,10 @@ class SubmittedFlightPlanController extends Controller
             ->where(['aircraft_type_id' => $aircraftTypeId])
             ->column();
         if (empty($credTypeIds)) {
-            return true;
+            return false;
         }
         return PilotCredential::find()
-            ->where(['pilot_id' => $pilotId, 'credential_type_id' => $credTypeIds, 'status' => PilotCredential::STATUS_ACTIVE])
-            ->andWhere(['OR', ['expiry_date' => null], ['>=', 'expiry_date', date('Y-m-d')]])
+            ->where(['pilot_id' => $pilotId, 'credential_type_id' => $credTypeIds])
             ->exists();
     }
 
@@ -607,8 +566,7 @@ class SubmittedFlightPlanController extends Controller
             return true;
         }
         return PilotCredential::find()
-            ->where(['pilot_id' => $pilotId, 'credential_type_id' => $credTypeIds, 'status' => PilotCredential::STATUS_ACTIVE])
-            ->andWhere(['OR', ['expiry_date' => null], ['>=', 'expiry_date', date('Y-m-d')]])
+            ->where(['pilot_id' => $pilotId, 'credential_type_id' => $credTypeIds])
             ->exists();
     }
 

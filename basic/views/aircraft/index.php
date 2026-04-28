@@ -33,8 +33,9 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
             [
-                'attribute' =>'aircraftConfiguration.fullname',
-                'label' => Yii::t('app', 'Aircraft Configuration'),
+                'attribute' => 'aircraftConfiguration',
+                'label'     => Yii::t('app', 'Aircraft Configuration'),
+                'value'     => fn($model) => $model->aircraftConfiguration->fullname,
             ],
             'registration',
             'name',
