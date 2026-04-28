@@ -33,6 +33,7 @@ class PilotCredentialController extends Controller
             [
                 'access' => [
                     'class' => AccessControl::class,
+                    'only'  => ['view', 'issue', 'activate', 'renew', 'revoke'],
                     'rules' => [
                         [
                             'allow' => true,
