@@ -103,4 +103,34 @@ return [
         'expiry_date'        => '2026-06-01',
         'issued_by'          => 2,
     ],
+    [
+        // Pilot 6 (Vfr School), B738 Type Rating, Active → para tests FPL: ve B738 y pasa GCLP con MNPS
+        'id'                 => 11,
+        'pilot_id'           => 6,
+        'credential_type_id' => 5,
+        'status'             => PilotCredential::STATUS_ACTIVE,
+        'issued_date'        => '2024-06-01',
+        'expiry_date'        => null,
+        'issued_by'          => 2,
+    ],
+    [
+        // Pilot 6 (Vfr School), MNPS Certification, Active → desbloquea B738 en GCLP
+        'id'                 => 12,
+        'pilot_id'           => 6,
+        'credential_type_id' => 4,
+        'status'             => PilotCredential::STATUS_ACTIVE,
+        'issued_date'        => '2024-06-01',
+        'expiry_date'        => null,
+        'issued_by'          => 2,
+    ],
+    [
+        // Pilot 7 (Ifr School), B738 Type Rating, Active → ve B738 pero bloqueado en GCLP sin MNPS
+        'id'                 => 13,
+        'pilot_id'           => 7,
+        'credential_type_id' => 5,
+        'status'             => PilotCredential::STATUS_ACTIVE,
+        'issued_date'        => '2024-06-01',
+        'expiry_date'        => null,
+        'issued_by'          => 2,
+    ],
 ];

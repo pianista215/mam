@@ -66,7 +66,7 @@ class CredentialTypeUpdateCest
         $I->assertEquals('PPL', $model->code);
 
         $count = CredentialType::find()->count();
-        $I->assertEquals(4, $count);
+        $I->assertEquals(6, $count);
     }
 
     public function updateWithDuplicateCode(\FunctionalTester $I)
@@ -106,7 +106,7 @@ class CredentialTypeUpdateCest
         $I->assertEquals('Helicopter commercial variant.', $model->description);
 
         $count = CredentialType::find()->count();
-        $I->assertEquals(4, $count);
+        $I->assertEquals(6, $count);
     }
 
     public function updateAddPrerequisite(\FunctionalTester $I)

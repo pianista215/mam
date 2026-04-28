@@ -31,4 +31,18 @@ return [
         'type'        => CredentialType::TYPE_CERTIFICATION,
         'description' => null,
     ],
+    [
+        'id'          => 5,
+        'code'        => 'B738',
+        'name'        => 'Boeing 737-800 Type Rating',
+        'type'        => CredentialType::TYPE_RATING,
+        'description' => 'Type rating for Boeing 737-800 series aircraft.',
+    ],
+    [
+        'id'          => 6,
+        'code'        => 'NVG',
+        'name'        => 'Night Vision Goggles',
+        'type'        => CredentialType::TYPE_CERTIFICATION,
+        'description' => null,
+    ],
 ];

@@ -25,4 +25,10 @@ return [
         'name' => 'Cessna 172',
         'max_nm_range' => 696,
     ],
+    [
+        'id' => 5,
+        'icao_type_code' => 'BE58',
+        'name' => 'Beechcraft Baron 58',
+        'max_nm_range' => 1480,
+    ],
 ];

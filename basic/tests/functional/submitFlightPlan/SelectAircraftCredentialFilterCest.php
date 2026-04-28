@@ -11,19 +11,25 @@ use tests\fixtures\CredentialTypeFixture;
 use tests\fixtures\CredentialTypePrerequisiteFixture;
 use tests\fixtures\PilotCredentialFixture;
 use tests\fixtures\RouteFixture;
-use tests\fixtures\SubmittedFlightPlanFixture;
 use tests\fixtures\TourStageFixture;
 
 /**
  * Tests aircraft credential filtering in the FPL aircraft-selection step and
  * server-side bypass prevention in all three prepareFpl* actions (route, tour, charter).
  *
- * Fixture data summary:
- *   - credential_type_aircraft_type: B738 (type_id=2) requires PPL (cred_type_id=1)
- *   - credential_type_airport_aircraft: B738 at GCLP additionally requires CPL (cred_type_id=3)
- *   - Pilot 1 (John Doe, LEBL): PPL active, IR active — no CPL
- *   - Pilot 6 (Vfr School, LEBL): PPL + CPL + IR active
- *   - Pilot 8 (Other Ifr School, LEBL): no credentials
+ * Credential → aircraft type mapping (credential_type_aircraft_type):
+ *   - PPL  (id=1) → C172 (type_id=4)
+ *   - CPL  (id=3) → BE58 (type_id=5)
+ *   - B738 Rating (id=5) → B738 (type_id=2)
+ *
+ * Airport restriction (credential_type_airport_aircraft):
+ *   - MNPS (id=4) required for B738 at GCLP
+ *
+ * Pilot credentials in fixtures:
+ *   - Pilot 1 (John Doe):   PPL active + IR active — no B738 Rating, no MNPS
+ *   - Pilot 6 (Vfr School): PPL + CPL + IR + B738 Rating + MNPS — full set
+ *   - Pilot 7 (Ifr School): PPL active + B738 Rating active — no MNPS
+ *   - Pilot 8 (Other Ifr):  no credentials
  */
 class SelectAircraftCredentialFilterCest
 {
@@ -35,7 +41,6 @@ class SelectAircraftCredentialFilterCest
             'charterRoute'                => CharterRouteFixture::class,
             'route'                       => RouteFixture::class,
             'tourStage'                   => TourStageFixture::class,
-            'submittedFlightPlan'         => SubmittedFlightPlanFixture::class,
             'credentialType'              => CredentialTypeFixture::class,
             'credentialTypePrerequisite'  => CredentialTypePrerequisiteFixture::class,
             'credentialTypeAircraftType'  => CredentialTypeAircraftTypeFixture::class,
@@ -45,25 +50,27 @@ class SelectAircraftCredentialFilterCest
     }
 
     // -------------------------------------------------------------------------
-    // Aircraft-type credential filter (select-aircraft-route)
+    // Aircraft-type credential filter (select-aircraft-route LEBL→LEVC, 165 nm)
     // -------------------------------------------------------------------------
 
-    public function pilotWithActivePplSeesB738AndC172(\FunctionalTester $I)
+    public function pilotWithPplSeesOnlyC172(\FunctionalTester $I)
     {
-        // Pilot 1 has PPL active → B738 (EC-BBB) and C172 (EC-UUU) must appear for LEBL→LEVC
+        // Pilot 1 has PPL active → only C172 (EC-UUU) visible; B738 and BE58 require other credentials
         $I->amLoggedInAs(1);
         $I->amOnRoute('submitted-flight-plan/select-aircraft-route', ['route_id' => '1']);
 
         $I->seeResponseCodeIs(200);
-        $I->see('EC-BBB');
-        $I->see('Boeing Name Cargo');
         $I->see('EC-UUU');
         $I->see('C172 Std');
+        $I->dontSee('EC-BBB');
+        $I->dontSee('Boeing Name Cargo');
+        $I->dontSee('EC-E58');
+        $I->dontSee('Baron 58 Std');
     }
 
     public function pilotWithoutCredentialSeesNoAircraft(\FunctionalTester $I)
     {
-        // Pilot 8 has NO credentials → all aircraft hidden (both B738 and C172 require PPL)
+        // Pilot 8 has NO credentials → all aircraft hidden
         $I->amLoggedInAs(8);
         $I->amOnRoute('submitted-flight-plan/select-aircraft-route', ['route_id' => '1']);
 
@@ -72,29 +79,31 @@ class SelectAircraftCredentialFilterCest
         $I->dontSee('Boeing Name Cargo');
         $I->dontSee('EC-UUU');
         $I->dontSee('C172 Std');
+        $I->dontSee('EC-E58');
+        $I->dontSee('Baron 58 Std');
     }
 
     // -------------------------------------------------------------------------
-    // Airport restriction filter (select-aircraft-route LEBL→GCLP)
+    // Airport restriction filter (select-aircraft-route LEBL→GCLP, 1173 nm)
     // -------------------------------------------------------------------------
 
-    public function b738BlockedAtRestrictedAirportForPilotLackingCpl(\FunctionalTester $I)
+    public function b738BlockedAtGclpForPilotLackingMnps(\FunctionalTester $I)
     {
-        // Pilot 1 has PPL but no CPL → B738 is hidden for GCLP (CPL required there)
-        // C172 is out of range for this route, so the only result with no credential
-        // filter would be B738. With the filter, nothing from B738 is shown.
-        $I->amLoggedInAs(1);
+        // Pilot 7 has PPL + B738 Rating but no MNPS → B738 is hidden for GCLP (MNPS required there)
+        // C172 (range 696 nm) is out of range for this route, so nothing is shown.
+        $I->amLoggedInAs(7);
         $I->amOnRoute('submitted-flight-plan/select-aircraft-route', ['route_id' => '3']);
 
         $I->seeResponseCodeIs(200);
         $I->dontSee('EC-BBB');
         $I->dontSee('Boeing Name Cargo');
         $I->dontSee('EC-UUU');
+        $I->dontSee('EC-E58');
     }
 
-    public function b738ShownAtRestrictedAirportForPilotWithCpl(\FunctionalTester $I)
+    public function b738ShownAtGclpForPilotWithMnps(\FunctionalTester $I)
     {
-        // Pilot 6 has PPL + CPL active → B738 is visible for LEBL→GCLP
+        // Pilot 6 has PPL + CPL + IR + B738 Rating + MNPS → B738 is visible for LEBL→GCLP
         $I->amLoggedInAs(6);
         $I->amOnRoute('submitted-flight-plan/select-aircraft-route', ['route_id' => '3']);
 
@@ -107,27 +116,27 @@ class SelectAircraftCredentialFilterCest
     // Bypass prevention: prepareFplRoute
     // -------------------------------------------------------------------------
 
-    public function prepareFplRouteBlockedForPilotLackingAircraftTypeCredential(\FunctionalTester $I)
+    public function prepareFplRouteBlockedForPilotLackingB738Rating(\FunctionalTester $I)
     {
-        // Pilot 8 (no credentials) bypasses the UI and tries to get aircraft 2 (B738) on route 1
+        // Pilot 8 (no credentials) bypasses the UI and tries to get B738 (aircraft 2) on route 1
         $I->amLoggedInAs(8);
         $I->amOnRoute('submitted-flight-plan/prepare-fpl-route', ['route_id' => '1', 'aircraft_id' => '2']);
 
         $I->seeResponseCodeIs(403);
     }
 
-    public function prepareFplRouteBlockedForPilotLackingC172Credential(\FunctionalTester $I)
+    public function prepareFplRouteBlockedForPilotLackingPpl(\FunctionalTester $I)
     {
-        // Pilot 8 (no credentials) bypasses the UI and tries aircraft 3 (C172) on route 1 — must be 403
+        // Pilot 8 (no credentials) bypasses the UI and tries C172 (aircraft 3) on route 1 — must be 403
         $I->amLoggedInAs(8);
         $I->amOnRoute('submitted-flight-plan/prepare-fpl-route', ['route_id' => '1', 'aircraft_id' => '3']);
 
         $I->seeResponseCodeIs(403);
     }
 
-    public function prepareFplRouteAllowedForPilotWithCredential(\FunctionalTester $I)
+    public function prepareFplRouteAllowedForPilotWithPpl(\FunctionalTester $I)
     {
-        // Pilot 1 (PPL → C172 requires PPL) can proceed with aircraft 3 (C172) on route 1
+        // Pilot 1 (PPL → C172 requires PPL) can proceed with C172 (aircraft 3) on route 1
         $I->amLoggedInAs(1);
         $I->amOnRoute('submitted-flight-plan/prepare-fpl-route', ['route_id' => '1', 'aircraft_id' => '3']);
 
@@ -135,10 +144,10 @@ class SelectAircraftCredentialFilterCest
         $I->see('Flight Plan Submission');
     }
 
-    public function prepareFplRouteBlockedAtRestrictedAirport(\FunctionalTester $I)
+    public function prepareFplRouteBlockedAtGclpWithoutMnps(\FunctionalTester $I)
     {
-        // Pilot 1 (PPL, no CPL) bypasses and tries B738 to GCLP (route 3)
-        $I->amLoggedInAs(1);
+        // Pilot 7 (B738 Rating, no MNPS) bypasses and tries B738 to GCLP (route 3) — blocked by MNPS
+        $I->amLoggedInAs(7);
         $I->amOnRoute('submitted-flight-plan/prepare-fpl-route', ['route_id' => '3', 'aircraft_id' => '2']);
 
         $I->seeResponseCodeIs(403);
@@ -148,7 +157,7 @@ class SelectAircraftCredentialFilterCest
     // Bypass prevention: prepareFplTour
     // -------------------------------------------------------------------------
 
-    public function prepareFplTourBlockedForPilotLackingAircraftTypeCredential(\FunctionalTester $I)
+    public function prepareFplTourBlockedForPilotWithoutCredential(\FunctionalTester $I)
     {
         // Tour stage 1: LEBL→LEMD. Pilot 8 (no credentials) tries B738 (aircraft 2) — must be 403
         $I->amLoggedInAs(8);
@@ -157,9 +166,9 @@ class SelectAircraftCredentialFilterCest
         $I->seeResponseCodeIs(403);
     }
 
-    public function prepareFplTourAllowedForPilotWithCredential(\FunctionalTester $I)
+    public function prepareFplTourAllowedForPilotWithPpl(\FunctionalTester $I)
     {
-        // Pilot 1 (PPL → C172 requires PPL) can fly aircraft 3 (C172) on tour stage 2
+        // Pilot 1 (PPL → C172 requires PPL) can fly C172 (aircraft 3) on tour stage 2
         $I->amLoggedInAs(1);
         $I->amOnRoute('submitted-flight-plan/prepare-fpl-tour', ['tour_stage_id' => '2', 'aircraft_id' => '3']);
 
@@ -171,7 +180,7 @@ class SelectAircraftCredentialFilterCest
     // Bypass prevention: prepareFplCharter
     // -------------------------------------------------------------------------
 
-    public function prepareFplCharterBlockedForPilotLackingAircraftTypeCredential(\FunctionalTester $I)
+    public function prepareFplCharterBlockedForPilotWithoutCredential(\FunctionalTester $I)
     {
         // Pilot 8 (no credentials) tries B738 (aircraft 2) on a charter to LEMD — must be 403
         $I->amLoggedInAs(8);
@@ -180,9 +189,9 @@ class SelectAircraftCredentialFilterCest
         $I->seeResponseCodeIs(403);
     }
 
-    public function prepareFplCharterAllowedForPilotWithCredential(\FunctionalTester $I)
+    public function prepareFplCharterAllowedForPilotWithPpl(\FunctionalTester $I)
     {
-        // Pilot 1 (PPL → C172 requires PPL) can fly aircraft 3 (C172) on a charter to LEMD
+        // Pilot 1 (PPL → C172 requires PPL) can fly C172 (aircraft 3) on a charter to LEMD
         $I->amLoggedInAs(1);
         $I->amOnRoute('submitted-flight-plan/prepare-fpl-charter', ['arrival' => 'lemd', 'aircraft_id' => '3']);
 
@@ -191,37 +200,35 @@ class SelectAircraftCredentialFilterCest
     }
 
     // -------------------------------------------------------------------------
-    // Credential validity edge cases (these tests run last and mutate fixture data)
+    // Credential validity edge cases (these tests mutate fixture data and run last)
     // -------------------------------------------------------------------------
 
     public function pilotWithExpiredCredentialCanStillSeeAircraft(\FunctionalTester $I)
     {
         // Pilot 1 has PPL active with no expiry (id=1). Expire it: an expired but non-revoked
-        // credential (status=ACTIVE, superseded_at=NULL) still allows flying so the pilot can
-        // complete a renewal flight. Only revoking a credential removes access.
+        // credential still allows flying so the pilot can complete a renewal flight.
+        // Only revoking (deleting) a credential removes access.
         \app\models\PilotCredential::updateAll(['expiry_date' => '2020-01-01'], ['id' => 1]);
 
         $I->amLoggedInAs(1);
         $I->amOnRoute('submitted-flight-plan/select-aircraft-route', ['route_id' => '1']);
 
         $I->seeResponseCodeIs(200);
-        $I->see('EC-BBB');
-        $I->see('Boeing Name Cargo');
         $I->see('EC-UUU');
+        $I->see('C172 Std');
     }
 
     public function pilotWithStudentCredentialCanStillSeeAircraft(\FunctionalTester $I)
     {
         // Demote pilot 1's PPL (id=1) to student — student credentials still grant aircraft access
-        // so the pilot can complete training flights. Access is only removed by revoking (deleting) the credential.
+        // so the pilot can complete training flights. Access is removed only by revoking.
         \app\models\PilotCredential::updateAll(['status' => \app\models\PilotCredential::STATUS_STUDENT, 'expiry_date' => null], ['id' => 1]);
 
         $I->amLoggedInAs(1);
         $I->amOnRoute('submitted-flight-plan/select-aircraft-route', ['route_id' => '1']);
 
         $I->seeResponseCodeIs(200);
-        $I->see('EC-BBB');
-        $I->see('Boeing Name Cargo');
         $I->see('EC-UUU');
+        $I->see('C172 Std');
     }
 }

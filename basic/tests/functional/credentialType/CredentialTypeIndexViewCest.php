@@ -79,7 +79,6 @@ class CredentialTypeIndexViewCest
         $I->see('Allows commercial operations as PIC.');
 
         $I->see('Update', 'a');
-        $I->see('Delete', 'a');
 
         $I->see('Prerequisites');
         $I->see('Unlocked Credentials');

@@ -80,5 +80,13 @@ return [
         'name' => 'Boeing Cargo JJJ',
         'location' => 'LEAL',
         'hours_flown' => 139.4
-    ]
+    ],
+    [
+        'id' => 11,
+        'aircraft_configuration_id' => 5,
+        'registration' => 'EC-E58',
+        'name' => 'Baron 58 Std',
+        'location' => 'LEBL',
+        'hours_flown' => 45.2,
+    ],
 ];

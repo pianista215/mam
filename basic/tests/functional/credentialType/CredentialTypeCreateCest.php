@@ -62,7 +62,7 @@ class CredentialTypeCreateCest
         $I->see('Name cannot be blank.');
 
         $count = CredentialType::find()->count();
-        $I->assertEquals(4, $count);
+        $I->assertEquals(6, $count);
     }
 
     public function submitDuplicateCode(\FunctionalTester $I)
@@ -78,7 +78,7 @@ class CredentialTypeCreateCest
         $I->see('Code "PPL" has already been taken.');
 
         $count = CredentialType::find()->count();
-        $I->assertEquals(4, $count);
+        $I->assertEquals(6, $count);
     }
 
     public function submitValidMinimal(\FunctionalTester $I)
@@ -105,7 +105,7 @@ class CredentialTypeCreateCest
         $I->assertEmpty($model->description);
 
         $count = CredentialType::find()->count();
-        $I->assertEquals(5, $count);
+        $I->assertEquals(7, $count);
     }
 
     public function submitWithDescription(\FunctionalTester $I)

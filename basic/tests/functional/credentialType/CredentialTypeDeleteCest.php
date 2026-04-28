@@ -22,18 +22,18 @@ class CredentialTypeDeleteCest
 
     public function deleteButtonVisibleForAdmin(\FunctionalTester $I)
     {
-        // id=4: MNPS — no dependents, no pilots → canDelete() = true → button shown
+        // id=6: NVG — no dependents, no pilots → canDelete() = true → button shown
         $I->amLoggedInAs(2);
-        $I->amOnRoute('credential-type/view', ['id' => '4']);
+        $I->amOnRoute('credential-type/view', ['id' => '6']);
 
         $I->see('Delete', 'a');
     }
 
     public function deleteButtonNotVisibleForUser(\FunctionalTester $I)
     {
-        // id=4: deletable type, but user has no CREDENTIAL_CRUD → button hidden
+        // id=6: deletable type, but user has no CREDENTIAL_CRUD → button hidden
         $I->amLoggedInAs(1);
-        $I->amOnRoute('credential-type/view', ['id' => '4']);
+        $I->amOnRoute('credential-type/view', ['id' => '6']);
 
         $I->dontSee('Delete', 'a');
     }
@@ -59,60 +59,60 @@ class CredentialTypeDeleteCest
     public function deleteViaGetForbiddenAsAdmin(\FunctionalTester $I)
     {
         $I->amLoggedInAs(2);
-        $I->amOnRoute('credential-type/delete', ['id' => '4']);
+        $I->amOnRoute('credential-type/delete', ['id' => '6']);
         $I->seeResponseCodeIs(405);
 
         $count = CredentialType::find()->count();
-        $I->assertEquals(4, $count);
+        $I->assertEquals(6, $count);
     }
 
     public function deleteViaGetForbiddenAsUser(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
-        $I->amOnRoute('credential-type/delete', ['id' => '4']);
+        $I->amOnRoute('credential-type/delete', ['id' => '6']);
         $I->seeResponseCodeIs(405);
 
         $count = CredentialType::find()->count();
-        $I->assertEquals(4, $count);
+        $I->assertEquals(6, $count);
     }
 
     public function deleteViaGetRedirectsGuest(\FunctionalTester $I)
     {
-        $I->amOnRoute('credential-type/delete', ['id' => '4']);
+        $I->amOnRoute('credential-type/delete', ['id' => '6']);
         $I->seeCurrentUrlMatches('~login~');
         $I->see('Login');
     }
 
     public function adminCanDeleteViaPost(\FunctionalTester $I)
     {
-        // id=4: MNPS — canDelete() = true
+        // id=6: NVG — canDelete() = true (no pilots, no dependents)
         $I->amLoggedInAs(2);
-        $I->sendAjaxPostRequest('/credential-type/delete?id=4');
+        $I->sendAjaxPostRequest('/credential-type/delete?id=6');
 
         $I->seeResponseCodeIsRedirection();
 
-        $count = CredentialType::find()->where(['id' => 4])->count();
+        $count = CredentialType::find()->where(['id' => 6])->count();
         $I->assertEquals(0, $count);
     }
 
     public function userCannotDeleteViaPost(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
-        $I->sendAjaxPostRequest('/credential-type/delete?id=4');
+        $I->sendAjaxPostRequest('/credential-type/delete?id=6');
 
         $I->seeResponseCodeIs(403);
 
-        $count = CredentialType::find()->where(['id' => 4])->count();
+        $count = CredentialType::find()->where(['id' => 6])->count();
         $I->assertEquals(1, $count);
     }
 
     public function guestCannotDeleteViaPost(\FunctionalTester $I)
     {
-        $I->sendAjaxPostRequest('/credential-type/delete?id=4');
+        $I->sendAjaxPostRequest('/credential-type/delete?id=6');
 
         $I->seeResponseCodeIsRedirection();
 
-        $count = CredentialType::find()->where(['id' => 4])->count();
+        $count = CredentialType::find()->where(['id' => 6])->count();
         $I->assertEquals(1, $count);
     }
 
