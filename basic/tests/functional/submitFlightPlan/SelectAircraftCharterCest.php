@@ -4,6 +4,7 @@ namespace tests\functional\submitFlightPlan;
 
 use tests\fixtures\AuthAssignmentFixture;
 use tests\fixtures\CredentialTypeAircraftTypeFixture;
+use tests\fixtures\CredentialTypeAirportAircraftFixture;
 use tests\fixtures\CredentialTypeFixture;
 use tests\fixtures\PilotCredentialFixture;
 use tests\fixtures\SubmittedFlightPlanFixture;
@@ -13,11 +14,12 @@ class SelectAircraftCharterCest
 {
     public function _fixtures(){
         return [
-            'authAssignment'             => AuthAssignmentFixture::class,
-            'submittedFlightPlan'         => SubmittedFlightPlanFixture::class,
-            'credentialType'             => CredentialTypeFixture::class,
-            'credentialTypeAircraftType' => CredentialTypeAircraftTypeFixture::class,
-            'pilotCredential'            => PilotCredentialFixture::class,
+            'authAssignment'              => AuthAssignmentFixture::class,
+            'submittedFlightPlan'          => SubmittedFlightPlanFixture::class,
+            'credentialType'              => CredentialTypeFixture::class,
+            'credentialTypeAircraftType'  => CredentialTypeAircraftTypeFixture::class,
+            'credentialTypeAirportAircraft' => CredentialTypeAirportAircraftFixture::class,
+            'pilotCredential'             => PilotCredentialFixture::class,
         ];
     }
 
@@ -102,6 +104,65 @@ class SelectAircraftCharterCest
         // Already reserved plane
         $I->dontSee('EC-DDD');
         $I->dontSee('Boeing Name 2 Cargo');
+    }
+
+    // -------------------------------------------------------------------------
+    // Credential type filter (LEBL→LEMD)
+    // -------------------------------------------------------------------------
+
+    public function pilotWithPplSeesOnlyC172(\FunctionalTester $I)
+    {
+        // Pilot 4 has only student PPL → only C172 (EC-UUU) visible; B738 requires B738 Rating
+        $I->amLoggedInAs(4);
+        $I->amOnRoute('submitted-flight-plan/select-aircraft-charter', ['arrival' => 'LEMD']);
+
+        $I->seeResponseCodeIs(200);
+        $I->see('EC-UUU');
+        $I->see('C172 Std');
+        $I->dontSee('EC-BBB');
+        $I->dontSee('Boeing Name Cargo');
+    }
+
+    public function pilotWithoutCredentialSeesNoAircraft(\FunctionalTester $I)
+    {
+        // Pilot 8 has NO credentials → all aircraft hidden
+        $I->amLoggedInAs(8);
+        $I->amOnRoute('submitted-flight-plan/select-aircraft-charter', ['arrival' => 'LEMD']);
+
+        $I->seeResponseCodeIs(200);
+        $I->dontSee('EC-BBB');
+        $I->dontSee('Boeing Name Cargo');
+        $I->dontSee('EC-UUU');
+        $I->dontSee('C172 Std');
+    }
+
+    // -------------------------------------------------------------------------
+    // Airport restriction filter (LEBL→GCLP)
+    // -------------------------------------------------------------------------
+
+    public function b738BlockedAtGclpForPilotLackingMnps(\FunctionalTester $I)
+    {
+        // Pilot 7 has PPL + B738 Rating but no MNPS → B738 hidden for GCLP (MNPS required)
+        // C172 (range 696 nm) is also out of range → nothing shown
+        $I->amLoggedInAs(7);
+        $I->amOnRoute('submitted-flight-plan/select-aircraft-charter', ['arrival' => 'GCLP']);
+
+        $I->seeResponseCodeIs(200);
+        $I->dontSee('EC-BBB');
+        $I->dontSee('Boeing Name Cargo');
+        $I->dontSee('EC-UUU');
+        $I->dontSee('C172 Std');
+    }
+
+    public function b738ShownAtGclpForPilotWithMnps(\FunctionalTester $I)
+    {
+        // Pilot 6 has full set (PPL + CPL + IR + B738 Rating + MNPS) → B738 visible for GCLP
+        $I->amLoggedInAs(6);
+        $I->amOnRoute('submitted-flight-plan/select-aircraft-charter', ['arrival' => 'GCLP']);
+
+        $I->seeResponseCodeIs(200);
+        $I->see('EC-BBB');
+        $I->see('Boeing Name Cargo');
     }
 
 }
