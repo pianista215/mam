@@ -113,6 +113,7 @@ class SelectAircraftTourCest
     public function pilotWithPplSeesOnlyC172(\FunctionalTester $I)
     {
         // Pilot 4 has only student PPL → only C172 (EC-UUU) visible; B738 requires B738 Rating
+        \app\models\SubmittedFlightPlan::deleteAll(['pilot_id' => 4]);
         $I->amLoggedInAs(4);
         $I->amOnRoute('submitted-flight-plan/select-aircraft-tour', ['tour_stage_id' => '2']);
 
@@ -126,6 +127,7 @@ class SelectAircraftTourCest
     public function pilotWithoutCredentialSeesNoAircraft(\FunctionalTester $I)
     {
         // Pilot 8 has NO credentials → all aircraft hidden
+        \app\models\SubmittedFlightPlan::deleteAll(['pilot_id' => 8]);
         $I->amLoggedInAs(8);
         $I->amOnRoute('submitted-flight-plan/select-aircraft-tour', ['tour_stage_id' => '2']);
 
@@ -144,6 +146,7 @@ class SelectAircraftTourCest
     {
         // Pilot 7 has PPL + B738 Rating but no MNPS → B738 hidden for GCLP (MNPS required)
         // C172 (range 696 nm) is also out of range → nothing shown
+        \app\models\SubmittedFlightPlan::deleteAll(['pilot_id' => 7]);
         $I->amLoggedInAs(7);
         $I->amOnRoute('submitted-flight-plan/select-aircraft-tour', ['tour_stage_id' => '3']);
 
@@ -157,6 +160,7 @@ class SelectAircraftTourCest
     public function b738ShownAtGclpForPilotWithMnps(\FunctionalTester $I)
     {
         // Pilot 6 has full set (PPL + CPL + IR + B738 Rating + MNPS) → B738 visible for GCLP
+        \app\models\SubmittedFlightPlan::deleteAll(['pilot_id' => 6]);
         $I->amLoggedInAs(6);
         $I->amOnRoute('submitted-flight-plan/select-aircraft-tour', ['tour_stage_id' => '3']);
 

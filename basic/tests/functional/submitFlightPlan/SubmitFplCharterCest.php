@@ -460,6 +460,7 @@ class SubmitFplCharterCest
     public function prepareFplCharterBlockedForPilotWithoutCredential(\FunctionalTester $I)
     {
         // Pilot 8 (no credentials) bypasses and tries B738 (aircraft 2) to LEMD → 403
+        \app\models\SubmittedFlightPlan::deleteAll(['pilot_id' => 8]);
         $I->amLoggedInAs(8);
         $I->amOnRoute('submitted-flight-plan/prepare-fpl-charter', ['arrival' => 'lemd', 'aircraft_id' => '2']);
 
@@ -470,6 +471,7 @@ class SubmitFplCharterCest
     public function prepareFplCharterBlockedAtGclpWithoutMnps(\FunctionalTester $I)
     {
         // Pilot 7 (B738 Rating, no MNPS) bypasses and tries B738 to GCLP → 403
+        \app\models\SubmittedFlightPlan::deleteAll(['pilot_id' => 7]);
         $I->amLoggedInAs(7);
         $I->amOnRoute('submitted-flight-plan/prepare-fpl-charter', ['arrival' => 'gclp', 'aircraft_id' => '2']);
 
