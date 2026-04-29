@@ -55,8 +55,9 @@ class PilotCredentialRevokeCest
 
         $I->assertNull(PilotCredential::findOne(3));
 
+        // Pilot 1 retains PPL (id=1), B738 Rating (id=14), and MNPS (id=15); IR (id=3) was revoked
         $count = PilotCredential::find()->where(['pilot_id' => 1])->count();
-        $I->assertEquals(1, $count);
+        $I->assertEquals(3, $count);
     }
 
     public function revokeBlockedLicense(\FunctionalTester $I)

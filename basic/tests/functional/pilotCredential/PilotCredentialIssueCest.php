@@ -53,7 +53,7 @@ class PilotCredentialIssueCest
         $I->seeResponseCodeIs(200);
 
         $count = PilotCredential::find()->count();
-        $I->assertEquals(13, $count);
+        $I->assertEquals(15, $count);
     }
 
     public function submitValidActiveLicense(\FunctionalTester $I)
@@ -162,6 +162,6 @@ class PilotCredentialIssueCest
         $I->seeResponseCodeIs(200);
 
         $count = PilotCredential::find()->count();
-        $I->assertEquals(13, $count);
+        $I->assertEquals(15, $count);
     }
 }

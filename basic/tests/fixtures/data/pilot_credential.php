@@ -133,4 +133,24 @@ return [
         'expiry_date'        => null,
         'issued_by'          => 2,
     ],
+    [
+        // John Doe, B738 Type Rating, Active → allows legacy FPL tests with EC-BBB (B738)
+        'id'                 => 14,
+        'pilot_id'           => 1,
+        'credential_type_id' => 5,
+        'status'             => PilotCredential::STATUS_ACTIVE,
+        'issued_date'        => '2023-06-01',
+        'expiry_date'        => null,
+        'issued_by'          => 2,
+    ],
+    [
+        // John Doe, MNPS, Active → allows B738 at GCLP (required by airport restriction fixture)
+        'id'                 => 15,
+        'pilot_id'           => 1,
+        'credential_type_id' => 4,
+        'status'             => PilotCredential::STATUS_ACTIVE,
+        'issued_date'        => '2023-06-01',
+        'expiry_date'        => null,
+        'issued_by'          => 2,
+    ],
 ];

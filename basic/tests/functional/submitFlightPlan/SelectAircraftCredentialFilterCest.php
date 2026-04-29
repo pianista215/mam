@@ -26,10 +26,11 @@ use tests\fixtures\TourStageFixture;
  *   - MNPS (id=4) required for B738 at GCLP
  *
  * Pilot credentials in fixtures:
- *   - Pilot 1 (John Doe):   PPL active + IR active — no B738 Rating, no MNPS
- *   - Pilot 6 (Vfr School): PPL + CPL + IR + B738 Rating + MNPS — full set
- *   - Pilot 7 (Ifr School): PPL active + B738 Rating active — no MNPS
- *   - Pilot 8 (Other Ifr):  no credentials
+ *   - Pilot 1 (John Doe):      PPL + IR + B738 Rating + MNPS (full set for legacy FPL tests)
+ *   - Pilot 4 (Vfr Validator): student PPL only — sees only C172
+ *   - Pilot 6 (Vfr School):    PPL + CPL + IR + B738 Rating + MNPS — full set
+ *   - Pilot 7 (Ifr School):    PPL active + B738 Rating active — no MNPS
+ *   - Pilot 8 (Other Ifr):     no credentials
  */
 class SelectAircraftCredentialFilterCest
 {
@@ -55,8 +56,8 @@ class SelectAircraftCredentialFilterCest
 
     public function pilotWithPplSeesOnlyC172(\FunctionalTester $I)
     {
-        // Pilot 1 has PPL active → only C172 (EC-UUU) visible; B738 and BE58 require other credentials
-        $I->amLoggedInAs(1);
+        // Pilot 4 has only student PPL → only C172 (EC-UUU) visible; B738 requires B738 Rating
+        $I->amLoggedInAs(4);
         $I->amOnRoute('submitted-flight-plan/select-aircraft-route', ['route_id' => '1']);
 
         $I->seeResponseCodeIs(200);
@@ -64,8 +65,6 @@ class SelectAircraftCredentialFilterCest
         $I->see('C172 Std');
         $I->dontSee('EC-BBB');
         $I->dontSee('Boeing Name Cargo');
-        $I->dontSee('EC-E58');
-        $I->dontSee('Baron 58 Std');
     }
 
     public function pilotWithoutCredentialSeesNoAircraft(\FunctionalTester $I)

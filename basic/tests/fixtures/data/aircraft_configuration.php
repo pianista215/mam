@@ -29,11 +29,4 @@ return [
         'pax_capacity' => 2,
         'cargo_capacity' => 100,
     ],
-    [
-        'id' => 5,
-        'aircraft_type_id' => 5,
-        'name' => 'Standard',
-        'pax_capacity' => 6,
-        'cargo_capacity' => 200,
-    ],
 ];

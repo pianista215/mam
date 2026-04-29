@@ -3,6 +3,9 @@
 namespace tests\functional\submitFlightPlan;
 
 use tests\fixtures\AuthAssignmentFixture;
+use tests\fixtures\CredentialTypeAircraftTypeFixture;
+use tests\fixtures\CredentialTypeFixture;
+use tests\fixtures\PilotCredentialFixture;
 use tests\fixtures\SubmittedFlightPlanFixture;
 use Yii;
 
@@ -10,8 +13,11 @@ class SubmitFplRouteCest
 {
     public function _fixtures(){
         return [
-            'authAssignment' => AuthAssignmentFixture::class,
-            'submittedFlightPlan' => SubmittedFlightPlanFixture::class,
+            'authAssignment'             => AuthAssignmentFixture::class,
+            'submittedFlightPlan'         => SubmittedFlightPlanFixture::class,
+            'credentialType'             => CredentialTypeFixture::class,
+            'credentialTypeAircraftType' => CredentialTypeAircraftTypeFixture::class,
+            'pilotCredential'            => PilotCredentialFixture::class,
         ];
     }
 
