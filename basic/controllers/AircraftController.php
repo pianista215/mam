@@ -63,7 +63,7 @@ class AircraftController extends Controller
         $dataProvider = $searchModel->search($this->request->queryParams);
 
         $dataProvider->sort->defaultOrder = [
-            'registration' => SORT_ASC,
+            'aircraftConfiguration' => SORT_ASC,
         ];
 
         return $this->render('index', [

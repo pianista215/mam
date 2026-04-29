@@ -33,7 +33,7 @@ class AircraftSearch extends Aircraft
     }
 
 
-    public function searchAvailableAircraftsInLocationWithRange($location, $distance)
+    public function searchAvailableAircraftsInLocationWithRange($location, $distance, int $pilotId, string $arrivalIcao)
     {
         $subquery = SubmittedFlightPlan::find()->select('aircraft_id');
 
@@ -52,10 +52,52 @@ class AircraftSearch extends Aircraft
             return $dataProvider;
         }
 
-        $query->andFilterWhere(['location' =>$this->location]);
-        $query->andFilterWhere(['>=','aircraft_type.max_nm_range', $distance]);
+        $query->andFilterWhere(['location' => $this->location]);
+        $query->andFilterWhere(['>=', 'aircraft_type.max_nm_range', $distance]);
+
+        $this->applyCredentialFilter($query, $pilotId, $arrivalIcao);
 
         return $dataProvider;
+    }
+
+    /**
+     * Restricts the aircraft query to types the pilot is allowed to fly.
+     * Any credential (active or student) grants access — access is removed only by revoking
+     * (deleting the row). Aircraft types with no mapping in credential_type_aircraft_type
+     * are hidden from everyone.
+     * Airport restrictions add a second layer: if credential_type_airport_aircraft
+     * has entries for the arrival airport, only pilots with a matching credential can fly
+     * those aircraft types there (types without entries are unrestricted).
+     */
+    private function applyCredentialFilter(\yii\db\ActiveQuery $query, int $pilotId, string $arrivalIcao): void
+    {
+        $validCredTypeIds = PilotCredential::find()
+            ->select('credential_type_id')
+            ->where(['pilot_id' => $pilotId])
+            ->column();
+
+        $allowedTypeIds = empty($validCredTypeIds) ? [] :
+            CredentialTypeAircraftType::find()
+                ->select('aircraft_type_id')->distinct()
+                ->where(['credential_type_id' => $validCredTypeIds])
+                ->column();
+        $query->andWhere(['in', 'aircraft_type.id', $allowedTypeIds]);
+
+        $airportTypeIds = CredentialTypeAirportAircraft::find()
+            ->select('aircraft_type_id')->distinct()
+            ->where(['airport_icao' => strtoupper($arrivalIcao)])
+            ->column();
+        if (!empty($airportTypeIds)) {
+            $allowedAirportTypeIds = empty($validCredTypeIds) ? [] :
+                CredentialTypeAirportAircraft::find()
+                    ->select('aircraft_type_id')->distinct()
+                    ->where(['airport_icao' => strtoupper($arrivalIcao), 'credential_type_id' => $validCredTypeIds])
+                    ->column();
+            $query->andWhere(['or',
+                ['not in', 'aircraft_type.id', $airportTypeIds],
+                ['in', 'aircraft_type.id', $allowedAirportTypeIds],
+            ]);
+        }
     }
 
     /**
@@ -67,12 +109,23 @@ class AircraftSearch extends Aircraft
      */
     public function search($params)
     {
-        $query = Aircraft::find();
-
-        // add conditions that should always apply here
+        $query = Aircraft::find()->joinWith(['aircraftConfiguration', 'aircraftConfiguration.aircraftType']);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'  => [
+                'attributes' => [
+                    'registration',
+                    'name',
+                    'location',
+                    'hours_flown',
+                    'aircraftConfiguration' => [
+                        'asc'  => ['aircraft_type.name' => SORT_ASC,  'aircraft_configuration.name' => SORT_ASC],
+                        'desc' => ['aircraft_type.name' => SORT_DESC, 'aircraft_configuration.name' => SORT_DESC],
+                        'label' => 'Aircraft Configuration',
+                    ],
+                ],
+            ],
         ]);
 
         $this->load($params);

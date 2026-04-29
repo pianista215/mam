@@ -11,6 +11,11 @@ use yii\grid\GridView;
 /** @var yii\web\View $this */
 /** @var app\models\Pilot $model */
 /** @var yii\data\ActiveDataProvider $flightsProvider */
+/** @var app\models\PilotCredential|null $highestLicense */
+/** @var app\models\PilotCredential[] $lowerLicenses */
+/** @var app\models\PilotCredential[] $earnedOther */
+/** @var app\models\PilotCredential[] $studentCredentials */
+/** @var app\models\AircraftType[] $authorizedAircraft */
 
 $this->title = $model->fullName;
 $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Pilots'), 'url' => ['index']];
@@ -133,6 +138,146 @@ $this->params['breadcrumbs'][] = $this->title;
                 </div>
 
             </div>
+        </div>
+    </div>
+
+    <?php
+    $hasAnyCredential = $highestLicense !== null || !empty($earnedOther) || !empty($studentCredentials);
+
+    $makeBadge = function($pc) {
+        if ($pc->isStudent()) {
+            return '<span class="badge bg-info">' . Yii::t('app', 'Student') . '</span>';
+        } elseif ($pc->expiry_date !== null && $pc->expiry_date < date('Y-m-d')) {
+            return '<span class="badge bg-danger">' . Yii::t('app', 'Expired') . '</span>';
+        }
+        return '<span class="badge bg-success">' . Yii::t('app', 'Active') . '</span>';
+    };
+    ?>
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="card-title mb-0"><?= Yii::t('app', 'Credentials') ?></h5>
+                <?php if (Yii::$app->user->can(Permissions::ISSUE_CREDENTIAL)): ?>
+                    <?= Html::a(
+                        '+ ' . Yii::t('app', 'Issue Credential'),
+                        ['/pilot-credential/issue', 'pilotId' => $model->id],
+                        ['class' => 'btn btn-sm btn-outline-primary']
+                    ) ?>
+                <?php endif; ?>
+            </div>
+
+            <?php if (!$hasAnyCredential): ?>
+                <p class="text-muted mb-0"><?= Yii::t('app', 'No credentials issued yet.') ?></p>
+            <?php else: ?>
+
+            <?php if ($highestLicense !== null || !empty($earnedOther)): ?>
+            <table class="table table-sm table-bordered mb-3">
+                <thead class="table-light">
+                    <tr>
+                        <th><?= Yii::t('app', 'Credential Type') ?></th>
+                        <th><?= Yii::t('app', 'Status') ?></th>
+                        <th><?= Yii::t('app', 'Issued Date') ?></th>
+                        <th><?= Yii::t('app', 'Expiry Date') ?></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if ($highestLicense !== null): ?>
+                    <tr>
+                        <td>
+                            <?= Html::encode($highestLicense->credentialType->name) ?>
+                            <span class="badge bg-secondary ms-1"><?= Html::encode($highestLicense->credentialType->getTypeLabel()) ?></span>
+                            <?php if (!empty($lowerLicenses)): ?>
+                                <a data-bs-toggle="collapse" href="#lowerLicenses" role="button"
+                                   class="ms-1 text-muted small text-decoration-none">
+                                    &#9662; <?= count($lowerLicenses) ?> <?= Yii::t('app', 'previous') ?>
+                                </a>
+                            <?php endif; ?>
+                        </td>
+                        <td><?= $makeBadge($highestLicense) ?></td>
+                        <td><?= Html::encode($highestLicense->issued_date) ?></td>
+                        <td><?= $highestLicense->expiry_date ? Html::encode($highestLicense->expiry_date) : '<span class="text-muted">—</span>' ?></td>
+                        <td><?= Html::a(Yii::t('app', 'View'), ['/pilot-credential/view', 'id' => $highestLicense->id], ['class' => 'btn btn-outline-secondary btn-sm']) ?></td>
+                    </tr>
+                    <?php if (!empty($lowerLicenses)): ?>
+                    <tr class="collapse" id="lowerLicenses">
+                        <td colspan="5" class="p-0 border-0">
+                            <table class="table table-sm mb-0 bg-light">
+                                <tbody>
+                                    <?php foreach ($lowerLicenses as $h): ?>
+                                    <tr>
+                                        <td>
+                                            <?= Html::encode($h->credentialType->name) ?>
+                                            <span class="badge bg-secondary ms-1"><?= Html::encode($h->credentialType->getTypeLabel()) ?></span>
+                                        </td>
+                                        <td><?= $makeBadge($h) ?></td>
+                                        <td><?= Html::encode($h->issued_date) ?></td>
+                                        <td><?= $h->expiry_date ? Html::encode($h->expiry_date) : '<span class="text-muted">—</span>' ?></td>
+                                        <td><?= Html::a(Yii::t('app', 'View'), ['/pilot-credential/view', 'id' => $h->id], ['class' => 'btn btn-outline-secondary btn-sm']) ?></td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                    <?php endif; ?>
+                    <?php endif; ?>
+
+                    <?php foreach ($earnedOther as $pc): ?>
+                    <tr>
+                        <td>
+                            <?= Html::encode($pc->credentialType->name) ?>
+                            <span class="badge bg-secondary ms-1"><?= Html::encode($pc->credentialType->getTypeLabel()) ?></span>
+                        </td>
+                        <td><?= $makeBadge($pc) ?></td>
+                        <td><?= Html::encode($pc->issued_date) ?></td>
+                        <td><?= $pc->expiry_date ? Html::encode($pc->expiry_date) : '<span class="text-muted">—</span>' ?></td>
+                        <td><?= Html::a(Yii::t('app', 'View'), ['/pilot-credential/view', 'id' => $pc->id], ['class' => 'btn btn-outline-secondary btn-sm']) ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+            <?php endif; ?>
+
+            <?php if (!empty($studentCredentials)): ?>
+            <h6 class="text-muted mt-3 mb-2"><?= Yii::t('app', 'In Training') ?></h6>
+            <table class="table table-sm table-bordered mb-3">
+                <thead class="table-light">
+                    <tr>
+                        <th><?= Yii::t('app', 'Credential Type') ?></th>
+                        <th><?= Yii::t('app', 'Status') ?></th>
+                        <th><?= Yii::t('app', 'Training Start Date') ?></th>
+                        <th><?= Yii::t('app', 'Training End Date') ?></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($studentCredentials as $pc): ?>
+                    <tr>
+                        <td>
+                            <?= Html::encode($pc->credentialType->name) ?>
+                            <span class="badge bg-secondary ms-1"><?= Html::encode($pc->credentialType->getTypeLabel()) ?></span>
+                        </td>
+                        <td><?= $makeBadge($pc) ?></td>
+                        <td><?= Html::encode($pc->issued_date) ?></td>
+                        <td><?= $pc->expiry_date ? Html::encode($pc->expiry_date) : '<span class="text-muted">—</span>' ?></td>
+                        <td><?= Html::a(Yii::t('app', 'View'), ['/pilot-credential/view', 'id' => $pc->id], ['class' => 'btn btn-outline-secondary btn-sm']) ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+            <?php endif; ?>
+
+            <?php endif; ?>
+
+            <?php if (!empty($authorizedAircraft)): ?>
+            <div>
+                <span class="text-muted small fw-semibold"><?= Yii::t('app', 'Authorized Aircraft Types') ?>:</span>
+                <?php foreach ($authorizedAircraft as $at): ?>
+                    <span class="badge bg-light text-dark border ms-1"><?= Html::encode($at->name) ?></span>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
         </div>
     </div>
 

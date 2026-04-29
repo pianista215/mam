@@ -37,6 +37,10 @@ final class Permissions
     public const IMAGE_CRUD = 'imageCrud';
     public const CHANGE_SITE_SETTINGS = 'changeSiteSettings';
 
+    // Credentials
+    public const CREDENTIAL_CRUD    = 'credentialCrud';
+    public const ISSUE_CREDENTIAL   = 'issueCredential';
+
     // Superadmin
     public const ASSIGN_ADMIN = 'assignAdmin';
 

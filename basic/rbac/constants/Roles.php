@@ -16,6 +16,9 @@ final class Roles
     public const TOUR_MANAGER = 'tourManager';
     public const AIRPORT_MANAGER = 'airportManager';
 
+    public const CREDENTIAL_MANAGER   = 'credentialManager';
+    public const CREDENTIAL_AUTHORITY = 'credentialAuthority';
+
     public const ADMIN = 'admin';
 
     private function __construct() {}

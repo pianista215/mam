@@ -4,5 +4,5 @@ return [
     'adminEmail' => 'admin@example.com',
     'senderEmail' => 'noreply@example.com',
     'senderName' => 'Example.com mailer',
-    'version' => '1.9.0',
+    'version' => '1.10.0',
 ];

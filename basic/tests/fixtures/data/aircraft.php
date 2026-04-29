@@ -80,5 +80,5 @@ return [
         'name' => 'Boeing Cargo JJJ',
         'location' => 'LEAL',
         'hours_flown' => 139.4
-    ]
+    ],
 ];

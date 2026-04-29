@@ -3,6 +3,10 @@
 namespace tests\functional\submitFlightPlan;
 
 use tests\fixtures\AuthAssignmentFixture;
+use tests\fixtures\CredentialTypeAircraftTypeFixture;
+use tests\fixtures\CredentialTypeAirportAircraftFixture;
+use tests\fixtures\CredentialTypeFixture;
+use tests\fixtures\PilotCredentialFixture;
 use tests\fixtures\SubmittedFlightPlanFixture;
 use Yii;
 
@@ -10,8 +14,12 @@ class SubmitFplRouteCest
 {
     public function _fixtures(){
         return [
-            'authAssignment' => AuthAssignmentFixture::class,
-            'submittedFlightPlan' => SubmittedFlightPlanFixture::class,
+            'authAssignment'              => AuthAssignmentFixture::class,
+            'submittedFlightPlan'          => SubmittedFlightPlanFixture::class,
+            'credentialType'              => CredentialTypeFixture::class,
+            'credentialTypeAircraftType'  => CredentialTypeAircraftTypeFixture::class,
+            'credentialTypeAirportAircraft' => CredentialTypeAirportAircraftFixture::class,
+            'pilotCredential'             => PilotCredentialFixture::class,
         ];
     }
 
@@ -429,6 +437,43 @@ class SubmitFplRouteCest
 
         $count = \app\models\SubmittedFlightPlan::find()->count();
         $I->assertEquals(6, $count);
+    }
+
+    // -------------------------------------------------------------------------
+    // Credential bypass prevention
+    // -------------------------------------------------------------------------
+
+    public function prepareFplRouteBlockedForPilotLackingB738Rating(\FunctionalTester $I)
+    {
+        // Pilot 8 (no credentials) bypasses the UI and tries B738 (aircraft 2) on route 1 → 403
+        \app\models\SubmittedFlightPlan::deleteAll(['pilot_id' => 8]);
+        $I->amLoggedInAs(8);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-route', ['route_id' => '1', 'aircraft_id' => '2']);
+
+        $I->seeResponseCodeIs(403);
+        $I->dontSee('Flight Plan Submission');
+    }
+
+    public function prepareFplRouteBlockedForPilotLackingPpl(\FunctionalTester $I)
+    {
+        // Pilot 8 (no credentials) bypasses the UI and tries C172 (aircraft 3) on route 1 → 403
+        \app\models\SubmittedFlightPlan::deleteAll(['pilot_id' => 8]);
+        $I->amLoggedInAs(8);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-route', ['route_id' => '1', 'aircraft_id' => '3']);
+
+        $I->seeResponseCodeIs(403);
+        $I->dontSee('Flight Plan Submission');
+    }
+
+    public function prepareFplRouteBlockedAtGclpWithoutMnps(\FunctionalTester $I)
+    {
+        // Pilot 7 (B738 Rating, no MNPS) bypasses the UI and tries B738 to GCLP (route 3) → 403
+        \app\models\SubmittedFlightPlan::deleteAll(['pilot_id' => 7]);
+        $I->amLoggedInAs(7);
+        $I->amOnRoute('submitted-flight-plan/prepare-fpl-route', ['route_id' => '3', 'aircraft_id' => '2']);
+
+        $I->seeResponseCodeIs(403);
+        $I->dontSee('Flight Plan Submission');
     }
 
     public function openPrepareFplRouteValidVFRToIFRPlan(\FunctionalTester $I)

@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.10.0] - 2026-04-27
+
+### Added
+- Credential type catalogue: create, view, update and delete credential types (licenses, ratings, certifications) with a prerequisite DAG and aircraft-type/airport-restriction mappings
+- Pilot credentials: issue, activate (student → active), renew, and revoke credentials per pilot, with full access-control enforcement (ISSUE_CREDENTIAL permission)
+- Credential cascade on renew: renewing a license auto-renews all active descendant rating credentials to the same expiry date
+- Credential cascade on revoke: revoking a license deletes all descendant credentials the pilot holds; revoking a license restores the revoked credential's expiry date to ancestor licenses
+- Ancestor expiry clearing: issuing or activating a higher-level license sets the expiry date of all lower ancestor licenses to null, so only the highest license carries an active expiry
+- Student-only issue enforcement: if a prerequisite is held only as Student, the new credential can only be issued as Student; the form disables the Active option dynamically and the server validates the rule
+- Renew blocked by higher license: a license can only be renewed if the pilot holds no higher (descendant) license; the Renew button is hidden and the endpoint returns 403 otherwise
+- Credential status badges (Active, Expired, Student) in pilot view and credential-type view
+- "Does not expire" checkbox in the issue/renew/activate forms with correct default state
+- RBAC roles CREDENTIAL_MANAGER and CREDENTIAL_AUTHORITY with corresponding permissions
+- FPL aircraft selection filtered by pilot credentials: aircraft types requiring credentials are hidden from the select-aircraft step; aircraft restricted to specific airports by certification are also hidden when the pilot lacks the required credential
+- Credential bypass prevention: all three FPL preparation endpoints (route, tour, charter) validate server-side that the pilot holds the required credentials for the chosen aircraft type and destination airport, returning 403 if not
+
 ## [1.9.0] - 2026-04-06
 
 ### Added
