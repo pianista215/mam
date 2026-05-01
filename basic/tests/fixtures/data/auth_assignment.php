@@ -61,6 +61,11 @@ return [
         'created_at' => time(),
     ],
     [
+        'item_name' => Roles::AIRCRAFT_TYPE_RESOURCE_MANAGER,
+        'user_id' => '9',
+        'created_at' => time(),
+    ],
+    [
         'item_name' => Roles::PILOT,
         'user_id' => '10',
         'created_at' => time(),

@@ -15,6 +15,23 @@ namespace app\models;
  */
 class CredentialTypeAircraftType extends \yii\db\ActiveRecord
 {
+    public static function pilotCanFlyAircraftType(int $pilotId, int $aircraftTypeId): bool
+    {
+        $credTypeIds = self::find()
+            ->select('credential_type_id')
+            ->where(['aircraft_type_id' => $aircraftTypeId])
+            ->column();
+
+        if (empty($credTypeIds)) {
+            return false;
+        }
+
+        return PilotCredential::find()
+            ->where(['pilot_id' => $pilotId, 'credential_type_id' => $credTypeIds])
+            ->exists();
+    }
+
+
     /**
      * {@inheritdoc}
      */

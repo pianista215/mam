@@ -544,16 +544,7 @@ class SubmittedFlightPlanController extends Controller
 
     protected function checkPilotCanFlyAircraftType(int $pilotId, int $aircraftTypeId): bool
     {
-        $credTypeIds = CredentialTypeAircraftType::find()
-            ->select('credential_type_id')
-            ->where(['aircraft_type_id' => $aircraftTypeId])
-            ->column();
-        if (empty($credTypeIds)) {
-            return false;
-        }
-        return PilotCredential::find()
-            ->where(['pilot_id' => $pilotId, 'credential_type_id' => $credTypeIds])
-            ->exists();
+        return CredentialTypeAircraftType::pilotCanFlyAircraftType($pilotId, $aircraftTypeId);
     }
 
     protected function checkPilotCanFlyToAirport(int $pilotId, int $aircraftTypeId, string $airportIcao): bool

@@ -8,6 +8,8 @@ return [
     // Settings
     ['key' => 'chunks_storage_path', 'value' => '/tmp/mam_test_chunks'],
     ['key' => 'images_storage_path', 'value' => '/tmp/mam_test_images'],
+    ['key' => 'files_storage_path',  'value' => '/tmp/mam_test_files'],
+    ['key' => 'max_files_size_mb',   'value' => '10240'],
     ['key' => 'token_life_h', 'value' => '24'],
 
     // Global config
