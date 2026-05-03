@@ -55,6 +55,19 @@ class AircraftTypeResourceController extends Controller
             return $this->redirect(['aircraft-type/view', 'id' => $aircraftTypeId]);
         }
 
+        if ($uploadedFile->error !== UPLOAD_ERR_OK) {
+            if (in_array($uploadedFile->error, [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true)) {
+                Yii::$app->session->setFlash('error', Yii::t('app', 'The file exceeds the maximum upload size allowed by the server.'));
+            } else {
+                $this->logError('PHP upload error for aircraft type resource', [
+                    'code'          => $uploadedFile->error,
+                    'aircraftTypeId' => $aircraftTypeId,
+                ]);
+                Yii::$app->session->setFlash('error', Yii::t('app', 'Error saving uploaded file.'));
+            }
+            return $this->redirect(['aircraft-type/view', 'id' => $aircraftTypeId]);
+        }
+
         $ext = strtolower($uploadedFile->extension);
         if (!in_array($ext, AircraftTypeResource::ALLOWED_EXTENSIONS, true)) {
             $allowed = implode(', ', AircraftTypeResource::ALLOWED_EXTENSIONS);

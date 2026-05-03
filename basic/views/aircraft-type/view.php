@@ -98,7 +98,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php if ($canViewResources): ?>
     <div class="card shadow-sm mb-4 mt-4">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h4 class="mb-0"><?= Yii::t('app', 'Aircraft Type Resources') ?></h4>
+            <h4 class="mb-0"><?= Yii::t('app', 'Resources') ?></h4>
             <?php if ($isResourceManager): ?>
             <form action="<?= Url::to(['aircraft-type-resource/upload', 'aircraftTypeId' => $model->id]) ?>"
                   method="post" enctype="multipart/form-data" class="d-flex gap-2">

@@ -61,7 +61,7 @@ class AircraftTypeResourceCest
         $I->amLoggedInAs(9);
         $I->amOnRoute('aircraft-type/view', ['id' => 2]);
         $I->seeResponseCodeIs(200);
-        $I->see('Aircraft Type Resources');
+        $I->see('Resources');
         $I->see('B738_QRH.pdf');
         $I->seeElement('input[name="file"]');
     }
@@ -72,7 +72,7 @@ class AircraftTypeResourceCest
         $I->amLoggedInAs(6);
         $I->amOnRoute('aircraft-type/view', ['id' => 2]);
         $I->seeResponseCodeIs(200);
-        $I->see('Aircraft Type Resources');
+        $I->see('Resources');
         $I->see('B738_QRH.pdf');
         $I->dontSeeElement('input[name="file"]');
     }
@@ -83,7 +83,7 @@ class AircraftTypeResourceCest
         $I->amLoggedInAs(8);
         $I->amOnRoute('aircraft-type/view', ['id' => 2]);
         $I->seeResponseCodeIs(200);
-        $I->dontSee('Aircraft Type Resources');
+        $I->dontSee('Resources');
     }
 
     public function guestRedirectedToLoginOnViewPage(\FunctionalTester $I): void
