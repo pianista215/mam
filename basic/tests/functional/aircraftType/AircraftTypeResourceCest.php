@@ -126,14 +126,14 @@ class AircraftTypeResourceCest
     public function nonManagerCannotDeleteResource(\FunctionalTester $I): void
     {
         $I->amLoggedInAs(6);
-        $I->sendAjaxPostRequest('/aircraft-type-resource/delete', ['id' => 1]);
+        $I->sendAjaxPostRequest('/aircraft-type-resource/delete?id=1');
         $I->seeResponseCodeIs(403);
     }
 
     public function resourceManagerCanDeleteResource(\FunctionalTester $I): void
     {
         $I->amLoggedInAs(9);
-        $I->sendAjaxPostRequest('/aircraft-type-resource/delete', ['id' => 1]);
+        $I->sendAjaxPostRequest('/aircraft-type-resource/delete?id=1');
         // Should redirect (302) to aircraft-type/view after deletion
         $I->seeResponseCodeIs(302);
     }
@@ -143,7 +143,7 @@ class AircraftTypeResourceCest
     public function nonManagerCannotUploadResource(\FunctionalTester $I): void
     {
         $I->amLoggedInAs(6);
-        $I->sendAjaxPostRequest('/aircraft-type-resource/upload', ['aircraftTypeId' => 2]);
+        $I->sendAjaxPostRequest('/aircraft-type-resource/upload?aircraftTypeId=2');
         $I->seeResponseCodeIs(403);
     }
 }
