@@ -103,8 +103,8 @@ class SiteSettingsForm extends Model
             'statistics_email_list' => Yii::t('app', 'Statistics email'),
             'statistics_email_language' => Yii::t('app', 'Statistics email language'),
 
-            'aircraft_type_resources_storage_path' => Yii::t('app', 'Files storage path'),
-            'aircraft_type_resources_limit_mb'  => Yii::t('app', 'Max files size (MB)'),
+            'aircraft_type_resources_storage_path' => Yii::t('app', 'Aircraft type resources storage path'),
+            'aircraft_type_resources_limit_mb'     => Yii::t('app', 'Aircraft type resources limit (MB)'),
         ];
     }
 
