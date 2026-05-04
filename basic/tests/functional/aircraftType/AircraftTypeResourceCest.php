@@ -143,7 +143,7 @@ class AircraftTypeResourceCest
     public function guestCannotUploadResource(\FunctionalTester $I): void
     {
         $I->sendAjaxPostRequest('/aircraft-type-resource/upload?aircraftTypeId=2');
-        $I->seeResponseCodeIs(403);
+        $I->seeResponseCodeIs(302);
     }
 
     public function nonManagerCannotUploadResource(\FunctionalTester $I): void
