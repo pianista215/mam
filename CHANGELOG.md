@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.11.0] - 2026-05-01
+## [1.11.0] - 2026-05-04
 
 ### Added
 - Aircraft type resource management: upload, download and delete documentation/configuration files (PDF, images, compressed archives) per aircraft type
