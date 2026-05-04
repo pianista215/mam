@@ -26,10 +26,16 @@ class m260501_111317_create_aircraft_type_resource extends Migration
             'aircraft_type', 'id',
             'CASCADE', 'CASCADE'
         );
+
+        $this->insert('config', ['key' => \app\config\ConfigHelper::AIRCRAFT_TYPE_RESOURCES_STORAGE_PATH, 'value' => '/opt/mam/aircraftTypeResources']);
+        $this->insert('config', ['key' => \app\config\ConfigHelper::AIRCRAFT_TYPE_RESOURCES_LIMIT_MB,     'value' => '10240']);
     }
 
     public function safeDown()
     {
+        $this->delete('config', ['key' => \app\config\ConfigHelper::AIRCRAFT_TYPE_RESOURCES_STORAGE_PATH]);
+        $this->delete('config', ['key' => \app\config\ConfigHelper::AIRCRAFT_TYPE_RESOURCES_LIMIT_MB]);
+
         $this->dropTable('aircraft_type_resource');
     }
 }
