@@ -55,7 +55,7 @@ class AircraftTypeResourceTest extends BaseUnitTest
 
     public function testGetPathReturnsCorrectPath()
     {
-        Config::set('files_storage_path', '/tmp/mam-files-test');
+        Config::set('aircraft_type_resources_storage_path', '/tmp/mam-files-test');
 
         $type     = $this->createAircraftType();
         $resource = new AircraftTypeResource([
@@ -95,7 +95,7 @@ class AircraftTypeResourceTest extends BaseUnitTest
 
     public function testAfterDeleteRemovesFileFromDisk()
     {
-        Config::set('files_storage_path', '/tmp');
+        Config::set('aircraft_type_resources_storage_path', '/tmp');
 
         $type     = $this->createAircraftType();
         $resource = new AircraftTypeResource([

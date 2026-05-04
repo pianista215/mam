@@ -76,11 +76,11 @@ class AircraftTypeResourceController extends Controller
         }
 
         $uploadedMb = $uploadedFile->size / 1024 / 1024;
-        if (AircraftTypeResource::getTotalSizeMb() + $uploadedMb > CK::getMaxFilesSizeMb()) {
+        if (AircraftTypeResource::getTotalSizeMb() + $uploadedMb > CK::getAircraftTypeResourcesLimitMb()) {
             $this->logWarn('Aircraft type resource upload rejected: global size limit exceeded', [
                 'aircraftTypeId' => $aircraftTypeId,
                 'uploadedMb'     => $uploadedMb,
-                'limitMb'        => CK::getMaxFilesSizeMb(),
+                'limitMb'        => CK::getAircraftTypeResourcesLimitMb(),
                 'user'           => Yii::$app->user->identity->license,
             ]);
             Yii::$app->session->setFlash('error', Yii::t('app', 'Global file storage limit exceeded. Upload rejected.'));
@@ -88,7 +88,7 @@ class AircraftTypeResourceController extends Controller
         }
 
         $filename  = Yii::$app->security->generateRandomString() . '.' . $ext;
-        $directory = CK::getFilesStoragePath() . '/aircraft_type/' . $aircraftTypeId;
+        $directory = CK::getAircraftTypeResourcesStoragePath() . '/aircraft_type/' . $aircraftTypeId;
         $fullPath  = $directory . '/' . $filename;
 
         FileHelper::createDirectory($directory, 0755, true);

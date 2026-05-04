@@ -52,8 +52,8 @@ $this->title = Yii::t('app', 'Site Settings');
 <?= $form->field($model, 'acars_installer_name') ?>
 <?= $form->field($model, 'token_life_h')->input('number') ?>
 <?= $form->field($model, 'charter_ratio')->input('number', ['step' => '0.01']) ?>
-<?= $form->field($model, 'files_storage_path') ?>
-<?= $form->field($model, 'max_files_size_mb')->input('number')
+<?= $form->field($model, 'aircraft_type_resources_storage_path') ?>
+<?= $form->field($model, 'aircraft_type_resources_limit_mb')->input('number')
         ->hint(Yii::t('app', 'In MB. Example: 10240 = 10 GB')) ?>
 
 <div class="form-group">

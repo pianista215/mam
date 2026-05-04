@@ -49,7 +49,7 @@ class AircraftTypeResource extends \yii\db\ActiveRecord
 
     public function getPath(): string
     {
-        return CK::getFilesStoragePath() . '/aircraft_type/' . $this->aircraft_type_id . '/' . $this->filename;
+        return CK::getAircraftTypeResourcesStoragePath() . '/aircraft_type/' . $this->aircraft_type_id . '/' . $this->filename;
     }
 
     public function afterDelete(): void

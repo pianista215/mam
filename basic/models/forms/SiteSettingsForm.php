@@ -33,8 +33,8 @@ class SiteSettingsForm extends Model
     public $statistics_email_list;
     public $statistics_email_language;
 
-    public $files_storage_path;
-    public $max_files_size_mb;
+    public $aircraft_type_resources_storage_path;
+    public $aircraft_type_resources_limit_mb;
 
     public function rules()
     {
@@ -43,7 +43,7 @@ class SiteSettingsForm extends Model
               'chunks_storage_path','images_storage_path','acars_releases_path','acars_installer_name',
               'token_life_h','charter_ratio','airline_name','no_reply_mail','support_mail',
               'x_url','instagram_url','facebook_url','statistics_email_list','statistics_email_language',
-              'files_storage_path','max_files_size_mb'], 'trim'],
+              'aircraft_type_resources_storage_path','aircraft_type_resources_limit_mb'], 'trim'],
 
             [['registration_start','registration_end'], 'date', 'format' => 'php:Y-m-d'],
             ['registration_start_location', 'filter', 'filter' => 'strtoupper'],
@@ -57,9 +57,9 @@ class SiteSettingsForm extends Model
                 'targetAttribute' => ['registration_start_location' => 'icao_code'],
             ],
 
-            [['chunks_storage_path','images_storage_path','acars_releases_path','files_storage_path'], 'validatePath'],
+            [['chunks_storage_path','images_storage_path','acars_releases_path','aircraft_type_resources_storage_path'], 'validatePath'],
 
-            ['max_files_size_mb', 'integer', 'min' => 1],
+            ['aircraft_type_resources_limit_mb', 'integer', 'min' => 1],
 
             ['token_life_h', 'integer', 'min' => 1],
 
@@ -103,8 +103,8 @@ class SiteSettingsForm extends Model
             'statistics_email_list' => Yii::t('app', 'Statistics email'),
             'statistics_email_language' => Yii::t('app', 'Statistics email language'),
 
-            'files_storage_path' => Yii::t('app', 'Files storage path'),
-            'max_files_size_mb'  => Yii::t('app', 'Max files size (MB)'),
+            'aircraft_type_resources_storage_path' => Yii::t('app', 'Files storage path'),
+            'aircraft_type_resources_limit_mb'  => Yii::t('app', 'Max files size (MB)'),
         ];
     }
 
@@ -128,8 +128,8 @@ class SiteSettingsForm extends Model
             CK::FACEBOOK_URL,
             CK::STATISTICS_EMAIL_LIST,
             CK::STATISTICS_EMAIL_LANGUAGE,
-            CK::FILES_STORAGE_PATH,
-            CK::MAX_FILES_SIZE_MB,
+            CK::AIRCRAFT_TYPE_RESOURCES_STORAGE_PATH,
+            CK::AIRCRAFT_TYPE_RESOURCES_LIMIT_MB,
         ];
     }
 
