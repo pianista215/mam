@@ -88,7 +88,7 @@ class AircraftTypeResourceController extends Controller
         }
 
         $filename  = Yii::$app->security->generateRandomString() . '.' . $ext;
-        $directory = CK::getAircraftTypeResourcesStoragePath() . '/aircraft_type/' . $aircraftTypeId;
+        $directory = CK::getAircraftTypeResourcesStoragePath() . '/' . AircraftTypeResource::STORAGE_SUBDIRECTORY . '/' . $aircraftTypeId;
         $fullPath  = $directory . '/' . $filename;
 
         FileHelper::createDirectory($directory, 0755, true);
@@ -131,13 +131,13 @@ class AircraftTypeResourceController extends Controller
 
     public function actionDelete(int $id): \yii\web\Response
     {
+        if (!Yii::$app->user->can(Permissions::AIRCRAFT_TYPE_RESOURCE_CRUD)) {
+            throw new ForbiddenHttpException();
+        }
+
         $resource = AircraftTypeResource::findOne(['id' => $id]);
         if ($resource === null) {
             throw new NotFoundHttpException();
-        }
-
-        if (!Yii::$app->user->can(Permissions::AIRCRAFT_TYPE_RESOURCE_CRUD)) {
-            throw new ForbiddenHttpException();
         }
 
         $aircraftTypeId = $resource->aircraft_type_id;
@@ -156,8 +156,13 @@ class AircraftTypeResourceController extends Controller
     public function actionDownload(int $id)
     {
         $resource = AircraftTypeResource::findOne(['id' => $id]);
+
         if ($resource === null) {
-            throw new NotFoundHttpException();
+            if (Yii::$app->user->can(Permissions::AIRCRAFT_TYPE_RESOURCE_CRUD)) {
+                throw new NotFoundHttpException();
+            } else {
+                throw new ForbiddenHttpException();
+            }
         }
 
         if (!Yii::$app->user->can(Permissions::ACCESS_AIRCRAFT_TYPE_RESOURCES, ['aircraft_type_id' => $resource->aircraft_type_id])) {

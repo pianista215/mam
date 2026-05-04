@@ -18,6 +18,7 @@ use Yii;
 class AircraftTypeResource extends \yii\db\ActiveRecord
 {
     public const ALLOWED_EXTENSIONS = ['png', 'jpg', 'jpeg', 'pdf', 'rar', 'zip', '7z'];
+    public const STORAGE_SUBDIRECTORY = 'aircraft_type';
 
     public static function tableName(): string
     {
@@ -49,7 +50,7 @@ class AircraftTypeResource extends \yii\db\ActiveRecord
 
     public function getPath(): string
     {
-        return CK::getAircraftTypeResourcesStoragePath() . '/aircraft_type/' . $this->aircraft_type_id . '/' . $this->filename;
+        return CK::getAircraftTypeResourcesStoragePath() . '/' . self::STORAGE_SUBDIRECTORY . '/' . $this->aircraft_type_id . '/' . $this->filename;
     }
 
     public function afterDelete(): void
