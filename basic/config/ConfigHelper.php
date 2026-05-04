@@ -17,6 +17,8 @@ class ConfigHelper
     public const ACARS_INSTALLER_NAME = 'acars_installer_name';
     public const TOKEN_LIFE_H = 'token_life_h';
     public const CHARTER_RATIO = 'charter_ratio';
+    public const AIRCRAFT_TYPE_RESOURCES_STORAGE_PATH = 'aircraft_type_resources_storage_path';
+    public const AIRCRAFT_TYPE_RESOURCES_LIMIT_MB     = 'aircraft_type_resources_limit_mb';
 
     // Global
     public const AIRLINE_NAME = 'airline_name';
@@ -63,6 +65,16 @@ class ConfigHelper
     public static function getImagesStoragePath(): string
     {
         return Config::get(self::IMAGES_STORAGE_PATH) ?? '/opt/mam/images';
+    }
+
+    public static function getAircraftTypeResourcesStoragePath(): string
+    {
+        return Config::get(self::AIRCRAFT_TYPE_RESOURCES_STORAGE_PATH) ?? '/opt/mam/aircraftTypeResources';
+    }
+
+    public static function getAircraftTypeResourcesLimitMb(): int
+    {
+        return (int)(Config::get(self::AIRCRAFT_TYPE_RESOURCES_LIMIT_MB) ?? 10240);
     }
 
     public static function getAcarsReleasesPath(): string

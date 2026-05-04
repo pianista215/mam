@@ -41,6 +41,10 @@ final class Permissions
     public const CREDENTIAL_CRUD    = 'credentialCrud';
     public const ISSUE_CREDENTIAL   = 'issueCredential';
 
+    // Aircraft type resources
+    public const ACCESS_AIRCRAFT_TYPE_RESOURCES = 'accessAircraftTypeResources';
+    public const AIRCRAFT_TYPE_RESOURCE_CRUD    = 'aircraftTypeResourceCrud';
+
     // Superadmin
     public const ASSIGN_ADMIN = 'assignAdmin';
 

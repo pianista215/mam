@@ -37,10 +37,16 @@ class SiteSettingsCest
             mkdir($acarsReleasesPath, 0777, true);
         }
 
+        $resourcesPath = '/tmp/aircraft-resources';
+        if (!is_dir($resourcesPath)) {
+            mkdir($resourcesPath, 0777, true);
+        }
+
         Config::set(CK::CHUNKS_STORAGE_PATH, $chunksPath);
         Config::set(CK::IMAGES_STORAGE_PATH, $imagesPath);
         Config::set(CK::ACARS_RELEASES_PATH, $acarsReleasesPath);
         Config::set(CK::ACARS_INSTALLER_NAME, 'Setup.exe');
+        Config::set(CK::AIRCRAFT_TYPE_RESOURCES_STORAGE_PATH, $resourcesPath);
         Yii::$app->cache->flush();
     }
 

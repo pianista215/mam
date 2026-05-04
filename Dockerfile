@@ -38,13 +38,16 @@ RUN mkdir -p /opt/mam/chunks \
     && mkdir -p /opt/mam/images/aircraftType_image \
     && mkdir -p /opt/mam/images/page_image \
     && mkdir -p /opt/mam/acars-releases \
+    && mkdir -p /opt/mam/aircraftTypeResources \
     && chown -R www-data:www-data /var/www/html \
     && chown -R www-data:www-data /opt/mam/chunks \
     && chown -R www-data:www-data /opt/mam/images \
     && chown -R www-data:www-data /opt/mam/acars-releases \
+    && chown -R www-data:www-data /opt/mam/aircraftTypeResources \
     && chmod -R 755 /var/www/html \
     && chmod -R 755 /opt/mam/chunks \
-    && chmod -R 755 /opt/mam/acars-releases
+    && chmod -R 755 /opt/mam/acars-releases \
+    && chmod -R 755 /opt/mam/aircraftTypeResources
 
 COPY initial_flags /tmp/initial_flags
 

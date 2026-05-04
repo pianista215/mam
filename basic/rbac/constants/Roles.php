@@ -19,6 +19,8 @@ final class Roles
     public const CREDENTIAL_MANAGER   = 'credentialManager';
     public const CREDENTIAL_AUTHORITY = 'credentialAuthority';
 
+    public const AIRCRAFT_TYPE_RESOURCE_MANAGER = 'aircraftTypeResourceManager';
+
     public const ADMIN = 'admin';
 
     private function __construct() {}

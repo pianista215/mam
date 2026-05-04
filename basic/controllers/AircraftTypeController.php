@@ -6,7 +6,9 @@ use app\helpers\LoggerTrait;
 use app\models\AircraftConfiguration;
 use app\models\AircraftConfigurationSearch;
 use app\models\AircraftType;
+use app\models\AircraftTypeResource;
 use app\models\AircraftTypeSearch;
+use app\models\CredentialTypeAircraftType;
 use app\rbac\constants\Permissions;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
@@ -84,9 +86,25 @@ class AircraftTypeController extends Controller
         $searchModel->aircraft_type_id = $model->id;
         $dataProvider = $searchModel->search([]);
 
+        $isResourceManager = Yii::$app->user->can(Permissions::AIRCRAFT_TYPE_RESOURCE_CRUD);
+        $canViewResources   = Yii::$app->user->can(
+            Permissions::ACCESS_AIRCRAFT_TYPE_RESOURCES,
+            ['aircraft_type_id' => $model->id]
+        );
+
+        $resources = $canViewResources
+            ? AircraftTypeResource::find()
+                ->where(['aircraft_type_id' => $model->id])
+                ->orderBy(['created_at' => SORT_DESC])
+                ->all()
+            : [];
+
         return $this->render('view', [
-            'model' => $model,
-            'dataProvider' => $dataProvider,
+            'model'             => $model,
+            'dataProvider'      => $dataProvider,
+            'resources'         => $resources,
+            'canViewResources'  => $canViewResources,
+            'isResourceManager' => $isResourceManager,
         ]);
     }
 

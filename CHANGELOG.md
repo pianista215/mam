@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.11.0] - 2026-05-04
+
+### Added
+- Aircraft type resource management: upload, download and delete documentation/configuration files (PDF, images, compressed archives) per aircraft type
+- New role `aircraftTypeResourceManager` with permissions to upload and delete aircraft type resources
+- File access gated by RBAC rule: only pilots holding the credentials to fly the aircraft type can view and download its resources
+- Admin settings: configurable storage path and maximum total size for aircraft type resources
+
 ## [1.10.0] - 2026-04-27
 
 ### Added

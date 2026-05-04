@@ -33,13 +33,17 @@ class SiteSettingsForm extends Model
     public $statistics_email_list;
     public $statistics_email_language;
 
+    public $aircraft_type_resources_storage_path;
+    public $aircraft_type_resources_limit_mb;
+
     public function rules()
     {
         return [
             [['registration_start','registration_end','registration_start_location',
               'chunks_storage_path','images_storage_path','acars_releases_path','acars_installer_name',
               'token_life_h','charter_ratio','airline_name','no_reply_mail','support_mail',
-              'x_url','instagram_url','facebook_url','statistics_email_list','statistics_email_language'], 'trim'],
+              'x_url','instagram_url','facebook_url','statistics_email_list','statistics_email_language',
+              'aircraft_type_resources_storage_path','aircraft_type_resources_limit_mb'], 'trim'],
 
             [['registration_start','registration_end'], 'date', 'format' => 'php:Y-m-d'],
             ['registration_start_location', 'filter', 'filter' => 'strtoupper'],
@@ -53,7 +57,9 @@ class SiteSettingsForm extends Model
                 'targetAttribute' => ['registration_start_location' => 'icao_code'],
             ],
 
-            [['chunks_storage_path','images_storage_path','acars_releases_path'], 'validatePath'],
+            [['chunks_storage_path','images_storage_path','acars_releases_path','aircraft_type_resources_storage_path'], 'validatePath'],
+
+            ['aircraft_type_resources_limit_mb', 'integer', 'min' => 1],
 
             ['token_life_h', 'integer', 'min' => 1],
 
@@ -96,6 +102,9 @@ class SiteSettingsForm extends Model
 
             'statistics_email_list' => Yii::t('app', 'Statistics email'),
             'statistics_email_language' => Yii::t('app', 'Statistics email language'),
+
+            'aircraft_type_resources_storage_path' => Yii::t('app', 'Aircraft type resources storage path'),
+            'aircraft_type_resources_limit_mb'     => Yii::t('app', 'Aircraft type resources limit (MB)'),
         ];
     }
 
@@ -119,6 +128,8 @@ class SiteSettingsForm extends Model
             CK::FACEBOOK_URL,
             CK::STATISTICS_EMAIL_LIST,
             CK::STATISTICS_EMAIL_LANGUAGE,
+            CK::AIRCRAFT_TYPE_RESOURCES_STORAGE_PATH,
+            CK::AIRCRAFT_TYPE_RESOURCES_LIMIT_MB,
         ];
     }
 
