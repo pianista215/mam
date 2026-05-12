@@ -116,7 +116,10 @@ class AircraftSearch extends Aircraft
             'sort'  => [
                 'attributes' => [
                     'registration',
-                    'name',
+                    'name' => [
+                        'asc'  => ['aircraft.name' => SORT_ASC],
+                        'desc' => ['aircraft.name' => SORT_DESC],
+                    ],
                     'location',
                     'hours_flown',
                     'aircraftConfiguration' => [
@@ -144,7 +147,7 @@ class AircraftSearch extends Aircraft
         ]);
 
         $query->andFilterWhere(['like', 'registration', $this->registration])
-            ->andFilterWhere(['like', 'name', $this->name])
+            ->andFilterWhere(['like', 'aircraft.name', $this->name])
             ->andFilterWhere(['like', 'location', $this->location]);
 
         return $dataProvider;

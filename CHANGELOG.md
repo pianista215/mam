@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.11.1] - 2026-05-12
+
+### Fixed
+- Aircraft index search by name no longer throws an integrity constraint violation when aircraft type and configuration tables are joined (ambiguous `name` column now qualified as `aircraft.name`)
+- Renewing a license no longer sets an expiry date on descendant ratings that had none (null expiry is now preserved in cascade)
+- Renewing a credential with the "Does not expire" checkbox now correctly removes the expiry date instead of rejecting the form with a validation error
+
 ## [1.11.0] - 2026-05-04
 
 ### Added

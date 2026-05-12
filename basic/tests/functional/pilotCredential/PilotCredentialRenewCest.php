@@ -149,6 +149,66 @@ class PilotCredentialRenewCest
         $I->assertEquals('2028-01-01', $ir->expiry_date);
     }
 
+    public function renewLicenseDoesNotCascadeToRatingWithoutExpiry(\FunctionalTester $I)
+    {
+        // Set IR (id=9) to null expiry — it should never gain an expiry via cascade
+        $ir = PilotCredential::findOne(9);
+        $ir->expiry_date = null;
+        $ir->save(false);
+
+        // Renew CPL (id=8) for pilot 6
+        $I->amLoggedInAs(2);
+        $I->amOnRoute('pilot-credential/renew', ['id' => 8]);
+
+        $I->fillField('#pilotcredential-expiry_date', '2028-01-01');
+        $I->click('Save', 'button');
+
+        $I->seeResponseCodeIs(200);
+
+        $cpl = PilotCredential::findOne(8);
+        $I->assertEquals('2028-01-01', $cpl->expiry_date);
+
+        // IR had no expiry — cascade must not assign one
+        $irAfter = PilotCredential::findOne(9);
+        $I->assertNull($irAfter->expiry_date);
+    }
+
+    public function renewRemovesExpiryDate(\FunctionalTester $I)
+    {
+        // id=3: John Doe IR, active, expiry='2027-01-10' → remove expiry by submitting empty string
+        $I->amLoggedInAs(2);
+        $I->sendAjaxPostRequest('/pilot-credential/renew?id=3', [
+            'PilotCredential' => [
+                'status'      => PilotCredential::STATUS_ACTIVE,
+                'issued_date' => '2025-01-10',
+                'expiry_date' => '',
+                'pilot_id'    => 1,
+                'issued_by'   => 2,
+            ],
+        ]);
+
+        $pc = PilotCredential::findOne(3);
+        $I->assertNull($pc->expiry_date);
+    }
+
+    public function renewAddsExpiryToNullExpiryCredential(\FunctionalTester $I)
+    {
+        // id=1: John Doe PPL, active, null expiry → add a future expiry date
+        $I->amLoggedInAs(2);
+        $I->sendAjaxPostRequest('/pilot-credential/renew?id=1', [
+            'PilotCredential' => [
+                'status'      => PilotCredential::STATUS_ACTIVE,
+                'issued_date' => '2024-01-15',
+                'expiry_date' => '2028-12-31',
+                'pilot_id'    => 1,
+                'issued_by'   => 2,
+            ],
+        ]);
+
+        $pc = PilotCredential::findOne(1);
+        $I->assertEquals('2028-12-31', $pc->expiry_date);
+    }
+
     public function renewNonExistent(\FunctionalTester $I)
     {
         $I->amLoggedInAs(2);

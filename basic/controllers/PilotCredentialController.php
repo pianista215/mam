@@ -290,6 +290,10 @@ class PilotCredentialController extends Controller
         if ($this->request->isPost && $model->load($this->request->post())) {
             $model->issued_date = $originalIssuedDate;
 
+            if ($model->expiry_date === '') {
+                $model->expiry_date = null;
+            }
+
             if ($model->expiry_date !== null && $model->expiry_date <= date('Y-m-d')) {
                 $model->addError('expiry_date', Yii::t('app', 'Expiry date must be after today.'));
             }
@@ -419,9 +423,13 @@ class PilotCredentialController extends Controller
         $updated = PilotCredential::updateAll(
             ['expiry_date' => $license->expiry_date],
             [
-                'pilot_id'           => $license->pilot_id,
-                'credential_type_id' => $ratingTypeIds,
-                'status'             => PilotCredential::STATUS_ACTIVE,
+                'and',
+                [
+                    'pilot_id'           => $license->pilot_id,
+                    'credential_type_id' => $ratingTypeIds,
+                    'status'             => PilotCredential::STATUS_ACTIVE,
+                ],
+                ['not', ['expiry_date' => null]],
             ]
         );
         if ($updated > 0) {
