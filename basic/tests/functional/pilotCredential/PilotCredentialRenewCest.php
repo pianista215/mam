@@ -149,6 +149,30 @@ class PilotCredentialRenewCest
         $I->assertEquals('2028-01-01', $ir->expiry_date);
     }
 
+    public function renewLicenseDoesNotCascadeToRatingWithoutExpiry(\FunctionalTester $I)
+    {
+        // Set IR (id=9) to null expiry — it should never gain an expiry via cascade
+        $ir = PilotCredential::findOne(9);
+        $ir->expiry_date = null;
+        $ir->save(false);
+
+        // Renew CPL (id=8) for pilot 6
+        $I->amLoggedInAs(2);
+        $I->amOnRoute('pilot-credential/renew', ['id' => 8]);
+
+        $I->fillField('#pilotcredential-expiry_date', '2028-01-01');
+        $I->click('Save', 'button');
+
+        $I->seeResponseCodeIs(200);
+
+        $cpl = PilotCredential::findOne(8);
+        $I->assertEquals('2028-01-01', $cpl->expiry_date);
+
+        // IR had no expiry — cascade must not assign one
+        $irAfter = PilotCredential::findOne(9);
+        $I->assertNull($irAfter->expiry_date);
+    }
+
     public function renewNonExistent(\FunctionalTester $I)
     {
         $I->amLoggedInAs(2);

@@ -419,9 +419,13 @@ class PilotCredentialController extends Controller
         $updated = PilotCredential::updateAll(
             ['expiry_date' => $license->expiry_date],
             [
-                'pilot_id'           => $license->pilot_id,
-                'credential_type_id' => $ratingTypeIds,
-                'status'             => PilotCredential::STATUS_ACTIVE,
+                'and',
+                [
+                    'pilot_id'           => $license->pilot_id,
+                    'credential_type_id' => $ratingTypeIds,
+                    'status'             => PilotCredential::STATUS_ACTIVE,
+                ],
+                ['not', ['expiry_date' => null]],
             ]
         );
         if ($updated > 0) {
