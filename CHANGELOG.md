@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.11.1] - upcoming
+## [1.11.1] - 2026-05-12
 
 ### Fixed
 - Aircraft index search by name no longer throws an integrity constraint violation when aircraft type and configuration tables are joined (ambiguous `name` column now qualified as `aircraft.name`)
