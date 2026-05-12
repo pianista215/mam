@@ -133,5 +133,15 @@ class AircraftIndexViewCest
         $I->see('Login');
     }
 
+    public function searchByNameFiltersAircraftOnly(\FunctionalTester $I)
+    {
+        $I->amOnRoute('aircraft/index', ['AircraftSearch[name]' => 'C172']);
+
+        $I->see('Showing 1-2 of 2 items.');
+        $I->see('C172 Std');
+        $I->see('C172 Other');
+        $I->dontSee('Boeing Name Std');
+        $I->dontSee('Boeing Name Cargo');
+    }
 
 }
