@@ -290,6 +290,10 @@ class PilotCredentialController extends Controller
         if ($this->request->isPost && $model->load($this->request->post())) {
             $model->issued_date = $originalIssuedDate;
 
+            if ($model->expiry_date === '') {
+                $model->expiry_date = null;
+            }
+
             if ($model->expiry_date !== null && $model->expiry_date <= date('Y-m-d')) {
                 $model->addError('expiry_date', Yii::t('app', 'Expiry date must be after today.'));
             }
