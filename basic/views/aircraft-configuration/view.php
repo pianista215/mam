@@ -44,8 +44,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'pax_capacity',
             'cargo_capacity',
             'crew',
-            'mtow',
             'bew',
+            'mtow',
         ],
     ]) ?>
 
