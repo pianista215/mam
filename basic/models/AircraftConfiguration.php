@@ -37,7 +37,6 @@ class AircraftConfiguration extends \yii\db\ActiveRecord
             [['aircraft_type_id', 'name', 'pax_capacity', 'cargo_capacity', 'crew', 'mtow'], 'required'],
             [['aircraft_type_id', 'pax_capacity', 'cargo_capacity'], 'integer', 'min' => 0],
             [['crew', 'mtow'], 'integer', 'min' => 1],
-            [['crew'], 'default', 'value' => 1],
             [['name'], 'string', 'max' => 20],
             [['name'], 'trim'],
             [['name'], 'unique', 'targetAttribute' => ['aircraft_type_id', 'name']],
