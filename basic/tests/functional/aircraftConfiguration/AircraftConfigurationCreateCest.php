@@ -54,6 +54,8 @@ class AircraftConfigurationCreateCest
        $I->see('Name cannot be blank.');
        $I->see('Pax Capacity cannot be blank.');
        $I->see('Cargo Capacity cannot be blank.');
+       $I->see('Crew cannot be blank.');
+       $I->see('MTOW (Kg) cannot be blank.');
 
        $count = \app\models\AircraftConfiguration::find()->count();
        $I->assertEquals(4, $count);
@@ -68,12 +70,16 @@ class AircraftConfigurationCreateCest
        $I->fillField('#aircraftconfiguration-name', 'Business Special');
        $I->fillField('#aircraftconfiguration-pax_capacity', '140');
        $I->fillField('#aircraftconfiguration-cargo_capacity', '950');
+       $I->fillField('#aircraftconfiguration-crew', '6');
+       $I->fillField('#aircraftconfiguration-mtow', '77000');
        $I->click('Save', 'button');
 
        $I->seeResponseCodeIs(200);
        $I->see('Airbus A320 (Business Special)');
        $I->see('140');
        $I->see('950');
+       $I->see('6');
+       $I->see('77000');
 
        $I->see('Update', 'a');
        $I->see('Delete', 'a');
@@ -83,6 +89,8 @@ class AircraftConfigurationCreateCest
        $I->assertEquals(1, $model->aircraft_type_id);
        $I->assertEquals(140, $model->pax_capacity);
        $I->assertEquals(950, $model->cargo_capacity);
+       $I->assertEquals(6, $model->crew);
+       $I->assertEquals(77000, $model->mtow);
 
        $count = \app\models\AircraftConfiguration::find()->count();
        $I->assertEquals(5, $count);

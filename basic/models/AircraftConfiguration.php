@@ -12,6 +12,8 @@ use Yii;
  * @property string $name
  * @property int $pax_capacity
  * @property int $cargo_capacity
+ * @property int $crew
+ * @property int $mtow
  *
  * @property AircraftType $aircraftType
  * @property Aircraft[] $aircrafts
@@ -32,8 +34,10 @@ class AircraftConfiguration extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['aircraft_type_id', 'name', 'pax_capacity', 'cargo_capacity'], 'required'],
+            [['aircraft_type_id', 'name', 'pax_capacity', 'cargo_capacity', 'crew', 'mtow'], 'required'],
             [['aircraft_type_id', 'pax_capacity', 'cargo_capacity'], 'integer', 'min' => 0],
+            [['crew', 'mtow'], 'integer', 'min' => 1],
+            [['crew'], 'default', 'value' => 1],
             [['name'], 'string', 'max' => 20],
             [['name'], 'trim'],
             [['name'], 'unique', 'targetAttribute' => ['aircraft_type_id', 'name']],
@@ -52,6 +56,8 @@ class AircraftConfiguration extends \yii\db\ActiveRecord
             'name' => Yii::t('app', 'Name'),
             'pax_capacity' => Yii::t('app', 'Pax Capacity'),
             'cargo_capacity' => Yii::t('app', 'Cargo Capacity'),
+            'crew' => Yii::t('app', 'Crew'),
+            'mtow' => Yii::t('app', 'MTOW (Kg)'),
         ];
     }
 
