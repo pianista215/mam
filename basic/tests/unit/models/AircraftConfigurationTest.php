@@ -23,6 +23,7 @@ class AircraftConfigurationTest extends BaseUnitTest
             'cargo_capacity' => 2000,
             'crew' => 5,
             'mtow' => 79016,
+            'bew' => 41413,
         ]);
         $this->assertTrue($standardConfig->save());
 
@@ -53,6 +54,7 @@ class AircraftConfigurationTest extends BaseUnitTest
             'cargo_capacity' => 2000,
             'crew' => 5,
             'mtow' => 79016,
+            'bew' => 41413,
         ]);
         $this->assertFalse($invalidConfig->save());
         $this->assertArrayHasKey('pax_capacity', $invalidConfig->errors);
@@ -75,6 +77,7 @@ class AircraftConfigurationTest extends BaseUnitTest
             'cargo_capacity' => 2000,
             'crew' => 5,
             'mtow' => 79016,
+            'bew' => 41413,
         ]);
         $this->assertTrue($duplicateConfig->save());
 

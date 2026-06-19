@@ -9,6 +9,7 @@ return [
         'cargo_capacity' => 4900,
         'crew' => 5,
         'mtow' => 79016,
+        'bew' => 41413,
     ],
     [
         'id' => 2,
@@ -18,6 +19,7 @@ return [
         'cargo_capacity' => 23500,
         'crew' => 3,
         'mtow' => 79016,
+        'bew' => 41413,
     ],
     [
         'id' => 3,
@@ -27,6 +29,7 @@ return [
         'cargo_capacity' => 300,
         'crew' => 1,
         'mtow' => 1111,
+        'bew' => 767,
     ],
     [
         'id' => 4,
@@ -36,5 +39,6 @@ return [
         'cargo_capacity' => 100,
         'crew' => 1,
         'mtow' => 1111,
+        'bew' => 767,
     ],
 ];

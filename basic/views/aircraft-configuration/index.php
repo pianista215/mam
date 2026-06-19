@@ -40,6 +40,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'cargo_capacity',
             'crew',
             'mtow',
+            'bew',
             [
                 'class' => ActionColumn::className(),
                 'visibleButtons'=>[

@@ -278,6 +278,7 @@ class FullFkTest extends BaseUnitTest
             'cargo_capacity' => 2000,
             'crew' => 5,
             'mtow' => 79016,
+            'bew' => 41413,
         ]);
         $this->assertTrue($aconf->save(), 'aircraft config saved');
 

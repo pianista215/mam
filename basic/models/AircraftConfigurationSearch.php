@@ -17,7 +17,7 @@ class AircraftConfigurationSearch extends AircraftConfiguration
     public function rules()
     {
         return [
-            [['id', 'aircraft_type_id', 'pax_capacity', 'cargo_capacity', 'crew', 'mtow'], 'integer'],
+            [['id', 'aircraft_type_id', 'pax_capacity', 'cargo_capacity', 'crew', 'mtow', 'bew'], 'integer'],
             [['name'], 'safe'],
         ];
     }
@@ -64,6 +64,7 @@ class AircraftConfigurationSearch extends AircraftConfiguration
             'cargo_capacity' => $this->cargo_capacity,
             'crew' => $this->crew,
             'mtow' => $this->mtow,
+            'bew' => $this->bew,
         ]);
 
         $query->andFilterWhere(['like', 'name', $this->name]);

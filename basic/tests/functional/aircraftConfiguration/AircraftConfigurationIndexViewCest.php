@@ -71,6 +71,7 @@ class AircraftConfigurationIndexViewCest
         $I->see('4900');
         $I->see('5');
         $I->see('79016');
+        $I->see('41413');
 
         $I->see('Aircrafts');
 
