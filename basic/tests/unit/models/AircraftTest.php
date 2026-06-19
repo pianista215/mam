@@ -43,6 +43,8 @@ class AircraftTest extends BaseUnitTest
             'name' => 'Standard',
             'pax_capacity' => 180,
             'cargo_capacity' => 2000,
+            'crew' => 5,
+            'mtow' => 79016,
         ]);
         $this->standardConfig->save();
 
@@ -51,6 +53,8 @@ class AircraftTest extends BaseUnitTest
             'name' => 'Cargo',
             'pax_capacity' => 0,
             'cargo_capacity' => 18000,
+            'crew' => 3,
+            'mtow' => 79016,
         ]);
         $this->cargoConfig->save();
     }

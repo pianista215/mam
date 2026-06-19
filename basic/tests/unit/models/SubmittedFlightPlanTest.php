@@ -157,6 +157,8 @@ class SubmittedFlightPlanTest extends BaseUnitTest
             'name' => 'Standard',
             'pax_capacity' => 180,
             'cargo_capacity' => 2000,
+            'crew' => 5,
+            'mtow' => 79016,
         ]);
         $config->save();
 

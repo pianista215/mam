@@ -71,7 +71,9 @@ class FlightDeletionRuleTest extends BaseUnitTest
             'aircraft_type_id' => 1,
             'name' => 'Standard',
             'pax_capacity' => 180,
-            'cargo_capacity' => 1000
+            'cargo_capacity' => 1000,
+            'crew' => 5,
+            'mtow' => 79016,
         ]);
         $aircraftConfig->save(false);
 
