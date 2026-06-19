@@ -34,13 +34,14 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'aircraftType.name',
                 'label' => Yii::t('app', 'Aircraft Type'),
+                'filter' => false,
             ],
             'name',
-            'pax_capacity',
-            'cargo_capacity',
-            'crew',
-            'bew',
-            'mtow',
+            ['attribute' => 'pax_capacity', 'filter' => false],
+            ['attribute' => 'cargo_capacity', 'filter' => false],
+            ['attribute' => 'crew', 'filter' => false],
+            ['attribute' => 'bew', 'filter' => false],
+            ['attribute' => 'mtow', 'filter' => false],
             [
                 'class' => ActionColumn::className(),
                 'visibleButtons'=>[
