@@ -7,6 +7,7 @@
 
 ### Changed
 - Test suite performance: replaced dynamic `generatePasswordHash()` calls in fixture and unit test files with pre-computed static bcrypt hashes, and removed redundant `clearDatabase()` calls in unit tests (Codeception's transaction rollback already handles cleanup). Functional tests went from ~1 hour to ~56 seconds.
+- Aircraft configuration index: aircraft type column is now sortable; default order is aircraft type ascending then name ascending
 
 ## [1.11.1] - 2026-05-12
 
