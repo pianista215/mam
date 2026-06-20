@@ -38,6 +38,11 @@ use Yii;
 
 class FullFkTest extends BaseUnitTest
 {
+    protected function _before()
+    {
+        parent::_before();
+        $this->clearDatabase();
+    }
 
     private function createPilot($country, $rank)
     {

@@ -51,7 +51,7 @@ class ImageTest extends BaseUnitTest
             'location' => 'LEMD',
             'date_of_birth' => '1990-01-01',
             'city' => 'Madrid',
-            'password' => Yii::$app->security->generatePasswordHash('Test123!'),
+            'password' => '$2y$10$PMqR7z39829xLMglTJb/cOULPxhYqp1tKTAccd5qKpuDg2Rh8wSFW', // Test123!
             'country_id' => $this->country->id,
         ]);
         $this->assertTrue($this->pilot->save(), print_r($this->pilot->errors, true));

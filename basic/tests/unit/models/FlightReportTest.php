@@ -69,7 +69,7 @@ class FlightReportTest extends BaseUnitTest
             'name' => 'John',
             'surname' => 'Doe',
             'email' => 'john.doe@example.com',
-            'password' => Yii::$app->security->generatePasswordHash('SecurePass123!'),
+            'password' => '$2y$10$Y1cO2xBAETW/UtvLwWcNkO0UgQTbuisG1n65xgc8kMgwfIv.TayjW', // SecurePass123!
             'country_id' => $country->id,
             'city' => 'Madrid',
             'location' => 'LEMD',

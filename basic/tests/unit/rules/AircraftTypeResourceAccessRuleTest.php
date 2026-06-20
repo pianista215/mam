@@ -68,7 +68,7 @@ class AircraftTypeResourceAccessRuleTest extends BaseUnitTest
             'name'        => 'Test',
             'surname'     => 'Pilot',
             'email'       => "p{$id}@test.com",
-            'password'    => Yii::$app->security->generatePasswordHash('pass'),
+            'password'    => '$2y$10$6v0EKzTl1T5It9KXZbqhzulEZt50DIjIgDuaIuWaICiOYqHyZCbTK', // pass
             'country_id'  => 1,
             'city'        => 'Madrid',
             'location'    => 'LEMD',

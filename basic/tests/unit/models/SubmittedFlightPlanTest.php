@@ -103,7 +103,7 @@ class SubmittedFlightPlanTest extends BaseUnitTest
             'name' => 'John',
             'surname' => 'Doe',
             'email' => 'john.doe@example.com',
-            'password' => Yii::$app->security->generatePasswordHash('SecurePass123!'),
+            'password' => '$2y$10$Y1cO2xBAETW/UtvLwWcNkO0UgQTbuisG1n65xgc8kMgwfIv.TayjW', // SecurePass123!
             'country_id' => $country->id,
             'city' => 'Madrid',
             'location' => 'LEMD',
@@ -124,7 +124,7 @@ class SubmittedFlightPlanTest extends BaseUnitTest
             'name' => 'John2',
             'surname' => 'Doe2',
             'email' => 'john.doe2@example.com',
-            'password' => Yii::$app->security->generatePasswordHash('SecurePass123!'),
+            'password' => '$2y$10$Y1cO2xBAETW/UtvLwWcNkO0UgQTbuisG1n65xgc8kMgwfIv.TayjW', // SecurePass123!
             'country_id' => $country->id,
             'city' => 'Madrid',
             'location' => 'LEMD',
@@ -137,7 +137,7 @@ class SubmittedFlightPlanTest extends BaseUnitTest
             'name' => 'Bcl',
             'surname' => 'Doe',
             'email' => 'john.bcl@example.com',
-            'password' => Yii::$app->security->generatePasswordHash('SecurePass123!'),
+            'password' => '$2y$10$Y1cO2xBAETW/UtvLwWcNkO0UgQTbuisG1n65xgc8kMgwfIv.TayjW', // SecurePass123!
             'country_id' => $country->id,
             'city' => 'Barcelona',
             'location' => 'LEBL',
