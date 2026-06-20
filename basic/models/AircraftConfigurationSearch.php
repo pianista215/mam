@@ -40,12 +40,27 @@ class AircraftConfigurationSearch extends AircraftConfiguration
      */
     public function search($params)
     {
-        $query = AircraftConfiguration::find();
-
-        // add conditions that should always apply here
+        $query = AircraftConfiguration::find()->joinWith(['aircraftType']);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => [
+                'attributes' => [
+                    'name' => [
+                        'asc'  => ['aircraft_configuration.name' => SORT_ASC],
+                        'desc' => ['aircraft_configuration.name' => SORT_DESC],
+                    ],
+                    'pax_capacity',
+                    'cargo_capacity',
+                    'crew',
+                    'bew',
+                    'mtow',
+                    'aircraftType' => [
+                        'asc'  => ['aircraft_type.name' => SORT_ASC],
+                        'desc' => ['aircraft_type.name' => SORT_DESC],
+                    ],
+                ],
+            ],
         ]);
 
         $this->load($params);
@@ -67,7 +82,7 @@ class AircraftConfigurationSearch extends AircraftConfiguration
             'bew' => $this->bew,
         ]);
 
-        $query->andFilterWhere(['like', 'name', $this->name]);
+        $query->andFilterWhere(['like', 'aircraft_configuration.name', $this->name]);
 
         return $dataProvider;
     }
