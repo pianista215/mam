@@ -5,6 +5,9 @@
 ### Added
 - Aircraft configuration: new `crew` field (minimum crew count, integer ≥ 1), `mtow` field (Maximum Takeoff Weight in kg, integer ≥ 1) and `bew` field (Basic Empty Weight in kg, integer ≥ 1) on every configuration
 
+### Changed
+- Test suite performance: replaced dynamic `generatePasswordHash()` calls in fixture and unit test files with pre-computed static bcrypt hashes, and removed redundant `clearDatabase()` calls in unit tests (Codeception's transaction rollback already handles cleanup). Functional tests went from ~1 hour to ~56 seconds.
+
 ## [1.11.1] - 2026-05-12
 
 ### Fixed
