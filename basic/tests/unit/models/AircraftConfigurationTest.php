@@ -34,6 +34,7 @@ class AircraftConfigurationTest extends BaseUnitTest
             'cargo_capacity' => 18000,
             'crew' => 3,
             'mtow' => 79016,
+            'bew' => 41413,
         ]);
         $this->assertTrue($cargoConfig->save());
     }
@@ -128,6 +129,7 @@ class AircraftConfigurationTest extends BaseUnitTest
             'cargo_capacity' => 500,
             'crew' => 2,
             'mtow' => 5000,
+            'bew' => 3000,
         ]);
         $this->assertFalse($nonExistentConfig->save());
         $this->assertArrayHasKey('aircraft_type_id', $nonExistentConfig->errors);
@@ -150,6 +152,7 @@ class AircraftConfigurationTest extends BaseUnitTest
             'cargo_capacity' => 2000,
             'crew' => 2,
             'mtow' => 1100,
+            'bew' => 767,
         ]);
         $this->assertTrue($standardConfig->save());
         $this->assertEquals($standardConfig->name, 'Trimmed');
