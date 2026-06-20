@@ -57,7 +57,7 @@ class AircraftConfiguration extends \yii\db\ActiveRecord
             'aircraft_type_id' => Yii::t('app', 'Aircraft Type'),
             'name' => Yii::t('app', 'Name'),
             'pax_capacity' => Yii::t('app', 'Pax Capacity'),
-            'cargo_capacity' => Yii::t('app', 'Cargo Capacity'),
+            'cargo_capacity' => Yii::t('app', 'Cargo Capacity (Kg)'),
             'crew' => Yii::t('app', 'Crew'),
             'mtow' => Yii::t('app', 'MTOW (Kg)'),
             'bew' => Yii::t('app', 'BEW (Kg)'),

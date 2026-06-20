@@ -75,6 +75,7 @@ return [
     'Cancel' => 'Cancelar',
     'Career Graph' => 'Grafo de Carrera',
     'Cargo Capacity' => 'Capacidad de Cargo',
+    'Cargo Capacity (Kg)' => 'Capacidad de Cargo (Kg)',
     'Certification' => 'Certificación',
     'Crew' => 'Tripulación',
     'Charter Route' => 'Ruta Chárter',
