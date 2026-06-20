@@ -61,7 +61,7 @@ class AircraftConfigurationUpdateCest
         $I->expectTo('see validations errors');
         $I->see('Name cannot be blank.');
         $I->see('Pax Capacity cannot be blank.');
-        $I->see('Cargo Capacity cannot be blank.');
+        $I->see('Cargo Capacity (Kg) cannot be blank.');
         $I->see('Crew cannot be blank.');
         $I->see('MTOW (Kg) cannot be blank.');
         $I->see('BEW (Kg) cannot be blank.');
