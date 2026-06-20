@@ -149,7 +149,7 @@ class AircraftConfigurationTest extends BaseUnitTest
             'aircraft_type_id' => $aircraftType->id,
             'name' => '   Trimmed    ',
             'pax_capacity' => 180,
-            'cargo_capacity' => 2000,
+            'cargo_capacity' => 200,
             'crew' => 2,
             'mtow' => 1100,
             'bew' => 767,
