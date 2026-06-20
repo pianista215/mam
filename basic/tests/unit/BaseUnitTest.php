@@ -9,7 +9,6 @@ abstract class BaseUnitTest extends \Codeception\Test\Unit
     protected function _before()
     {
         parent::_before();
-        $this->clearDatabase();
     }
 
     protected function clearDatabase()

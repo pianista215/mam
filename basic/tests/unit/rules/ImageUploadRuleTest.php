@@ -77,7 +77,7 @@ class ImageUploadRuleTest extends BaseUnitTest
             'name' => 'John',
             'surname' => 'Doe',
             'email' => uniqid('p') . '@example.com',
-            'password' => Yii::$app->security->generatePasswordHash('pass123'),
+            'password' => '$2y$10$K.0PtZ92xXE1tVEl35T0v.b920DA4uwtVPf9jCAyKhlHwKs72EJdW', // pass123
             'country_id' => 1,
             'city' => 'Madrid',
             'location' => 'LEMD',

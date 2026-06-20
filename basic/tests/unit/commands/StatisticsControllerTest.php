@@ -79,6 +79,9 @@ class StatisticsControllerTest extends BaseUnitTest
             'name' => 'Standard',
             'pax_capacity' => 180,
             'cargo_capacity' => 2000,
+            'crew' => 5,
+            'mtow' => 79016,
+            'bew' => 41413,
         ]);
         $config->save(false);
 
@@ -105,7 +108,7 @@ class StatisticsControllerTest extends BaseUnitTest
             'name' => 'John',
             'surname' => 'Doe',
             'email' => 'john@test.com',
-            'password' => Yii::$app->security->generatePasswordHash('test'),
+            'password' => '$2y$10$72JM.DYpddpessTYjHI0kuH/0NKNYeLP.YoU2AZwGY1kHY.Aow0Mu', // test
             'country_id' => $country->id,
             'city' => 'Madrid',
             'location' => 'LEMD',
@@ -118,7 +121,7 @@ class StatisticsControllerTest extends BaseUnitTest
             'name' => 'Jane',
             'surname' => 'Smith',
             'email' => 'jane@test.com',
-            'password' => Yii::$app->security->generatePasswordHash('test'),
+            'password' => '$2y$10$72JM.DYpddpessTYjHI0kuH/0NKNYeLP.YoU2AZwGY1kHY.Aow0Mu', // test
             'country_id' => $country->id,
             'city' => 'Barcelona',
             'location' => 'LEBL',

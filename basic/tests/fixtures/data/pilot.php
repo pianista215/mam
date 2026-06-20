@@ -8,7 +8,7 @@ return [
         'name' => 'John',
         'surname' => 'Doe',
         'email' => 'john.doe@example.com',
-        'password' => Yii::$app->security->generatePasswordHash('SecurePass123!'),
+        'password' => '$2y$10$Y1cO2xBAETW/UtvLwWcNkO0UgQTbuisG1n65xgc8kMgwfIv.TayjW', // SecurePass123!
         'access_token' => Yii::$app->security->generateRandomString(32),
         'city' => 'Madrid',
         'location' => 'LEBL',
@@ -24,7 +24,7 @@ return [
         'name' => 'Admin',
         'surname' => 'Admin',
         'email' => 'admin@example.com',
-        'password' => Yii::$app->security->generatePasswordHash('admin1234!'),
+        'password' => '$2y$10$G0UYaBgs1LfLp../w6owU.tFNiQWuy7inL5l5p.j6cNn5mv6rjFrW', // admin1234!
         'access_token' => Yii::$app->security->generateRandomString(32),
         'city' => 'Valladolid',
         'location' => 'LEMD',
@@ -40,7 +40,7 @@ return [
         'name' => 'nonactivated',
         'surname' => 'nonactivated',
         'email' => 'nonactivated@example.com',
-        'password' => Yii::$app->security->generatePasswordHash('nonactivated1234!'),
+        'password' => '$2y$10$OIpNZIxQ2IUYUphzFsxZL.MridirIe62qchfARoDtxuoQ.10vfPli', // nonactivated1234!
         'access_token' => Yii::$app->security->generateRandomString(32),
         'city' => 'Valladolid',
         'location' => 'LEBL',
@@ -55,7 +55,7 @@ return [
         'name' => 'Vfr',
         'surname' => 'Validator',
         'email' => 'id4@example.com',
-        'password' => Yii::$app->security->generatePasswordHash('otherid4!'),
+        'password' => '$2y$10$xrgoZ6jg8AenVxknA0FWjOi0cvDJG3qp6sJxZDsjRjs6ifcVZBE8C', // otherid4!
         'access_token' => Yii::$app->security->generateRandomString(32),
         'city' => 'Valladolid',
         'location' => 'LEBL',
@@ -70,7 +70,7 @@ return [
         'name' => 'Ifr',
         'surname' => 'Validator',
         'email' => 'id5@example.com',
-        'password' => Yii::$app->security->generatePasswordHash('otherid5!'),
+        'password' => '$2y$10$T7XLfONy6suabw1DehxxS.npGYFKssFKdW0.SP8NUuv2uo.mkx3fW', // otherid5!
         'access_token' => Yii::$app->security->generateRandomString(32),
         'city' => 'Valladolid',
         'location' => 'LEBL',
@@ -86,7 +86,7 @@ return [
         'name' => 'Vfr',
         'surname' => 'School',
         'email' => 'id6@example.com',
-        'password' => Yii::$app->security->generatePasswordHash('otherid6!'),
+        'password' => '$2y$10$ADQYBDDE1StNd1MO2mtoRevk/noCjS3hsEnWIGmrnI4Uf5YbkEThC', // otherid6!
         'access_token' => Yii::$app->security->generateRandomString(32),
         'city' => 'Valladolid',
         'location' => 'LEBL',
@@ -101,7 +101,7 @@ return [
         'name' => 'Ifr',
         'surname' => 'School',
         'email' => 'id7@example.com',
-        'password' => Yii::$app->security->generatePasswordHash('otherid7!'),
+        'password' => '$2y$10$B2UMUofInJC22pV0MaKKCuKwNbWDNU3dChH0i1g3TgYAOms8x.QbW', // otherid7!
         'access_token' => Yii::$app->security->generateRandomString(32),
         'city' => 'Valladolid',
         'location' => 'LEBL',
@@ -117,7 +117,7 @@ return [
         'name' => 'Other Ifr',
         'surname' => 'School',
         'email' => 'id8@example.com',
-        'password' => Yii::$app->security->generatePasswordHash('otherid8!'),
+        'password' => '$2y$10$bgdiFWB9XMvBiVRhB0BD/OLhtCNmjL43ul/IT3J5./se3eFlkZzz2', // otherid8!
         'access_token' => Yii::$app->security->generateRandomString(32),
         'city' => 'Valladolid',
         'location' => 'LEBL',
@@ -133,7 +133,7 @@ return [
         'name' => 'Fleet',
         'surname' => 'Mgr',
         'email' => 'id9@example.com',
-        'password' => Yii::$app->security->generatePasswordHash('otherid9!'),
+        'password' => '$2y$10$rmcyLNpMNpUTy4k85/ZP6eGogJhFYAIg8KVxX9tXPS2ynAfXHrudO', // otherid9!
         'access_token' => Yii::$app->security->generateRandomString(32),
         'city' => 'Valladolid',
         'location' => 'LEBL',
@@ -149,7 +149,7 @@ return [
         'name' => 'Tour',
         'surname' => 'Mgr',
         'email' => 'id10@example.com',
-        'password' => Yii::$app->security->generatePasswordHash('otherid10!'),
+        'password' => '$2y$10$Hp2t5kJjpetZOI3YdVm4aez2PwdoRI9fy8CBs6AXScwryDcRBahwK', // otherid10!
         'access_token' => Yii::$app->security->generateRandomString(32),
         'city' => 'Valladolid',
         'location' => 'LEAL',
@@ -164,7 +164,7 @@ return [
         'name' => 'Fleet',
         'surname' => 'Opr',
         'email' => 'id11@example.com',
-        'password' => Yii::$app->security->generatePasswordHash('otherid11!'),
+        'password' => '$2y$10$tMoAXBuFkx0WlFN7KKoGuO83FFVh0AXPF87uPfmRj.0p2yypqMrhG', // otherid11!
         'access_token' => Yii::$app->security->generateRandomString(32),
         'city' => 'Valladolid',
         'location' => 'LEAL',
@@ -179,7 +179,7 @@ return [
         'name' => 'Airport',
         'surname' => 'Manager',
         'email' => 'id12@example.com',
-        'password' => Yii::$app->security->generatePasswordHash('otherid12!'),
+        'password' => '$2y$10$di2VpYE9eb/faj/pDk2KJee.BanyyyY0lH3ceKafx1V2fFokUq2za', // otherid12!
         'access_token' => Yii::$app->security->generateRandomString(32),
         'city' => 'Valladolid',
         'location' => 'LEAL',
@@ -194,7 +194,7 @@ return [
         'name' => 'Super',
         'surname' => 'Admin',
         'email' => 'id13@example.com',
-        'password' => Yii::$app->security->generatePasswordHash('otherid13!'),
+        'password' => '$2y$10$gyJr7h0ByHtiHiBPbwZgZO2W50teGQFriMeVFSk8sLz9d2nugk47.', // otherid13!
         'access_token' => Yii::$app->security->generateRandomString(32),
         'city' => 'Valladolid',
         'location' => 'LEAL',

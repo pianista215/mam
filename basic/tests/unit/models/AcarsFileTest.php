@@ -69,7 +69,7 @@ class AcarsFileTest extends BaseUnitTest
             'name' => 'John',
             'surname' => 'Doe',
             'email' => 'john.doe@example.com',
-            'password' => Yii::$app->security->generatePasswordHash('SecurePass123!'),
+            'password' => '$2y$10$Y1cO2xBAETW/UtvLwWcNkO0UgQTbuisG1n65xgc8kMgwfIv.TayjW', // SecurePass123!
             'country_id' => $country->id,
             'city' => 'Madrid',
             'location' => 'LEMD',
@@ -89,6 +89,9 @@ class AcarsFileTest extends BaseUnitTest
             'name' => 'Standard',
             'pax_capacity' => 180,
             'cargo_capacity' => 2000,
+            'crew' => 5,
+            'mtow' => 79016,
+            'bew' => 41413,
         ]);
         $config->save();
 

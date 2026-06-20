@@ -23,6 +23,12 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'cargo_capacity')->textInput() ?>
 
+    <?= $form->field($model, 'crew')->textInput() ?>
+
+    <?= $form->field($model, 'bew')->textInput() ?>
+
+    <?= $form->field($model, 'mtow')->textInput() ?>
+
     <div class="form-group">
         <?= Html::submitButton(Yii::t('app', 'Save'), ['class' => 'btn btn-success']) ?>
     </div>

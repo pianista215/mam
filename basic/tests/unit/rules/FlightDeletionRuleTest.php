@@ -71,7 +71,10 @@ class FlightDeletionRuleTest extends BaseUnitTest
             'aircraft_type_id' => 1,
             'name' => 'Standard',
             'pax_capacity' => 180,
-            'cargo_capacity' => 1000
+            'cargo_capacity' => 1000,
+            'crew' => 5,
+            'mtow' => 79016,
+            'bew' => 41413,
         ]);
         $aircraftConfig->save(false);
 
@@ -93,7 +96,7 @@ class FlightDeletionRuleTest extends BaseUnitTest
             'name' => 'Pilot',
             'surname' => 'Test',
             'email' => "pilot{$id}@example.com",
-            'password' => Yii::$app->security->generatePasswordHash('pass123'),
+            'password' => '$2y$10$K.0PtZ92xXE1tVEl35T0v.b920DA4uwtVPf9jCAyKhlHwKs72EJdW', // pass123
             'country_id' => 1,
             'city' => 'Madrid',
             'location' => 'LEMD',

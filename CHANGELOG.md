@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.12.0] - upcoming
+
+### Added
+- Aircraft configuration: new `crew` field (minimum crew count, integer ≥ 1), `mtow` field (Maximum Takeoff Weight in kg, integer ≥ 1) and `bew` field (Basic Empty Weight in kg, integer ≥ 1) on every configuration
+
 ## [1.11.1] - 2026-05-12
 
 ### Fixed
