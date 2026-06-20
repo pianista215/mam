@@ -15,12 +15,18 @@ use Yii;
  * @property int $crew
  * @property int $mtow
  * @property int $bew
+ * @property float|null $fuel_regression_a
+ * @property float|null $fuel_regression_b
+ * @property int|null $fuel_regression_n
+ * @property float|null $fuel_avg_kg_per_min
+ * @property string|null $fuel_regression_updated_at
  *
  * @property AircraftType $aircraftType
  * @property Aircraft[] $aircrafts
  */
 class AircraftConfiguration extends \yii\db\ActiveRecord
 {
+    const SCENARIO_ADMIN_FORM = 'admin_form';
     /**
      * {@inheritdoc}
      */
@@ -44,7 +50,18 @@ class AircraftConfiguration extends \yii\db\ActiveRecord
             [['name'], 'trim'],
             [['name'], 'unique', 'targetAttribute' => ['aircraft_type_id', 'name']],
             [['aircraft_type_id'], 'exist', 'skipOnError' => true, 'targetClass' => AircraftType::class, 'targetAttribute' => ['aircraft_type_id' => 'id']],
+            [['fuel_regression_a', 'fuel_regression_b', 'fuel_avg_kg_per_min'], 'number'],
+            [['fuel_regression_n'], 'integer', 'min' => 0],
+            [['fuel_regression_updated_at'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+            [['fuel_regression_a', 'fuel_regression_b', 'fuel_regression_n', 'fuel_avg_kg_per_min', 'fuel_regression_updated_at'], 'default', 'value' => null],
         ];
+    }
+
+    public function scenarios()
+    {
+        $scenarios = parent::scenarios();
+        $scenarios[self::SCENARIO_ADMIN_FORM] = ['aircraft_type_id', 'name', 'pax_capacity', 'cargo_capacity', 'crew', 'mtow', 'bew'];
+        return $scenarios;
     }
 
     /**

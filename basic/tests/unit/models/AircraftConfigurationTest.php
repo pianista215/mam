@@ -135,6 +135,33 @@ class AircraftConfigurationTest extends BaseUnitTest
         $this->assertArrayHasKey('aircraft_type_id', $nonExistentConfig->errors);
     }
 
+    public function testRegressionFieldsNotAssignableViaAdminFormScenario()
+    {
+        $config = new AircraftConfiguration(['scenario' => AircraftConfiguration::SCENARIO_ADMIN_FORM]);
+        $config->load([
+            'AircraftConfiguration' => [
+                'aircraft_type_id' => 1,
+                'name' => 'Test',
+                'pax_capacity' => 100,
+                'cargo_capacity' => 1000,
+                'crew' => 2,
+                'mtow' => 50000,
+                'bew' => 30000,
+                'fuel_regression_a' => 999.99,
+                'fuel_regression_b' => 5.1234,
+                'fuel_regression_n' => 100,
+                'fuel_avg_kg_per_min' => 99.9999,
+                'fuel_regression_updated_at' => '2026-01-01 00:00:00',
+            ],
+        ]);
+
+        $this->assertNull($config->fuel_regression_a);
+        $this->assertNull($config->fuel_regression_b);
+        $this->assertNull($config->fuel_regression_n);
+        $this->assertNull($config->fuel_avg_kg_per_min);
+        $this->assertNull($config->fuel_regression_updated_at);
+    }
+
     public function testTrimName()
     {
         $aircraftType = new AircraftType([

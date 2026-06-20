@@ -350,6 +350,9 @@ crontab -e
 
 # Optional: Monthly consolidation (day 2 at 03:00) to ensure data integrity
 0 3 2 * * cd /path/to/mam/basic && php yii statistics/consolidate >> /var/log/mam/statistics-consolidate.log 2>&1
+
+# Nightly fuel regression recalculation at 02:00
+0 2 * * * cd /path/to/mam/basic && php yii fuel-regression/calculate >> /var/log/mam/fuel-regression.log 2>&1
 ```
 
 ### Email configuration
