@@ -63,7 +63,7 @@ $this->params['breadcrumbs'][] = $this->title;
     ]) ?>
     <?php endif; ?>
 
-    <h3><?=Yii::t('app', 'Flight data')?></h3>
+    <h3 class="mt-4"><?=Yii::t('app', 'Flight data')?></h3>
 
     <?= $this->render('_flight_data', [
         'model' => $model,
