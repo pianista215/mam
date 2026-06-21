@@ -47,30 +47,16 @@ $this->params['breadcrumbs'][] = $this->title;
     ]) ?>
 
     <?php if ($model->pax_adults !== null): ?>
-    <div class="card mt-3">
-        <div class="card-header"><strong><?= Yii::t('app', 'Load Sheet') ?></strong></div>
-        <div class="card-body">
-            <?php
-            $adultW  = \app\config\ConfigHelper::getPaxAdultWeightKg();
-            $childW  = \app\config\ConfigHelper::getPaxChildWeightKg();
-            $bagW    = \app\config\ConfigHelper::getPaxCheckedBaggageKg();
-            $paxKg   = $model->pax_adults * $adultW + $model->pax_children * $childW;
-            $bagsKg  = $model->cargo_bags * $bagW;
-            $cargoKg = $bagsKg + $model->cargo_paid_kg;
-            ?>
-            <p>
-                <strong><?= Yii::t('app', 'PAX') ?>:</strong>
-                <?= $model->pax_adults ?> <?= Yii::t('app', 'adults') ?>,
-                <?= $model->pax_children ?> <?= Yii::t('app', 'children') ?>
-                &rarr; (<?= $model->pax_adults ?>&times;<?= $adultW ?> + <?= $model->pax_children ?>&times;<?= $childW ?>) = <strong><?= $paxKg ?> Kg</strong>
-            </p>
-            <p>
-                <strong><?= Yii::t('app', 'Cargo') ?>:</strong>
-                <?= Yii::t('app', 'Checked bags') ?> (<?= $model->cargo_bags ?> &times; <?= $bagW ?> Kg = <?= $bagsKg ?> Kg) +
-                <?= Yii::t('app', 'Paid cargo') ?> (<?= $model->cargo_paid_kg ?> Kg) = <strong><?= $cargoKg ?> Kg</strong>
-            </p>
-        </div>
-    </div>
+    <?= $this->render('_load_sheet', [
+        'paxAdults'   => $model->pax_adults,
+        'paxChildren' => $model->pax_children,
+        'cargoBags'   => $model->cargo_bags,
+        'cargoPaidKg' => $model->cargo_paid_kg,
+        'crew'        => $model->aircraft->aircraftConfiguration->crew,
+        'adultW'      => \app\config\ConfigHelper::getPaxAdultWeightKg(),
+        'childW'      => \app\config\ConfigHelper::getPaxChildWeightKg(),
+        'bagW'        => \app\config\ConfigHelper::getPaxCheckedBaggageKg(),
+    ]) ?>
     <?php endif; ?>
 
 </div>
