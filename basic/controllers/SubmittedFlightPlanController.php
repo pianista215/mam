@@ -504,11 +504,15 @@ class SubmittedFlightPlanController extends Controller
             }
 
             if ($this->request->isPost) {
-                $oldAlternative = $model->alternative1_icao;
+                $oldAlternative  = $model->alternative1_icao;
+                $oldAlternateNm  = $this->computeAlternateNm($entity->arrival, $oldAlternative);
                 $model->scenario = SubmittedFlightPlan::SCENARIO_FPL_FORM;
                 if ($model->load($this->request->post())) {
                     if ($model->alternative1_icao !== $oldAlternative) {
-                        $this->applyPayloadToModel($model, $entity, $model->aircraft);
+                        $newAlternateNm = $this->computeAlternateNm($entity->arrival, $model->alternative1_icao);
+                        if ($newAlternateNm > $oldAlternateNm) {
+                            $this->applyPayloadToModel($model, $entity, $model->aircraft);
+                        }
                     }
                     $model->scenario = SubmittedFlightPlan::SCENARIO_DEFAULT;
                     if ($model->save()) {
@@ -567,23 +571,30 @@ class SubmittedFlightPlanController extends Controller
         }
     }
 
+    private function computeAlternateNm(string $arrivalIcao, ?string $altIcao): float
+    {
+        if (!$altIcao) {
+            return 0.0;
+        }
+        $destAirport = Airport::findOne(['icao_code' => $arrivalIcao]);
+        $altAirport  = Airport::findOne(['icao_code' => $altIcao]);
+        if (!$destAirport || !$altAirport) {
+            return 0.0;
+        }
+        return GeoUtils::haversine(
+            (float) $destAirport->latitude,
+            (float) $destAirport->longitude,
+            (float) $altAirport->latitude,
+            (float) $altAirport->longitude,
+            'nm'
+        );
+    }
+
     protected function applyPayloadToModel(SubmittedFlightPlan $model, $entity, Aircraft $aircraft): void
     {
         $config = $aircraft->aircraftConfiguration;
 
-        $destAirport = Airport::findOne(['icao_code' => $entity->arrival]);
-        $altAirport  = Airport::findOne(['icao_code' => $model->alternative1_icao]);
-
-        $alternateNm = 0.0;
-        if ($destAirport && $altAirport) {
-            $alternateNm = GeoUtils::haversine(
-                (float) $destAirport->latitude,
-                (float) $destAirport->longitude,
-                (float) $altAirport->latitude,
-                (float) $altAirport->longitude,
-                'nm'
-            );
-        }
+        $alternateNm = $this->computeAlternateNm($entity->arrival, $model->alternative1_icao);
 
         $fuelEstimate    = FuelEstimator::estimate($config, (float) $entity->distance_nm, $alternateNm);
         $estimatedFuelKg = $fuelEstimate ? $fuelEstimate['total'] : null;

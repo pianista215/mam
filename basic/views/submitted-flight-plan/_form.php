@@ -84,10 +84,12 @@ use yii\widgets\ActiveForm;
         <div class="col-md-4">
             <div><?= $form->field($model, 'endurance_time')->textInput(['maxlength' => true, 'class' => 'form-control', 'readonly' => ($mode == 'view')])?></div>
         </div>
+        <?php if ($mode === 'view'): ?>
         <div class="col-md-4">
             <div><?=Yii::t('app', 'People on board')?></div>
             <div><?= Html::input('text', 'people', $pob ?? 'X', ['disabled' => true, 'maxlength' => 3, 'class' => 'form-control'])?></div>
         </div>
+        <?php endif; ?>
         <div class="col-md-4">
             <div><?=Yii::t('app', 'Pilot in command')?></div>
             <div><?= Html::input('text', 'pilot', $pilotName, ['disabled' => true, 'class' => 'form-control'])?></div>
