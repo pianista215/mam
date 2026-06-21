@@ -359,6 +359,10 @@ class FlightReportSubmissionCest
         $I->assertEquals($flight->status, 'C');
         $I->assertEquals(null, $flight->tour_stage_id);
         $I->assertEquals('R', $flight->flight_type);
+        $I->assertEquals(150, $flight->pax_adults);
+        $I->assertEquals(10, $flight->pax_children);
+        $I->assertEquals(5, $flight->cargo_bags);
+        $I->assertEquals(200, $flight->cargo_paid_kg);
 
         return $flight_report_id;
     }
@@ -662,6 +666,59 @@ class FlightReportSubmissionCest
         $I->assertEmpty($fpl);
         $charterRoute = \app\models\CharterRoute::find()->where(['pilot_id' => 4])->all();
         $I->assertEmpty($charterRoute);
+    }
+
+    public function testValidFlightReportSubmissionTourFlight(ApiTester $I)
+    {
+        // FPL id 4: pilot 8, aircraft 7, tour_stage_id 2 (LEBL→LEMD, tour "Tour actual reported", sequence 1)
+        $pilot_id = 8;
+        $aircraft_id = 7;
+
+        $this->loginAsUser($pilot_id, $I);
+        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=4', [
+            'pilot_comments'    => 'Tour flight done',
+            'last_position_lat' => 40.471926,
+            'last_position_lon' => -3.56264,
+            'network'           => 'VATSIM',
+            'sim_aircraft_name' => 'PMDG 737',
+            'report_tool'       => 'Mam Acars 1.0',
+            'start_time'        => '2025-03-01 09:00:00',
+            'end_time'          => '2025-03-01 10:15:00',
+            'chunks'            => [
+                ['id' => 1, 'sha256sum' => str_repeat('T', 44)],
+            ],
+        ]);
+
+        $I->seeResponseCodeIs(200);
+        $response = $I->grabResponse();
+        $data = json_decode($response, true);
+        $I->assertArrayHasKey('flight_report_id', $data);
+
+        $flight_report_id = $data['flight_report_id'];
+
+        $flight_report = \app\models\FlightReport::find()->where(['id' => $flight_report_id])->one();
+        $I->assertEquals('2025-03-01 09:00:00', $flight_report->start_time);
+        $I->assertEquals('2025-03-01 10:15:00', $flight_report->end_time);
+
+        $flight = \app\models\Flight::find()->where(['id' => $flight_report->flight_id])->one();
+        $I->assertEquals($pilot_id, $flight->pilot_id);
+        $I->assertEquals($aircraft_id, $flight->aircraft_id);
+        $I->assertEquals('T', $flight->flight_type);
+        $I->assertEquals(2, $flight->tour_stage_id);
+        $I->assertEquals('TAR1', $flight->code);
+        $I->assertEquals('LEBL', $flight->departure);
+        $I->assertEquals('LEMD', $flight->arrival);
+        $I->assertEquals('C', $flight->status);
+
+        // Verify pax/cargo from FPL id 4 are copied to the flight
+        $I->assertEquals(80, $flight->pax_adults);
+        $I->assertEquals(5, $flight->pax_children);
+        $I->assertEquals(20, $flight->cargo_bags);
+        $I->assertEquals(500, $flight->cargo_paid_kg);
+
+        // FPL is deleted after submission
+        $fpl = \app\models\SubmittedFlightPlan::find()->where(['pilot_id' => $pilot_id])->all();
+        $I->assertEmpty($fpl);
     }
 
 

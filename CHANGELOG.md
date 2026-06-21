@@ -13,6 +13,12 @@
 
 ### Changed
 - Test suite performance: replaced dynamic `generatePasswordHash()` calls in fixture and unit test files with pre-computed static bcrypt hashes, and removed redundant `clearDatabase()` calls in unit tests (Codeception's transaction rollback already handles cleanup). Functional tests went from ~1 hour to ~56 seconds.
+- Test: `FlightReportSubmissionCest` — `testValidWithRequest` now asserts that `pax_adults`, `pax_children`, `cargo_bags` and `cargo_paid_kg` are copied from the submitted FPL to the created flight; fixture entry id=1 updated with representative load data to enable the assertion. New test `testValidFlightReportSubmissionTourFlight` covers tour-type submissions, verifying `flight_type='T'`, `tour_stage_id` and pax/cargo propagation
+- Test: `SubmittedFlightPlanUpdateCest.updateAlternateToCloserDoesNotRegeneratePayload` — setup now seeds `cargo_bags` and `cargo_paid_kg` alongside pax to reflect the real invariant (all four fields are populated together); assertions extended to include cargo fields
+- Test: `PilotIndexViewCest` — expected flight count for pilot 5 updated to 7 (flight id=108 was added to the fixture for statistics testing)
+
+### Fixed
+- Console `flight-report/assemble-pending-acars` and `flight-report/import-pending-reports-analysis` — new unit test suite (`FlightReportControllerTest`, 15 tests) covering: gzip assembly and decompression, context.json generation, full happy-path import (phases, metrics, issues, events, pilot/aircraft hours, flight status), transaction rollback on unknown phase/issue/metric, null-issue timestamp, empty-array and null metric skipping, pipe-separated issue values, and comma-to-dot coordinate conversion
 - Aircraft configuration index: aircraft type column is now sortable; default order is aircraft type ascending then name ascending
 
 ## [1.11.1] - 2026-05-12

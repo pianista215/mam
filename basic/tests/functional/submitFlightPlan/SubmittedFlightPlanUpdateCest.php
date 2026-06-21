@@ -203,7 +203,7 @@ class SubmittedFlightPlanUpdateCest
         // FPL #3: LEBL→GCLP. Set initial alternate to LEBL (~1200 NM from GCLP) and known payload.
         Yii::$app->db->createCommand()->update(
             'submitted_flight_plan',
-            ['alternative1_icao' => 'LEBL', 'pax_adults' => 42, 'pax_children' => 3],
+            ['alternative1_icao' => 'LEBL', 'pax_adults' => 42, 'pax_children' => 3, 'cargo_bags' => 10, 'cargo_paid_kg' => 0],
             ['id' => 3]
         )->execute();
 
@@ -225,6 +225,8 @@ class SubmittedFlightPlanUpdateCest
         $model = \app\models\SubmittedFlightPlan::find()->where(['id' => 3])->one();
         $I->assertEquals(42, $model->pax_adults,   'Payload must not be regenerated when alternate is closer');
         $I->assertEquals(3,  $model->pax_children, 'Payload must not be regenerated when alternate is closer');
+        $I->assertEquals(10, $model->cargo_bags,   'Payload must not be regenerated when alternate is closer');
+        $I->assertEquals(0,  $model->cargo_paid_kg,'Payload must not be regenerated when alternate is closer');
     }
 
     public function updateAlternateToFartherRegeneratesPayload(\FunctionalTester $I)

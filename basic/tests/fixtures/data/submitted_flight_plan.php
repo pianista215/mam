@@ -16,6 +16,10 @@ return [
         'estimated_time' => '0130',
         'other_information' => 'DOF/20241205 REG/ECDDD OPR/XXX',
         'endurance_time' => '0400',
+        'pax_adults' => 150,
+        'pax_children' => 10,
+        'cargo_bags' => 5,
+        'cargo_paid_kg' => 200,
     ],
     [
         'id' => 2,
@@ -64,6 +68,10 @@ return [
         'estimated_time' => '0230',
         'other_information' => 'DOF/20241205 REG/ECFOS OPR/XXX',
         'endurance_time' => '0500',
+        'pax_adults' => 80,
+        'pax_children' => 5,
+        'cargo_bags' => 20,
+        'cargo_paid_kg' => 500,
     ],
     [
         'id' => 5,
