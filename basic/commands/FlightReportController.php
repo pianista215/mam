@@ -16,8 +16,6 @@ use Yii;
 
 class FlightReportController extends Controller
 {
-    # TODO: PENDING TO IMPLEMENT TESTING
-
     protected function joinAcarsFiles($report): ?string
     {
         $reportPath  = $report->getChunksDirectory();
