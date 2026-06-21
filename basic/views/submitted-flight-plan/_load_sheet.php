@@ -24,7 +24,7 @@ $cargoKg     = $bagsKg + $cargoPaidKg;
 $totalPayload = $crewKg + $paxKg + $cargoKg;
 $pob         = $paxTotal + $crew;
 
-$fmt = fn(int $n) => number_format($n, 0, '.', ',') . ' kg';
+$fmt = fn(int $n) => number_format($n, 0, '.', ',') . ' Kg';
 ?>
 <div class="card mt-3">
     <div class="card-header text-white text-center fw-bold py-2" style="background-color: var(--brand);">
@@ -49,7 +49,7 @@ $fmt = fn(int $n) => number_format($n, 0, '.', ',') . ' kg';
                 <tr>
                     <td class="ps-3"><?= Yii::t('app', 'Crew') ?></td>
                     <td class="text-center"><?= $crew ?></td>
-                    <td class="text-end"><?= $adultW ?> kg</td>
+                    <td class="text-end"><?= $adultW ?> Kg</td>
                     <td class="text-end fw-semibold"><?= $fmt($crewKg) ?></td>
                 </tr>
 
@@ -59,13 +59,13 @@ $fmt = fn(int $n) => number_format($n, 0, '.', ',') . ' kg';
                 <tr>
                     <td class="ps-3"><?= Yii::t('app', 'Adults') ?></td>
                     <td class="text-center"><?= $paxAdults ?></td>
-                    <td class="text-end"><?= $adultW ?> kg</td>
+                    <td class="text-end"><?= $adultW ?> Kg</td>
                     <td class="text-end"><?= $fmt($adultsKg) ?></td>
                 </tr>
                 <tr>
                     <td class="ps-3"><?= Yii::t('app', 'Children') ?></td>
                     <td class="text-center"><?= $paxChildren ?></td>
-                    <td class="text-end"><?= $childW ?> kg</td>
+                    <td class="text-end"><?= $childW ?> Kg</td>
                     <td class="text-end"><?= $fmt($childrenKg) ?></td>
                 </tr>
                 <tr class="fw-bold" style="--bs-table-bg: #e9ecef;">
@@ -81,7 +81,7 @@ $fmt = fn(int $n) => number_format($n, 0, '.', ',') . ' kg';
                 <tr>
                     <td class="ps-3"><?= Yii::t('app', 'Checked bags') ?></td>
                     <td class="text-center"><?= $cargoBags ?></td>
-                    <td class="text-end"><?= $bagW ?> kg</td>
+                    <td class="text-end"><?= $bagW ?> Kg</td>
                     <td class="text-end"><?= $fmt($bagsKg) ?></td>
                 </tr>
                 <tr>
