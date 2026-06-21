@@ -56,7 +56,7 @@ class AircraftConfigurationCreateCest
        $I->see('Cargo Capacity (Kg) cannot be blank.');
        $I->see('Crew cannot be blank.');
        $I->see('MTOW (Kg) cannot be blank.');
-       $I->see('BEW (Kg) cannot be blank.');
+       $I->see('OEW (Kg) cannot be blank.');
 
        $count = \app\models\AircraftConfiguration::find()->count();
        $I->assertEquals(4, $count);
@@ -73,7 +73,7 @@ class AircraftConfigurationCreateCest
        $I->fillField('#aircraftconfiguration-cargo_capacity', '950');
        $I->fillField('#aircraftconfiguration-crew', '6');
        $I->fillField('#aircraftconfiguration-mtow', '77000');
-       $I->fillField('#aircraftconfiguration-bew', '42000');
+       $I->fillField('#aircraftconfiguration-oew', '42000');
        $I->click('Save', 'button');
 
        $I->seeResponseCodeIs(200);
@@ -94,7 +94,7 @@ class AircraftConfigurationCreateCest
        $I->assertEquals(950, $model->cargo_capacity);
        $I->assertEquals(6, $model->crew);
        $I->assertEquals(77000, $model->mtow);
-       $I->assertEquals(42000, $model->bew);
+       $I->assertEquals(42000, $model->oew);
 
        $count = \app\models\AircraftConfiguration::find()->count();
        $I->assertEquals(5, $count);

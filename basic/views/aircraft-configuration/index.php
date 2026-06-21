@@ -41,7 +41,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ['attribute' => 'pax_capacity', 'filter' => false],
             ['attribute' => 'cargo_capacity', 'filter' => false],
             ['attribute' => 'crew', 'filter' => false],
-            ['attribute' => 'bew', 'filter' => false],
+            ['attribute' => 'oew', 'filter' => false],
             ['attribute' => 'mtow', 'filter' => false],
             [
                 'class' => ActionColumn::className(),

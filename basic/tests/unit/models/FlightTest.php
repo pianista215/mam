@@ -91,7 +91,7 @@ class FlightTest extends BaseUnitTest
             'cargo_capacity' => 2000,
             'crew' => 5,
             'mtow' => 79016,
-            'bew' => 41413,
+            'oew' => 41413,
         ]);
         $config->save();
 

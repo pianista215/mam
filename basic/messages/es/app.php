@@ -233,7 +233,7 @@ return [
     'Manage Images' => 'Gestionar Imágenes',
     'Max Glideslope' => 'Senda máxima',
     'Max Range (NM)' => 'Máximo Alcance (NM)',
-    'BEW (Kg)' => 'BEW (Kg)',
+    'OEW (Kg)' => 'OEW (Kg)',
     'MTOW (Kg)' => 'MTOW (Kg)',
     'Aircraft type resources limit (MB)' => 'Límite de recursos del tipo de aeronave (MB)',
     'Monthly Statistics' => 'Estadísticas Mensuales',

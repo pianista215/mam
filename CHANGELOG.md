@@ -3,7 +3,7 @@
 ## [1.12.0] - upcoming
 
 ### Added
-- Aircraft configuration: new `crew` field (minimum crew count, integer ≥ 1), `mtow` field (Maximum Takeoff Weight in kg, integer ≥ 1) and `bew` field (Basic Empty Weight in kg, integer ≥ 1) on every configuration
+- Aircraft configuration: new `crew` field (minimum crew count, integer ≥ 1), `mtow` field (Maximum Takeoff Weight in kg, integer ≥ 1) and `oew` field (Basic Empty Weight in kg, integer ≥ 1) on every configuration
 - Fuel regression: nightly job (`fuel-regression/calculate`) computes per-configuration linear regression (fuel = a + b·distance) from completed historical flights, with hard-floor and 2σ outlier filtering. `FuelEstimator` helper (`basic/helpers/FuelEstimator.php`) provides fuel breakdowns (trip, alternate, contingency, reserve) for flight generation, returning `null` when insufficient data (< 5 valid flights) so the generator falls back to a static safe payload allocation. Regression fields in `aircraft_configuration` are write-protected against mass-assignment via `SCENARIO_ADMIN_FORM`
 
 ### Changed

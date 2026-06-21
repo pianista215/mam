@@ -2,7 +2,7 @@
 
 use yii\db\Migration;
 
-class m260619_175732_add_crew_mtow_bew_to_aircraft_configuration extends Migration
+class m260619_175732_add_crew_mtow_oew_to_aircraft_configuration extends Migration
 {
     public function up()
     {
@@ -10,7 +10,7 @@ class m260619_175732_add_crew_mtow_bew_to_aircraft_configuration extends Migrati
             $this->tinyInteger(3)->unsigned()->notNull()->after('cargo_capacity'));
         $this->addColumn('aircraft_configuration', 'mtow',
             $this->integer(10)->unsigned()->notNull()->after('crew'));
-        $this->addColumn('aircraft_configuration', 'bew',
+        $this->addColumn('aircraft_configuration', 'oew',
             $this->integer(10)->unsigned()->notNull()->after('mtow'));
     }
 
@@ -18,6 +18,6 @@ class m260619_175732_add_crew_mtow_bew_to_aircraft_configuration extends Migrati
     {
         $this->dropColumn('aircraft_configuration', 'crew');
         $this->dropColumn('aircraft_configuration', 'mtow');
-        $this->dropColumn('aircraft_configuration', 'bew');
+        $this->dropColumn('aircraft_configuration', 'oew');
     }
 }
