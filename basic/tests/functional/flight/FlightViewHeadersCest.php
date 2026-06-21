@@ -42,4 +42,5 @@ class FlightViewHeadersCest
         $I->seeResponseCodeIs(200);
         $I->see('Charter Flight (LEMD-LEBL)');
     }
+
 }

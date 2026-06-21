@@ -141,6 +141,22 @@ return [
         'crash' => 0,
         'sim_aircraft_name' => 'Zibo 737-800',
     ],
+    // Flight 10 - modern flight with payload data
+    [
+        'id' => 10,
+        'flight_id' => 10,
+        'start_time' => '2026-01-01 08:15:00',
+        'end_time' => '2026-01-01 09:45:00',
+        'flight_time_minutes' => 90,
+        'block_time_minutes' => 95,
+        'total_fuel_burn_kg' => 3200,
+        'distance_nm' => 280,
+        'pilot_comments' => '',
+        'initial_fuel_on_board' => 6000,
+        'zero_fuel_weight' => 58000,
+        'crash' => 0,
+        'sim_aircraft_name' => 'Zibo 737-800',
+    ],
     // Flight 108 (December 2024) - 95 minutes, 280 nm
     [
         'id' => 108,
