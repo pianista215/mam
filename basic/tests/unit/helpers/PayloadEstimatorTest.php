@@ -116,6 +116,29 @@ class PayloadEstimatorTest extends BaseUnitTest
         $this->assertGreaterThanOrEqual(0, $result['cargo_paid_kg']);
     }
 
+    public function testFallbackCapsTotalWeightAtFiftyPercent()
+    {
+        $mtow   = 100000;
+        $oew    = 50000;
+        $crew   = 2;
+        $adultW = 84;
+        $config = $this->makeConfig([
+            'mtow' => $mtow, 'oew' => $oew, 'crew' => $crew,
+            'pax_capacity' => 150, 'cargo_capacity' => 20000,
+        ]);
+        // With null fuel: availablePayload = (MTOW - OEW - crew*adultW) * 0.5
+        $maxPayload = ($mtow - $oew - $crew * $adultW) * 0.5;
+
+        for ($i = 0; $i < 20; $i++) {
+            $result      = $this->generate($config, null);
+            $paxWeight   = $result['pax_adults'] * $adultW + $result['pax_children'] * 35;
+            $bagsWeight  = $result['cargo_bags'] * 13;
+            $totalWeight = $paxWeight + $bagsWeight + $result['cargo_paid_kg'];
+
+            $this->assertLessThanOrEqual($maxPayload, $totalWeight);
+        }
+    }
+
     // --- Zero available payload edge case ---
 
     public function testZeroAvailablePayloadReturnsAllZeros()
