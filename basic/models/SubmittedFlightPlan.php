@@ -42,6 +42,7 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
 {
     use LoggerTrait;
 
+    const SCENARIO_DEFAULT  = 'default';
     const SCENARIO_FPL_FORM = 'fpl_form';
     /**
      * {@inheritdoc}

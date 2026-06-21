@@ -510,7 +510,7 @@ class SubmittedFlightPlanController extends Controller
                     if ($model->alternative1_icao !== $oldAlternative) {
                         $this->applyPayloadToModel($model, $entity, $model->aircraft);
                     }
-                    $model->scenario = SubmittedFlightPlan::DEFAULT_SCENARIO;
+                    $model->scenario = SubmittedFlightPlan::SCENARIO_DEFAULT;
                     if ($model->save()) {
                         $this->logInfo('Updated fpl', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
                         return $this->redirect(['view', 'id' => $model->id]);
