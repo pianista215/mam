@@ -212,6 +212,11 @@ class FlightReportController extends Controller
         $flight->report_tool = $dto->report_tool;
         $flight->network = $dto->network;
 
+        $flight->pax_adults    = $submittedFpl->pax_adults;
+        $flight->pax_children  = $submittedFpl->pax_children;
+        $flight->cargo_bags    = $submittedFpl->cargo_bags;
+        $flight->cargo_paid_kg = $submittedFpl->cargo_paid_kg;
+
         return $flight;
     }
 

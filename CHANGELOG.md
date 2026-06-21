@@ -5,6 +5,11 @@
 ### Added
 - Aircraft configuration: new `crew` field (minimum crew count, integer ≥ 1), `mtow` field (Maximum Takeoff Weight in kg, integer ≥ 1) and `oew` field (Basic Empty Weight in kg, integer ≥ 1) on every configuration
 - Fuel regression: nightly job (`fuel-regression/calculate`) computes per-configuration linear regression (fuel = a + b·distance) from completed historical flights, with hard-floor and 2σ outlier filtering. `FuelEstimator` helper (`basic/helpers/FuelEstimator.php`) provides fuel breakdowns (trip, alternate, contingency, reserve) for flight generation, returning `null` when insufficient data (< 5 valid flights) so the generator falls back to a static safe payload allocation. Regression fields in `aircraft_configuration` are write-protected against mass-assignment via `SCENARIO_ADMIN_FORM`
+- Passenger and cargo load generation on FPL submission: `PayloadEstimator` helper computes a randomised but realistic load (adults, children, checked bags, paid cargo) using MTOW/OEW/fuel estimate and configurable weight constants; occupancy varies by day of week (higher on Mon/Fri/Sat/Sun). Results are stored on `submitted_flight_plan` and copied to `flight` when ACARS submits
+- Load sheet displayed in the FPL view and flight view: PAX line (adults × adult_weight + children × child_weight) and Cargo line (bags + paid cargo) with Kg totals
+- "People on board" field now shows the actual count (pax + crew) instead of 'X' in both the FPL and flight views
+- Payload regenerated automatically when the alternate airport is changed during FPL update
+- Admin settings → new "Pesos de Carga" section: configurable adult weight (default 84 Kg), child weight (default 35 Kg), and checked baggage weight (default 13 Kg)
 
 ### Changed
 - Test suite performance: replaced dynamic `generatePasswordHash()` calls in fixture and unit test files with pre-computed static bcrypt hashes, and removed redundant `clearDatabase()` calls in unit tests (Codeception's transaction rollback already handles cleanup). Functional tests went from ~1 hour to ~56 seconds.

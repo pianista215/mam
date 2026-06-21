@@ -25,6 +25,10 @@ use Yii;
  * @property int $pilot_id
  * @property int|null $tour_stage_id
  * @property int|null $charter_route_id
+ * @property int|null $pax_adults
+ * @property int|null $pax_children
+ * @property int|null $cargo_bags
+ * @property int|null $cargo_paid_kg
  *
  * @property Aircraft $aircraft
  * @property Airport $alternative1Icao
@@ -37,6 +41,8 @@ use Yii;
 class SubmittedFlightPlan extends \yii\db\ActiveRecord
 {
     use LoggerTrait;
+
+    const SCENARIO_FPL_FORM = 'fpl_form';
     /**
      * {@inheritdoc}
      */
@@ -48,6 +54,18 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
+    public function scenarios()
+    {
+        $scenarios = parent::scenarios();
+        $scenarios[self::SCENARIO_FPL_FORM] = [
+            'flight_rules', 'alternative1_icao', 'alternative2_icao',
+            'cruise_speed_value', 'cruise_speed_unit',
+            'flight_level_value', 'flight_level_unit',
+            'route', 'estimated_time', 'other_information', 'endurance_time',
+        ];
+        return $scenarios;
+    }
+
     public function rules()
     {
         return [
@@ -77,6 +95,8 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
             [['pilot_id'], 'validatePilotLocation'],
             [['aircraft_id'], 'validateAircraftLocation'],
             [['route_id', 'tour_stage_id', 'charter_route_id'], 'validateRouteOrStageOrCharter', 'skipOnEmpty' => false],
+            [['pax_adults', 'pax_children', 'cargo_bags', 'cargo_paid_kg'], 'integer', 'min' => 0],
+            [['pax_adults', 'pax_children', 'cargo_bags', 'cargo_paid_kg'], 'default', 'value' => null],
         ];
     }
 

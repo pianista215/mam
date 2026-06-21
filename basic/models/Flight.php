@@ -34,6 +34,10 @@ use Yii;
  * @property string|null $validation_date
  * @property int|null $tour_stage_id
  * @property string $flight_type
+ * @property int|null $pax_adults
+ * @property int|null $pax_children
+ * @property int|null $cargo_bags
+ * @property int|null $cargo_paid_kg
  *
  * @property Aircraft $aircraft
  * @property Airport $alternative1Icao
@@ -113,6 +117,8 @@ class Flight extends \yii\db\ActiveRecord
             [['pilot_id'], 'exist', 'skipOnError' => true, 'targetClass' => Pilot::class, 'targetAttribute' => ['pilot_id' => 'id']],
             [['validator_id'], 'exist', 'skipOnError' => true, 'targetClass' => Pilot::class, 'targetAttribute' => ['validator_id' => 'id']],
             [['tour_stage_id'], 'exist', 'skipOnError' => true, 'targetClass' => TourStage::class, 'targetAttribute' => ['tour_stage_id' => 'id']],
+            [['pax_adults', 'pax_children', 'cargo_bags', 'cargo_paid_kg'], 'integer', 'min' => 0],
+            [['pax_adults', 'pax_children', 'cargo_bags', 'cargo_paid_kg'], 'default', 'value' => null],
         ];
     }
 

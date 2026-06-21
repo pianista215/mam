@@ -86,4 +86,28 @@ class ConfigHelperTest extends BaseUnitTest
 
         $this->assertNull(Config::get('non_existing_key')); // para fechas y strings opcionales
     }
+
+    public function testPayloadWeightGettersReturnDefaults()
+    {
+        Config::delete(CK::PAX_ADULT_WEIGHT_KG);
+        Config::delete(CK::PAX_CHILD_WEIGHT_KG);
+        Config::delete(CK::PAX_CHECKED_BAGGAGE_KG);
+        Yii::$app->cache->flush();
+
+        $this->assertEquals(84, CK::getPaxAdultWeightKg());
+        $this->assertEquals(35, CK::getPaxChildWeightKg());
+        $this->assertEquals(13, CK::getPaxCheckedBaggageKg());
+    }
+
+    public function testPayloadWeightGettersReturnConfiguredValues()
+    {
+        Config::set(CK::PAX_ADULT_WEIGHT_KG,    '90');
+        Config::set(CK::PAX_CHILD_WEIGHT_KG,    '40');
+        Config::set(CK::PAX_CHECKED_BAGGAGE_KG, '15');
+        Yii::$app->cache->flush();
+
+        $this->assertEquals(90, CK::getPaxAdultWeightKg());
+        $this->assertEquals(40, CK::getPaxChildWeightKg());
+        $this->assertEquals(15, CK::getPaxCheckedBaggageKg());
+    }
 }
