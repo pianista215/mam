@@ -27,7 +27,7 @@ $pob         = $paxTotal + $crew;
 $fmt = fn(int $n) => number_format($n, 0, '.', ',') . ' Kg';
 ?>
 <div class="card mt-3">
-    <div class="card-header text-white text-center fw-bold py-2" style="background-color: var(--brand);">
+    <div class="card-header bg-dark text-white text-center fw-bold py-2">
         <?= Html::encode(Yii::t('app', 'Load Sheet')) ?>
     </div>
     <div class="card-body p-0">
@@ -97,7 +97,7 @@ $fmt = fn(int $n) => number_format($n, 0, '.', ',') . ' Kg';
                     <td class="text-end"><?= $fmt($cargoKg) ?></td>
                 </tr>
 
-                <tr class="fw-bold" style="--bs-table-bg: var(--brand); --bs-table-color: #fff;">
+                <tr class="fw-bold table-secondary" style="border-top: 2px solid #6c757d;">
                     <td><?= Yii::t('app', 'Payload') ?></td>
                     <td class="text-center fw-normal"><?= $pob ?> <?= Yii::t('app', 'POB') ?></td>
                     <td class="text-end"></td>
