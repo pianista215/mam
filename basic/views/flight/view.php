@@ -51,7 +51,7 @@ $this->params['breadcrumbs'][] = $this->title;
     ]) ?>
 
     <?php if ($model->pax_adults !== null): ?>
-    <?= $this->render('@app/views/submitted-flight-plan/_load_sheet', [
+    <?= $this->render('@app/views/partials/_load_sheet', [
         'paxAdults'   => $model->pax_adults,
         'paxChildren' => $model->pax_children,
         'cargoBags'   => $model->cargo_bags,
