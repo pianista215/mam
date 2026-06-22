@@ -1,12 +1,25 @@
 # Changelog
 
-## [1.12.0] - upcoming
+## [1.12.0] - 2026-06-22
 
 ### Added
-- Aircraft configuration: new `crew` field (minimum crew count, integer ≥ 1), `mtow` field (Maximum Takeoff Weight in kg, integer ≥ 1) and `bew` field (Basic Empty Weight in kg, integer ≥ 1) on every configuration
+- Aircraft configuration: new `crew` field (minimum crew count, integer ≥ 1), `mtow` field (Maximum Takeoff Weight in kg, integer ≥ 1) and `oew` field (Basic Empty Weight in kg, integer ≥ 1) on every configuration
+- Fuel regression: nightly job (`fuel-regression/calculate`) computes per-configuration linear regression (fuel = a + b·distance) from completed historical flights, with hard-floor and 2σ outlier filtering. `FuelEstimator` helper (`basic/helpers/FuelEstimator.php`) provides fuel breakdowns (trip, alternate, contingency, reserve) for flight generation, returning `null` when insufficient data (< 5 valid flights) so the generator falls back to a static safe payload allocation. Regression fields in `aircraft_configuration` are write-protected against mass-assignment via `SCENARIO_ADMIN_FORM`
+- Passenger and cargo load generation on FPL submission: `PayloadEstimator` helper computes a randomised but realistic load (adults, children, checked bags, paid cargo) using MTOW/OEW/fuel estimate and configurable weight constants; occupancy varies by day of week (higher on Mon/Fri/Sat/Sun). Results are stored on `submitted_flight_plan` and copied to `flight` when ACARS submits
+- Aviation-style load sheet displayed in the FPL view and flight view: sectioned table (Crew / Passengers / Hold+Cargo) with unit weights, subtotals per section, and a highlighted Payload row showing total weight and POB; hidden on flights created before this feature (legacy flights without payload data show no load sheet)
+- "People on board" field now shows the actual count (pax + crew) instead of 'X' in both the FPL and flight views
+- Payload regenerated automatically when the alternate airport is changed during FPL update
+- Admin settings → new "Pesos de Carga" section: configurable adult weight (default 84 Kg), child weight (default 35 Kg), and checked baggage weight (default 13 Kg)
 
 ### Changed
 - Test suite performance: replaced dynamic `generatePasswordHash()` calls in fixture and unit test files with pre-computed static bcrypt hashes, and removed redundant `clearDatabase()` calls in unit tests (Codeception's transaction rollback already handles cleanup). Functional tests went from ~1 hour to ~56 seconds.
+- Test: `FlightReportSubmissionCest` — `testValidWithRequest` now asserts that `pax_adults`, `pax_children`, `cargo_bags` and `cargo_paid_kg` are copied from the submitted FPL to the created flight; fixture entry id=1 updated with representative load data to enable the assertion. New test `testValidFlightReportSubmissionTourFlight` covers tour-type submissions, verifying `flight_type='T'`, `tour_stage_id` and pax/cargo propagation
+- Test: `SubmittedFlightPlanUpdateCest.updateAlternateToCloserDoesNotRegeneratePayload` — setup now seeds `cargo_bags` and `cargo_paid_kg` alongside pax to reflect the real invariant (all four fields are populated together); assertions extended to include cargo fields
+- Test: `PilotIndexViewCest` — expected flight count for pilot 5 updated to 7 (flight id=108 was added to the fixture for statistics testing)
+
+### Fixed
+- Console `flight-report/assemble-pending-acars` and `flight-report/import-pending-reports-analysis` — new unit test suite (`FlightReportControllerTest`, 15 tests) covering: gzip assembly and decompression, context.json generation, full happy-path import (phases, metrics, issues, events, pilot/aircraft hours, flight status), transaction rollback on unknown phase/issue/metric, null-issue timestamp, empty-array and null metric skipping, pipe-separated issue values, and comma-to-dot coordinate conversion
+- Aircraft configuration index: aircraft type column is now sortable; default order is aircraft type ascending then name ascending
 
 ## [1.11.1] - 2026-05-12
 

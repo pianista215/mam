@@ -61,6 +61,7 @@ class AircraftConfigurationController extends Controller
         $dataProvider = $searchModel->search($this->request->queryParams);
 
         $dataProvider->sort->defaultOrder = [
+            'aircraftType' => SORT_ASC,
             'name' => SORT_ASC,
         ];
 
@@ -98,7 +99,7 @@ class AircraftConfigurationController extends Controller
     public function actionCreate()
     {
         if(Yii::$app->user->can(Permissions::AIRCRAFT_CONFIGURATION_CRUD)){
-            $model = new AircraftConfiguration();
+            $model = new AircraftConfiguration(['scenario' => AircraftConfiguration::SCENARIO_ADMIN_FORM]);
 
             if ($this->request->isPost) {
                 if ($model->load($this->request->post()) && $model->save()) {
@@ -134,6 +135,7 @@ class AircraftConfigurationController extends Controller
     {
         if(Yii::$app->user->can(Permissions::AIRCRAFT_CONFIGURATION_CRUD)){
             $model = $this->findModel($id);
+            $model->scenario = AircraftConfiguration::SCENARIO_ADMIN_FORM;
 
             if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
                 $this->logInfo('Updated aircraft config', ['model' => $model, 'user' => Yii::$app->user->identity->license]);

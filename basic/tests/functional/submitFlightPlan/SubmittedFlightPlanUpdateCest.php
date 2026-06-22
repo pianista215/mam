@@ -196,4 +196,66 @@ class SubmittedFlightPlanUpdateCest
         $I->assertEquals(5, $count);
     }
 
+    // --- Payload regeneration on alternate change ---
+
+    public function updateAlternateToCloserDoesNotRegeneratePayload(\FunctionalTester $I)
+    {
+        // FPL #3: LEBL→GCLP. Set initial alternate to LEBL (~1200 NM from GCLP) and known payload.
+        Yii::$app->db->createCommand()->update(
+            'submitted_flight_plan',
+            ['alternative1_icao' => 'LEBL', 'pax_adults' => 42, 'pax_children' => 3, 'cargo_bags' => 10, 'cargo_paid_kg' => 0],
+            ['id' => 3]
+        )->execute();
+
+        $I->amLoggedInAs(7);
+        $I->amOnRoute('submitted-flight-plan/update', ['id' => '3']);
+
+        // Change alternate to LEMD (~950 NM from GCLP) → closer → no regeneration
+        $I->fillField('#submittedflightplan-cruise_speed_value', '350');
+        $I->fillField('#flight_level_value', '320');
+        $I->fillField('#submittedflightplan-route', 'DCT EXAMPLE');
+        $I->fillField('#submittedflightplan-estimated_time', '0210');
+        $I->fillField('#submittedflightplan-alternative1_icao', 'LEMD');
+        $I->fillField('#submittedflightplan-other_information', 'DOF/20241205 REG/ECDOS OPR/XXX');
+        $I->fillField('#submittedflightplan-endurance_time', '0420');
+
+        $I->click('Submit FPL', 'button');
+        $I->seeResponseCodeIs(200);
+
+        $model = \app\models\SubmittedFlightPlan::find()->where(['id' => 3])->one();
+        $I->assertEquals(42, $model->pax_adults,   'Payload must not be regenerated when alternate is closer');
+        $I->assertEquals(3,  $model->pax_children, 'Payload must not be regenerated when alternate is closer');
+        $I->assertEquals(10, $model->cargo_bags,   'Payload must not be regenerated when alternate is closer');
+        $I->assertEquals(0,  $model->cargo_paid_kg,'Payload must not be regenerated when alternate is closer');
+    }
+
+    public function updateAlternateToFartherRegeneratesPayload(\FunctionalTester $I)
+    {
+        // FPL #3: LEBL→GCLP. Set impossible sentinel (config pax_capacity=160, so 999 cannot occur).
+        Yii::$app->db->createCommand()->update(
+            'submitted_flight_plan',
+            ['pax_adults' => 999],
+            ['id' => 3]
+        )->execute();
+
+        $I->amLoggedInAs(7);
+        $I->amOnRoute('submitted-flight-plan/update', ['id' => '3']);
+
+        // Change alternate from LEMD (~950 NM) to LEBL (~1200 NM from GCLP) → farther → regenerate
+        $I->fillField('#submittedflightplan-cruise_speed_value', '350');
+        $I->fillField('#flight_level_value', '320');
+        $I->fillField('#submittedflightplan-route', 'DCT EXAMPLE');
+        $I->fillField('#submittedflightplan-estimated_time', '0210');
+        $I->fillField('#submittedflightplan-alternative1_icao', 'LEBL');
+        $I->fillField('#submittedflightplan-other_information', 'DOF/20241205 REG/ECDOS OPR/XXX');
+        $I->fillField('#submittedflightplan-endurance_time', '0420');
+
+        $I->click('Submit FPL', 'button');
+        $I->seeResponseCodeIs(200);
+
+        $model = \app\models\SubmittedFlightPlan::find()->where(['id' => 3])->one();
+        $I->assertNotEquals(999, $model->pax_adults, 'Payload must be regenerated when alternate is farther');
+        $I->assertLessThanOrEqual(160, $model->pax_adults, 'Regenerated pax must not exceed pax_capacity');
+    }
+
 }

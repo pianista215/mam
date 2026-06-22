@@ -27,7 +27,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'crew') ?>
 
-    <?= $form->field($model, 'bew') ?>
+    <?= $form->field($model, 'oew') ?>
 
     <?= $form->field($model, 'mtow') ?>
 

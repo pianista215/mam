@@ -55,6 +55,7 @@ $this->params['breadcrumbs'][] = $this->title;
                  }
             ],
         ],
+        'headerRowOptions' => ['style' => 'vertical-align: middle'],
         'tableOptions' => ['class' => 'table table-striped table-bordered'],
         'pager' => [
                 'options' => ['class' => 'pagination justify-content-center'],

@@ -36,6 +36,10 @@ class SiteSettingsForm extends Model
     public $aircraft_type_resources_storage_path;
     public $aircraft_type_resources_limit_mb;
 
+    public $pax_adult_weight_kg;
+    public $pax_child_weight_kg;
+    public $pax_checked_baggage_kg;
+
     public function rules()
     {
         return [
@@ -43,7 +47,8 @@ class SiteSettingsForm extends Model
               'chunks_storage_path','images_storage_path','acars_releases_path','acars_installer_name',
               'token_life_h','charter_ratio','airline_name','no_reply_mail','support_mail',
               'x_url','instagram_url','facebook_url','statistics_email_list','statistics_email_language',
-              'aircraft_type_resources_storage_path','aircraft_type_resources_limit_mb'], 'trim'],
+              'aircraft_type_resources_storage_path','aircraft_type_resources_limit_mb',
+              'pax_adult_weight_kg','pax_child_weight_kg','pax_checked_baggage_kg'], 'trim'],
 
             [['registration_start','registration_end'], 'date', 'format' => 'php:Y-m-d'],
             ['registration_start_location', 'filter', 'filter' => 'strtoupper'],
@@ -60,6 +65,8 @@ class SiteSettingsForm extends Model
             [['chunks_storage_path','images_storage_path','acars_releases_path','aircraft_type_resources_storage_path'], 'validatePath'],
 
             ['aircraft_type_resources_limit_mb', 'integer', 'min' => 1],
+
+            [['pax_adult_weight_kg', 'pax_child_weight_kg', 'pax_checked_baggage_kg'], 'integer', 'min' => 1],
 
             ['token_life_h', 'integer', 'min' => 1],
 
@@ -105,6 +112,10 @@ class SiteSettingsForm extends Model
 
             'aircraft_type_resources_storage_path' => Yii::t('app', 'Aircraft type resources storage path'),
             'aircraft_type_resources_limit_mb'     => Yii::t('app', 'Aircraft type resources limit (MB)'),
+
+            'pax_adult_weight_kg'    => Yii::t('app', 'Adult passenger weight (Kg)'),
+            'pax_child_weight_kg'    => Yii::t('app', 'Child passenger weight (Kg)'),
+            'pax_checked_baggage_kg' => Yii::t('app', 'Checked baggage weight (Kg)'),
         ];
     }
 
@@ -130,6 +141,9 @@ class SiteSettingsForm extends Model
             CK::STATISTICS_EMAIL_LANGUAGE,
             CK::AIRCRAFT_TYPE_RESOURCES_STORAGE_PATH,
             CK::AIRCRAFT_TYPE_RESOURCES_LIMIT_MB,
+            CK::PAX_ADULT_WEIGHT_KG,
+            CK::PAX_CHILD_WEIGHT_KG,
+            CK::PAX_CHECKED_BAGGAGE_KG,
         ];
     }
 

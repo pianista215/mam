@@ -45,4 +45,17 @@ $this->params['breadcrumbs'][] = $this->title;
         'mode' => 'view',
     ]) ?>
 
+    <?php if ($model->pax_adults !== null): ?>
+    <?= $this->render('@app/views/partials/_load_sheet', [
+        'paxAdults'   => $model->pax_adults,
+        'paxChildren' => $model->pax_children,
+        'cargoBags'   => $model->cargo_bags,
+        'cargoPaidKg' => $model->cargo_paid_kg,
+        'crew'        => $model->crew,
+        'adultW'      => \app\config\ConfigHelper::getPaxAdultWeightKg(),
+        'childW'      => \app\config\ConfigHelper::getPaxChildWeightKg(),
+        'bagW'        => \app\config\ConfigHelper::getPaxCheckedBaggageKg(),
+    ]) ?>
+    <?php endif; ?>
+
 </div>

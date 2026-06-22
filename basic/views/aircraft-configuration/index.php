@@ -32,15 +32,16 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
             [
-                'attribute' => 'aircraftType.name',
+                'attribute' => 'aircraftType',
                 'label' => Yii::t('app', 'Aircraft Type'),
+                'value' => fn($model) => $model->aircraftType->name,
                 'filter' => false,
             ],
             'name',
             ['attribute' => 'pax_capacity', 'filter' => false],
             ['attribute' => 'cargo_capacity', 'filter' => false],
             ['attribute' => 'crew', 'filter' => false],
-            ['attribute' => 'bew', 'filter' => false],
+            ['attribute' => 'oew', 'filter' => false],
             ['attribute' => 'mtow', 'filter' => false],
             [
                 'class' => ActionColumn::className(),
@@ -57,6 +58,7 @@ $this->params['breadcrumbs'][] = $this->title;
                  }
             ],
         ],
+        'headerRowOptions' => ['style' => 'vertical-align: middle'],
         'tableOptions' => ['class' => 'table table-striped table-bordered'],
         'pager' => [
                 'options' => ['class' => 'pagination justify-content-center'],

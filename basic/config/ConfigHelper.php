@@ -34,6 +34,11 @@ class ConfigHelper
     public const STATISTICS_EMAIL_LIST = 'statistics_email_list';
     public const STATISTICS_EMAIL_LANGUAGE = 'statistics_email_language';
 
+    // Payload weights
+    public const PAX_ADULT_WEIGHT_KG    = 'pax_adult_weight_kg';
+    public const PAX_CHILD_WEIGHT_KG    = 'pax_child_weight_kg';
+    public const PAX_CHECKED_BAGGAGE_KG = 'pax_checked_baggage_kg';
+
     public static function getRegistrationStart(): ?DateTime
     {
         $value = Config::get(self::REGISTRATION_START);
@@ -147,6 +152,21 @@ class ConfigHelper
     {
         $value = Config::get(self::STATISTICS_EMAIL_LANGUAGE);
         return !empty($value) ? $value : 'en';
+    }
+
+    public static function getPaxAdultWeightKg(): int
+    {
+        return (int)(Config::get(self::PAX_ADULT_WEIGHT_KG) ?? 84);
+    }
+
+    public static function getPaxChildWeightKg(): int
+    {
+        return (int)(Config::get(self::PAX_CHILD_WEIGHT_KG) ?? 35);
+    }
+
+    public static function getPaxCheckedBaggageKg(): int
+    {
+        return (int)(Config::get(self::PAX_CHECKED_BAGGAGE_KG) ?? 13);
     }
 
 }

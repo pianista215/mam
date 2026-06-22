@@ -125,6 +125,7 @@ $this->params['breadcrumbs'][] = $this->title;
                  'contentOptions' => ['style' => 'width:10%; text-align:center; vertical-align:middle;']
             ],
         ],
+        'headerRowOptions' => ['style' => 'vertical-align: middle'],
         'tableOptions' => ['class' => 'table table-striped table-bordered'],
         'pager' => [
                 'options' => ['class' => 'pagination justify-content-center'],

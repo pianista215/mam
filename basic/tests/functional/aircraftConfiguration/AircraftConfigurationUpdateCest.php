@@ -55,16 +55,16 @@ class AircraftConfigurationUpdateCest
         $I->fillField('#aircraftconfiguration-cargo_capacity', '');
         $I->fillField('#aircraftconfiguration-crew', '');
         $I->fillField('#aircraftconfiguration-mtow', '');
-        $I->fillField('#aircraftconfiguration-bew', '');
+        $I->fillField('#aircraftconfiguration-oew', '');
         $I->click('Save');
 
         $I->expectTo('see validations errors');
         $I->see('Name cannot be blank.');
         $I->see('Pax Capacity cannot be blank.');
-        $I->see('Cargo Capacity cannot be blank.');
+        $I->see('Cargo Capacity (Kg) cannot be blank.');
         $I->see('Crew cannot be blank.');
         $I->see('MTOW (Kg) cannot be blank.');
-        $I->see('BEW (Kg) cannot be blank.');
+        $I->see('OEW (Kg) cannot be blank.');
 
         $count = \app\models\AircraftConfiguration::find()->count();
         $I->assertEquals(4, $count);
@@ -80,7 +80,7 @@ class AircraftConfigurationUpdateCest
         $I->fillField('#aircraftconfiguration-cargo_capacity', '800');
         $I->fillField('#aircraftconfiguration-crew', '4');
         $I->fillField('#aircraftconfiguration-mtow', '75000');
-        $I->fillField('#aircraftconfiguration-bew', '40000');
+        $I->fillField('#aircraftconfiguration-oew', '40000');
 
         $I->click('Save');
 
@@ -102,7 +102,7 @@ class AircraftConfigurationUpdateCest
         $I->assertEquals(800, $model->cargo_capacity);
         $I->assertEquals(4, $model->crew);
         $I->assertEquals(75000, $model->mtow);
-        $I->assertEquals(40000, $model->bew);
+        $I->assertEquals(40000, $model->oew);
 
         $count = \app\models\AircraftConfiguration::find()->count();
         $I->assertEquals(4, $count);

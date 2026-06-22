@@ -3,8 +3,10 @@
 namespace app\controllers;
 
 use app\config\ConfigHelper as CK;
+use app\helpers\FuelEstimator;
 use app\helpers\GeoUtils;
 use app\helpers\LoggerTrait;
+use app\helpers\PayloadEstimator;
 use app\models\Aircraft;
 use app\models\AircraftSearch;
 use app\models\CredentialTypeAircraftType;
@@ -366,6 +368,10 @@ class SubmittedFlightPlanController extends Controller
                         }
                     }
 
+                    if ($ok) {
+                        $this->applyPayloadToModel($model, $entity, $aircraft);
+                    }
+
                     if ($ok && !$model->save()) {
                         $ok = false;
                     }
@@ -464,7 +470,7 @@ class SubmittedFlightPlanController extends Controller
             }
             return $this->render('view', [
                 'model' => $model,
-                'entity' => $entity
+                'entity' => $entity,
             ]);
         } else {
             throw new ForbiddenHttpException();
@@ -493,14 +499,28 @@ class SubmittedFlightPlanController extends Controller
                 $entity = $model->charterRoute;
             }
 
-            if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-                $this->logInfo('Updated fpl', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
-                return $this->redirect(['view', 'id' => $model->id]);
+            if ($this->request->isPost) {
+                $oldAlternative  = $model->alternative1_icao;
+                $oldAlternateNm  = $this->computeAlternateNm($entity->arrival, $oldAlternative);
+                $model->scenario = SubmittedFlightPlan::SCENARIO_FPL_FORM;
+                if ($model->load($this->request->post())) {
+                    if ($model->alternative1_icao !== $oldAlternative) {
+                        $newAlternateNm = $this->computeAlternateNm($entity->arrival, $model->alternative1_icao);
+                        if ($newAlternateNm > $oldAlternateNm) {
+                            $this->applyPayloadToModel($model, $entity, $model->aircraft);
+                        }
+                    }
+                    $model->scenario = SubmittedFlightPlan::SCENARIO_DEFAULT;
+                    if ($model->save()) {
+                        $this->logInfo('Updated fpl', ['model' => $model, 'user' => Yii::$app->user->identity->license]);
+                        return $this->redirect(['view', 'id' => $model->id]);
+                    }
+                }
             }
 
             return $this->render('update', [
                 'model' => $model,
-                'entity' => $entity
+                'entity' => $entity,
             ]);
         } else {
             throw new ForbiddenHttpException();
@@ -540,6 +560,57 @@ class SubmittedFlightPlanController extends Controller
         } else {
             throw new ForbiddenHttpException();
         }
+    }
+
+    private function computeAlternateNm(string $arrivalIcao, ?string $altIcao): float
+    {
+        if (!$altIcao) {
+            return 0.0;
+        }
+        $destAirport = Airport::findOne(['icao_code' => $arrivalIcao]);
+        $altAirport  = Airport::findOne(['icao_code' => $altIcao]);
+        if (!$destAirport || !$altAirport) {
+            return 0.0;
+        }
+        return GeoUtils::haversine(
+            (float) $destAirport->latitude,
+            (float) $destAirport->longitude,
+            (float) $altAirport->latitude,
+            (float) $altAirport->longitude,
+            'nm'
+        );
+    }
+
+    protected function applyPayloadToModel(SubmittedFlightPlan $model, $entity, Aircraft $aircraft): void
+    {
+        $config = $aircraft->aircraftConfiguration;
+
+        $alternateNm = $this->computeAlternateNm($entity->arrival, $model->alternative1_icao);
+
+        $fuelEstimate    = FuelEstimator::estimate($config, (float) $entity->distance_nm, $alternateNm);
+        $estimatedFuelKg = $fuelEstimate ? $fuelEstimate['total'] : null;
+
+        $this->logInfo('Fuel estimate for payload generation', [
+            'config_id'         => $config->id,
+            'distance_nm'       => $entity->distance_nm,
+            'alternate_nm'      => $alternateNm,
+            'estimated_fuel_kg' => $estimatedFuelKg,
+        ]);
+
+        $payload = PayloadEstimator::generate(
+            $config,
+            $estimatedFuelKg,
+            CK::getPaxAdultWeightKg(),
+            CK::getPaxChildWeightKg(),
+            CK::getPaxCheckedBaggageKg(),
+            new \DateTime()
+        );
+
+        $model->crew          = $config->crew;
+        $model->pax_adults    = $payload['pax_adults'];
+        $model->pax_children  = $payload['pax_children'];
+        $model->cargo_bags    = $payload['cargo_bags'];
+        $model->cargo_paid_kg = $payload['cargo_paid_kg'];
     }
 
     protected function checkPilotCanFlyAircraftType(int $pilotId, int $aircraftTypeId): bool

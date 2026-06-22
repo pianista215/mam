@@ -44,12 +44,25 @@ $this->params['breadcrumbs'][] = $this->title;
     <h3><?=Yii::t('app', 'Flight plan')?></h1>
 
     <?= $this->render('_flight_plan', [
-        'model' => $model,
-        'aircraft' => $model->getAircraft()->one(),
+        'model'     => $model,
+        'aircraft'  => $model->getAircraft()->one(),
         'pilotName' => $model->pilot->fullname,
     ]) ?>
 
-    <h3><?=Yii::t('app', 'Flight data')?></h3>
+    <?php if ($model->pax_adults !== null): ?>
+    <?= $this->render('@app/views/partials/_load_sheet', [
+        'paxAdults'   => $model->pax_adults,
+        'paxChildren' => $model->pax_children,
+        'cargoBags'   => $model->cargo_bags,
+        'cargoPaidKg' => $model->cargo_paid_kg,
+        'crew'        => $model->crew,
+        'adultW'      => \app\config\ConfigHelper::getPaxAdultWeightKg(),
+        'childW'      => \app\config\ConfigHelper::getPaxChildWeightKg(),
+        'bagW'        => \app\config\ConfigHelper::getPaxCheckedBaggageKg(),
+    ]) ?>
+    <?php endif; ?>
+
+    <h3 class="mt-4"><?=Yii::t('app', 'Flight data')?></h3>
 
     <?= $this->render('_flight_data', [
         'model' => $model,
