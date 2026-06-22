@@ -78,9 +78,8 @@ class FlightController extends Controller
      */
     public function actionView($id)
     {
-        $model = $this->findModel($id);
         return $this->render('view', [
-            'model' => $model,
+            'model' => $this->findModel($id),
         ]);
     }
 
