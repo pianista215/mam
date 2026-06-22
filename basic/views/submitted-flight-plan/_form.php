@@ -87,7 +87,7 @@ use yii\widgets\ActiveForm;
         <?php if ($mode === 'view'): ?>
         <div class="col-md-4">
             <div><?=Yii::t('app', 'People on board')?></div>
-            <div><?= Html::input('text', 'people', $pob ?? 'X', ['disabled' => true, 'maxlength' => 3, 'class' => 'form-control'])?></div>
+            <div><?= Html::input('text', 'people', $model->pob ?? 'X', ['disabled' => true, 'maxlength' => 3, 'class' => 'form-control'])?></div>
         </div>
         <?php endif; ?>
         <div class="col-md-4">

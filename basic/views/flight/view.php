@@ -47,7 +47,6 @@ $this->params['breadcrumbs'][] = $this->title;
         'model'     => $model,
         'aircraft'  => $model->getAircraft()->one(),
         'pilotName' => $model->pilot->fullname,
-        'pob'       => $pob,
     ]) ?>
 
     <?php if ($model->pax_adults !== null): ?>

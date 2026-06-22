@@ -468,11 +468,9 @@ class SubmittedFlightPlanController extends Controller
             } else {
                 $entity = $model->charterRoute;
             }
-            $pob = $model->pob ?? 'X';
             return $this->render('view', [
                 'model' => $model,
                 'entity' => $entity,
-                'pob' => $pob,
             ]);
         } else {
             throw new ForbiddenHttpException();
@@ -520,12 +518,9 @@ class SubmittedFlightPlanController extends Controller
                 }
             }
 
-            $pob = $model->pob ?? 'X';
-
             return $this->render('update', [
                 'model' => $model,
                 'entity' => $entity,
-                'pob' => $pob,
             ]);
         } else {
             throw new ForbiddenHttpException();

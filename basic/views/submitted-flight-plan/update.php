@@ -21,7 +21,6 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Update');
         'entity' => $entity,
         'pilotName' => $model->pilot->fullname,
         'mode' => 'update',
-        'pob' => $pob,
     ]) ?>
 
 </div>

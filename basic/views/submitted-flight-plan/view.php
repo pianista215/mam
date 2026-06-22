@@ -43,7 +43,6 @@ $this->params['breadcrumbs'][] = $this->title;
         'entity' => $entity,
         'pilotName' => $model->pilot->fullname,
         'mode' => 'view',
-        'pob' => $pob,
     ]) ?>
 
     <?php if ($model->pax_adults !== null): ?>
