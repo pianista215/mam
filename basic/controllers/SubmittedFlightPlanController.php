@@ -468,9 +468,7 @@ class SubmittedFlightPlanController extends Controller
             } else {
                 $entity = $model->charterRoute;
             }
-            $pob = ($model->crew !== null)
-                ? $model->pax_adults + $model->pax_children + $model->crew
-                : 'X';
+            $pob = $model->pob ?? 'X';
             return $this->render('view', [
                 'model' => $model,
                 'entity' => $entity,
@@ -522,9 +520,7 @@ class SubmittedFlightPlanController extends Controller
                 }
             }
 
-            $pob = ($model->crew !== null)
-                ? $model->pax_adults + $model->pax_children + $model->crew
-                : 'X';
+            $pob = $model->pob ?? 'X';
 
             return $this->render('update', [
                 'model' => $model,

@@ -350,4 +350,12 @@ class Flight extends \yii\db\ActiveRecord
 
         return $result !== false;
     }
+
+    public function getPob(): ?int
+    {
+        if ($this->crew === null) {
+            return null;
+        }
+        return $this->crew + $this->pax_adults + $this->pax_children;
+    }
 }
