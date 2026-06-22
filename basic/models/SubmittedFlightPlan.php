@@ -25,6 +25,7 @@ use Yii;
  * @property int $pilot_id
  * @property int|null $tour_stage_id
  * @property int|null $charter_route_id
+ * @property int|null $crew
  * @property int|null $pax_adults
  * @property int|null $pax_children
  * @property int|null $cargo_bags
@@ -96,8 +97,8 @@ class SubmittedFlightPlan extends \yii\db\ActiveRecord
             [['pilot_id'], 'validatePilotLocation'],
             [['aircraft_id'], 'validateAircraftLocation'],
             [['route_id', 'tour_stage_id', 'charter_route_id'], 'validateRouteOrStageOrCharter', 'skipOnEmpty' => false],
-            [['pax_adults', 'pax_children', 'cargo_bags', 'cargo_paid_kg'], 'integer', 'min' => 0],
-            [['pax_adults', 'pax_children', 'cargo_bags', 'cargo_paid_kg'], 'default', 'value' => null],
+            [['crew', 'pax_adults', 'pax_children', 'cargo_bags', 'cargo_paid_kg'], 'integer', 'min' => 0],
+            [['crew', 'pax_adults', 'pax_children', 'cargo_bags', 'cargo_paid_kg'], 'default', 'value' => null],
         ];
     }
 

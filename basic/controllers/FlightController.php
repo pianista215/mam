@@ -79,8 +79,8 @@ class FlightController extends Controller
     public function actionView($id)
     {
         $model = $this->findModel($id);
-        $pob = ($model->pax_adults !== null)
-            ? $model->pax_adults + $model->pax_children + $model->aircraft->aircraftConfiguration->crew
+        $pob = ($model->crew !== null)
+            ? $model->pax_adults + $model->pax_children + $model->crew
             : 'X';
         return $this->render('view', [
             'model' => $model,

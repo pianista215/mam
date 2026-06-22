@@ -468,8 +468,8 @@ class SubmittedFlightPlanController extends Controller
             } else {
                 $entity = $model->charterRoute;
             }
-            $pob = ($model->pax_adults !== null)
-                ? $model->pax_adults + $model->pax_children + $model->aircraft->aircraftConfiguration->crew
+            $pob = ($model->crew !== null)
+                ? $model->pax_adults + $model->pax_children + $model->crew
                 : 'X';
             return $this->render('view', [
                 'model' => $model,
@@ -522,8 +522,8 @@ class SubmittedFlightPlanController extends Controller
                 }
             }
 
-            $pob = ($model->pax_adults !== null)
-                ? $model->pax_adults + $model->pax_children + $model->aircraft->aircraftConfiguration->crew
+            $pob = ($model->crew !== null)
+                ? $model->pax_adults + $model->pax_children + $model->crew
                 : 'X';
 
             return $this->render('update', [
@@ -615,6 +615,7 @@ class SubmittedFlightPlanController extends Controller
             new \DateTime()
         );
 
+        $model->crew          = $config->crew;
         $model->pax_adults    = $payload['pax_adults'];
         $model->pax_children  = $payload['pax_children'];
         $model->cargo_bags    = $payload['cargo_bags'];

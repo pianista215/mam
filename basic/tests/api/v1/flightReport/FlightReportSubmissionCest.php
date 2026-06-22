@@ -359,6 +359,7 @@ class FlightReportSubmissionCest
         $I->assertEquals($flight->status, 'C');
         $I->assertEquals(null, $flight->tour_stage_id);
         $I->assertEquals('R', $flight->flight_type);
+        $I->assertEquals(3, $flight->crew);
         $I->assertEquals(150, $flight->pax_adults);
         $I->assertEquals(10, $flight->pax_children);
         $I->assertEquals(5, $flight->cargo_bags);
@@ -711,6 +712,7 @@ class FlightReportSubmissionCest
         $I->assertEquals('C', $flight->status);
 
         // Verify pax/cargo from FPL id 4 are copied to the flight
+        $I->assertEquals(5, $flight->crew);
         $I->assertEquals(80, $flight->pax_adults);
         $I->assertEquals(5, $flight->pax_children);
         $I->assertEquals(20, $flight->cargo_bags);

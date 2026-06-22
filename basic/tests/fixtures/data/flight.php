@@ -252,6 +252,7 @@ return [
         'creation_date' => '2026-01-01 08:00:00',
         'network' => 'IVAO',
         'flight_type' => 'R',
+        'crew'          => 5,
         'pax_adults'    => 50,
         'pax_children'  => 8,
         'cargo_bags'    => 30,
