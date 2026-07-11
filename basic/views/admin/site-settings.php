@@ -30,6 +30,7 @@ $this->title = Yii::t('app', 'Site Settings');
 <?= $form->field($model, 'airline_name') ?>
 <?= $form->field($model, 'no_reply_mail') ?>
 <?= $form->field($model, 'support_mail') ?>
+<?= $form->field($model, 'operations_mail') ?>
 
 <h3><?= Yii::t('app', 'Registration Settings') ?></h3>
 <?= $form->field($model, 'registration_start')->input('date') ?>

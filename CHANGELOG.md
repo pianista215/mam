@@ -1,5 +1,15 @@
 # Changelog
 
+## [Upcoming] - 1.13.0
+
+### Added
+- Email notification sent to pilot when a flight is rejected or validated with comments (no email on silent approvals to avoid spam); subject and body identify the flight by code and date; reply-to goes to the configurable operations email
+- New "Operations email" setting in admin → Site Settings, configurable alongside noreply and support emails
+
+### Changed
+
+### Fixed
+
 ## [1.12.0] - 2026-06-22
 
 ### Added

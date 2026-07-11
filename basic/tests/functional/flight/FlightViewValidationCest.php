@@ -3,6 +3,7 @@
 namespace tests\functional\flight;
 
 use tests\fixtures\AuthAssignmentFixture;
+use tests\fixtures\ConfigFixture;
 use tests\fixtures\FlightFixture;
 use tests\fixtures\FlightReportFixture;
 use FunctionalTester;
@@ -21,6 +22,7 @@ class FlightViewValidationCest
     {
         return [
             'authAssignment' => AuthAssignmentFixture::class,
+            'config' => ConfigFixture::class,
             'flight' => [
                 'class' => FlightFixture::class,
                 'dataFile' => __DIR__ . '/../../fixtures/data/flight_long_for_validations.php',
@@ -314,6 +316,43 @@ class FlightViewValidationCest
         $I->seeResponseCodeIs(200);
         $countSecond = \app\models\PilotTourCompletion::find()->where(['tour_id' => '3'])->count();
         $I->assertEquals(0, $countSecond);
+    }
+
+    public function emailSentOnReject(FunctionalTester $I)
+    {
+        $I->amLoggedInAs(4); // VFR validator
+
+        // Flight 1 is a VFR flight in status V — owned by pilot 1 (john.doe@example.com)
+        $this->submitReject($I, 1, 'Rejected by VFR validator');
+
+        $messages = $I->grabSentEmails();
+        $I->assertCount(1, $messages);
+        $subject = $messages[0]->getSubject();
+        $I->assertStringContainsString('rejected', $subject);
+    }
+
+    public function emailSentOnApproveWithComment(FunctionalTester $I)
+    {
+        $I->amLoggedInAs(5); // IFR validator
+
+        // Flight 2 is an IFR flight in status V — owned by pilot 1 (john.doe@example.com)
+        $this->submitApprove($I, 2, 'Looks good, minor comment.');
+
+        $messages = $I->grabSentEmails();
+        $I->assertCount(1, $messages);
+        $subject = $messages[0]->getSubject();
+        $I->assertStringContainsString('validated with comments', $subject);
+    }
+
+    public function noEmailOnSilentApprove(FunctionalTester $I)
+    {
+        $I->amLoggedInAs(5); // IFR validator
+
+        // Flight 3 is an IFR flight in status V — approve without comments
+        $this->submitValidation($I, 3, 'approve', null);
+
+        $messages = $I->grabSentEmails();
+        $I->assertCount(0, $messages);
     }
 
     public function validationIgnoreIfTourIsAlreadyCompleted(FunctionalTester $I)
