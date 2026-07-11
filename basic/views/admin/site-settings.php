@@ -51,6 +51,14 @@ $this->title = Yii::t('app', 'Site Settings');
 <?= $form->field($model, 'pax_child_weight_kg')->input('number', ['min' => 1]) ?>
 <?= $form->field($model, 'pax_checked_baggage_kg')->input('number', ['min' => 1]) ?>
 
+<h3><?= Yii::t('app', 'Occupancy Ratios') ?></h3>
+<?= $form->field($model, 'pax_occ_cargo_min')->input('number', ['min' => 0, 'max' => 100]) ?>
+<?= $form->field($model, 'pax_occ_cargo_max')->input('number', ['min' => 0, 'max' => 100]) ?>
+<?= $form->field($model, 'pax_occ_low_min')->input('number', ['min' => 0, 'max' => 100]) ?>
+<?= $form->field($model, 'pax_occ_low_max')->input('number', ['min' => 0, 'max' => 100]) ?>
+<?= $form->field($model, 'pax_occ_high_min')->input('number', ['min' => 0, 'max' => 100]) ?>
+<?= $form->field($model, 'pax_occ_high_max')->input('number', ['min' => 0, 'max' => 100]) ?>
+
 <h3><?= Yii::t('app', 'Other') ?></h3>
 <?= $form->field($model, 'chunks_storage_path') ?>
 <?= $form->field($model, 'images_storage_path') ?>

@@ -2,6 +2,7 @@
 
 namespace app\helpers;
 
+use app\config\ConfigHelper as CK;
 use app\models\AircraftConfiguration;
 
 class PayloadEstimator
@@ -44,7 +45,7 @@ class PayloadEstimator
     private static function cargoOnly(float $availablePayload, int $cargoCapacity): array
     {
         $maxCargo  = min($availablePayload, $cargoCapacity);
-        $fillPct   = mt_rand(60, 90) / 100;
+        $fillPct   = mt_rand(CK::getPaxOccCargoMin(), CK::getPaxOccCargoMax()) / 100;
         return [
             'pax_adults'    => 0,
             'pax_children'  => 0,
@@ -64,8 +65,8 @@ class PayloadEstimator
         // Weekday occupancy: Mon(1), Fri(5), Sat(6), Sun(7) are high-traffic days
         $weekday     = (int) $flightDate->format('N');
         $highTraffic = in_array($weekday, [1, 5, 6, 7], true);
-        $minOcc      = $highTraffic ? 50 : 40;
-        $maxOcc      = $highTraffic ? 85 : 80;
+        $minOcc      = $highTraffic ? CK::getPaxOccHighMin() : CK::getPaxOccLowMin();
+        $maxOcc      = $highTraffic ? CK::getPaxOccHighMax() : CK::getPaxOccLowMax();
         $occupancy   = mt_rand($minOcc, $maxOcc) / 100;
         $paxTotal    = min((int) round($config->pax_capacity * $occupancy), $config->pax_capacity);
 

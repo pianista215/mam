@@ -40,6 +40,13 @@ class ConfigHelper
     public const PAX_CHILD_WEIGHT_KG    = 'pax_child_weight_kg';
     public const PAX_CHECKED_BAGGAGE_KG = 'pax_checked_baggage_kg';
 
+    public const PAX_OCC_CARGO_MIN = 'pax_occ_cargo_min';
+    public const PAX_OCC_CARGO_MAX = 'pax_occ_cargo_max';
+    public const PAX_OCC_HIGH_MIN  = 'pax_occ_high_min';
+    public const PAX_OCC_HIGH_MAX  = 'pax_occ_high_max';
+    public const PAX_OCC_LOW_MIN   = 'pax_occ_low_min';
+    public const PAX_OCC_LOW_MAX   = 'pax_occ_low_max';
+
     public static function getRegistrationStart(): ?DateTime
     {
         $value = Config::get(self::REGISTRATION_START);
@@ -173,6 +180,36 @@ class ConfigHelper
     public static function getPaxCheckedBaggageKg(): int
     {
         return (int)(Config::get(self::PAX_CHECKED_BAGGAGE_KG) ?? 13);
+    }
+
+    public static function getPaxOccCargoMin(): int
+    {
+        return (int)(Config::get(self::PAX_OCC_CARGO_MIN) ?? 60);
+    }
+
+    public static function getPaxOccCargoMax(): int
+    {
+        return (int)(Config::get(self::PAX_OCC_CARGO_MAX) ?? 90);
+    }
+
+    public static function getPaxOccHighMin(): int
+    {
+        return (int)(Config::get(self::PAX_OCC_HIGH_MIN) ?? 50);
+    }
+
+    public static function getPaxOccHighMax(): int
+    {
+        return (int)(Config::get(self::PAX_OCC_HIGH_MAX) ?? 85);
+    }
+
+    public static function getPaxOccLowMin(): int
+    {
+        return (int)(Config::get(self::PAX_OCC_LOW_MIN) ?? 40);
+    }
+
+    public static function getPaxOccLowMax(): int
+    {
+        return (int)(Config::get(self::PAX_OCC_LOW_MAX) ?? 80);
     }
 
 }
