@@ -238,43 +238,41 @@ class FlightController extends Controller
         $isRejected  = $model->status === Flight::STATUS_REJECTED;
         $hasComments = !empty(trim($model->validator_comments ?? ''));
 
-        if (!$isRejected && !$hasComments) {
-            return;
-        }
+        if ($isRejected || $hasComments) {
+            $pilot = $model->pilot;
 
-        $pilot = $model->pilot;
+            try {
+                $airline        = CK::getAirlineName();
+                $noReplyMail    = CK::getNoReplyMail();
+                $operationsMail = CK::getOperationsMail();
+                $flightDate     = substr($model->creation_date, 0, 10);
 
-        try {
-            $airline        = CK::getAirlineName();
-            $noReplyMail    = CK::getNoReplyMail();
-            $operationsMail = CK::getOperationsMail();
-            $flightDate     = substr($model->creation_date, 0, 10);
+                $subject = $isRejected
+                    ? Yii::t('app', '{airline}: Flight {code} ({date}) rejected', [
+                        'airline' => $airline, 'code' => $model->code, 'date' => $flightDate,
+                    ])
+                    : Yii::t('app', '{airline}: Flight {code} ({date}) validated with comments', [
+                        'airline' => $airline, 'code' => $model->code, 'date' => $flightDate,
+                    ]);
 
-            $subject = $isRejected
-                ? Yii::t('app', '{airline}: Flight {code} ({date}) rejected', [
-                    'airline' => $airline, 'code' => $model->code, 'date' => $flightDate,
-                ])
-                : Yii::t('app', '{airline}: Flight {code} ({date}) validated with comments', [
-                    'airline' => $airline, 'code' => $model->code, 'date' => $flightDate,
-                ]);
-
-            Yii::$app->mailer
-                ->compose('flightValidation', [
-                    'pilotName'  => $pilot->fullname,
-                    'flightCode' => $model->code,
-                    'flightDate' => $flightDate,
-                    'departure'  => $model->departure,
-                    'arrival'    => $model->arrival,
-                    'comments'   => $model->validator_comments,
-                    'isRejected' => $isRejected,
-                ])
-                ->setFrom([$noReplyMail => $airline])
-                ->setReplyTo([$operationsMail => 'Operations ' . $airline])
-                ->setTo($pilot->email)
-                ->setSubject($subject)
-                ->send();
-        } catch (\Throwable $e) {
-            $this->logError('Error sending flight validation email', ['flight_id' => $model->id, 'e' => $e]);
+                Yii::$app->mailer
+                    ->compose('flightValidation', [
+                        'pilotName'  => $pilot->fullname,
+                        'flightCode' => $model->code,
+                        'flightDate' => $flightDate,
+                        'departure'  => $model->departure,
+                        'arrival'    => $model->arrival,
+                        'comments'   => $model->validator_comments,
+                        'isRejected' => $isRejected,
+                    ])
+                    ->setFrom([$noReplyMail => $airline])
+                    ->setReplyTo([$operationsMail => 'Operations ' . $airline])
+                    ->setTo($pilot->email)
+                    ->setSubject($subject)
+                    ->send();
+            } catch (\Throwable $e) {
+                $this->logError('Error sending flight validation email', ['flight_id' => $model->id, 'e' => $e]);
+            }
         }
     }
 
