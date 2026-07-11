@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\config\ConfigHelper as CK;
 use app\helpers\LoggerTrait;
 use app\models\Flight;
 use app\models\FlightSearch;
@@ -128,6 +129,7 @@ class FlightController extends Controller
             throw new ForbiddenHttpException(Yii::t('app', 'You\'re not allowed to validate this flight.'));
         }
 
+        $committed = false;
         $transaction = Yii::$app->db->beginTransaction();
 
         try {
@@ -186,11 +188,16 @@ class FlightController extends Controller
             }
 
             $transaction->commit();
+            $committed = true;
             Yii::$app->session->setFlash('success', Yii::t('app', 'Flight validation finished.'));
         } catch (\Throwable $e) {
             $transaction->rollBack();
             $this->logError('Error validating flight', ['model' => $model, 'user' => Yii::$app->user->identity->license, 'ex' => $e]);
             Yii::$app->session->setFlash('error', Yii::t('app', 'Error validating flight.'));
+        }
+
+        if ($committed) {
+            $this->sendFlightValidationEmail($model);
         }
 
         return $this->redirect(['view', 'id' => $model->id]);
@@ -224,6 +231,51 @@ class FlightController extends Controller
         }
 
         return $this->redirect(['index']);
+    }
+
+    protected function sendFlightValidationEmail(Flight $model): void
+    {
+        $isRejected  = $model->status === Flight::STATUS_REJECTED;
+        $hasComments = !empty(trim($model->validator_comments ?? ''));
+
+        if (!$isRejected && !$hasComments) {
+            return;
+        }
+
+        $pilot = $model->pilot;
+
+        try {
+            $airline        = CK::getAirlineName();
+            $noReplyMail    = CK::getNoReplyMail();
+            $operationsMail = CK::getOperationsMail();
+            $flightDate     = substr($model->creation_date, 0, 10);
+
+            $subject = $isRejected
+                ? Yii::t('app', '{airline}: Flight {code} ({date}) rejected', [
+                    'airline' => $airline, 'code' => $model->code, 'date' => $flightDate,
+                ])
+                : Yii::t('app', '{airline}: Flight {code} ({date}) validated with comments', [
+                    'airline' => $airline, 'code' => $model->code, 'date' => $flightDate,
+                ]);
+
+            Yii::$app->mailer
+                ->compose('flightValidation', [
+                    'pilotName'  => $pilot->fullname,
+                    'flightCode' => $model->code,
+                    'flightDate' => $flightDate,
+                    'departure'  => $model->departure,
+                    'arrival'    => $model->arrival,
+                    'comments'   => $model->validator_comments,
+                    'isRejected' => $isRejected,
+                ])
+                ->setFrom([$noReplyMail => $airline])
+                ->setReplyTo([$operationsMail => 'Operations ' . $airline])
+                ->setTo($pilot->email)
+                ->setSubject($subject)
+                ->send();
+        } catch (\Throwable $e) {
+            $this->logError('Error sending flight validation email', ['flight_id' => $model->id, 'e' => $e]);
+        }
     }
 
     /**

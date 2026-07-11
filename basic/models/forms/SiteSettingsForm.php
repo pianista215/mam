@@ -25,6 +25,7 @@ class SiteSettingsForm extends Model
     public $airline_name;
     public $no_reply_mail;
     public $support_mail;
+    public $operations_mail;
 
     public $x_url;
     public $instagram_url;
@@ -45,7 +46,7 @@ class SiteSettingsForm extends Model
         return [
             [['registration_start','registration_end','registration_start_location',
               'chunks_storage_path','images_storage_path','acars_releases_path','acars_installer_name',
-              'token_life_h','charter_ratio','airline_name','no_reply_mail','support_mail',
+              'token_life_h','charter_ratio','airline_name','no_reply_mail','support_mail','operations_mail',
               'x_url','instagram_url','facebook_url','statistics_email_list','statistics_email_language',
               'aircraft_type_resources_storage_path','aircraft_type_resources_limit_mb',
               'pax_adult_weight_kg','pax_child_weight_kg','pax_checked_baggage_kg'], 'trim'],
@@ -74,7 +75,7 @@ class SiteSettingsForm extends Model
             ['charter_ratio', 'number'],
             ['charter_ratio', 'number', 'min' => 0, 'max' => 1],
 
-            [['no_reply_mail','support_mail'], 'email'],
+            [['no_reply_mail','support_mail','operations_mail'], 'email'],
 
             [['x_url','instagram_url','facebook_url'], 'url'],
 
@@ -102,6 +103,7 @@ class SiteSettingsForm extends Model
             'airline_name' => Yii::t('app', 'Airline name'),
             'no_reply_mail' => Yii::t('app', 'No-reply email'),
             'support_mail' => Yii::t('app', 'Support email'),
+            'operations_mail' => Yii::t('app', 'Operations email'),
 
             'x_url' => Yii::t('app', 'X / Twitter URL'),
             'instagram_url' => Yii::t('app', 'Instagram URL'),
@@ -134,6 +136,7 @@ class SiteSettingsForm extends Model
             CK::AIRLINE_NAME,
             CK::NO_REPLY_MAIL,
             CK::SUPPORT_MAIL,
+            CK::OPERATIONS_MAIL,
             CK::X_URL,
             CK::INSTAGRAM_URL,
             CK::FACEBOOK_URL,

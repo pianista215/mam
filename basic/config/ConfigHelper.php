@@ -24,6 +24,7 @@ class ConfigHelper
     public const AIRLINE_NAME = 'airline_name';
     public const NO_REPLY_MAIL = 'no_reply_mail';
     public const SUPPORT_MAIL = 'support_mail';
+    public const OPERATIONS_MAIL = 'operations_mail';
 
     // Footer
     public const X_URL = 'x_url';
@@ -115,6 +116,11 @@ class ConfigHelper
     public static function getSupportMail(): string
     {
         return Config::get(self::SUPPORT_MAIL) ?? 'support@airlinename.com';
+    }
+
+    public static function getOperationsMail(): string
+    {
+        return Config::get(self::OPERATIONS_MAIL) ?? 'operations@airlinename.com';
     }
 
     public static function getXUrl(): ?string
