@@ -1,5 +1,13 @@
 # Changelog
 
+## [Upcoming] - 1.13.0
+
+### Added
+
+### Changed
+
+### Fixed
+
 ## [1.12.0] - 2026-06-22
 
 ### Added
