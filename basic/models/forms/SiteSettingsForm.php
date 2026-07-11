@@ -41,6 +41,13 @@ class SiteSettingsForm extends Model
     public $pax_child_weight_kg;
     public $pax_checked_baggage_kg;
 
+    public $pax_occ_cargo_min;
+    public $pax_occ_cargo_max;
+    public $pax_occ_high_min;
+    public $pax_occ_high_max;
+    public $pax_occ_low_min;
+    public $pax_occ_low_max;
+
     public function rules()
     {
         return [
@@ -49,7 +56,10 @@ class SiteSettingsForm extends Model
               'token_life_h','charter_ratio','airline_name','no_reply_mail','support_mail','operations_mail',
               'x_url','instagram_url','facebook_url','statistics_email_list','statistics_email_language',
               'aircraft_type_resources_storage_path','aircraft_type_resources_limit_mb',
-              'pax_adult_weight_kg','pax_child_weight_kg','pax_checked_baggage_kg'], 'trim'],
+              'pax_adult_weight_kg','pax_child_weight_kg','pax_checked_baggage_kg',
+              'pax_occ_cargo_min','pax_occ_cargo_max',
+              'pax_occ_high_min','pax_occ_high_max',
+              'pax_occ_low_min','pax_occ_low_max'], 'trim'],
 
             [['registration_start','registration_end'], 'date', 'format' => 'php:Y-m-d'],
             ['registration_start_location', 'filter', 'filter' => 'strtoupper'],
@@ -68,6 +78,14 @@ class SiteSettingsForm extends Model
             ['aircraft_type_resources_limit_mb', 'integer', 'min' => 1],
 
             [['pax_adult_weight_kg', 'pax_child_weight_kg', 'pax_checked_baggage_kg'], 'integer', 'min' => 1],
+
+            [['pax_occ_cargo_min','pax_occ_cargo_max',
+              'pax_occ_high_min','pax_occ_high_max',
+              'pax_occ_low_min','pax_occ_low_max'], 'integer', 'min' => 0, 'max' => 100],
+
+            ['pax_occ_cargo_min', 'compare', 'compareAttribute' => 'pax_occ_cargo_max', 'operator' => '<=', 'type' => 'number'],
+            ['pax_occ_high_min',  'compare', 'compareAttribute' => 'pax_occ_high_max',  'operator' => '<=', 'type' => 'number'],
+            ['pax_occ_low_min',   'compare', 'compareAttribute' => 'pax_occ_low_max',   'operator' => '<=', 'type' => 'number'],
 
             ['token_life_h', 'integer', 'min' => 1],
 
@@ -118,6 +136,13 @@ class SiteSettingsForm extends Model
             'pax_adult_weight_kg'    => Yii::t('app', 'Adult passenger weight (Kg)'),
             'pax_child_weight_kg'    => Yii::t('app', 'Child passenger weight (Kg)'),
             'pax_checked_baggage_kg' => Yii::t('app', 'Checked baggage weight (Kg)'),
+
+            'pax_occ_cargo_min' => Yii::t('app', 'Cargo-only flights fill min (%)'),
+            'pax_occ_cargo_max' => Yii::t('app', 'Cargo-only flights fill max (%)'),
+            'pax_occ_high_min'  => Yii::t('app', 'Pax high-traffic occupancy min (%)'),
+            'pax_occ_high_max'  => Yii::t('app', 'Pax high-traffic occupancy max (%)'),
+            'pax_occ_low_min'   => Yii::t('app', 'Pax low-traffic occupancy min (%)'),
+            'pax_occ_low_max'   => Yii::t('app', 'Pax low-traffic occupancy max (%)'),
         ];
     }
 
@@ -147,6 +172,12 @@ class SiteSettingsForm extends Model
             CK::PAX_ADULT_WEIGHT_KG,
             CK::PAX_CHILD_WEIGHT_KG,
             CK::PAX_CHECKED_BAGGAGE_KG,
+            CK::PAX_OCC_CARGO_MIN,
+            CK::PAX_OCC_CARGO_MAX,
+            CK::PAX_OCC_HIGH_MIN,
+            CK::PAX_OCC_HIGH_MAX,
+            CK::PAX_OCC_LOW_MIN,
+            CK::PAX_OCC_LOW_MAX,
         ];
     }
 

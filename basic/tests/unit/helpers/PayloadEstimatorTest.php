@@ -2,10 +2,13 @@
 
 namespace tests\unit\helpers;
 
+use app\config\Config;
+use app\config\ConfigHelper as CK;
 use app\helpers\PayloadEstimator;
 use app\models\AircraftConfiguration;
 use DateTime;
 use tests\unit\BaseUnitTest;
+use Yii;
 
 class PayloadEstimatorTest extends BaseUnitTest
 {
@@ -190,6 +193,54 @@ class PayloadEstimatorTest extends BaseUnitTest
             $this->assertGreaterThanOrEqual(0, $result['pax_children']);
             $this->assertGreaterThanOrEqual(0, $result['cargo_bags']);
             $this->assertGreaterThanOrEqual(0, $result['cargo_paid_kg']);
+        }
+    }
+
+    // --- Configurable occupancy ratios ---
+
+    public function testOccupancyRatiosAreRespected()
+    {
+        Config::set(CK::PAX_OCC_CARGO_MIN, '70');
+        Config::set(CK::PAX_OCC_CARGO_MAX, '75');
+        Config::set(CK::PAX_OCC_HIGH_MIN,  '60');
+        Config::set(CK::PAX_OCC_HIGH_MAX,  '65');
+        Config::set(CK::PAX_OCC_LOW_MIN,   '30');
+        Config::set(CK::PAX_OCC_LOW_MAX,   '35');
+        Yii::$app->cache->flush();
+
+        try {
+            // Cargo-only: fill must land in [70%, 75%] of maxCargo
+            $cargoConfig = $this->makeConfig(['pax_capacity' => 0, 'cargo_capacity' => 10000]);
+            for ($i = 0; $i < 20; $i++) {
+                $result = $this->generate($cargoConfig, 5000.0);
+                $this->assertGreaterThanOrEqual((int) round(10000 * 0.70), $result['cargo_paid_kg']);
+                $this->assertLessThanOrEqual((int) round(10000 * 0.75), $result['cargo_paid_kg']);
+            }
+
+            // High-traffic pax (Friday = ISO weekday 5)
+            $paxConfig = $this->makeConfig(['pax_capacity' => 200, 'mtow' => 100000, 'oew' => 50000]);
+            for ($i = 0; $i < 20; $i++) {
+                $result   = $this->generate($paxConfig, 10000.0, '2026-06-19');
+                $paxTotal = $result['pax_adults'] + $result['pax_children'];
+                $this->assertGreaterThanOrEqual((int) round(200 * 0.60), $paxTotal);
+                $this->assertLessThanOrEqual((int) round(200 * 0.65), $paxTotal);
+            }
+
+            // Low-traffic pax (Tuesday = ISO weekday 2)
+            for ($i = 0; $i < 20; $i++) {
+                $result   = $this->generate($paxConfig, 10000.0, '2026-06-16');
+                $paxTotal = $result['pax_adults'] + $result['pax_children'];
+                $this->assertGreaterThanOrEqual((int) round(200 * 0.30), $paxTotal);
+                $this->assertLessThanOrEqual((int) round(200 * 0.35), $paxTotal);
+            }
+        } finally {
+            Config::delete(CK::PAX_OCC_CARGO_MIN);
+            Config::delete(CK::PAX_OCC_CARGO_MAX);
+            Config::delete(CK::PAX_OCC_HIGH_MIN);
+            Config::delete(CK::PAX_OCC_HIGH_MAX);
+            Config::delete(CK::PAX_OCC_LOW_MIN);
+            Config::delete(CK::PAX_OCC_LOW_MAX);
+            Yii::$app->cache->flush();
         }
     }
 }
