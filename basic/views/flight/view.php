@@ -6,6 +6,7 @@ use yii\widgets\DetailView;
 
 /** @var yii\web\View $this */
 /** @var app\models\Flight $model */
+/** @var array|null $loadSheet */
 
 $this->title = $model->id;
 $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Flights'), 'url' => ['index']];
@@ -49,16 +50,9 @@ $this->params['breadcrumbs'][] = $this->title;
         'pilotName' => $model->pilot->fullname,
     ]) ?>
 
-    <?php if ($model->pax_adults !== null): ?>
+    <?php if ($loadSheet !== null): ?>
     <?= $this->render('@app/views/partials/_load_sheet', [
-        'paxAdults'   => $model->pax_adults,
-        'paxChildren' => $model->pax_children,
-        'cargoBags'   => $model->cargo_bags,
-        'cargoPaidKg' => $model->cargo_paid_kg,
-        'crew'        => $model->crew,
-        'adultW'      => \app\config\ConfigHelper::getPaxAdultWeightKg(),
-        'childW'      => \app\config\ConfigHelper::getPaxChildWeightKg(),
-        'bagW'        => \app\config\ConfigHelper::getPaxCheckedBaggageKg(),
+        'loadSheet' => $loadSheet,
     ]) ?>
     <?php endif; ?>
 

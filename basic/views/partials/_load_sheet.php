@@ -3,26 +3,27 @@
 use yii\helpers\Html;
 
 /**
- * @var yii\web\View  $this
- * @var int           $paxAdults
- * @var int           $paxChildren
- * @var int           $cargoBags
- * @var int           $cargoPaidKg
- * @var int           $crew
- * @var int           $adultW
- * @var int           $childW
- * @var int           $bagW
+ * @var yii\web\View $this
+ * @var array         $loadSheet Breakdown from PayloadEstimator::calculateLoadSheet()
  */
 
-$crewKg      = $crew * $adultW;
-$adultsKg    = $paxAdults * $adultW;
-$childrenKg  = $paxChildren * $childW;
-$paxTotal    = $paxAdults + $paxChildren;
-$paxKg       = $adultsKg + $childrenKg;
-$bagsKg      = $cargoBags * $bagW;
-$cargoKg     = $bagsKg + $cargoPaidKg;
-$totalPayload = $crewKg + $paxKg + $cargoKg;
-$pob         = $paxTotal + $crew;
+$paxAdults    = $loadSheet['paxAdults'];
+$paxChildren  = $loadSheet['paxChildren'];
+$cargoBags    = $loadSheet['cargoBags'];
+$cargoPaidKg  = $loadSheet['cargoPaidKg'];
+$crew         = $loadSheet['crew'];
+$adultW       = $loadSheet['adultW'];
+$childW       = $loadSheet['childW'];
+$bagW         = $loadSheet['bagW'];
+$crewKg       = $loadSheet['crewKg'];
+$adultsKg     = $loadSheet['adultsKg'];
+$childrenKg   = $loadSheet['childrenKg'];
+$paxTotal     = $loadSheet['paxTotal'];
+$paxKg        = $loadSheet['paxKg'];
+$bagsKg       = $loadSheet['bagsKg'];
+$cargoKg      = $loadSheet['cargoKg'];
+$totalPayload = $loadSheet['totalPayload'];
+$pob          = $loadSheet['pob'];
 
 $fmt = fn(int $n) => number_format($n, 0, '.', ',') . ' Kg';
 ?>

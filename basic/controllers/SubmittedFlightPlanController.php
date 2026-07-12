@@ -468,9 +468,25 @@ class SubmittedFlightPlanController extends Controller
             } else {
                 $entity = $model->charterRoute;
             }
+
+            $loadSheet = null;
+            if ($model->pax_adults !== null) {
+                $loadSheet = PayloadEstimator::calculateLoadSheet(
+                    $model->crew,
+                    $model->pax_adults,
+                    $model->pax_children,
+                    $model->cargo_bags,
+                    $model->cargo_paid_kg,
+                    CK::getPaxAdultWeightKg(),
+                    CK::getPaxChildWeightKg(),
+                    CK::getPaxCheckedBaggageKg()
+                );
+            }
+
             return $this->render('view', [
                 'model' => $model,
                 'entity' => $entity,
+                'loadSheet' => $loadSheet,
             ]);
         } else {
             throw new ForbiddenHttpException();

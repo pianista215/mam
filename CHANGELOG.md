@@ -6,9 +6,12 @@
 - Email notification sent to pilot when a flight is rejected or validated with comments (no email on silent approvals to avoid spam); subject and body identify the flight by code and date; reply-to goes to the configurable operations email
 - New "Operations email" setting in admin → Site Settings, configurable alongside noreply and support emails
 - Admin settings → new "Occupancy Ratios" section: configurable fill range for cargo-only flights (default 60–90 %) and occupancy ranges for pax flights on low-traffic days (default 40–80 %) and high-traffic days (Mon/Fri/Sat/Sun, default 50–85 %); each pair validates that min ≤ max and both values are integers in 0–100
+- `context.json` sent to mam-analyzer now includes `expected_payload_kg` (total load sheet payload in kg — crew + pax + cargo; `null` for flights created before the pax/cargo feature) and `oew_kg` (aircraft configuration's OEW), enabling the analyzer to detect ZFW/payload mismatches
+- New `TakeoffWithBadPayload` issue type (penalty 20): reported by mam-analyzer when the payload derived from `zfw_kg - oew_kg` doesn't match the expected payload
 
 ### Changed
 - Aircraft type resources (view page) are now ordered by original filename ascending instead of upload date
+- Load sheet total payload calculation moved from the view into `PayloadEstimator::calculateLoadSheet()`, now shared by the flight/flight-plan views and the ACARS analysis context generator
 
 ### Fixed
 

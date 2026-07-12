@@ -1,6 +1,8 @@
 <?php
 namespace app\commands;
 
+use app\config\ConfigHelper;
+use app\helpers\PayloadEstimator;
 use app\models\FlightEvent;
 use app\models\FlightEventAttribute;
 use app\models\FlightEventData;
@@ -127,12 +129,30 @@ class FlightReportController extends Controller
 
     protected function generateFlightContext($flight, $report)
     {
+        $expectedPayloadKg = null;
+        if ($flight->crew !== null && $flight->pax_adults !== null && $flight->pax_children !== null
+            && $flight->cargo_bags !== null && $flight->cargo_paid_kg !== null) {
+            $loadSheet = PayloadEstimator::calculateLoadSheet(
+                $flight->crew,
+                $flight->pax_adults,
+                $flight->pax_children,
+                $flight->cargo_bags,
+                $flight->cargo_paid_kg,
+                ConfigHelper::getPaxAdultWeightKg(),
+                ConfigHelper::getPaxChildWeightKg(),
+                ConfigHelper::getPaxCheckedBaggageKg()
+            );
+            $expectedPayloadKg = $loadSheet['totalPayload'];
+        }
+
         $context = [
             'departure' => $this->buildAirportWithRunways($flight->departure0),
             'destination' => ['icao' => $flight->arrival],
             'alternative1' => ['icao' => $flight->alternative1_icao],
             'alternative2' => $flight->alternative2_icao !== null ? ['icao' => $flight->alternative2_icao] : null,
             'landing' => $this->buildAirportWithRunways($report->landingAirport),
+            'expected_payload_kg' => $expectedPayloadKg,
+            'oew_kg' => $flight->aircraft->aircraftConfiguration->oew,
         ];
 
         $contextPath = $report->getChunksDirectory() . DIRECTORY_SEPARATOR . 'context.json';

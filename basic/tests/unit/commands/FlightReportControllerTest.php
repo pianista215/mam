@@ -87,6 +87,7 @@ class FlightReportControllerTest extends BaseUnitTest
             ['code' => 'LandingHardFpm',          'penalty' => 20],
             ['code' => 'LandingAllEnginesStopped','penalty' => null],
             ['code' => 'AppHighVsBelow1000AGL',   'penalty' => 10],
+            ['code' => 'TakeoffWithBadPayload',   'penalty' => 20],
         ];
         foreach ($issueDefs as $def) {
             (new IssueType($def))->save(false);
@@ -159,7 +160,7 @@ class FlightReportControllerTest extends BaseUnitTest
 
     private static int $pilotSeq = 0;
 
-    private function createFlightWithReport(): array
+    private function createFlightWithReport(array $flightAttributes = []): array
     {
         $pilot = new Pilot([
             'license'       => 'T' . str_pad(++self::$pilotSeq, 7, '0', STR_PAD_LEFT),
@@ -184,7 +185,7 @@ class FlightReportControllerTest extends BaseUnitTest
         ]);
         $aircraft->save(false);
 
-        $flight = new Flight([
+        $flight = new Flight(array_merge([
             'pilot_id'          => $pilot->id,
             'aircraft_id'       => $aircraft->id,
             'code'              => 'TST001',
@@ -203,7 +204,7 @@ class FlightReportControllerTest extends BaseUnitTest
             'report_tool'       => 'TestTool',
             'status'            => 'S',
             'flight_type'       => 'R',
-        ]);
+        ], $flightAttributes));
         $flight->save(false);
 
         $report = new FlightReport([
@@ -361,6 +362,35 @@ class FlightReportControllerTest extends BaseUnitTest
         $this->assertCount(1, $context['departure']['runways']);
         $this->assertEquals('LEBL', $context['destination']['icao']);
         $this->assertEquals('LEBL', $context['landing']['icao']);
+        $this->assertEquals(767, $context['oew_kg']);
+        $this->assertNull($context['expected_payload_kg']);
+    }
+
+    public function testAssembleSuccessWithPayload(): void
+    {
+        [, $report] = $this->createFlightWithReport([
+            'crew'          => 2,
+            'pax_adults'    => 3,
+            'pax_children'  => 1,
+            'cargo_bags'    => 2,
+            'cargo_paid_kg' => 50,
+        ]);
+        $chunksPath = $report->getChunksDirectory();
+
+        $this->writeGzipChunk($chunksPath . '/1', '{"part":1}');
+        (new AcarsFile([
+            'flight_report_id' => $report->id,
+            'chunk_id'         => 1,
+            'sha256sum'        => str_repeat('A', 44),
+        ]))->save(false);
+
+        $result = $this->controller->actionAssemblePendingAcars();
+
+        $this->assertEquals(ExitCode::OK, $result);
+        $context = json_decode(file_get_contents($chunksPath . '/context.json'), true);
+        // 2*84 (crew) + 3*84 (adults) + 1*35 (children) + 2*13 (bags) + 50 (paid cargo) = 531
+        $this->assertEquals(531, $context['expected_payload_kg']);
+        $this->assertEquals(767, $context['oew_kg']);
     }
 
     public function testAssembleInvalidGzip(): void

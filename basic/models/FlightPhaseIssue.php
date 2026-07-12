@@ -91,7 +91,7 @@ class FlightPhaseIssue extends \yii\db\ActiveRecord
             $parts = array_map('trim', explode('|', $value));
             $description = str_replace('{limit}', $parts[2], $description);
             $to_add = Yii::t('app', 'Sampled VS') . ': ' . $parts[0]. ' fpm '. Yii::t('app','and'). ' '. $parts[1]. ' AGL';
-        } else if($issue_code == 'Refueling' || $issue_code == 'ZfwModified'){
+        } else if($issue_code == 'Refueling' || $issue_code == 'ZfwModified' || $issue_code == 'TakeoffWithBadPayload'){
             $to_add = $value. ' Kg';
         } else {
             $to_add = $value;
