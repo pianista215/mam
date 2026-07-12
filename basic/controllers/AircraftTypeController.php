@@ -95,7 +95,7 @@ class AircraftTypeController extends Controller
         $resources = $canViewResources
             ? AircraftTypeResource::find()
                 ->where(['aircraft_type_id' => $model->id])
-                ->orderBy(['created_at' => SORT_DESC])
+                ->orderBy(['original_name' => SORT_ASC])
                 ->all()
             : [];
 

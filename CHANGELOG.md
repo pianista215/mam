@@ -8,6 +8,7 @@
 - Admin settings → new "Occupancy Ratios" section: configurable fill range for cargo-only flights (default 60–90 %) and occupancy ranges for pax flights on low-traffic days (default 40–80 %) and high-traffic days (Mon/Fri/Sat/Sun, default 50–85 %); each pair validates that min ≤ max and both values are integers in 0–100
 
 ### Changed
+- Aircraft type resources (view page) are now ordered by original filename ascending instead of upload date
 
 ### Fixed
 
