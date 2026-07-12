@@ -46,6 +46,9 @@ $this->title = Yii::t('app', 'Site Settings');
 <?= $form->field($model, 'statistics_email_list') ?>
 <?= $form->field($model, 'statistics_email_language')->dropDownList(['en' => 'English', 'es' => 'Español']) ?>
 
+<h3><?= Yii::t('app', 'Discord') ?></h3>
+<?= $form->field($model, 'discord_webhook_url') ?>
+
 <h3><?= Yii::t('app', 'Payload Weights') ?></h3>
 <?= $form->field($model, 'pax_adult_weight_kg')->input('number', ['min' => 1]) ?>
 <?= $form->field($model, 'pax_child_weight_kg')->input('number', ['min' => 1]) ?>

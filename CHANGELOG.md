@@ -8,6 +8,7 @@
 - Admin settings → new "Occupancy Ratios" section: configurable fill range for cargo-only flights (default 60–90 %) and occupancy ranges for pax flights on low-traffic days (default 40–80 %) and high-traffic days (Mon/Fri/Sat/Sun, default 50–85 %); each pair validates that min ≤ max and both values are integers in 0–100
 - `context.json` sent to mam-analyzer now includes `expected_payload_kg` (total load sheet payload in kg — crew + pax + cargo; `null` for flights created before the pax/cargo feature) and `oew_kg` (aircraft configuration's OEW), enabling the analyzer to detect ZFW/payload mismatches
 - New `TakeoffWithBadPayload` issue type (penalty 20): reported by mam-analyzer when the payload derived from `zfw_kg - oew_kg` doesn't match the expected payload
+- Monthly and yearly statistics summaries can now also be posted to a Discord channel via a configurable webhook URL (admin → Site Settings → Discord), reusing the same aggregates/rankings/records already sent by email; notification is skipped silently if no webhook URL is configured, and a delivery failure never affects the email send or the command's exit code
 
 ### Changed
 - Aircraft type resources (view page) are now ordered by original filename ascending instead of upload date

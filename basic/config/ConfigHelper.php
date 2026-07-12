@@ -34,6 +34,7 @@ class ConfigHelper
     // Statistics
     public const STATISTICS_EMAIL_LIST = 'statistics_email_list';
     public const STATISTICS_EMAIL_LANGUAGE = 'statistics_email_language';
+    public const DISCORD_WEBHOOK_URL = 'discord_webhook_url';
 
     // Payload weights
     public const PAX_ADULT_WEIGHT_KG    = 'pax_adult_weight_kg';
@@ -165,6 +166,17 @@ class ConfigHelper
     {
         $value = Config::get(self::STATISTICS_EMAIL_LANGUAGE);
         return !empty($value) ? $value : 'en';
+    }
+
+    /**
+     * Get the Discord webhook URL for statistics notifications.
+     *
+     * @return string|null Webhook URL or null if not configured
+     */
+    public static function getDiscordWebhookUrl(): ?string
+    {
+        $value = Config::get(self::DISCORD_WEBHOOK_URL);
+        return !empty($value) ? $value : null;
     }
 
     public static function getPaxAdultWeightKg(): int
