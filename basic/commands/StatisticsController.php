@@ -3,6 +3,8 @@
 namespace app\commands;
 
 use app\config\ConfigHelper;
+use app\helpers\DiscordNotifier;
+use app\helpers\DiscordStatisticsFormatter;
 use app\models\AircraftType;
 use app\models\Flight;
 use app\models\FlightPhaseMetricType;
@@ -724,13 +726,22 @@ class StatisticsController extends Controller
         $monthName = Yii::$app->formatter->asDate($date, 'MMMM');
         $periodTitle = ucfirst($monthName) . ' ' . $year;
 
+        $aggregates = $this->getAggregatesForPeriod($period);
+        $rankings = $this->getRankingsForPeriod($period);
+        $records = $this->getRecordsForPeriod($period);
+
         $sent = $this->sendStatisticsEmail(
             $email,
             Yii::t('app', 'Monthly Statistics') . ' - ' . $periodTitle,
             'monthlyStatistics',
             $period,
-            $periodTitle
+            $periodTitle,
+            $aggregates,
+            $rankings,
+            $records
         );
+
+        $this->sendStatisticsDiscordNotification($periodTitle, $aggregates, $rankings, $records);
 
         // Restore original language
         Yii::$app->language = $originalLanguage;
@@ -781,13 +792,22 @@ class StatisticsController extends Controller
 
         $periodTitle = (string) $year;
 
+        $aggregates = $this->getAggregatesForPeriod($period);
+        $rankings = $this->getRankingsForPeriod($period);
+        $records = $this->getRecordsForPeriod($period);
+
         $sent = $this->sendStatisticsEmail(
             $email,
             Yii::t('app', 'Yearly Statistics') . ' - ' . $periodTitle,
             'yearlyStatistics',
             $period,
-            $periodTitle
+            $periodTitle,
+            $aggregates,
+            $rankings,
+            $records
         );
+
+        $this->sendStatisticsDiscordNotification($periodTitle, $aggregates, $rankings, $records);
 
         // Restore original language
         Yii::$app->language = $originalLanguage;
@@ -826,12 +846,11 @@ class StatisticsController extends Controller
         string $subject,
         string $template,
         StatisticPeriod $period,
-        string $periodTitle
+        string $periodTitle,
+        array $aggregates,
+        array $rankings,
+        array $records
     ): bool {
-        $aggregates = $this->getAggregatesForPeriod($period);
-        $rankings = $this->getRankingsForPeriod($period);
-        $records = $this->getRecordsForPeriod($period);
-
         $airlineName = ConfigHelper::getAirlineName();
         $fromEmail = ConfigHelper::getNoReplyMail();
         $replyToEmail = ConfigHelper::getSupportMail();
@@ -849,6 +868,37 @@ class StatisticsController extends Controller
             ->setTo($to)
             ->setSubject($airlineName . ' - ' . $subject)
             ->send();
+    }
+
+    /**
+     * Send the statistics summary to Discord via webhook, if configured.
+     * Failures are logged but never affect the command's exit code — the email is the
+     * required delivery channel, Discord is an optional addition.
+     */
+    private function sendStatisticsDiscordNotification(
+        string $periodTitle,
+        array $aggregates,
+        array $rankings,
+        array $records
+    ): void {
+        $webhookUrl = ConfigHelper::getDiscordWebhookUrl();
+        if (empty($webhookUrl)) {
+            return;
+        }
+
+        $payload = DiscordStatisticsFormatter::format(
+            ConfigHelper::getAirlineName(),
+            $periodTitle,
+            $aggregates,
+            $rankings,
+            $records
+        );
+
+        if (DiscordNotifier::send($webhookUrl, $payload)) {
+            $this->stdout("Discord notification sent.\n");
+        } else {
+            $this->stderr("Failed to send Discord notification (see logs).\n");
+        }
     }
 
     /**

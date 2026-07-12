@@ -123,6 +123,8 @@ return [
     'Departure Aerodrome' => 'Aeródromo de Salida',
     'Description' => 'Descripción',
     'Designator' => 'Identificador',
+    'Discord' => 'Discord',
+    'Discord webhook URL' => 'Discord webhook URL',
     'Does not expire' => 'Sin fecha de caducidad',
     'Destination Aerodrome' => 'Aeródromo de Llegada',
     'Detected Issues' => 'Incidencias Detectadas',
