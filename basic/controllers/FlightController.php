@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\config\ConfigHelper as CK;
 use app\helpers\LoggerTrait;
+use app\helpers\PayloadEstimator;
 use app\models\Flight;
 use app\models\FlightSearch;
 use app\models\PilotTourCompletion;
@@ -79,8 +80,25 @@ class FlightController extends Controller
      */
     public function actionView($id)
     {
+        $model = $this->findModel($id);
+
+        $loadSheet = null;
+        if ($model->pax_adults !== null) {
+            $loadSheet = PayloadEstimator::calculateLoadSheet(
+                $model->crew,
+                $model->pax_adults,
+                $model->pax_children,
+                $model->cargo_bags,
+                $model->cargo_paid_kg,
+                CK::getPaxAdultWeightKg(),
+                CK::getPaxChildWeightKg(),
+                CK::getPaxCheckedBaggageKg()
+            );
+        }
+
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $model,
+            'loadSheet' => $loadSheet,
         ]);
     }
 

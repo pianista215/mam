@@ -42,6 +42,55 @@ class PayloadEstimator
         return self::paxAndCargo($config, $availablePayload, $adultWeightKg, $childWeightKg, $baggageWeightKg, $flightDate);
     }
 
+    /**
+     * Computes the crew/pax/cargo weight breakdown (in kg) for a booked flight's load sheet.
+     * Shared by the load sheet views and the ACARS analysis context so the total payload
+     * figure is calculated in exactly one place.
+     *
+     * @return array{crew: int, paxAdults: int, paxChildren: int, cargoBags: int, cargoPaidKg: int,
+     *               adultW: float, childW: float, bagW: float, crewKg: float, adultsKg: float,
+     *               childrenKg: float, paxTotal: int, paxKg: float, bagsKg: float, cargoKg: float,
+     *               totalPayload: float, pob: int}
+     */
+    public static function calculateLoadSheet(
+        int $crew,
+        int $paxAdults,
+        int $paxChildren,
+        int $cargoBags,
+        int $cargoPaidKg,
+        float $adultWeightKg,
+        float $childWeightKg,
+        float $baggageWeightKg
+    ): array {
+        $crewKg     = $crew * $adultWeightKg;
+        $adultsKg   = $paxAdults * $adultWeightKg;
+        $childrenKg = $paxChildren * $childWeightKg;
+        $paxTotal   = $paxAdults + $paxChildren;
+        $paxKg      = $adultsKg + $childrenKg;
+        $bagsKg     = $cargoBags * $baggageWeightKg;
+        $cargoKg    = $bagsKg + $cargoPaidKg;
+
+        return [
+            'crew'         => $crew,
+            'paxAdults'    => $paxAdults,
+            'paxChildren'  => $paxChildren,
+            'cargoBags'    => $cargoBags,
+            'cargoPaidKg'  => $cargoPaidKg,
+            'adultW'       => $adultWeightKg,
+            'childW'       => $childWeightKg,
+            'bagW'         => $baggageWeightKg,
+            'crewKg'       => $crewKg,
+            'adultsKg'     => $adultsKg,
+            'childrenKg'   => $childrenKg,
+            'paxTotal'     => $paxTotal,
+            'paxKg'        => $paxKg,
+            'bagsKg'       => $bagsKg,
+            'cargoKg'      => $cargoKg,
+            'totalPayload' => $crewKg + $paxKg + $cargoKg,
+            'pob'          => $paxTotal + $crew,
+        ];
+    }
+
     private static function cargoOnly(float $availablePayload, int $cargoCapacity): array
     {
         $maxCargo  = min($availablePayload, $cargoCapacity);
