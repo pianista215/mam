@@ -393,15 +393,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'aircraft.aircraftConfiguration.aircraftType.icao_type_code',
             [
-                'attribute' => 'status',
-                'filter' => false,
-                'format' => 'raw',
-                'value' => function ($model) {
-                    return FlightStatusIconHelper::renderIcon($model);
-                },
-                'contentOptions' => ['style' => 'text-align:center; font-size: 18px;'],
-            ],
-            [
                 'label' => Yii::t('app', 'Flight Time'),
                 'value' => function ($model) {
                     $minutes = $model->flightReport->flight_time_minutes ?? null;
@@ -409,6 +400,15 @@ $this->params['breadcrumbs'][] = $this->title;
                         ? TimeHelper::formatHoursMinutes($minutes / 60.0)
                         : '-';
                 },
+            ],
+            [
+                'attribute' => 'status',
+                'filter' => false,
+                'format' => 'raw',
+                'value' => function ($model) {
+                    return FlightStatusIconHelper::renderIcon($model);
+                },
+                'contentOptions' => ['style' => 'text-align:center; font-size: 18px;'],
             ],
             [
                 'class' => 'yii\grid\ActionColumn',
