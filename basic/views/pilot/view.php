@@ -2,6 +2,7 @@
 
 use app\helpers\TimeHelper;
 use app\helpers\ImageMam;
+use app\helpers\FlightStatusIconHelper;
 use app\models\Image;
 use app\rbac\constants\Permissions;
 use yii\helpers\Html;
@@ -399,6 +400,15 @@ $this->params['breadcrumbs'][] = $this->title;
                         ? TimeHelper::formatHoursMinutes($minutes / 60.0)
                         : '-';
                 },
+            ],
+            [
+                'attribute' => 'status',
+                'filter' => false,
+                'format' => 'raw',
+                'value' => function ($model) {
+                    return FlightStatusIconHelper::renderIcon($model);
+                },
+                'contentOptions' => ['style' => 'text-align:center; font-size: 18px;'],
             ],
             [
                 'class' => 'yii\grid\ActionColumn',
