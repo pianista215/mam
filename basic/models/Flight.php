@@ -169,7 +169,7 @@ class Flight extends \yii\db\ActiveRecord
             self::STATUS_REJECTED => Yii::t('app', 'Rejected')
         ];
 
-        return $list[$this->status];
+        return $list[$this->status] ?? Yii::t('app', 'Unknown');
     }
 
     public function isProcessed(){

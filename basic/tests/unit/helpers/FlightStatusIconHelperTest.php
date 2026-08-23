@@ -33,5 +33,6 @@ class FlightStatusIconHelperTest extends BaseUnitTest
         $html = FlightStatusIconHelper::renderIcon($flight);
 
         $this->assertStringContainsString('fa-question-circle', $html);
+        $this->assertStringContainsString('title="Unknown"', $html);
     }
 }
