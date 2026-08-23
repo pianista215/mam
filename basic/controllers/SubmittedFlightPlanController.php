@@ -480,7 +480,7 @@ class SubmittedFlightPlanController extends Controller
                     CK::getPaxAdultWeightKg(),
                     CK::getPaxChildWeightKg(),
                     CK::getPaxCheckedBaggageKg(),
-                    $model->aircraft?->aircraftConfiguration?->oew
+                    $model->aircraft->aircraftConfiguration->oew
                 );
             }
 
