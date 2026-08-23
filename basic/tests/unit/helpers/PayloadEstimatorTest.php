@@ -243,4 +243,28 @@ class PayloadEstimatorTest extends BaseUnitTest
             Yii::$app->cache->flush();
         }
     }
+
+    public function testBagsRatioIsRespected()
+    {
+        Config::set(CK::PAX_BAGS_RATIO_MIN, '50');
+        Config::set(CK::PAX_BAGS_RATIO_MAX, '55');
+        Yii::$app->cache->flush();
+
+        try {
+            $config = $this->makeConfig(['pax_capacity' => 180]);
+
+            for ($i = 0; $i < 30; $i++) {
+                $result   = $this->generate($config, 8000.0);
+                $paxTotal = $result['pax_adults'] + $result['pax_children'];
+                if ($paxTotal > 0) {
+                    $this->assertGreaterThanOrEqual((int) round($paxTotal * 0.50) - 1, $result['cargo_bags']);
+                    $this->assertLessThanOrEqual((int) round($paxTotal * 0.55) + 1, $result['cargo_bags']);
+                }
+            }
+        } finally {
+            Config::delete(CK::PAX_BAGS_RATIO_MIN);
+            Config::delete(CK::PAX_BAGS_RATIO_MAX);
+            Yii::$app->cache->flush();
+        }
+    }
 }

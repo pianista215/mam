@@ -133,7 +133,7 @@ class PayloadEstimator
             $paxWeight = $adults * $adultWeightKg + $children * $childWeightKg;
         }
 
-        $bags            = (int) round($paxTotal * mt_rand(20, 35) / 100);
+        $bags            = (int) round($paxTotal * mt_rand(CK::getPaxBagsRatioMin(), CK::getPaxBagsRatioMax()) / 100);
         $bagsWeight      = $bags * $baggageWeightKg;
         $remainingCargo  = max(0.0, $availablePayload - $paxWeight);
         $cargoLimit      = min($remainingCargo, (float) $config->cargo_capacity);

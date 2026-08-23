@@ -110,4 +110,24 @@ class ConfigHelperTest extends BaseUnitTest
         $this->assertEquals(40, CK::getPaxChildWeightKg());
         $this->assertEquals(15, CK::getPaxCheckedBaggageKg());
     }
+
+    public function testBagsRatioGettersReturnDefaults()
+    {
+        Config::delete(CK::PAX_BAGS_RATIO_MIN);
+        Config::delete(CK::PAX_BAGS_RATIO_MAX);
+        Yii::$app->cache->flush();
+
+        $this->assertEquals(20, CK::getPaxBagsRatioMin());
+        $this->assertEquals(35, CK::getPaxBagsRatioMax());
+    }
+
+    public function testBagsRatioGettersReturnConfiguredValues()
+    {
+        Config::set(CK::PAX_BAGS_RATIO_MIN, '25');
+        Config::set(CK::PAX_BAGS_RATIO_MAX, '40');
+        Yii::$app->cache->flush();
+
+        $this->assertEquals(25, CK::getPaxBagsRatioMin());
+        $this->assertEquals(40, CK::getPaxBagsRatioMax());
+    }
 }

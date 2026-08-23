@@ -61,6 +61,8 @@ $this->title = Yii::t('app', 'Site Settings');
 <?= $form->field($model, 'pax_occ_low_max')->input('number', ['min' => 0, 'max' => 100]) ?>
 <?= $form->field($model, 'pax_occ_high_min')->input('number', ['min' => 0, 'max' => 100]) ?>
 <?= $form->field($model, 'pax_occ_high_max')->input('number', ['min' => 0, 'max' => 100]) ?>
+<?= $form->field($model, 'pax_bags_ratio_min')->input('number', ['min' => 0, 'max' => 100]) ?>
+<?= $form->field($model, 'pax_bags_ratio_max')->input('number', ['min' => 0, 'max' => 100]) ?>
 
 <h3><?= Yii::t('app', 'Other') ?></h3>
 <?= $form->field($model, 'chunks_storage_path') ?>
