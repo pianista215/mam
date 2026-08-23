@@ -49,6 +49,8 @@ class PayloadEstimator
      *
      * @param float|null $oewKg Aircraft configuration's OEW in kg, used to add an estimated ZFW (OEW + payload)
      *                           to the breakdown. Pass null when unavailable; estimatedZfw is then null too.
+     *                           Keep this optional with a null default: FlightReportController::generateFlightContext()
+     *                           calls this method without it, since the ACARS context only needs totalPayload.
      * @return array{crew: int, paxAdults: int, paxChildren: int, cargoBags: int, cargoPaidKg: int,
      *               adultW: float, childW: float, bagW: float, crewKg: float, adultsKg: float,
      *               childrenKg: float, paxTotal: int, paxKg: float, bagsKg: float, cargoKg: float,
