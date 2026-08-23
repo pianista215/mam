@@ -92,7 +92,8 @@ class FlightController extends Controller
                 $model->cargo_paid_kg,
                 CK::getPaxAdultWeightKg(),
                 CK::getPaxChildWeightKg(),
-                CK::getPaxCheckedBaggageKg()
+                CK::getPaxCheckedBaggageKg(),
+                $model->aircraft->aircraftConfiguration->oew
             );
         }
 
