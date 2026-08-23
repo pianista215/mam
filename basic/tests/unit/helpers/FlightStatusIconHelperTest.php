@@ -26,13 +26,4 @@ class FlightStatusIconHelperTest extends BaseUnitTest
             $this->assertStringContainsString('title="' . $flight->fullStatus . '"', $html, "Status $status should include fullStatus in the tooltip");
         }
     }
-
-    public function testRenderIconFallsBackForUnknownStatus()
-    {
-        $flight = new Flight(['status' => 'X']);
-        $html = FlightStatusIconHelper::renderIcon($flight);
-
-        $this->assertStringContainsString('fa-question-circle', $html);
-        $this->assertStringContainsString('title="Unknown"', $html);
-    }
 }

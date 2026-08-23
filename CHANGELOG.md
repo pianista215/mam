@@ -10,7 +10,6 @@
 
 ### Fixed
 - Malformed `<i>` tag in the pending-validation status icon (missing closing `>`)
-- `Flight::getFullStatus()` no longer throws on an unrecognized status value; falls back to "Unknown"
 
 ## [1.13.0] - 2026-07-12
 
