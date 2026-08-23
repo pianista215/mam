@@ -146,6 +146,24 @@ class SiteSettingsCest
         $I->assertEquals('0.2', Config::get(CK::CHARTER_RATIO));
     }
 
+    public function invalidBagsRatioIsNotSaved(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(2);
+        Config::set(CK::PAX_BAGS_RATIO_MIN, '20');
+        Config::set(CK::PAX_BAGS_RATIO_MAX, '35');
+
+        $I->amOnRoute('admin/site-settings');
+
+        $I->fillField('input[name="SiteSettingsForm[pax_bags_ratio_min]"]', '80');
+        $I->fillField('input[name="SiteSettingsForm[pax_bags_ratio_max]"]', '10');
+        $I->click('Save');
+
+        $I->see('Please fix the following errors');
+
+        $I->assertEquals('20', Config::get(CK::PAX_BAGS_RATIO_MIN));
+        $I->assertEquals('35', Config::get(CK::PAX_BAGS_RATIO_MAX));
+    }
+
     public function invalidEmailIsNotSaved(\FunctionalTester $I)
     {
         $I->amLoggedInAs(2);

@@ -477,6 +477,8 @@ return [
     'Pax high-traffic occupancy max (%)' => 'Vuelos de pasajeros (Días alta demanda). Máximo %',
     'Pax low-traffic occupancy min (%)' => 'Vuelos de pasajeros (Días baja demanda). Mínimo %',
     'Pax low-traffic occupancy max (%)' => 'Vuelos de pasajeros (Días baja demanda). Máximo %',
+    'Checked baggage ratio min (%)' => 'Ratio de maletas facturadas. Mínimo %',
+    'Checked baggage ratio max (%)' => 'Ratio de maletas facturadas. Máximo %',
     'Item' => 'Concepto',
     'Count' => 'Unidades',
     'Unit weight' => 'Peso unit.',

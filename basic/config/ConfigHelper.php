@@ -48,6 +48,9 @@ class ConfigHelper
     public const PAX_OCC_LOW_MIN   = 'pax_occ_low_min';
     public const PAX_OCC_LOW_MAX   = 'pax_occ_low_max';
 
+    public const PAX_BAGS_RATIO_MIN = 'pax_bags_ratio_min';
+    public const PAX_BAGS_RATIO_MAX = 'pax_bags_ratio_max';
+
     public static function getRegistrationStart(): ?DateTime
     {
         $value = Config::get(self::REGISTRATION_START);
@@ -222,6 +225,16 @@ class ConfigHelper
     public static function getPaxOccLowMax(): int
     {
         return (int)(Config::get(self::PAX_OCC_LOW_MAX) ?? 80);
+    }
+
+    public static function getPaxBagsRatioMin(): int
+    {
+        return (int)(Config::get(self::PAX_BAGS_RATIO_MIN) ?? 20);
+    }
+
+    public static function getPaxBagsRatioMax(): int
+    {
+        return (int)(Config::get(self::PAX_BAGS_RATIO_MAX) ?? 35);
     }
 
 }
