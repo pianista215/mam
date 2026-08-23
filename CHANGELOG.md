@@ -6,6 +6,7 @@
 - Pilot detail view: "Recent flights" table now shows a status icon (with tooltip) for each flight, matching the flight list view
 - `FlightStatusIconHelper::renderIcon()` centralizes the status icon markup, now shared by the flight list and pilot detail views
 - Admin settings → Occupancy Ratios: configurable checked-baggage ratio (default 20–35%), replacing the previously hardcoded range; validates min ≤ max, integers 0–100
+- Load sheet now shows an estimated ZFW (OEW + payload) in a single muted row below the payload total, labeled as approximate; hidden when the aircraft has no OEW configured
 
 ### Changed
 

@@ -491,4 +491,6 @@ return [
     'POB' => 'POB',
     'OEW' => 'OEW',
     'ZFW' => 'ZFW',
+    'Estimated ZFW' => 'ZFW estimado',
+    'may vary by aircraft/developer' => 'puede variar según avión/desarrollador',
 ];

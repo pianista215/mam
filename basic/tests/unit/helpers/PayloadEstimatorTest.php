@@ -267,4 +267,21 @@ class PayloadEstimatorTest extends BaseUnitTest
             Yii::$app->cache->flush();
         }
     }
+
+    // --- calculateLoadSheet: estimated ZFW ---
+
+    public function testCalculateLoadSheetWithOewReturnsEstimatedZfw()
+    {
+        $result = PayloadEstimator::calculateLoadSheet(2, 100, 10, 20, 500, 84, 35, 13, 40000.0);
+
+        $this->assertEquals($result['totalPayload'], $result['estimatedZfw'] - 40000.0);
+        $this->assertEquals(40000.0 + $result['totalPayload'], $result['estimatedZfw']);
+    }
+
+    public function testCalculateLoadSheetWithoutOewReturnsNullEstimatedZfw()
+    {
+        $result = PayloadEstimator::calculateLoadSheet(2, 100, 10, 20, 500, 84, 35, 13);
+
+        $this->assertNull($result['estimatedZfw']);
+    }
 }

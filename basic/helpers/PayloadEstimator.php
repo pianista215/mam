@@ -47,10 +47,12 @@ class PayloadEstimator
      * Shared by the load sheet views and the ACARS analysis context so the total payload
      * figure is calculated in exactly one place.
      *
+     * @param float|null $oewKg Aircraft configuration's OEW in kg, used to add an estimated ZFW (OEW + payload)
+     *                           to the breakdown. Pass null when unavailable; estimatedZfw is then null too.
      * @return array{crew: int, paxAdults: int, paxChildren: int, cargoBags: int, cargoPaidKg: int,
      *               adultW: float, childW: float, bagW: float, crewKg: float, adultsKg: float,
      *               childrenKg: float, paxTotal: int, paxKg: float, bagsKg: float, cargoKg: float,
-     *               totalPayload: float, pob: int}
+     *               totalPayload: float, pob: int, estimatedZfw: ?float}
      */
     public static function calculateLoadSheet(
         int $crew,
@@ -60,7 +62,8 @@ class PayloadEstimator
         int $cargoPaidKg,
         float $adultWeightKg,
         float $childWeightKg,
-        float $baggageWeightKg
+        float $baggageWeightKg,
+        ?float $oewKg = null
     ): array {
         $crewKg     = $crew * $adultWeightKg;
         $adultsKg   = $paxAdults * $adultWeightKg;
@@ -69,6 +72,7 @@ class PayloadEstimator
         $paxKg      = $adultsKg + $childrenKg;
         $bagsKg     = $cargoBags * $baggageWeightKg;
         $cargoKg    = $bagsKg + $cargoPaidKg;
+        $totalPayload = $crewKg + $paxKg + $cargoKg;
 
         return [
             'crew'         => $crew,
@@ -86,8 +90,9 @@ class PayloadEstimator
             'paxKg'        => $paxKg,
             'bagsKg'       => $bagsKg,
             'cargoKg'      => $cargoKg,
-            'totalPayload' => $crewKg + $paxKg + $cargoKg,
+            'totalPayload' => $totalPayload,
             'pob'          => $paxTotal + $crew,
+            'estimatedZfw' => $oewKg !== null ? $oewKg + $totalPayload : null,
         ];
     }
 

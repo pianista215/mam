@@ -24,6 +24,7 @@ $bagsKg       = $loadSheet['bagsKg'];
 $cargoKg      = $loadSheet['cargoKg'];
 $totalPayload = $loadSheet['totalPayload'];
 $pob          = $loadSheet['pob'];
+$estimatedZfw = $loadSheet['estimatedZfw'] ?? null;
 
 $fmt = fn(int $n) => number_format($n, 0, '.', ',') . ' Kg';
 ?>
@@ -104,6 +105,15 @@ $fmt = fn(int $n) => number_format($n, 0, '.', ',') . ' Kg';
                     <td class="text-end"></td>
                     <td class="text-end"><?= $fmt($totalPayload) ?></td>
                 </tr>
+
+                <?php if ($estimatedZfw !== null): ?>
+                <tr class="text-muted">
+                    <td><?= Yii::t('app', 'Estimated ZFW') ?> (<?= Yii::t('app', 'may vary by aircraft/developer') ?>)</td>
+                    <td class="text-center">&asymp;</td>
+                    <td class="text-end"></td>
+                    <td class="text-end"><?= $fmt((int) round($estimatedZfw)) ?></td>
+                </tr>
+                <?php endif; ?>
 
             </tbody>
         </table>
