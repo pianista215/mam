@@ -1,6 +1,6 @@
 # Changelog
 
-## [Upcoming] - 1.14.0
+## [1.14.0] - 2026-08-23
 
 ### Added
 - Pilot detail view: "Recent flights" table now shows a status icon (with tooltip) for each flight, matching the flight list view
