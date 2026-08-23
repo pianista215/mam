@@ -1,6 +1,17 @@
 # Changelog
 
-## [Upcoming] - 1.13.0
+## [Upcoming] - 1.14.0
+
+### Added
+- Pilot detail view: "Recent flights" table now shows a status icon (with tooltip) for each flight, matching the flight list view
+- `FlightStatusIconHelper::renderIcon()` centralizes the status icon markup, now shared by the flight list and pilot detail views
+
+### Changed
+
+### Fixed
+- Malformed `<i>` tag in the pending-validation status icon (missing closing `>`)
+
+## [1.13.0] - 2026-07-12
 
 ### Added
 - Email notification sent to pilot when a flight is rejected or validated with comments (no email on silent approvals to avoid spam); subject and body identify the flight by code and date; reply-to goes to the configurable operations email

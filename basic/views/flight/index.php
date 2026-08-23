@@ -1,5 +1,6 @@
 <?php
 
+use app\helpers\FlightStatusIconHelper;
 use app\helpers\ImageMam;
 use app\models\Flight;
 use app\models\Image;
@@ -108,16 +109,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => false,
                 'format' => 'raw', //Important for allow html
                 'value' => function ($model) {
-                    $icons = [
-                        'C' => '<i class="fa-solid fa-arrow-up" style="color: #6c757d;"></i>',
-                        'S' => '<i class="fa-regular fa-clock" style="color: #0d6efd;"></i>',
-                        'V' => '<i class="fa-regular fa-eye" style="color: orange;"</i>',
-                        'F' => '<i class="fa-regular fa-circle-check" style="color: green;"></i>',
-                        'R' => '<i class="fa-regular fa-circle-xmark" style="color: red;"></i>',
-                    ];
-
-                    $icon = $icons[$model->status] ?? '<i class="fa-regular fa-question-circle"></i>';
-                    return '<span title="' . htmlspecialchars($model->fullStatus) . '">' . $icon . '</span>';
+                    return FlightStatusIconHelper::renderIcon($model);
                 },
                 'contentOptions' => ['style' => 'text-align:center; font-size: 18px;'], // Opcional
             ],
