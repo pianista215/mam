@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.15.0] - Upcoming
+## [1.15.0] - 2026-10-06
 
 ### Added
 - Flight map now shows event markers where flaps, landing gear, lift-off, touchdown (with landing V/S) and autopilot ON/OFF happen; every flap selection gets its own marker, even quick successive ones
