@@ -38,7 +38,7 @@ class FlightEventMarkersTest extends BaseUnitTest
         $this->assertSame([], $markers);
     }
 
-    public function testQuickFlapsSelectionsAreMergedIntoOneMarker()
+    public function testEveryFlapsSelectionIsAMarker()
     {
         $markers = FlightEventMarkers::extract([
             $this->event(0, ['Flaps' => '0']),
@@ -48,17 +48,15 @@ class FlightEventMarkersTest extends BaseUnitTest
             $this->event(60, ['Flaps' => '49']),
         ]);
 
-        $this->assertCount(1, $markers);
-        $this->assertSame('flaps', $markers[0]['type']);
-        $this->assertSame('F49', $markers[0]['short']);
-        $this->assertSame(0, $markers[0]['from']);
-        $this->assertSame(49, $markers[0]['to']);
-        // Positioned where the first selection happened
-        $this->assertSame(41.6, $markers[0]['lat']);
+        // Quick successive selections are not merged: each one is shown
+        $this->assertSame(['F22', 'F34', 'F49'], $this->shorts($markers));
+        $this->assertSame([0, 22, 34], array_column($markers, 'from'));
+        $this->assertSame([22, 34, 49], array_column($markers, 'to'));
+        $this->assertSame([41.6, 41.7, 41.8], array_column($markers, 'lat'));
         $this->assertSame('2026-07-12 12:00:10', $markers[0]['timestamp']);
     }
 
-    public function testFlapsRetractionAfterPreviousSettingIsOneMarker()
+    public function testFlapsRetractionSteps()
     {
         $markers = FlightEventMarkers::extract([
             $this->event(0, ['Flaps' => '49']),
@@ -67,12 +65,12 @@ class FlightEventMarkersTest extends BaseUnitTest
             $this->event(72, ['Flaps' => '0']),
         ]);
 
-        $this->assertSame(['F31', 'F0'], $this->shorts($markers));
-        $this->assertSame(31, $markers[1]['from']);
-        $this->assertSame(0, $markers[1]['to']);
+        $this->assertSame(['F31', 'F22', 'F0'], $this->shorts($markers));
+        $this->assertSame(22, $markers[2]['from']);
+        $this->assertSame(0, $markers[2]['to']);
     }
 
-    public function testFlapsBackAndForthToSameValueProducesNoMarker()
+    public function testFlapsBackAndForthProducesBothMarkers()
     {
         $markers = FlightEventMarkers::extract([
             $this->event(0, ['Flaps' => '10']),
@@ -80,7 +78,7 @@ class FlightEventMarkersTest extends BaseUnitTest
             $this->event(12, ['Flaps' => '10']),
         ]);
 
-        $this->assertSame([], $markers);
+        $this->assertSame(['F20', 'F10'], $this->shorts($markers));
     }
 
     public function testGearLiftoffTouchdownAndAutopilot()
@@ -129,7 +127,7 @@ class FlightEventMarkersTest extends BaseUnitTest
         $this->assertSame(90.0, $markers[0]['heading']);
     }
 
-    public function testMarkersAreChronologicalWhenFlapsGroupClosesLater()
+    public function testMarkersAreChronological()
     {
         $markers = FlightEventMarkers::extract([
             $this->event(0, ['Flaps' => '0', 'Gear' => 'Up']),
@@ -138,6 +136,6 @@ class FlightEventMarkersTest extends BaseUnitTest
             $this->event(14, ['Flaps' => '49', 'Gear' => 'Down']),
         ]);
 
-        $this->assertSame(['F49', 'G↓'], $this->shorts($markers));
+        $this->assertSame(['F30', 'F40', 'G↓', 'F49'], $this->shorts($markers));
     }
 }

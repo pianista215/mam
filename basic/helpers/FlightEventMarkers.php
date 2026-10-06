@@ -20,13 +20,6 @@ class FlightEventMarkers
     const TYPE_TOUCHDOWN = 'touchdown';
     const TYPE_AUTOPILOT = 'autopilot';
 
-    /**
-     * Flap selections separated by at most this many seconds are merged into a
-     * single marker with the final setting: pilots often move the lever through
-     * several positions in quick succession (e.g. 30 -> 38 -> 49).
-     */
-    const FLAPS_SETTLE_SECONDS = 10;
-
     /** Max seconds between touchdown and a LandingVSFpm sample to attach it. */
     const TOUCHDOWN_VS_WINDOW_SECONDS = 10;
 
@@ -58,7 +51,6 @@ class FlightEventMarkers
         $markers = [];
         $prev = [];
         $position = null;
-        $flapsGroup = null;
         $lastTouchdownIdx = null;
 
         foreach ($events as $event) {
@@ -68,24 +60,11 @@ class FlightEventMarkers
 
             $position = self::updatePosition($position, $values);
 
-            // Close a pending flaps group once the flaps have settled
-            if ($flapsGroup !== null && $time - $flapsGroup['lastTime'] > self::FLAPS_SETTLE_SECONDS) {
-                self::closeFlapsGroup($flapsGroup, $markers);
-                $flapsGroup = null;
-            }
-
+            // Every flap selection is a marker, even quick successive ones, so validators see them all
             if (isset($values['Flaps']) && $values['Flaps'] !== '') {
                 $flaps = (int)round((float)$values['Flaps']);
                 if (array_key_exists('Flaps', $prev) && $prev['Flaps'] !== $flaps && $position !== null) {
-                    if ($flapsGroup === null) {
-                        $flapsGroup = [
-                            'marker' => self::makeMarker(self::TYPE_FLAPS, $ts, $position, $prev['Flaps'], $flaps),
-                            'lastTime' => $time,
-                        ];
-                    } else {
-                        $flapsGroup['marker']['to'] = $flaps;
-                        $flapsGroup['lastTime'] = $time;
-                    }
+                    $markers[] = self::makeMarker(self::TYPE_FLAPS, $ts, $position, $prev['Flaps'], $flaps);
                 }
                 $prev['Flaps'] = $flaps;
             }
@@ -119,13 +98,6 @@ class FlightEventMarkers
                 $markers[] = self::makeMarker(self::TYPE_AUTOPILOT, $ts, $position, $ap[0], $ap[1]);
             }
         }
-
-        if ($flapsGroup !== null) {
-            self::closeFlapsGroup($flapsGroup, $markers);
-        }
-
-        // Flaps groups are emitted when they close, restore chronological order (usort is stable)
-        usort($markers, fn($a, $b) => strcmp($a['timestamp'], $b['timestamp']));
 
         foreach ($markers as &$marker) {
             $marker['short'] = self::shortCode($marker);
@@ -174,13 +146,6 @@ class FlightEventMarkers
         return $position;
     }
 
-    private static function closeFlapsGroup(array $group, array &$markers): void
-    {
-        $marker = $group['marker'];
-        if ($marker['from'] !== $marker['to']) {
-            $markers[] = $marker;
-        }
-    }
 
     private static function makeMarker(string $type, string $ts, array $position, $from = null, $to = null): array
     {
