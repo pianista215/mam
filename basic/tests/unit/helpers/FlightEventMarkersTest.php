@@ -38,7 +38,7 @@ class FlightEventMarkersTest extends BaseUnitTest
         $this->assertSame([], $markers);
     }
 
-    public function testFlapsSamplesWhileMovingAreMergedIntoOneMarker()
+    public function testQuickFlapsSelectionsAreMergedIntoOneMarker()
     {
         $markers = FlightEventMarkers::extract([
             $this->event(0, ['Flaps' => '0']),
@@ -53,7 +53,7 @@ class FlightEventMarkersTest extends BaseUnitTest
         $this->assertSame('F49', $markers[0]['short']);
         $this->assertSame(0, $markers[0]['from']);
         $this->assertSame(49, $markers[0]['to']);
-        // Positioned where the movement started
+        // Positioned where the first selection happened
         $this->assertSame(41.6, $markers[0]['lat']);
         $this->assertSame('2026-07-12 12:00:10', $markers[0]['timestamp']);
     }

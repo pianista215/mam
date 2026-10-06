@@ -21,8 +21,9 @@ class FlightEventMarkers
     const TYPE_AUTOPILOT = 'autopilot';
 
     /**
-     * Flap changes separated by at most this many seconds are merged into a
-     * single marker: the simulator samples the flaps while they are moving.
+     * Flap selections separated by at most this many seconds are merged into a
+     * single marker with the final setting: pilots often move the lever through
+     * several positions in quick succession (e.g. 30 -> 38 -> 49).
      */
     const FLAPS_SETTLE_SECONDS = 10;
 
