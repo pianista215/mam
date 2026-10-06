@@ -4,10 +4,10 @@
 
 ### Added
 - Flight map now shows event markers where flaps, landing gear, lift-off, touchdown (with landing V/S) and autopilot ON/OFF happen; flap samples recorded while the flaps are moving are merged into a single marker with the final setting
-- Event markers use readable labels ("Flaps 49%", "Gear Down", "AP OFF", touchdown with V/S) with lift-off/landing icons
+- Event markers use readable labels ("Flaps 49%", "Gear Down", "AP OFF", touchdown with V/S) with lift-off/landing icons, drawn as speech bubbles beside the track pointing to where each event happened
 - Nearby event markers are grouped into a stacked label; clicking it zooms in to split it or lists its events, and clicking an event syncs the altitude chart and raw event viewer
 - Clicking the flight track on the map jumps to the nearest recorded event, like clicking the altitude chart
-- Map legend lets you show/hide each event type; temporary A/B/C selector to compare marker designs (speech bubble beside the track, leader-line callout, pin)
+- Map legend lets you show/hide each event type
 - `FlightEventMarkers` helper detects the markers from the ACARS event stream
 
 ### Fixed

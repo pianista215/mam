@@ -374,12 +374,6 @@ $eventMarkerI18n = [
                 <button id="mapStyleOSM" class="btn" style="background:var(--brand);color:var(--bg-white);border-color:var(--brand-dark);">VFR</button>
                 <button id="mapStyleIFR" class="btn" style="background:var(--bg-white);color:var(--brand);border-color:var(--brand);">IFR</button>
             </div>
-            <?php // Temporary design selector to compare event marker styles on real flights ?>
-            <div class="btn-group btn-group-sm shadow-sm d-flex mt-1" role="group">
-                <button class="btn event-design-btn" data-design="badge" title="Bubble">A</button>
-                <button class="btn event-design-btn" data-design="callout" title="Callout">B</button>
-                <button class="btn event-design-btn" data-design="pin" title="Pin">C</button>
-            </div>
         </div>
         <div style="position: absolute; top: 8px; left: 8px; z-index: 1000;
                     background: var(--bg-white); border: 1px solid #ccc; border-radius: 4px;
@@ -1050,17 +1044,12 @@ const LABEL_FONT = 'bold 11px Arial, sans-serif';
 const ICON_FONT = '900 11px "Font Awesome 6 Free"';
 // Font Awesome glyphs (already loaded by the main layout) drawn before the label
 const MARKER_ICONS = {
-    liftoff:   { glyph: '', css: 'fa-plane-departure' },
-    touchdown: { glyph: '', css: 'fa-plane-arrival' },
+    liftoff:   { glyph: '\uf5b0', css: 'fa-plane-departure' },
+    touchdown: { glyph: '\uf5af', css: 'fa-plane-arrival' },
 };
-const CLUSTER_DISTANCE = { badge: 55, callout: 60, pin: 55 };
+const CLUSTER_DISTANCE = 55;
 const CLUSTER_COLOR = '#212529';
 const MAX_STACK = 3;
-let eventDesign = 'badge';
-try {
-    const saved = localStorage.getItem('mam.eventMarkerDesign');
-    if (saved && CLUSTER_DISTANCE[saved]) eventDesign = saved;
-} catch (e) { /* storage unavailable */ }
 
 function markerColor(m) {
     const def = EVENT_MARKER_TYPES[m.type] || { color: '#333' };
@@ -1213,73 +1202,34 @@ function canvasStyle(key, width, height, anchor, draw) {
     return styleCache[key];
 }
 
-// Labels placed beside the track, perpendicular to the aircraft heading, so the route stays visible.
-// pointer 'tail': speech-bubble tail whose tip marks the exact position (A)
-// pointer 'line': dot on the track + leader line (B)
-function offsetLabelStyle(items, heading, side, pointer) {
+// Speech-bubble labels placed beside the track, perpendicular to the aircraft heading, so the
+// route stays visible; the tail tip marks the exact position of the event
+function bubbleStyle(items, heading, side) {
     const angle = Math.round(((heading || 0) + 90 * side + 360) % 360);
-    const { w, h } = stackSize(items), m = 6;
-    const leader = pointer === 'tail' ? 10 : 26;
+    const { w, h } = stackSize(items), m = 6, tailLen = 10;
     const rad = angle * Math.PI / 180;
     const dx = Math.sin(rad), dy = -Math.cos(rad);
-    // Push the labels out so that their edge sits at the end of the pointer. The tail must touch the
-    // label, so it uses where the ray leaves the label box; the line uses the box projection.
+    // Place the labels so that the point where the tail ray leaves the label box is tailLen away
     const halfAlongRay = Math.min(
         Math.abs(dx) > 1e-6 ? w / 2 / Math.abs(dx) : Infinity,
         Math.abs(dy) > 1e-6 ? h / 2 / Math.abs(dy) : Infinity
     );
-    const reach = leader + (pointer === 'tail' ? halfAlongRay : Math.abs(dx) * w / 2 + Math.abs(dy) * h / 2);
+    const reach = tailLen + halfAlongRay;
     const px = dx * reach, py = dy * reach;
     const minX = Math.min(-5, px - w / 2) - m, maxX = Math.max(5, px + w / 2) + m;
     const minY = Math.min(-5, py - h / 2) - m, maxY = Math.max(5, py + h / 2) + m;
     const ox = -minX, oy = -minY;
-    // The pointer belongs to the pill it touches
-    const hitY = dy * leader - (py - h / 2);
+    // The tail belongs to the pill it touches
+    const hitY = dy * tailLen - (py - h / 2);
     const hitIndex = Math.min(items.length - 1, Math.max(0, Math.floor(hitY / (PILL_H + STACK_GAP))));
-    const color = items[hitIndex].color;
-    const key = pointer + '|' + angle + '|' + JSON.stringify(items);
+    const key = angle + '|' + JSON.stringify(items);
     return canvasStyle(key, maxX - minX, maxY - minY, [ox, oy], ctx => {
-        let tail = null;
-        if (pointer === 'tail') {
-            // Base well inside the pill so the join is hidden by the pill fill
-            const inset = 6;
-            tail = {
-                index: hitIndex,
-                tip: [ox, oy],
-                base: [ox + dx * (leader + inset), oy + dy * (leader + inset)],
-                half: 5,
-            };
-        } else {
-            ctx.lineCap = 'round';
-            [['#fff', 4], [color, 2]].forEach(([c, width]) => {
-                ctx.beginPath();
-                ctx.moveTo(ox, oy);
-                ctx.lineTo(ox + dx * leader, oy + dy * leader);
-                ctx.strokeStyle = c;
-                ctx.lineWidth = width;
-                ctx.stroke();
-            });
-            ctx.beginPath();
-            ctx.arc(ox, oy, 4, 0, 2 * Math.PI);
-            ctx.fillStyle = color;
-            ctx.fill();
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = '#fff';
-            ctx.stroke();
-        }
-        drawStack(ctx, ox + px, oy + py - h / 2, items, tail);
-    });
-}
-
-// C: pin whose tip touches the event position
-function pinStyle(items) {
-    const { w, h } = stackSize(items), tailLen = 10, m = 6;
-    const cx = w / 2 + m, tipY = m + h + tailLen;
-    return canvasStyle('pin|' + JSON.stringify(items), w + 2 * m, tipY + m, [cx, tipY], ctx => {
-        drawStack(ctx, cx, m, items, {
-            index: items.length - 1,
-            tip: [cx, tipY],
-            base: [cx, m + h - 6],
+        // Base well inside the pill so the join is hidden by the pill fill
+        const inset = 6;
+        drawStack(ctx, ox + px, oy + py - h / 2, items, {
+            index: hitIndex,
+            tip: [ox, oy],
+            base: [ox + dx * (tailLen + inset), oy + dy * (tailLen + inset)],
             half: 5,
         });
     });
@@ -1298,9 +1248,7 @@ function eventMarkerStyle(feature) {
         items = items.slice(0, MAX_STACK - 1);
         items.push({ label: '+' + (markers.length - MAX_STACK + 1) + ' ' + eventMarkerI18n.events, icon: null, color: CLUSTER_COLOR });
     }
-    if (eventDesign === 'pin') return pinStyle(items);
-    const pointer = eventDesign === 'callout' ? 'line' : 'tail';
-    return offsetLabelStyle(items, markers[0].heading, members[0].get('side'), pointer);
+    return bubbleStyle(items, markers[0].heading, members[0].get('side'));
 }
 
 // ---- Layer ----
@@ -1308,14 +1256,14 @@ const eventMarkerSource = new ol.source.Vector({
     features: eventMarkers.map((m, i) => {
         const f = new ol.Feature({ geometry: new ol.geom.Point(ol.proj.fromLonLat([m.lon, m.lat])) });
         f.set('marker', m);
-        // Alternate callout side so that consecutive labels do not overlap
+        // Alternate label side so that consecutive labels do not overlap
         f.set('side', i % 2 === 0 ? 1 : -1);
         return f;
     }),
 });
 
 const eventClusterSource = new ol.source.Cluster({
-    distance: CLUSTER_DISTANCE[eventDesign],
+    distance: CLUSTER_DISTANCE,
     source: eventMarkerSource,
     // Hidden types are excluded from clustering
     geometryFunction: f => eventTypeVisible[f.get('marker').type] ? f.getGeometry() : null,
@@ -1330,7 +1278,7 @@ map.addLayer(eventMarkerLayer);
 
 // Icon glyphs need the webfont: redraw once it is available
 if (document.fonts && document.fonts.load) {
-    document.fonts.load(ICON_FONT, '').then(() => {
+    document.fonts.load(ICON_FONT, '\uf5b0').then(() => {
         styleCache = {};
         eventMarkerLayer.changed();
     }).catch(() => { /* labels still render without icons */ });
@@ -1342,23 +1290,6 @@ document.querySelectorAll('.event-filter-check').forEach(cb => {
         eventMarkerSource.changed();
         hideEventPopup();
     });
-});
-
-function setEventDesign(design) {
-    eventDesign = design;
-    try { localStorage.setItem('mam.eventMarkerDesign', design); } catch (e) { /* storage unavailable */ }
-    eventClusterSource.setDistance(CLUSTER_DISTANCE[design]);
-    eventMarkerLayer.changed();
-    hideEventPopup();
-    document.querySelectorAll('.event-design-btn').forEach(btn => {
-        const active = btn.dataset.design === design;
-        btn.style.background  = active ? 'var(--brand)' : 'var(--bg-white)';
-        btn.style.color       = active ? 'var(--bg-white)' : 'var(--brand)';
-        btn.style.borderColor = active ? 'var(--brand-dark)' : 'var(--brand)';
-    });
-}
-document.querySelectorAll('.event-design-btn').forEach(btn => {
-    btn.addEventListener('click', () => setEventDesign(btn.dataset.design));
 });
 
 // ---- Cluster popup ----
@@ -1461,9 +1392,6 @@ map.on('singleclick', evt => {
         view.fit(extent, { padding: [padding, padding, padding, padding], duration: 500, maxZoom: 18 });
     }
 });
-
-// Initial design, once the popup elements above are initialised
-setEventDesign(eventDesign);
 JS
     );
 }
