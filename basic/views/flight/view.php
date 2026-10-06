@@ -7,6 +7,7 @@ use yii\widgets\DetailView;
 /** @var yii\web\View $this */
 /** @var app\models\Flight $model */
 /** @var array|null $loadSheet */
+/** @var array $eventMarkers */
 
 $this->title = $model->id;
 $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Flights'), 'url' => ['index']];
@@ -73,6 +74,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php if ($model->hasAcarsInfo()): ?>
         <?= $this->render('_map_altitude', [
             'report' => $model->flightReport,
+            'eventMarkers' => $eventMarkers ?? [],
         ]) ?>
     <?php endif; ?>
 

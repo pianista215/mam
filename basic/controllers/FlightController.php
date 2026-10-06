@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\config\ConfigHelper as CK;
+use app\helpers\FlightEventMarkers;
 use app\helpers\LoggerTrait;
 use app\helpers\PayloadEstimator;
 use app\models\Flight;
@@ -97,9 +98,15 @@ class FlightController extends Controller
             );
         }
 
+        $eventMarkers = [];
+        if ($model->hasAcarsInfo()) {
+            $eventMarkers = FlightEventMarkers::fromReport($model->flightReport);
+        }
+
         return $this->render('view', [
             'model' => $model,
             'loadSheet' => $loadSheet,
+            'eventMarkers' => $eventMarkers,
         ]);
     }
 

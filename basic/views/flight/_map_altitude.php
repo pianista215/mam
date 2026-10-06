@@ -257,6 +257,28 @@ foreach ($runwayAirports as $airport) {
     }
 }
 $airportRunwaysJson = Json::encode($airportRunways);
+
+/** @var array $eventMarkers markers prepared by FlightEventMarkers::fromReport() */
+$eventMarkers = $eventMarkers ?? [];
+
+// Presentation registry for event markers: adding a new marker type only needs an entry here
+$eventMarkerTypes = [
+    'flaps'     => ['color' => '#1e3a8a', 'label' => Yii::t('app', 'Flaps')],
+    'gear'      => ['color' => '#6b21a8', 'label' => Yii::t('app', 'Landing gear')],
+    'liftoff'   => ['color' => '#15803d', 'label' => Yii::t('app', 'Lift-off')],
+    'touchdown' => ['color' => '#b91c1c', 'label' => Yii::t('app', 'Touchdown')],
+    'autopilot' => ['color' => '#0f766e', 'colorOff' => '#c2410c', 'label' => Yii::t('app', 'Autopilot')],
+];
+$eventMarkerI18n = [
+    'flaps'     => Yii::t('app', 'Flaps'),
+    'gearDown'  => Yii::t('app', 'Gear Down'),
+    'gearUp'    => Yii::t('app', 'Gear Up'),
+    'liftoff'   => Yii::t('app', 'Lift-off'),
+    'touchdown' => Yii::t('app', 'Touchdown'),
+    'apOn'      => Yii::t('app', 'Autopilot engaged'),
+    'apOff'     => Yii::t('app', 'Autopilot disengaged'),
+    'events'    => Yii::t('app', 'events'),
+];
 ?>
 
 <div class="container">
@@ -320,6 +342,27 @@ $airportRunwaysJson = Json::encode($airportRunways);
     transform: translateY(-2px);
     box-shadow: 0 6px 18px rgba(0,0,0,.25);
 }
+.event-marker-popup {
+    background: var(--bg-white);
+    color: var(--text-dark);
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.25);
+    font-size: 12px;
+    padding: 4px 8px;
+    white-space: nowrap;
+}
+.event-marker-popup { padding: 4px 0; max-height: 220px; overflow-y: auto; }
+.event-marker-popup .event-row {
+    display: flex; align-items: center; gap: 6px;
+    padding: 2px 10px; cursor: pointer;
+}
+.event-marker-popup .event-row:hover { background: rgba(0,0,0,.08); }
+.event-marker-chip {
+    display: inline-block; min-width: 34px; text-align: center;
+    border-radius: 8px; color: #fff; font-weight: bold; font-size: 10px; padding: 0 4px;
+}
+.event-marker-time { color: #777; font-variant-numeric: tabular-nums; }
 </style>
 
 
@@ -330,6 +373,12 @@ $airportRunwaysJson = Json::encode($airportRunways);
             <div class="btn-group btn-group-sm shadow-sm" role="group">
                 <button id="mapStyleOSM" class="btn" style="background:var(--brand);color:var(--bg-white);border-color:var(--brand-dark);">VFR</button>
                 <button id="mapStyleIFR" class="btn" style="background:var(--bg-white);color:var(--brand);border-color:var(--brand);">IFR</button>
+            </div>
+            <?php // Temporary design selector to compare event marker styles on real flights ?>
+            <div class="btn-group btn-group-sm shadow-sm d-flex mt-1" role="group">
+                <button class="btn event-design-btn" data-design="badge" title="Bubble">A</button>
+                <button class="btn event-design-btn" data-design="callout" title="Callout">B</button>
+                <button class="btn event-design-btn" data-design="pin" title="Pin">C</button>
             </div>
         </div>
         <div style="position: absolute; top: 8px; left: 8px; z-index: 1000;
@@ -361,8 +410,25 @@ $airportRunwaysJson = Json::encode($airportRunways);
                 <?= $type ?>
             </label>
             <?php endforeach; ?>
+            <?php if (!empty($eventMarkers)): ?>
+            <hr style="margin: 3px 0;">
+            <div style="font-weight: bold; margin-bottom: 2px; color: var(--text-dark);"><?= Yii::t('app', 'Events') ?></div>
+            <?php foreach ($eventMarkerTypes as $type => $def):
+                $swatch = isset($def['colorOff'])
+                    ? "linear-gradient(90deg, {$def['color']} 50%, {$def['colorOff']} 50%)"
+                    : $def['color'];
+            ?>
+            <label style="display:flex; align-items:center; gap:5px; cursor:pointer; color:var(--text-dark);">
+                <input type="checkbox" class="event-filter-check" data-type="<?= $type ?>" checked>
+                <span style="display:inline-block; width:14px; height:10px; border-radius:5px;
+                             background:<?= $swatch ?>; flex-shrink:0;"></span>
+                <?= Html::encode($def['label']) ?>
+            </label>
+            <?php endforeach; ?>
+            <?php endif; ?>
         </div>
         <div id="map" style="width: 100%; height: 600px;"></div>
+        <div id="eventMarkerPopup" class="event-marker-popup" style="display:none;"></div>
     </div>
     <canvas id="altitudeChart" width="800" height="400"></canvas>
     <div class="mt-4">
@@ -806,9 +872,42 @@ function getPhaseColor(ts) {
   return '#888888'; // fallback
 }
 
+// Selected event index in labels; drawn by selectedEventPlugin so hovering does not clear it
+let selectedChartIndex = null;
+const selectedEventPlugin = {
+    id: 'selectedEvent',
+    afterDatasetsDraw(chart) {
+        if (selectedChartIndex === null) return;
+        const xScale = chart.scales.x;
+        if (selectedChartIndex < xScale.min || selectedChartIndex > xScale.max) return;
+        const point = chart.getDatasetMeta(0).data[selectedChartIndex];
+        if (!point) return;
+        const area = chart.chartArea;
+        const c = chart.ctx;
+        c.save();
+        c.beginPath();
+        c.setLineDash([4, 4]);
+        c.moveTo(point.x, area.top);
+        c.lineTo(point.x, area.bottom);
+        c.lineWidth = 1.5;
+        c.strokeStyle = 'rgba(255, 0, 0, 0.8)';
+        c.stroke();
+        c.setLineDash([]);
+        c.beginPath();
+        c.arc(point.x, point.y, 6, 0, 2 * Math.PI);
+        c.fillStyle = 'rgba(255, 0, 0, 0.7)';
+        c.fill();
+        c.lineWidth = 2;
+        c.strokeStyle = 'rgba(255, 0, 0, 1)';
+        c.stroke();
+        c.restore();
+    }
+};
+
 const ctx = document.getElementById('altitudeChart').getContext('2d');
 const myChart = new Chart(ctx, {
   type: 'line',
+  plugins: [selectedEventPlugin],
   data: {
     labels: labels,
     datasets: [
@@ -842,30 +941,11 @@ const myChart = new Chart(ctx, {
   },
   options: {
     onClick: (e) => {
-        const points = myChart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
-            if (points.length) {
-                const firstPoint = points[0];
-                const coords = myChart.data.datasets[firstPoint.datasetIndex].data[firstPoint.index].coords;
-                pointSource.clear();
-                const mapCoordinates = ol.proj.fromLonLat(coords);
-
-                const pointFeature = new ol.Feature({
-                    geometry: new ol.geom.Point(mapCoordinates)
-                });
-
-                pointSource.addFeature(pointFeature);
-
-                map.getView().animate({
-                    center: ol.proj.fromLonLat(coords),
-                    duration: 1000
-                });
-                const timestamp = myChart.data.labels[firstPoint.index];
-                const eventIndex = rawEventIndexByTimestamp[timestamp];
-
-                if (eventIndex !== undefined) {
-                    showRawEvent(eventIndex);
-                }
-            }
+        // Nearest sample on the x axis, no need to hit the line exactly
+        const points = myChart.getElementsAtEventForMode(e, 'index', { intersect: false }, true);
+        if (points.length) {
+            showRawEventByTimestamp(myChart.data.labels[points[0].index]);
+        }
     },
     responsive: true,
     interaction: {
@@ -902,13 +982,35 @@ const myChart = new Chart(ctx, {
   }
 });
 
-function triggerChartPointByTimestamp(timestamp) {
-    const labelIndex = labels.indexOf(timestamp);
-    if (labelIndex === -1) return;
+// Index of the label closest in time (labels are sorted timestamps)
+function nearestLabelIndex(timestamp) {
+    if (labels.length === 0) return -1;
+    let lo = 0, hi = labels.length - 1;
+    while (lo < hi) {
+        const mid = (lo + hi) >> 1;
+        if (labels[mid] < timestamp) lo = mid + 1; else hi = mid;
+    }
+    const t = ts => Date.parse(ts.replace(' ', 'T'));
+    if (lo > 0 && t(timestamp) - t(labels[lo - 1]) < t(labels[lo]) - t(timestamp)) {
+        return lo - 1;
+    }
+    return lo;
+}
 
-    myChart.setActiveElements([{ datasetIndex: 0, index: labelIndex }]);
-    myChart.tooltip.setActiveElements([{ datasetIndex: 0, index: labelIndex }], { x: 0, y: 0 });
-    myChart.update();
+function triggerChartPointByTimestamp(timestamp) {
+    const labelIndex = nearestLabelIndex(timestamp);
+    if (labelIndex === -1) return;
+    selectedChartIndex = labelIndex;
+
+    // When zoomed in, pan the chart so the selected point is visible, keeping the zoom level
+    const xScale = myChart.scales.x;
+    if (xScale && (labelIndex < xScale.min || labelIndex > xScale.max)) {
+        const range = xScale.max - xScale.min;
+        const min = Math.max(0, Math.min(labels.length - 1 - range, Math.round(labelIndex - range / 2)));
+        myChart.options.scales.x.min = min;
+        myChart.options.scales.x.max = min + range;
+    }
+    myChart.update('none');
 }
 
 showRawEvent(0);
@@ -931,4 +1033,438 @@ function setActiveMapBtn(activeId) {
 document.getElementById('mapStyleOSM').addEventListener('click', () => setActiveMapBtn('mapStyleOSM'));
 document.getElementById('mapStyleIFR').addEventListener('click', () => setActiveMapBtn('mapStyleIFR'));
 ");
+?>
+<?php
+if (!empty($eventMarkers)) {
+    $this->registerJs(
+        'const eventMarkers = ' . Json::encode($eventMarkers) . ";\n" .
+        'const EVENT_MARKER_TYPES = ' . Json::encode($eventMarkerTypes) . ";\n" .
+        'const eventMarkerI18n = ' . Json::encode($eventMarkerI18n) . ";\n"
+    );
+    $this->registerJs(<<<'JS'
+// ---- Event markers (flaps, gear, lift-off, touchdown, autopilot) ----
+const eventTypeVisible = {};
+Object.keys(EVENT_MARKER_TYPES).forEach(t => { eventTypeVisible[t] = true; });
+
+const LABEL_FONT = 'bold 11px Arial, sans-serif';
+const ICON_FONT = '900 11px "Font Awesome 6 Free"';
+// Font Awesome glyphs (already loaded by the main layout) drawn before the label
+const MARKER_ICONS = {
+    liftoff:   { glyph: '', css: 'fa-plane-departure' },
+    touchdown: { glyph: '', css: 'fa-plane-arrival' },
+};
+const CLUSTER_DISTANCE = { badge: 55, callout: 60, pin: 55 };
+const CLUSTER_COLOR = '#212529';
+const MAX_STACK = 3;
+let eventDesign = 'badge';
+try {
+    const saved = localStorage.getItem('mam.eventMarkerDesign');
+    if (saved && CLUSTER_DISTANCE[saved]) eventDesign = saved;
+} catch (e) { /* storage unavailable */ }
+
+function markerColor(m) {
+    const def = EVENT_MARKER_TYPES[m.type] || { color: '#333' };
+    if (m.type === 'autopilot' && m.to !== 'On') return def.colorOff;
+    return def.color;
+}
+
+// Readable label drawn on the map
+function markerLabel(m) {
+    switch (m.type) {
+        case 'flaps':     return eventMarkerI18n.flaps + ' ' + m.to + '%';
+        case 'gear':      return m.to === 'Down' ? eventMarkerI18n.gearDown : eventMarkerI18n.gearUp;
+        case 'liftoff':   return eventMarkerI18n.liftoff;
+        case 'touchdown': return eventMarkerI18n.touchdown + (m.extra !== null ? ' ' + m.extra + ' fpm' : '');
+        case 'autopilot': return m.to === 'On' ? 'AP ON' : 'AP OFF';
+    }
+    return m.short;
+}
+
+// Full description used by the cluster list
+function markerLongText(m) {
+    switch (m.type) {
+        case 'flaps':     return eventMarkerI18n.flaps + ' ' + m.from + '% → ' + m.to + '%';
+        case 'autopilot': return m.to === 'On' ? eventMarkerI18n.apOn : eventMarkerI18n.apOff;
+    }
+    return markerLabel(m);
+}
+
+function timeOf(ts) { return ts.substring(11); }
+
+function htmlEscape(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// ---- Canvas rendering ----
+const DPR = window.devicePixelRatio || 1;
+const PILL_H = 20, PILL_PAD = 7, ICON_GAP = 4, STACK_GAP = 2;
+const measureCtx = document.createElement('canvas').getContext('2d');
+
+function measure(font, text) {
+    measureCtx.font = font;
+    return Math.ceil(measureCtx.measureText(text).width);
+}
+
+// item: { label, icon, color }
+function pillWidth(item) {
+    const iconW = item.icon ? measure(ICON_FONT, item.icon) + ICON_GAP : 0;
+    return Math.max(PILL_H, PILL_PAD * 2 + iconW + measure(LABEL_FONT, item.label));
+}
+
+function stackSize(items) {
+    return {
+        w: Math.max(...items.map(pillWidth)),
+        h: items.length * PILL_H + (items.length - 1) * STACK_GAP,
+    };
+}
+
+function roundRectPath(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+}
+
+// Draws the items as a vertical stack of equal-width pills centered on (cx, top).
+// tail (optional): { index, tip: [x, y], base: [x, y], half } merges a pointer into that pill.
+function drawStack(ctx, cx, top, items, tail) {
+    const w = stackSize(items).w;
+    const x = cx - w / 2;
+    const yOf = i => top + i * (PILL_H + STACK_GAP);
+    const tailPath = () => {
+        const [tx, ty] = tail.tip, [bx, by] = tail.base;
+        const len = Math.hypot(bx - tx, by - ty) || 1;
+        const nx = -(by - ty) / len * tail.half, ny = (bx - tx) / len * tail.half;
+        ctx.beginPath();
+        ctx.moveTo(tx, ty);
+        ctx.lineTo(bx + nx, by + ny);
+        ctx.lineTo(bx - nx, by - ny);
+        ctx.closePath();
+    };
+
+    // Pass 1: white outline (with a soft shadow) of every shape
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.35)';
+    ctx.shadowBlur = 3;
+    ctx.shadowOffsetY = 1;
+    ctx.lineWidth = 3;
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#fff';
+    items.forEach((item, i) => {
+        roundRectPath(ctx, x, yOf(i), w, PILL_H, PILL_H / 2);
+        ctx.stroke();
+    });
+    if (tail) {
+        tailPath();
+        ctx.stroke();
+    }
+    ctx.restore();
+
+    // Pass 2: fills cover the inner half of the outlines, so pill + tail read as a single shape
+    items.forEach((item, i) => {
+        ctx.fillStyle = item.color;
+        roundRectPath(ctx, x, yOf(i), w, PILL_H, PILL_H / 2);
+        ctx.fill();
+        if (tail && tail.index === i) {
+            tailPath();
+            ctx.fill();
+        }
+    });
+
+    // Pass 3: icon + label
+    ctx.fillStyle = '#fff';
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'left';
+    items.forEach((item, i) => {
+        const cy = yOf(i) + PILL_H / 2 + 0.5;
+        let tx = x + PILL_PAD;
+        if (item.icon) {
+            ctx.font = ICON_FONT;
+            ctx.fillText(item.icon, tx, cy);
+            tx += measure(ICON_FONT, item.icon) + ICON_GAP;
+        }
+        ctx.font = LABEL_FONT;
+        ctx.fillText(item.label, tx, cy);
+    });
+}
+
+let styleCache = {};
+function canvasStyle(key, width, height, anchor, draw) {
+    if (!styleCache[key]) {
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.ceil(width * DPR);
+        canvas.height = Math.ceil(height * DPR);
+        const ctx = canvas.getContext('2d');
+        ctx.scale(DPR, DPR);
+        draw(ctx);
+        styleCache[key] = new ol.style.Style({
+            image: new ol.style.Icon({
+                img: canvas,
+                anchor: [anchor[0] * DPR, anchor[1] * DPR],
+                anchorXUnits: 'pixels',
+                anchorYUnits: 'pixels',
+                scale: 1 / DPR,
+            }),
+        });
+    }
+    return styleCache[key];
+}
+
+// Labels placed beside the track, perpendicular to the aircraft heading, so the route stays visible.
+// pointer 'tail': speech-bubble tail whose tip marks the exact position (A)
+// pointer 'line': dot on the track + leader line (B)
+function offsetLabelStyle(items, heading, side, pointer) {
+    const angle = Math.round(((heading || 0) + 90 * side + 360) % 360);
+    const { w, h } = stackSize(items), m = 6;
+    const leader = pointer === 'tail' ? 10 : 26;
+    const rad = angle * Math.PI / 180;
+    const dx = Math.sin(rad), dy = -Math.cos(rad);
+    // Push the labels out so that their edge sits at the end of the pointer. The tail must touch the
+    // label, so it uses where the ray leaves the label box; the line uses the box projection.
+    const halfAlongRay = Math.min(
+        Math.abs(dx) > 1e-6 ? w / 2 / Math.abs(dx) : Infinity,
+        Math.abs(dy) > 1e-6 ? h / 2 / Math.abs(dy) : Infinity
+    );
+    const reach = leader + (pointer === 'tail' ? halfAlongRay : Math.abs(dx) * w / 2 + Math.abs(dy) * h / 2);
+    const px = dx * reach, py = dy * reach;
+    const minX = Math.min(-5, px - w / 2) - m, maxX = Math.max(5, px + w / 2) + m;
+    const minY = Math.min(-5, py - h / 2) - m, maxY = Math.max(5, py + h / 2) + m;
+    const ox = -minX, oy = -minY;
+    // The pointer belongs to the pill it touches
+    const hitY = dy * leader - (py - h / 2);
+    const hitIndex = Math.min(items.length - 1, Math.max(0, Math.floor(hitY / (PILL_H + STACK_GAP))));
+    const color = items[hitIndex].color;
+    const key = pointer + '|' + angle + '|' + JSON.stringify(items);
+    return canvasStyle(key, maxX - minX, maxY - minY, [ox, oy], ctx => {
+        let tail = null;
+        if (pointer === 'tail') {
+            // Base well inside the pill so the join is hidden by the pill fill
+            const inset = 6;
+            tail = {
+                index: hitIndex,
+                tip: [ox, oy],
+                base: [ox + dx * (leader + inset), oy + dy * (leader + inset)],
+                half: 5,
+            };
+        } else {
+            ctx.lineCap = 'round';
+            [['#fff', 4], [color, 2]].forEach(([c, width]) => {
+                ctx.beginPath();
+                ctx.moveTo(ox, oy);
+                ctx.lineTo(ox + dx * leader, oy + dy * leader);
+                ctx.strokeStyle = c;
+                ctx.lineWidth = width;
+                ctx.stroke();
+            });
+            ctx.beginPath();
+            ctx.arc(ox, oy, 4, 0, 2 * Math.PI);
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#fff';
+            ctx.stroke();
+        }
+        drawStack(ctx, ox + px, oy + py - h / 2, items, tail);
+    });
+}
+
+// C: pin whose tip touches the event position
+function pinStyle(items) {
+    const { w, h } = stackSize(items), tailLen = 10, m = 6;
+    const cx = w / 2 + m, tipY = m + h + tailLen;
+    return canvasStyle('pin|' + JSON.stringify(items), w + 2 * m, tipY + m, [cx, tipY], ctx => {
+        drawStack(ctx, cx, m, items, {
+            index: items.length - 1,
+            tip: [cx, tipY],
+            base: [cx, m + h - 6],
+            half: 5,
+        });
+    });
+}
+
+function markerItem(m) {
+    return { label: markerLabel(m), icon: MARKER_ICONS[m.type]?.glyph || null, color: markerColor(m) };
+}
+
+function eventMarkerStyle(feature) {
+    const members = feature.get('features');
+    const markers = sortedMembers(members);
+    // Clusters show their events as a readable stack; long ones are summarized
+    let items = markers.map(markerItem);
+    if (items.length > MAX_STACK) {
+        items = items.slice(0, MAX_STACK - 1);
+        items.push({ label: '+' + (markers.length - MAX_STACK + 1) + ' ' + eventMarkerI18n.events, icon: null, color: CLUSTER_COLOR });
+    }
+    if (eventDesign === 'pin') return pinStyle(items);
+    const pointer = eventDesign === 'callout' ? 'line' : 'tail';
+    return offsetLabelStyle(items, markers[0].heading, members[0].get('side'), pointer);
+}
+
+// ---- Layer ----
+const eventMarkerSource = new ol.source.Vector({
+    features: eventMarkers.map((m, i) => {
+        const f = new ol.Feature({ geometry: new ol.geom.Point(ol.proj.fromLonLat([m.lon, m.lat])) });
+        f.set('marker', m);
+        // Alternate callout side so that consecutive labels do not overlap
+        f.set('side', i % 2 === 0 ? 1 : -1);
+        return f;
+    }),
+});
+
+const eventClusterSource = new ol.source.Cluster({
+    distance: CLUSTER_DISTANCE[eventDesign],
+    source: eventMarkerSource,
+    // Hidden types are excluded from clustering
+    geometryFunction: f => eventTypeVisible[f.get('marker').type] ? f.getGeometry() : null,
+});
+
+const eventMarkerLayer = new ol.layer.Vector({
+    source: eventClusterSource,
+    style: eventMarkerStyle,
+    zIndex: 100,
+});
+map.addLayer(eventMarkerLayer);
+
+// Icon glyphs need the webfont: redraw once it is available
+if (document.fonts && document.fonts.load) {
+    document.fonts.load(ICON_FONT, '').then(() => {
+        styleCache = {};
+        eventMarkerLayer.changed();
+    }).catch(() => { /* labels still render without icons */ });
+}
+
+document.querySelectorAll('.event-filter-check').forEach(cb => {
+    cb.addEventListener('change', function() {
+        eventTypeVisible[this.dataset.type] = this.checked;
+        eventMarkerSource.changed();
+        hideEventPopup();
+    });
+});
+
+function setEventDesign(design) {
+    eventDesign = design;
+    try { localStorage.setItem('mam.eventMarkerDesign', design); } catch (e) { /* storage unavailable */ }
+    eventClusterSource.setDistance(CLUSTER_DISTANCE[design]);
+    eventMarkerLayer.changed();
+    hideEventPopup();
+    document.querySelectorAll('.event-design-btn').forEach(btn => {
+        const active = btn.dataset.design === design;
+        btn.style.background  = active ? 'var(--brand)' : 'var(--bg-white)';
+        btn.style.color       = active ? 'var(--bg-white)' : 'var(--brand)';
+        btn.style.borderColor = active ? 'var(--brand-dark)' : 'var(--brand)';
+    });
+}
+document.querySelectorAll('.event-design-btn').forEach(btn => {
+    btn.addEventListener('click', () => setEventDesign(btn.dataset.design));
+});
+
+// ---- Cluster popup ----
+const popupEl = document.getElementById('eventMarkerPopup');
+const popupOverlay = new ol.Overlay({ element: popupEl, offset: [0, -16], positioning: 'bottom-center', stopEvent: true });
+map.addOverlay(popupOverlay);
+
+function hideEventPopup() {
+    popupEl.style.display = 'none';
+    popupOverlay.setPosition(undefined);
+}
+
+function sortedMembers(members) {
+    return members.map(f => f.get('marker')).sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+}
+
+function chipHtml(m) {
+    const icon = MARKER_ICONS[m.type] ? '<i class="fa-solid ' + MARKER_ICONS[m.type].css + '"></i> ' : '';
+    return '<span class="event-marker-chip" style="background:' + markerColor(m) + '">' + icon
+        + htmlEscape(markerLabel(m)) + '</span>';
+}
+
+function markerDetailHtml(m) {
+    const alt = m.altitude !== null ? ' · ' + m.altitude + ' ft' : '';
+    const detail = markerLongText(m) !== markerLabel(m) ? ' ' + htmlEscape(markerLongText(m)) : '';
+    return chipHtml(m) + detail + ' <span class="event-marker-time">' + timeOf(m.timestamp) + alt + '</span>';
+}
+
+function eventClusterAtPixel(pixel) {
+    return map.forEachFeatureAtPixel(pixel, f => f, { layerFilter: l => l === eventMarkerLayer, hitTolerance: 3 });
+}
+
+// ---- Click on the track: jump to the nearest recorded event (like the altitude chart) ----
+const TRACK_HIT_PX = 10;
+const trackPoints = [];
+rawEvents.forEach((ev, idx) => {
+    const lat = ev.values?.Latitude, lon = ev.values?.Longitude;
+    if (lat === undefined || lon === undefined) return;
+    trackPoints.push({ idx: idx, coord: ol.proj.fromLonLat([parseFloat(lon), parseFloat(lat)]) });
+});
+
+function nearestTrackEvent(pixel) {
+    let best = null, bestDist = TRACK_HIT_PX * TRACK_HIT_PX;
+    trackPoints.forEach(p => {
+        const px = map.getPixelFromCoordinate(p.coord);
+        if (!px) return;
+        const d = (px[0] - pixel[0]) ** 2 + (px[1] - pixel[1]) ** 2;
+        if (d <= bestDist) { bestDist = d; best = p; }
+    });
+    return best;
+}
+
+// Only a pointer cursor on hover: markers and track are clickable, no hover popup
+map.on('pointermove', evt => {
+    if (evt.dragging) return;
+    const clickable = eventClusterAtPixel(evt.pixel) || nearestTrackEvent(evt.pixel) !== null;
+    map.getTargetElement().style.cursor = clickable ? 'pointer' : '';
+});
+
+function showEventPopup(coordinate, markers) {
+    popupEl.innerHTML = markers.map(m =>
+        '<div class="event-row" data-ts="' + htmlEscape(m.timestamp) + '">' + markerDetailHtml(m) + '</div>'
+    ).join('');
+    popupEl.querySelectorAll('.event-row').forEach(row => {
+        row.addEventListener('click', () => {
+            hideEventPopup();
+            showRawEventByTimestamp(row.dataset.ts);
+        });
+    });
+    popupEl.style.display = '';
+    popupOverlay.setPosition(coordinate);
+}
+
+map.on('singleclick', evt => {
+    const cluster = eventClusterAtPixel(evt.pixel);
+    if (!cluster) {
+        hideEventPopup();
+        const point = nearestTrackEvent(evt.pixel);
+        if (point) showRawEvent(point.idx);
+        return;
+    }
+    const members = cluster.get('features');
+    if (members.length === 1) {
+        hideEventPopup();
+        showRawEventByTimestamp(members[0].get('marker').timestamp);
+        return;
+    }
+    // Zoom into the cluster when that splits it; otherwise list its events
+    const view = map.getView();
+    const extent = ol.extent.boundingExtent(members.map(f => f.getGeometry().getCoordinates()));
+    const size = map.getSize();
+    const padding = 120;
+    const targetZoom = view.getZoomForResolution(
+        view.getResolutionForExtent(extent, [Math.max(1, size[0] - 2 * padding), Math.max(1, size[1] - 2 * padding)])
+    );
+    if ((ol.extent.getWidth(extent) < 1 && ol.extent.getHeight(extent) < 1) || targetZoom - view.getZoom() < 0.5) {
+        showEventPopup(cluster.getGeometry().getCoordinates(), sortedMembers(members));
+    } else {
+        hideEventPopup();
+        view.fit(extent, { padding: [padding, padding, padding, padding], duration: 500, maxZoom: 18 });
+    }
+});
+
+// Initial design, once the popup elements above are initialised
+setEventDesign(eventDesign);
+JS
+    );
+}
 ?>
