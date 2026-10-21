@@ -92,7 +92,7 @@ class ImageController extends Controller
         ]);
 
         if (Yii::$app->user->isGuest) {
-            if ($type === Image::TYPE_PILOT_PROFILE || $type === Image::TYPE_TOUR_IMAGE) {
+            if ($type === Image::TYPE_PILOT_PROFILE || $type === Image::TYPE_TOUR_IMAGE || $type === Image::TYPE_CLIENT_LOGO) {
                 throw new ForbiddenHttpException();
             }
 

@@ -21,6 +21,8 @@ final class Roles
 
     public const AIRCRAFT_TYPE_RESOURCE_MANAGER = 'aircraftTypeResourceManager';
 
+    public const BUSINESS_MANAGER = 'businessManager';
+
     public const ADMIN = 'admin';
 
     private function __construct() {}

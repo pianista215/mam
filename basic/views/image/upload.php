@@ -39,6 +39,8 @@ $photoTypes = [
     Image::TYPE_AIRCRAFT_TYPE_IMAGE,
 ];
 $isPhoto = in_array($image->type, $photoTypes);
+// Non-photo images are stored as PNG, so the crop box may exceed the image and the gap stays transparent
+$allowTransparentPadding = !$isPhoto && $hasFixedDimensions;
 ?>
 
 <div class="image-upload">
@@ -58,6 +60,16 @@ $isPhoto = in_array($image->type, $photoTypes);
 
     <div style="display:flex; flex-direction:column; align-items:center; margin-top:1rem;">
         <input type="file" id="imageInput" accept="image/*" class="form-control mb-2" style="max-width:250px;">
+        <?php if ($allowTransparentPadding): ?>
+            <div id="zoomControls" class="mb-2 text-center" style="display:none;">
+                <div class="btn-group btn-group-sm mb-1" role="group">
+                    <button type="button" id="zoomOutBtn" class="btn btn-outline-secondary" title="<?= Html::encode(Yii::t('app', 'Zoom out')) ?>">&minus;</button>
+                    <button type="button" id="fitBtn" class="btn btn-outline-secondary"><?= Yii::t('app', 'Fit whole image') ?></button>
+                    <button type="button" id="zoomInBtn" class="btn btn-outline-secondary" title="<?= Html::encode(Yii::t('app', 'Zoom in')) ?>">+</button>
+                </div>
+                <div class="form-text"><?= Yii::t('app', 'Areas of the frame outside the image will be transparent.') ?></div>
+            </div>
+        <?php endif; ?>
         <div class="btn-group" role="group">
             <button id="uploadBtn" class="btn btn-primary"><?= Yii::t('app', 'Upload image') ?></button>
             <?php if ($imageExists): ?>
@@ -98,6 +110,44 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let originalFileType = null;
 
+    const allowTransparentPadding = <?= $allowTransparentPadding ? 'true' : 'false' ?>;
+
+    // Crop box fills the container (keeping the ratio) and the whole image is centered inside it
+    function fitWholeImage() {
+        const container = cropper.getContainerData();
+        const margin = 0.9;
+        let boxWidth = container.width * margin;
+        let boxHeight = boxWidth / aspectRatio;
+        if (boxHeight > container.height * margin) {
+            boxHeight = container.height * margin;
+            boxWidth = boxHeight * aspectRatio;
+        }
+        const box = {
+            left: (container.width - boxWidth) / 2,
+            top: (container.height - boxHeight) / 2,
+            width: boxWidth,
+            height: boxHeight,
+        };
+        cropper.setCropBoxData(box);
+
+        const imageData = cropper.getImageData();
+        const scale = Math.min(box.width / imageData.naturalWidth, box.height / imageData.naturalHeight);
+        const width = imageData.naturalWidth * scale;
+        const height = imageData.naturalHeight * scale;
+        cropper.setCanvasData({
+            left: box.left + (box.width - width) / 2,
+            top: box.top + (box.height - height) / 2,
+            width: width,
+            height: height,
+        });
+    }
+
+    if (allowTransparentPadding) {
+        document.getElementById('zoomInBtn').addEventListener('click', () => cropper && cropper.zoom(0.1));
+        document.getElementById('zoomOutBtn').addEventListener('click', () => cropper && cropper.zoom(-0.1));
+        document.getElementById('fitBtn').addEventListener('click', () => cropper && fitWholeImage());
+    }
+
     input.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (!file) return;
@@ -111,13 +161,20 @@ document.addEventListener('DOMContentLoaded', function() {
             if (cropper) cropper.destroy();
 
             const cropperOptions = {
-                viewMode: 1,
+                viewMode: allowTransparentPadding ? 0 : 1,
                 dragMode: 'move',
-                background: false,
+                // Checkerboard background shows which areas will be transparent
+                background: allowTransparentPadding,
                 autoCropArea: 1,
             };
             if (hasFixedDimensions) {
                 cropperOptions.aspectRatio = aspectRatio;
+            }
+            if (allowTransparentPadding) {
+                cropperOptions.ready = function () {
+                    fitWholeImage();
+                    document.getElementById('zoomControls').style.display = 'block';
+                };
             }
 
             cropper = new Cropper(image, cropperOptions);
@@ -132,6 +189,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const canvasOptions = hasFixedDimensions ? { width: targetWidth, height: targetHeight } : {};
+        if (allowTransparentPadding) {
+            canvasOptions.fillColor = 'transparent';
+            canvasOptions.imageSmoothingQuality = 'high';
+        }
         const isPhoto = <?= $isPhoto ? 'true' : 'false' ?>;
         const isPng = originalFileType === 'image/png';
         const mimeType = (isPhoto && !isPng) ? 'image/jpeg' : 'image/png';

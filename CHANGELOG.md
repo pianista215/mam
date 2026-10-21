@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.16.0] - Upcoming
+
+### Added
+- Clients: new catalog (Operations → Clients) with name, mandatory headquarters airport, hub airports and a fixed-ratio logo (300×150 px); the headquarters can't be stored as a hub. First step towards the upcoming jobs system
+- Clients are visible to registered users only (list, detail and logos are hidden from guests)
+- Client detail page puts the logo first: logo centered and shown large, with the name as a subtle caption below and the headquarters underneath; hubs shown as links to their airports. Client list shows logos at half size, keeping the 2:1 ratio
+- New `businessManager` role (`clientCrud` permission) to create, update and delete clients and upload their logos; inherited by admin
+- Image upload: for PNG image types with fixed size (logos, icons, badges) you can now zoom out and fit the whole image inside the frame; the uncovered area is saved as transparent. A checkerboard background shows it and there are zoom −/+ and "Fit whole image" buttons
+
 ## [1.15.0] - 2026-10-06
 
 ### Added

@@ -46,6 +46,11 @@ return [
         'created_at' => time(),
     ],
     [
+        'item_name' => Roles::BUSINESS_MANAGER,
+        'user_id' => '7',
+        'created_at' => time(),
+    ],
+    [
         'item_name' => Roles::PILOT,
         'user_id' => '8',
         'created_at' => time(),
