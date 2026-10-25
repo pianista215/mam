@@ -102,9 +102,9 @@ trait AssignmentGeneratorTestTrait
      * @param float $minRunwayM Length of the runway all those flights took off from, so it becomes the configuration's
      *                          minimum runway
      */
-    private function createAircraft(int $rangeNm, string $location, ?float $averageNm, float $minRunwayM = 2000): Aircraft
+    private function createAircraft(int $rangeNm, string $location, ?float $averageNm, float $minRunwayM = 2000, int $paxCapacity = 4): Aircraft
     {
-        $aircraft = $this->createAircraftWithoutHistory($rangeNm, $location);
+        $aircraft = $this->createAircraftWithoutHistory($rangeNm, $location, $paxCapacity);
         if ($averageNm !== null) {
             for ($i = 0; $i < AssignmentGenerator::MIN_FLIGHTS; $i++) {
                 $this->recordFlight($aircraft, $averageNm, Flight::STATUS_FINISHED, $minRunwayM);
@@ -113,7 +113,7 @@ trait AssignmentGeneratorTestTrait
         return $aircraft;
     }
 
-    private function createAircraftWithoutHistory(int $rangeNm, string $location): Aircraft
+    private function createAircraftWithoutHistory(int $rangeNm, string $location, int $paxCapacity = 4): Aircraft
     {
         $this->aircraftCounter++;
 
@@ -127,7 +127,7 @@ trait AssignmentGeneratorTestTrait
         $config = new AircraftConfiguration([
             'aircraft_type_id' => $type->id,
             'name' => 'Config ' . $this->aircraftCounter,
-            'pax_capacity' => 4,
+            'pax_capacity' => $paxCapacity,
             'cargo_capacity' => 100,
             'crew' => 1,
             'mtow' => 1400,
@@ -390,6 +390,8 @@ trait AssignmentGeneratorTestTrait
         $aircraft = Aircraft::findOne($aircraft->id);
         $origin = $aircraft->location0;
         $range = $aircraft->aircraftConfiguration->aircraftType->max_nm_range;
+        // Light aircraft recomputed independently: below 1000 NM and fewer than 20 seats
+        $isLight = $range < 1000 && $aircraft->aircraftConfiguration->pax_capacity < 20;
 
         // Window recomputed here independently of the generator
         $average = (float) (new \yii\db\Query())
@@ -433,8 +435,8 @@ trait AssignmentGeneratorTestTrait
             $originRunways = array_map(fn($r) => (float) $r->length_m, Runway::find()->where(['airport_icao' => $origin->icao_code])->all());
             $this->assertNotEmpty($originRunways, "Assignments offered from {$origin->icao_code}, which has no runways");
             $this->assertGreaterThanOrEqual($minRunwayM, max($originRunways), "Origin {$origin->icao_code} runways too short");
-            if ($range < 1000) {
-                $this->assertLessThanOrEqual(3000, max($originRunways), "Small aircraft at big origin {$origin->icao_code}");
+            if ($isLight) {
+                $this->assertLessThanOrEqual(3000, max($originRunways), "Light aircraft at big origin {$origin->icao_code}");
             }
         }
 
@@ -477,8 +479,8 @@ trait AssignmentGeneratorTestTrait
             $this->assertNotEmpty($runways, "$icao has no runways");
             $longest = max(array_map(fn($r) => (float) $r->length_m, $runways));
             $this->assertGreaterThanOrEqual($minRunwayM, $longest, "$icao only has $longest m of runway, minimum is $minRunwayM m");
-            if ($range < 1000) {
-                $this->assertLessThanOrEqual(3000, $longest, "Small aircraft sent to $icao with a $longest m runway");
+            if ($isLight) {
+                $this->assertLessThanOrEqual(3000, $longest, "Light aircraft sent to $icao with a $longest m runway");
             }
 
             $dest = Airport::findOne(['icao_code' => $icao]);

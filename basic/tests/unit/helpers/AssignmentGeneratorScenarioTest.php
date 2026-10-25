@@ -341,6 +341,31 @@ class AssignmentGeneratorScenarioTest extends BaseUnitTest
         $this->assertSame([], AssignmentGenerator::generate($this->a320('LESA')));
     }
 
+    public function testSaabCanFlyFromBarajasButTheMauleCannot()
+    {
+        // Saab 340: 935 NM but 34 seats, so not a light aircraft. Maule M7: 450 NM, 3 seats
+        $saab = $this->createAircraft(935, 'LEMD', 312, 1306, 34);
+        $maule = $this->createAircraft(450, 'LEMD', 139, 1047, 3);
+
+        $this->assertNotEmpty(AssignmentGenerator::generate($saab, $this->alwaysAccept()));
+        $this->assertSame([], AssignmentGenerator::generate($maule));
+    }
+
+    public function testMauleIsSentToSmallAerodromes()
+    {
+        // Valladolid's longest runway is 3005 m: too big for a Maule, which gets small fields from Cuatro Vientos
+        $this->createAirportAt('LEVD', 41.7061, -4.8519, [3005.2, 909.2]);
+        $this->createClient('Valladolid Client', 'LEVD');
+        $maule = $this->createAircraft(450, 'LECU', 139, 1047, 3);
+
+        $union = $this->unionOfDestinations($this->runs($maule, 100));
+
+        $this->assertNotEmpty($union);
+        $this->assertNotContains('LEVD', $union);
+        $this->assertNoBigAirports($union);
+        $this->assertSame([], AssignmentGenerator::generate($this->moveAircraft($maule, 'LEVD')));
+    }
+
     public function testKingAirCanStartFromTheShortRunwaysItHasUsedBefore()
     {
         foreach (['LECU', 'LESO'] as $origin) {

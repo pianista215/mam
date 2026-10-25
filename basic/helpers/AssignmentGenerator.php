@@ -3,6 +3,7 @@
 namespace app\helpers;
 
 use app\models\Aircraft;
+use app\models\AircraftConfiguration;
 use app\models\Airport;
 use app\models\Client;
 use app\models\ClientHub;
@@ -24,8 +25,8 @@ use yii\db\Query;
  * takeoff runways means no assignments.
  *
  * Only eligible airports are ever offered: different from the origin, not a heliport, inside the distance window,
- * with at least one runway as long as the configuration's minimum runway and, for small aircraft
- * (range < 1000 NM), without any runway longer than 3000 m.
+ * with at least one runway as long as the configuration's minimum runway and, for light aircraft
+ * (range < 1000 NM and fewer than 20 seats, e.g. a Maule or a C172), without any runway longer than 3000 m.
  *
  * Direct mode (some client has its headquarters or a hub at the origin): each of those clients gets up to
  * CLIENT_SLOTS assignments to its own eligible airports; remaining slots are filled with random eligible
@@ -40,7 +41,7 @@ use yii\db\Query;
  * When a regular route no longer than the window maximum departs from the origin, each assignment survives with
  * ACCEPT_PERCENT probability.
  *
- * The origin must meet the same airport rules; otherwise there are no assignments, e.g. a small aircraft parked at
+ * The origin must meet the same airport rules; otherwise there are no assignments, e.g. a light aircraft parked at
  * a big airport.
  *
  * Dead-end safety: since the origin always meets the airport rules and eligibility is symmetric (same distance and
@@ -68,8 +69,10 @@ class AssignmentGenerator
     const MAX_DISTANCE_FACTOR = 1.2;
     const RANGE_FACTOR = 0.8;
 
-    const SMALL_AIRCRAFT_MAX_RANGE_NM = 1000; // below: small aircraft, never sent to big airports
-    const SMALL_AIRCRAFT_MAX_RUNWAY_M = 3000;
+    // Light aircraft (below both limits) are never sent to big airports
+    const LIGHT_AIRCRAFT_MAX_RANGE_NM = 1000;
+    const LIGHT_AIRCRAFT_MAX_PAX = 20;
+    const LIGHT_AIRCRAFT_MAX_RUNWAY_M = 3000;
 
     // Airport names matching these are excluded (heliports) or avoided as fillers (military airports)
     const HELIPORT_NAME_PATTERNS = ['%Heliport%', '%Helipuerto%', '%Heliporto%'];
@@ -90,7 +93,7 @@ class AssignmentGenerator
             return [];
         }
         [$minNm, $maxNm] = $window;
-        $range = $aircraft->aircraftConfiguration->aircraftType->max_nm_range;
+        $isLight = self::isLightAircraft($aircraft->aircraftConfiguration);
 
         $minRunwayM = self::minTakeoffRunway($aircraft->aircraft_configuration_id);
         if ($minRunwayM === null) {
@@ -98,11 +101,11 @@ class AssignmentGenerator
         }
 
         // The origin must meet the same airport rules as any destination
-        if (!self::isSuitableAirport($origin->icao_code, $range, $minRunwayM)) {
+        if (!self::isSuitableAirport($origin->icao_code, $isLight, $minRunwayM)) {
             return [];
         }
 
-        $eligible = self::findEligibleAirports($origin, $minNm, $maxNm, $range, $minRunwayM);
+        $eligible = self::findEligibleAirports($origin, $minNm, $maxNm, $isLight, $minRunwayM);
         if (empty($eligible)) {
             return [];
         }
@@ -218,7 +221,7 @@ class AssignmentGenerator
      * Airports that can be offered as destination, with their distance from the origin, country and military flag.
      * @return array<string, array{distance: float, country_id: int, military: bool}> keyed by icao, sorted by icao
      */
-    private static function findEligibleAirports(Airport $origin, float $minNm, float $maxNm, int $range, float $minRunwayM): array
+    private static function findEligibleAirports(Airport $origin, float $minNm, float $maxNm, bool $isLight, float $minRunwayM): array
     {
         // One degree of latitude is slightly more than 60 NM, so this box never cuts valid airports
         $latDelta = $maxNm / 60;
@@ -229,7 +232,7 @@ class AssignmentGenerator
             ->where(['<>', 'icao_code', $origin->icao_code])
             ->andWhere(['between', 'latitude', $origin->latitude - $latDelta, $origin->latitude + $latDelta])
             ->orderBy(['icao_code' => SORT_ASC]);
-        self::applyAirportRules($query, $range, $minRunwayM);
+        self::applyAirportRules($query, $isLight, $minRunwayM);
 
         $eligible = [];
         foreach ($query->all() as $row) {
@@ -251,19 +254,28 @@ class AssignmentGenerator
 
     /**
      * Whether the aircraft can operate at the airport: not a heliport, with a runway at least $minRunwayM long
-     * and, for small aircraft, no runway longer than SMALL_AIRCRAFT_MAX_RUNWAY_M.
+     * and, for light aircraft, no runway longer than LIGHT_AIRCRAFT_MAX_RUNWAY_M.
      */
-    public static function isSuitableAirport(string $icao, int $range, float $minRunwayM): bool
+    public static function isSuitableAirport(string $icao, bool $isLight, float $minRunwayM): bool
     {
         $query = (new Query())->from('airport')->where(['icao_code' => $icao]);
-        self::applyAirportRules($query, $range, $minRunwayM);
+        self::applyAirportRules($query, $isLight, $minRunwayM);
         return $query->exists();
+    }
+
+    /**
+     * Light aircraft: range below LIGHT_AIRCRAFT_MAX_RANGE_NM and fewer than LIGHT_AIRCRAFT_MAX_PAX seats.
+     */
+    public static function isLightAircraft(AircraftConfiguration $config): bool
+    {
+        return $config->aircraftType->max_nm_range < self::LIGHT_AIRCRAFT_MAX_RANGE_NM
+            && $config->pax_capacity < self::LIGHT_AIRCRAFT_MAX_PAX;
     }
 
     /**
      * Restricts an airport query to airports the aircraft can operate at (see isSuitableAirport()).
      */
-    private static function applyAirportRules(Query $query, int $range, float $minRunwayM): void
+    private static function applyAirportRules(Query $query, bool $isLight, float $minRunwayM): void
     {
         $runways = (new Query())->from('runway')->where('runway.airport_icao = airport.icao_code');
         $query->andWhere(['exists', (clone $runways)->andWhere(['>=', 'length_m', $minRunwayM])]);
@@ -272,8 +284,8 @@ class AssignmentGenerator
             $query->andWhere(['not like', 'airport.name', $pattern, false]);
         }
 
-        if ($range < self::SMALL_AIRCRAFT_MAX_RANGE_NM) {
-            $query->andWhere(['not exists', (clone $runways)->andWhere(['>', 'length_m', self::SMALL_AIRCRAFT_MAX_RUNWAY_M])]);
+        if ($isLight) {
+            $query->andWhere(['not exists', (clone $runways)->andWhere(['>', 'length_m', self::LIGHT_AIRCRAFT_MAX_RUNWAY_M])]);
         }
     }
 

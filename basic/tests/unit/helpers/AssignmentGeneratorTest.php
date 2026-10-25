@@ -13,7 +13,8 @@ use tests\unit\BaseUnitTest;
  *
  * Default aircraft: 1500 NM range whose configuration has an average flown distance of 1000 NM, so its distance
  * window is [500, 1200] NM, and whose flights took off from 2000 m runways, so it needs a runway of 2000 m or more.
- * smallAircraft() (999 NM) needs 600 m and can't use runways above 3000 m; largeAircraft() (2500 NM) needs 3000 m.
+ * smallAircraft() (999 NM, 4 seats: a light aircraft) needs 600 m and can't use runways above 3000 m;
+ * largeAircraft() (2500 NM) needs 3000 m.
  * The origin XORG has a 3000 m runway, so all of them can start there. Every other airport gets a 2000 m runway
  * unless the test says otherwise.
  * Naming: XDnn = client airports, XFnn = plain airports (fillers).
@@ -867,6 +868,39 @@ class AssignmentGeneratorTest extends BaseUnitTest
         }
     }
 
+    public function testMaximumRunwayOnlyAppliesToLightAircraft()
+    {
+        $this->createAirport('XD01', 600, [3500]);
+        $this->createAirport('XD02', 700, [2500]);
+        $this->createClient('Runways', 'XORG', ['XD01', 'XD02']);
+
+        $expected = [
+            // [range NM, seats, destinations]
+            [999, 4, ['XD02']],
+            [999, 19, ['XD02']],
+            [999, 20, ['XD01', 'XD02']],
+            [935, 34, ['XD01', 'XD02']],
+            [1000, 4, ['XD01', 'XD02']],
+        ];
+        foreach ($expected as [$range, $pax, $destinations]) {
+            $aircraft = $this->createAircraft($range, 'XORG', self::AVERAGE, 1000, $pax);
+            foreach ($this->generateAllWays($aircraft) as $result) {
+                $this->assertSame($destinations, $this->destinationsOf($result), "$range NM / $pax seats");
+            }
+        }
+    }
+
+    public function testCommuterCanStartFromABigAirport()
+    {
+        $this->createOrigin('XBIG', [3500]);
+        // Same range, only the seats differ
+        $commuter = $this->createAircraft(935, 'XBIG', self::AVERAGE, 1300, 34);
+        $light = $this->createAircraft(935, 'XBIG', self::AVERAGE, 1300, 3);
+
+        $this->assertSame(['XF01'], $this->destinationsOf($this->generate($this->alwaysAccept(), $commuter)));
+        $this->assertSame([], AssignmentGenerator::generate($light, $this->alwaysAccept()));
+    }
+
     public function testRangeNoLongerDecidesTheMinimumRunway()
     {
         // A long-range aircraft that has always taken off from 1200 m runways can use short runways
@@ -1131,7 +1165,7 @@ class AssignmentGeneratorTest extends BaseUnitTest
         $this->createAirport('XA05', 800, [2000], self::$SPAIN, 'Some Heliport');
 
         $expected = [
-            // icao => [999 NM / 600 m, 999 NM / 2000 m, 1000 NM / 2000 m, 1000 NM / 3001 m]
+            // icao => [light / 600 m, light / 2000 m, not light / 2000 m, not light / 3001 m]
             'XA01' => [true, true, true, false],
             'XA02' => [true, false, false, false],
             'XA03' => [false, false, true, true],
@@ -1139,12 +1173,29 @@ class AssignmentGeneratorTest extends BaseUnitTest
             'XA05' => [false, false, false, false],
         ];
         foreach ($expected as $icao => [$a, $b, $c, $d]) {
-            $this->assertSame($a, AssignmentGenerator::isSuitableAirport($icao, 999, 600), "$icao 999 NM / 600 m");
-            $this->assertSame($b, AssignmentGenerator::isSuitableAirport($icao, 999, 2000), "$icao 999 NM / 2000 m");
-            $this->assertSame($c, AssignmentGenerator::isSuitableAirport($icao, 1000, 2000), "$icao 1000 NM / 2000 m");
-            $this->assertSame($d, AssignmentGenerator::isSuitableAirport($icao, 1000, 3001), "$icao 1000 NM / 3001 m");
+            $this->assertSame($a, AssignmentGenerator::isSuitableAirport($icao, true, 600), "$icao light / 600 m");
+            $this->assertSame($b, AssignmentGenerator::isSuitableAirport($icao, true, 2000), "$icao light / 2000 m");
+            $this->assertSame($c, AssignmentGenerator::isSuitableAirport($icao, false, 2000), "$icao not light / 2000 m");
+            $this->assertSame($d, AssignmentGenerator::isSuitableAirport($icao, false, 3001), "$icao not light / 3001 m");
         }
-        $this->assertFalse(AssignmentGenerator::isSuitableAirport('ZZZZ', 1500, 1000));
+        $this->assertFalse(AssignmentGenerator::isSuitableAirport('ZZZZ', false, 1000));
+    }
+
+    public function testIsLightAircraft()
+    {
+        $expected = [
+            // [range NM, seats, light?]
+            [450, 3, true],     // Maule
+            [999, 19, true],
+            [999, 20, false],   // enough seats to be a commuter
+            [935, 34, false],   // Saab 340
+            [1000, 4, false],   // enough range
+            [915, 0, true],     // light cargo
+        ];
+        foreach ($expected as [$range, $pax, $light]) {
+            $aircraft = $this->createAircraftWithoutHistory($range, 'XORG', $pax);
+            $this->assertSame($light, AssignmentGenerator::isLightAircraft($aircraft->aircraftConfiguration), "$range NM / $pax seats");
+        }
     }
 
     // =====================================================================
