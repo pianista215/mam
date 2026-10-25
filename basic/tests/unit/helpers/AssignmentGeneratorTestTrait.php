@@ -25,6 +25,12 @@ trait AssignmentGeneratorTestTrait
     private int $aircraftCounter = 0;
     private int $flightCounter = 0;
     private ?int $pilotId = null;
+    /** @var array<string, string> runway length => reference airport ICAO */
+    private array $referenceRunways = [];
+    /** @var array<string, int> metric code => metric type id */
+    private array $metricTypeIds = [];
+    /** @var array<string, int> metric code => phase type id */
+    private array $phaseTypeIds = [];
 
     private static int $SPAIN = 1;
     private static int $PORTUGAL = 2;
@@ -56,10 +62,23 @@ trait AssignmentGeneratorTestTrait
         }
     }
 
+    /**
+     * Creates a runway and one runway end per designator (e.g. "09/27" -> "09" and "27").
+     */
     private function createRunway(string $icao, float $lengthM, string $designators = '09/27'): void
     {
         $runway = new Runway(['airport_icao' => $icao, 'designators' => $designators, 'width_m' => 45, 'length_m' => $lengthM]);
         $this->assertTrue($runway->save(), json_encode($runway->errors));
+
+        foreach (explode('/', $designators) as $designator) {
+            \Yii::$app->db->createCommand()->insert('runway_end', [
+                'runway_id' => $runway->id,
+                'designator' => $designator,
+                'latitude' => 0,
+                'longitude' => 0,
+                'true_heading_deg' => 0,
+            ])->execute();
+        }
     }
 
     private function createClient(string $name, string $headquarters, array $hubs = []): Client
@@ -80,13 +99,15 @@ trait AssignmentGeneratorTestTrait
      *
      * @param float|null $averageNm Distance of the MIN_FLIGHTS finished flights recorded for the configuration
      *                              (so it is also their average); null leaves the configuration without flight history
+     * @param float $minRunwayM Length of the runway all those flights took off from, so it becomes the configuration's
+     *                          minimum runway
      */
-    private function createAircraft(int $rangeNm, string $location, ?float $averageNm): Aircraft
+    private function createAircraft(int $rangeNm, string $location, ?float $averageNm, float $minRunwayM = 2000): Aircraft
     {
         $aircraft = $this->createAircraftWithoutHistory($rangeNm, $location);
         if ($averageNm !== null) {
             for ($i = 0; $i < AssignmentGenerator::MIN_FLIGHTS; $i++) {
-                $this->recordFlight($aircraft, $averageNm);
+                $this->recordFlight($aircraft, $averageNm, Flight::STATUS_FINISHED, $minRunwayM);
             }
         }
         return $aircraft;
@@ -142,16 +163,54 @@ trait AssignmentGeneratorTestTrait
         return Aircraft::findOne($sibling->id);
     }
 
-    private function recordFlight(Aircraft $aircraft, ?float $distanceNm, string $status = Flight::STATUS_FINISHED): void
+    /**
+     * Records a flight of the aircraft. With $takeoffRunwayM, the flight departs from a reference airport far away
+     * whose only runway has that length, and its takeoff phase records that runway.
+     */
+    private function recordFlight(Aircraft $aircraft, ?float $distanceNm, string $status = Flight::STATUS_FINISHED, ?float $takeoffRunwayM = null): void
     {
+        if ($takeoffRunwayM === null) {
+            $this->recordFlightFrom($aircraft, $distanceNm, $status, $aircraft->location);
+        } else {
+            $this->recordFlightFrom($aircraft, $distanceNm, $status, $this->referenceRunwayAirport($takeoffRunwayM), '09');
+        }
+    }
+
+    /**
+     * Airport at latitude -80 (never within any distance window) with a single 09/27 runway of the given length.
+     */
+    private function referenceRunwayAirport(float $lengthM): string
+    {
+        $key = (string) $lengthM;
+        if (!isset($this->referenceRunways[$key])) {
+            $icao = sprintf('R%03d', count($this->referenceRunways) + 1);
+            $this->createAirportAt($icao, -80.0, count($this->referenceRunways) * 0.1, [], 1, "Reference $lengthM m");
+            $this->createRunway($icao, $lengthM, '09/27');
+            $this->referenceRunways[$key] = $icao;
+        }
+        return $this->referenceRunways[$key];
+    }
+
+    /**
+     * @param string|null $takeoffDesignator Runway end recorded as TakeoffRunway, if any
+     * @param string|null $landingDesignator Runway end recorded as LandingRunway, if any
+     */
+    private function recordFlightFrom(
+        Aircraft $aircraft,
+        ?float $distanceNm,
+        string $status,
+        string $departure,
+        ?string $takeoffDesignator = null,
+        ?string $landingDesignator = null
+    ): void {
         $this->flightCounter++;
         $flight = new Flight([
             'pilot_id' => $this->getPilotId($aircraft->location),
             'aircraft_id' => $aircraft->id,
             'code' => 'ASG' . $this->flightCounter,
-            'departure' => $aircraft->location,
-            'arrival' => $aircraft->location,
-            'alternative1_icao' => $aircraft->location,
+            'departure' => $departure,
+            'arrival' => $departure,
+            'alternative1_icao' => $departure,
             'flight_rules' => 'V',
             'cruise_speed_unit' => 'N',
             'cruise_speed_value' => '120',
@@ -168,14 +227,49 @@ trait AssignmentGeneratorTestTrait
         ]);
         $flight->save(false);
 
-        (new FlightReport([
+        $report = new FlightReport([
             'flight_id' => $flight->id,
             'start_time' => '2026-10-01 10:00:00',
             'end_time' => '2026-10-01 11:00:00',
             'flight_time_minutes' => 60,
             'distance_nm' => $distanceNm === null ? null : (int) round($distanceNm),
             'sim_aircraft_name' => 'Test Aircraft',
-        ]))->save(false);
+        ]);
+        $report->save(false);
+
+        if ($takeoffDesignator !== null) {
+            $this->recordPhaseMetric($report->id, 'takeoff', 'TakeoffRunway', $takeoffDesignator);
+        }
+        if ($landingDesignator !== null) {
+            $this->recordPhaseMetric($report->id, 'final_landing', 'LandingRunway', $landingDesignator);
+        }
+    }
+
+    private function recordPhaseMetric(int $reportId, string $phaseCode, string $metricCode, string $value): void
+    {
+        $db = \Yii::$app->db;
+        if (!isset($this->metricTypeIds[$metricCode])) {
+            $phaseTypeId = $db->createCommand('SELECT id FROM flight_phase_type WHERE code = :code', [':code' => $phaseCode])->queryScalar();
+            if ($phaseTypeId === false) {
+                $db->createCommand()->insert('flight_phase_type', ['code' => $phaseCode])->execute();
+                $phaseTypeId = $db->getLastInsertID();
+            }
+            $db->createCommand()->insert('flight_phase_metric_type', ['flight_phase_type_id' => $phaseTypeId, 'code' => $metricCode])->execute();
+            $this->metricTypeIds[$metricCode] = (int) $db->getLastInsertID();
+            $this->phaseTypeIds[$metricCode] = (int) $phaseTypeId;
+        }
+
+        $db->createCommand()->insert('flight_phase', [
+            'flight_report_id' => $reportId,
+            'flight_phase_type_id' => $this->phaseTypeIds[$metricCode],
+            'start' => '2026-10-01 10:05:00',
+            'end' => '2026-10-01 10:06:00',
+        ])->execute();
+        $db->createCommand()->insert('flight_phase_metric', [
+            'flight_phase_id' => $db->getLastInsertID(),
+            'metric_type_id' => $this->metricTypeIds[$metricCode],
+            'value' => $value,
+        ])->execute();
     }
 
     private function getPilotId(string $location): int
@@ -318,6 +412,32 @@ trait AssignmentGeneratorTestTrait
         $minNm = $average * 0.5;
         $maxNm = min($average * 1.2, $range * 0.8);
 
+        // Minimum runway recomputed here independently: second shortest takeoff runway of finished flights
+        $takeoffLengths = \Yii::$app->db->createCommand(
+            "SELECT r.length_m FROM flight_phase_metric m
+             JOIN flight_phase_metric_type mt ON mt.id = m.metric_type_id AND mt.code = 'TakeoffRunway'
+             JOIN flight_phase fp ON fp.id = m.flight_phase_id
+             JOIN flight_report fr ON fr.id = fp.flight_report_id
+             JOIN flight f ON f.id = fr.flight_id AND f.status = 'F'
+             JOIN aircraft a ON a.id = f.aircraft_id AND a.aircraft_configuration_id = :config
+             JOIN runway r ON r.airport_icao = f.departure
+             JOIN runway_end re ON re.runway_id = r.id AND re.designator = m.value
+             ORDER BY r.length_m",
+            [':config' => $aircraft->aircraft_configuration_id]
+        )->queryColumn();
+        if (!empty($assignments)) {
+            $this->assertGreaterThanOrEqual(2, count($takeoffLengths), 'Assignments offered without 2 known takeoff runways');
+        }
+        $minRunwayM = (float) ($takeoffLengths[1] ?? 0);
+        if (!empty($assignments)) {
+            $originRunways = array_map(fn($r) => (float) $r->length_m, Runway::find()->where(['airport_icao' => $origin->icao_code])->all());
+            $this->assertNotEmpty($originRunways, "Assignments offered from {$origin->icao_code}, which has no runways");
+            $this->assertGreaterThanOrEqual($minRunwayM, max($originRunways), "Origin {$origin->icao_code} runways too short");
+            if ($range < 1000) {
+                $this->assertLessThanOrEqual(3000, max($originRunways), "Small aircraft at big origin {$origin->icao_code}");
+            }
+        }
+
         $this->assertLessThanOrEqual(AssignmentGenerator::COUNT, count($assignments));
 
         $pairs = $this->pairsOf($assignments);
@@ -356,12 +476,9 @@ trait AssignmentGeneratorTestTrait
             $runways = Runway::find()->where(['airport_icao' => $icao])->all();
             $this->assertNotEmpty($runways, "$icao has no runways");
             $longest = max(array_map(fn($r) => (float) $r->length_m, $runways));
+            $this->assertGreaterThanOrEqual($minRunwayM, $longest, "$icao only has $longest m of runway, minimum is $minRunwayM m");
             if ($range < 1000) {
                 $this->assertLessThanOrEqual(3000, $longest, "Small aircraft sent to $icao with a $longest m runway");
-            } elseif ($range <= 2000) {
-                $this->assertGreaterThanOrEqual(2000, $longest, "Medium aircraft sent to $icao with only $longest m of runway");
-            } else {
-                $this->assertGreaterThanOrEqual(3000, $longest, "Large aircraft sent to $icao with only $longest m of runway");
             }
 
             $dest = Airport::findOne(['icao_code' => $icao]);

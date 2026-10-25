@@ -5,17 +5,18 @@ namespace tests\unit\helpers;
 use app\helpers\AssignmentGenerator;
 use app\models\Aircraft;
 use app\models\Client;
+use app\models\Flight;
 use tests\unit\BaseUnitTest;
 
 /**
  * Realistic scenarios on a Spanish network with real coordinates and approximate runway lengths,
  * showing that every kind of client produces sensible assignments for every kind of aircraft.
  *
- * Aircraft (range, average flown distance → window):
- * - C182: 915 NM, 175 NM → [87.5, 210], small: no runway above 3000 m
- * - C172: 730 NM, 100 NM → [50, 120], small
- * - King Air 350: 1750 NM, 334 NM → [167, 400.8], medium: a runway of 2000 m or more
- * - A320: 3300 NM, 400 NM → [200, 480], large: a runway of 3000 m or more
+ * Aircraft (range, average flown distance → window, minimum runway learnt from takeoffs):
+ * - C182: 915 NM, 175 NM → [87.5, 210], 500 m; small: no runway above 3000 m
+ * - C172: 730 NM, 100 NM → [50, 120], 500 m; small
+ * - King Air 350: 1750 NM, 334 NM → [167, 400.8], 1484 m (the real second shortest King Air takeoff)
+ * - A320: 3300 NM, 400 NM → [200, 480], 2700 m
  */
 class AssignmentGeneratorScenarioTest extends BaseUnitTest
 {
@@ -66,22 +67,22 @@ class AssignmentGeneratorScenarioTest extends BaseUnitTest
 
     private function c182(string $location): Aircraft
     {
-        return $this->createAircraft(915, $location, 175);
+        return $this->createAircraft(915, $location, 175, 500);
     }
 
     private function c172(string $location): Aircraft
     {
-        return $this->createAircraft(730, $location, 100);
+        return $this->createAircraft(730, $location, 100, 500);
     }
 
     private function kingAir(string $location): Aircraft
     {
-        return $this->createAircraft(1750, $location, 334);
+        return $this->createAircraft(1750, $location, 334, 1484);
     }
 
     private function a320(string $location): Aircraft
     {
-        return $this->createAircraft(3300, $location, 400);
+        return $this->createAircraft(3300, $location, 400, 2700);
     }
 
     /** @return array<int, array> Seeded random runs, each one validated */
@@ -134,7 +135,7 @@ class AssignmentGeneratorScenarioTest extends BaseUnitTest
     public function testLongHaulA320GetsNothingWithinSpain()
     {
         // Usually flown 1000 NM: window [500, 1200], no Spanish client airport is that far from Madrid
-        $longHaul = $this->createAircraft(3300, 'LEMD', 1000);
+        $longHaul = $this->createAircraft(3300, 'LEMD', 1000, 2700);
 
         $this->assertSame([], AssignmentGenerator::generate($longHaul));
     }
@@ -146,9 +147,9 @@ class AssignmentGeneratorScenarioTest extends BaseUnitTest
         }
     }
 
-    public function testKingAirAtRegionalHeadquartersSkipsTheTooCloseHubAndShortRunways()
+    public function testKingAirAtRegionalHeadquartersSkipsTheTooCloseHub()
     {
-        // LEAS (137 NM) is too close for the King Air's usual 334 NM; LECU (1500 m) and LESO (1754 m) too short.
+        // LEAS (137 NM) is too close for the King Air's usual 334 NM. Cuatro Vientos (1500 m) is fine for its 1484 m.
         // Lisbon (391 NM) would fit, but Regional Norte is a Spanish-only client and Spain has enough options.
         $results = $this->runs($this->kingAir('LEBB'), 100);
         foreach ($results as $result) {
@@ -157,7 +158,7 @@ class AssignmentGeneratorScenarioTest extends BaseUnitTest
         }
 
         $this->assertSame(
-            ['LEBL', 'LEGR', 'LEMD', 'LESA', 'LEVC', 'LEZL'],
+            ['LEBL', 'LECU', 'LEGR', 'LEMD', 'LESA', 'LEVC', 'LEZL'],
             $this->unionOfDestinations($results)
         );
     }
@@ -170,7 +171,7 @@ class AssignmentGeneratorScenarioTest extends BaseUnitTest
 
         $union = $this->unionOfDestinations($this->runs($this->kingAir('LEBB'), 100));
 
-        $this->assertSame(['LEBL', 'LEGR', 'LEMD', 'LESA', 'LEVC', 'LEZL'], $union);
+        $this->assertSame(['LEBL', 'LECU', 'LEGR', 'LEMD', 'LESA', 'LEVC', 'LEZL'], $union);
     }
 
     // --- Country preference (King Air around Vigo and Porto) ---
@@ -193,7 +194,7 @@ class AssignmentGeneratorScenarioTest extends BaseUnitTest
 
         // Lisbon (208 NM) and Porto (59 NM, too close) are never offered
         $this->assertSame(
-            ['LEBB', 'LEBG', 'LEGR', 'LEHC', 'LELO', 'LEMD', 'LEMG', 'LEZL'],
+            ['LEBB', 'LEBG', 'LECU', 'LEGR', 'LEHC', 'LELO', 'LEMD', 'LEMG', 'LESO', 'LEZL'],
             $this->unionOfDestinations($results)
         );
     }
@@ -335,11 +336,38 @@ class AssignmentGeneratorScenarioTest extends BaseUnitTest
 
     public function testAircraftAtAnAirportItShouldNotUseGetsNothing()
     {
-        // C182 at Barajas (4350 m), A320 at Salamanca (2513 m), King Air at Cuatro Vientos (1500 m)
+        // C182 at Barajas (4350 m, too big), A320 at Salamanca (2513 m, below its 2700 m)
         $this->assertSame([], AssignmentGenerator::generate($this->c182('LEMD')));
         $this->assertSame([], AssignmentGenerator::generate($this->a320('LESA')));
-        $this->assertSame([], AssignmentGenerator::generate($this->kingAir('LECU')));
-        $this->assertSame([], AssignmentGenerator::generate($this->kingAir('LESO')));
+    }
+
+    public function testKingAirCanStartFromTheShortRunwaysItHasUsedBefore()
+    {
+        foreach (['LECU', 'LESO'] as $origin) {
+            foreach ($this->runs($this->kingAir($origin)) as $result) {
+                $this->assertNotEmpty($result, "King Air at $origin");
+            }
+        }
+    }
+
+    public function testAircraftThatAlwaysUsedLongRunwaysCannotStartFromCuatroVientos()
+    {
+        // TBM-like: same range as the King Air, but its second shortest takeoff was 2281 m
+        $tbm = $this->createAircraft(1730, 'LECU', 305, 2281);
+
+        $this->assertSame([], AssignmentGenerator::generate($tbm));
+    }
+
+    public function testMinimumRunwayComesFromRealTakeoffs()
+    {
+        // Two takeoffs from Cuatro Vientos (1500 m, runway 01/19) and one from Barajas (runway 01, 4350 m)
+        $kingAir = $this->createAircraftWithoutHistory(1750, 'LEBB');
+        $this->recordFlightFrom($kingAir, 334, Flight::STATUS_FINISHED, 'LECU', '01');
+        $this->recordFlightFrom($kingAir, 334, Flight::STATUS_FINISHED, 'LECU', '19');
+        $this->recordFlightFrom($kingAir, 334, Flight::STATUS_FINISHED, 'LEMD', '01');
+
+        $this->assertSame(1500.0, AssignmentGenerator::minTakeoffRunway($kingAir->aircraft_configuration_id));
+        $this->assertContains('LECU', $this->unionOfDestinations($this->runs($kingAir, 100)));
     }
 
     public function testC182AtAnAirportWithExactly3000mGetsAssignments()
@@ -364,11 +392,11 @@ class AssignmentGeneratorScenarioTest extends BaseUnitTest
         $c182 = $this->createAircraftWithoutHistory(915, 'LECU');
         $this->assertSame([], AssignmentGenerator::generate($c182));
 
-        $this->recordFlight($c182, 150);
-        $this->recordFlight($c182, 200);
+        $this->recordFlight($c182, 150, Flight::STATUS_FINISHED, 500);
+        $this->recordFlight($c182, 200, Flight::STATUS_FINISHED, 500);
         $this->assertSame([], AssignmentGenerator::generate($c182));
 
-        $this->recordFlight($c182, 175);
+        $this->recordFlight($c182, 175, Flight::STATUS_FINISHED, 500);
 
         $this->assertCount(3, AssignmentGenerator::generate($c182));
     }
@@ -419,7 +447,7 @@ class AssignmentGeneratorScenarioTest extends BaseUnitTest
             $result = AssignmentGenerator::generate($kingAir);
             $this->assertValidAssignments($result, $kingAir);
             $this->assertNotEmpty($result, "King Air stuck at {$kingAir->location}");
-            $this->assertNotContains($kingAir->location, ['LECU', 'LESO', 'LEHX']);
+            $this->assertNotSame('LEHX', $kingAir->location);
             $kingAir = $this->moveAircraft($kingAir, $result[mt_rand(0, count($result) - 1)]['destination']);
         }
         mt_srand();
