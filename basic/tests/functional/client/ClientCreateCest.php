@@ -103,7 +103,8 @@ class ClientCreateCest
         ]);
 
         $I->seeResponseCodeIs(200);
-        $I->see('Unknown hub airports: ZZZZ');
+        // Ajax requests don't fill the page history, so check the raw response
+        $I->assertStringContainsString('Unknown hub airports: ZZZZ', $I->grabPageSource());
         $I->assertEquals(2, Client::find()->count());
     }
 

@@ -30,15 +30,15 @@ class ClientIndexViewCest
 
     public function guestDoesNotSeeMenuEntry(\FunctionalTester $I)
     {
-        $I->amOnRoute('site/index');
+        $I->amOnRoute('site/login');
         $I->dontSeeLink('Clients');
     }
 
     public function userSeesMenuEntry(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
-        $I->amOnRoute('site/index');
-        $I->seeLink('Clients');
+        $I->amOnRoute('rank/index');
+        $I->seeLink('Clients', '/client/index');
     }
 
     public function userSeesIndexWithoutCrudButtons(\FunctionalTester $I)
