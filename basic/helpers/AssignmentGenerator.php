@@ -37,9 +37,11 @@ use yii\db\Query;
  * When a regular route no longer than the window maximum departs from the origin, each assignment survives with
  * ACCEPT_PERCENT probability.
  *
- * Dead-end safety, assuming the aircraft is only ever at an airport it can operate (runways suiting the aircraft).
- * Eligibility is symmetric (same distance and same aircraft both ways), so the previous airport P is always eligible
- * from the destination D:
+ * The origin must meet the same airport rules (not a heliport, runways suiting the aircraft); otherwise there are
+ * no assignments, e.g. a small aircraft parked at a big airport.
+ *
+ * Dead-end safety: since the origin always meets the airport rules and eligibility is symmetric (same distance and
+ * same aircraft both ways), the previous airport P is always eligible from the destination D:
  * - D reached as a client airport: D has clients, so direct mode fills every slot and P is a valid filler
  *   (the country preference never leaves a slot empty while any eligible airport remains, and military airports
  *   are used when nothing else is available).
@@ -88,6 +90,11 @@ class AssignmentGenerator
         }
         [$minNm, $maxNm] = $window;
         $range = $aircraft->aircraftConfiguration->aircraftType->max_nm_range;
+
+        // The origin must meet the same airport rules as any destination
+        if (!self::isSuitableAirport($origin->icao_code, $range)) {
+            return [];
+        }
 
         $eligible = self::findEligibleAirports($origin, $minNm, $maxNm, $range);
         if (empty($eligible)) {
@@ -180,27 +187,14 @@ class AssignmentGenerator
     {
         // One degree of latitude is slightly more than 60 NM, so this box never cuts valid airports
         $latDelta = $maxNm / 60;
-        $runways = (new Query())->from('runway')->where('runway.airport_icao = airport.icao_code');
 
         $query = (new Query())
             ->select(['icao_code', 'name', 'latitude', 'longitude', 'country_id'])
             ->from('airport')
             ->where(['<>', 'icao_code', $origin->icao_code])
             ->andWhere(['between', 'latitude', $origin->latitude - $latDelta, $origin->latitude + $latDelta])
-            ->andWhere(['exists', $runways])
             ->orderBy(['icao_code' => SORT_ASC]);
-
-        foreach (self::HELIPORT_NAME_PATTERNS as $pattern) {
-            $query->andWhere(['not like', 'name', $pattern, false]);
-        }
-
-        if ($range < self::SMALL_AIRCRAFT_MAX_RANGE_NM) {
-            $query->andWhere(['not exists', (clone $runways)->andWhere(['>', 'length_m', self::SMALL_AIRCRAFT_MAX_RUNWAY_M])]);
-        } elseif ($range <= self::MEDIUM_AIRCRAFT_MAX_RANGE_NM) {
-            $query->andWhere(['exists', (clone $runways)->andWhere(['>=', 'length_m', self::MEDIUM_AIRCRAFT_MIN_RUNWAY_M])]);
-        } else {
-            $query->andWhere(['exists', (clone $runways)->andWhere(['>=', 'length_m', self::LARGE_AIRCRAFT_MIN_RUNWAY_M])]);
-        }
+        self::applyAirportRules($query, $range);
 
         $eligible = [];
         foreach ($query->all() as $row) {
@@ -218,6 +212,37 @@ class AssignmentGenerator
             }
         }
         return $eligible;
+    }
+
+    /**
+     * Whether the aircraft can operate at the airport: not a heliport, with runways suiting its range.
+     */
+    public static function isSuitableAirport(string $icao, int $range): bool
+    {
+        $query = (new Query())->from('airport')->where(['icao_code' => $icao]);
+        self::applyAirportRules($query, $range);
+        return $query->exists();
+    }
+
+    /**
+     * Restricts an airport query to airports that aren't heliports and have runways suiting the aircraft range.
+     */
+    private static function applyAirportRules(Query $query, int $range): void
+    {
+        $runways = (new Query())->from('runway')->where('runway.airport_icao = airport.icao_code');
+        $query->andWhere(['exists', $runways]);
+
+        foreach (self::HELIPORT_NAME_PATTERNS as $pattern) {
+            $query->andWhere(['not like', 'airport.name', $pattern, false]);
+        }
+
+        if ($range < self::SMALL_AIRCRAFT_MAX_RANGE_NM) {
+            $query->andWhere(['not exists', (clone $runways)->andWhere(['>', 'length_m', self::SMALL_AIRCRAFT_MAX_RUNWAY_M])]);
+        } elseif ($range <= self::MEDIUM_AIRCRAFT_MAX_RANGE_NM) {
+            $query->andWhere(['exists', (clone $runways)->andWhere(['>=', 'length_m', self::MEDIUM_AIRCRAFT_MIN_RUNWAY_M])]);
+        } else {
+            $query->andWhere(['exists', (clone $runways)->andWhere(['>=', 'length_m', self::LARGE_AIRCRAFT_MIN_RUNWAY_M])]);
+        }
     }
 
     /**

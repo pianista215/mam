@@ -323,6 +323,18 @@ trait AssignmentGeneratorTestTrait
         $pairs = $this->pairsOf($assignments);
         $this->assertSame($pairs, array_values(array_unique($pairs)), 'Duplicated (destination, client) pair');
 
+        // Distinct destinations come first: once a destination repeats, no new destination may follow
+        $seen = [];
+        $repeating = false;
+        foreach (array_column($assignments, 'destination') as $icao) {
+            if (isset($seen[$icao])) {
+                $repeating = true;
+            } else {
+                $this->assertFalse($repeating, "New destination $icao after a repeated one");
+                $seen[$icao] = true;
+            }
+        }
+
         foreach (array_count_values(array_column($assignments, 'destination')) as $icao => $count) {
             $this->assertLessThanOrEqual(AssignmentGenerator::MAX_PER_DESTINATION, $count, "$icao offered $count times");
         }

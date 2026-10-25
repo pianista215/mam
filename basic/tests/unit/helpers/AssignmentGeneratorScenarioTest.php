@@ -322,12 +322,32 @@ class AssignmentGeneratorScenarioTest extends BaseUnitTest
 
     public function testA320AtAirportWithoutClientsOnlyGetsCarrierAirports()
     {
-        // LEMD is 93 NM away (too close); the other client airports have no 3000 m runway
-        foreach ($this->runs($this->a320('LESA')) as $result) {
+        // From Valencia: LEMD (154 NM) and LEBL (160 NM) are too close; the other client airports have no 3000 m runway
+        foreach ($this->runs($this->a320('LEVC')) as $result) {
             $this->assertSame(
-                ["LEBL#{$this->carrier->id}", "LEMG#{$this->carrier->id}", "LEZL#{$this->carrier->id}"],
+                ["LEMG#{$this->carrier->id}", "LEZL#{$this->carrier->id}"],
                 $this->pairsOf($result)
             );
+        }
+    }
+
+    // --- Origin must suit the aircraft ---
+
+    public function testAircraftAtAnAirportItShouldNotUseGetsNothing()
+    {
+        // C182 at Barajas (4350 m), A320 at Salamanca (2513 m), King Air at Cuatro Vientos (1500 m)
+        $this->assertSame([], AssignmentGenerator::generate($this->c182('LEMD')));
+        $this->assertSame([], AssignmentGenerator::generate($this->a320('LESA')));
+        $this->assertSame([], AssignmentGenerator::generate($this->kingAir('LECU')));
+        $this->assertSame([], AssignmentGenerator::generate($this->kingAir('LESO')));
+    }
+
+    public function testC182AtAnAirportWithExactly3000mGetsAssignments()
+    {
+        // León has exactly 3000 m, so it is still a small airport; no client there, reverse mode
+        foreach ($this->runs($this->c182('LELN')) as $result) {
+            $this->assertNotEmpty($result);
+            $this->assertNoBigAirports($this->destinationsOf($result));
         }
     }
 

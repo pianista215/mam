@@ -12,8 +12,10 @@ use tests\unit\BaseUnitTest;
  * from the origin XORG (latitude 0) is exactly the NM given when creating it (negative = south).
  *
  * Default aircraft: 1500 NM range (medium: needs a runway of 2000 m or more) whose configuration has an
- * average flown distance of 1000 NM, so its distance window is [500, 1200] NM. Every airport gets a 2000 m
- * runway unless the test says otherwise. Naming: XDnn = client airports, XFnn = plain airports (fillers).
+ * average flown distance of 1000 NM, so its distance window is [500, 1200] NM. The origin XORG has a 3000 m
+ * runway, the only length every runway band accepts, so small, medium and large aircraft can all start there.
+ * Every other airport gets a 2000 m runway unless the test says otherwise.
+ * Naming: XDnn = client airports, XFnn = plain airports (fillers).
  */
 class AssignmentGeneratorTest extends BaseUnitTest
 {
@@ -34,7 +36,7 @@ class AssignmentGeneratorTest extends BaseUnitTest
         parent::_before();
         $this->clearDatabase();
         $this->createCountry();
-        $this->createAirport('XORG', 0);
+        $this->createAirport('XORG', 0, [3000]);
         $this->aircraft = $this->createAircraft(self::MEDIUM_RANGE, 'XORG', self::AVERAGE);
     }
 
@@ -525,6 +527,35 @@ class AssignmentGeneratorTest extends BaseUnitTest
         }
     }
 
+    public function testOwnAirportsPreferThoseNotOfferedByEarlierClients()
+    {
+        $this->createAirports(['XD01' => 600, 'XD02' => 700, 'XD03' => 800, 'XD04' => 900]);
+        $this->createClient('First', 'XORG', ['XD01', 'XD02', 'XD03']);
+        $second = $this->createClient('Second', 'XORG', ['XD01', 'XD02', 'XD03', 'XD04']);
+
+        foreach ($this->generateAllWays() as $result) {
+            $secondDestinations = array_column(array_filter($result, fn($a) => $a['client_id'] === $second->id), 'destination');
+            if (!empty($secondDestinations)) {
+                // XD04 is the only airport the first client doesn't offer, so it's always among the second's three
+                $this->assertContains('XD04', $secondDestinations);
+            }
+            $this->assertSame(4, $this->distinctCount($result));
+        }
+    }
+
+    public function testReverseModeOwnAirportsPreferThoseNotOfferedByEarlierClients()
+    {
+        $this->createAirports(['XD01' => 600, 'XD02' => 700, 'XD03' => 800, 'XD04' => 900]);
+        $this->createClient('First', 'XD01', ['XD02', 'XD03']);
+        $this->createClient('Second', 'XD04', ['XD01', 'XD02', 'XD03']);
+
+        foreach ($this->generateAllWays() as $result) {
+            $this->assertCount(AssignmentGenerator::COUNT, $result);
+            $this->assertContains('XD04', array_column($result, 'destination'));
+            $this->assertSame(4, $this->distinctCount($result));
+        }
+    }
+
     // =====================================================================
     // Country preference for invented destinations
     // =====================================================================
@@ -863,6 +894,110 @@ class AssignmentGeneratorTest extends BaseUnitTest
     }
 
     // =====================================================================
+    // Origin: same airport rules as destinations
+    // =====================================================================
+
+    /**
+     * Creates an extra origin next to XORG (same position) with an HQ-only client and one filler 600 NM away.
+     */
+    private function createOrigin(string $icao, array $runwayLengths, ?string $name = null): void
+    {
+        $this->createAirport($icao, 0, $runwayLengths, self::$SPAIN, $name);
+        $this->createAirports(['XF01' => 600]);
+        $this->createClient("HQ at $icao", $icao);
+    }
+
+    public function testSmallAircraftAtABigAirportGetsNothing()
+    {
+        $this->createOrigin('XBIG', [2000, 3200]);
+        $small = $this->createAircraft(self::SMALL_RANGE, 'XBIG', self::AVERAGE);
+        $medium = $this->createAircraft(self::MEDIUM_RANGE, 'XBIG', self::AVERAGE);
+
+        $this->assertSame([], AssignmentGenerator::generate($small, $this->alwaysAccept()));
+        $this->assertSame(['XF01'], $this->destinationsOf($this->generate($this->alwaysAccept(), $medium)));
+    }
+
+    public function testMediumAircraftAtAShortRunwayAirportGetsNothing()
+    {
+        $this->createOrigin('XSHO', [1999]);
+        $medium = $this->createAircraft(self::MEDIUM_RANGE, 'XSHO', self::AVERAGE);
+        $small = $this->createAircraft(self::SMALL_RANGE, 'XSHO', self::AVERAGE);
+
+        $this->assertSame([], AssignmentGenerator::generate($medium, $this->alwaysAccept()));
+        $this->assertSame(['XF01'], $this->destinationsOf($this->generate($this->alwaysAccept(), $small)));
+    }
+
+    public function testLargeAircraftAtAnAirportWithoutA3000mRunwayGetsNothing()
+    {
+        $this->createOrigin('XMED', [2999]);
+        $this->createRunway('XF01', 3500, '18/36');
+        $large = $this->createAircraft(self::LARGE_RANGE, 'XMED', self::AVERAGE);
+        $medium = $this->createAircraft(self::MEDIUM_RANGE, 'XMED', self::AVERAGE);
+
+        $this->assertSame([], AssignmentGenerator::generate($large, $this->alwaysAccept()));
+        $this->assertSame(['XF01'], $this->destinationsOf($this->generate($this->alwaysAccept(), $medium)));
+    }
+
+    public function testEveryRunwayBandCanStartFromAnExactly3000mRunway()
+    {
+        $this->createAirport('XF01', 600, [3000]);
+        $this->createClient('HQ Only', 'XORG');
+
+        foreach ([$this->smallAircraft(), $this->aircraft, $this->largeAircraft()] as $aircraft) {
+            $this->assertNotEmpty($this->generate($this->alwaysAccept(), $aircraft));
+        }
+    }
+
+    public function testOriginWithoutRunwaysGetsNothing()
+    {
+        $this->createOrigin('XNOR', []);
+        $aircraft = $this->createAircraft(self::MEDIUM_RANGE, 'XNOR', self::AVERAGE);
+
+        $this->assertSame([], AssignmentGenerator::generate($aircraft, $this->alwaysAccept()));
+    }
+
+    public function testOriginHeliportGetsNothingEvenWithARunway()
+    {
+        $this->createOrigin('XHEL', [2455.6], 'Mas Passamaner Heliport');
+        $aircraft = $this->createAircraft(self::MEDIUM_RANGE, 'XHEL', self::AVERAGE);
+
+        $this->assertSame([], AssignmentGenerator::generate($aircraft, $this->alwaysAccept()));
+    }
+
+    public function testMilitaryOriginStillGetsAssignments()
+    {
+        $this->createOrigin('XMIL', [2500], 'Zaragoza Air Base');
+        $aircraft = $this->createAircraft(self::MEDIUM_RANGE, 'XMIL', self::AVERAGE);
+
+        $this->assertSame(['XF01'], $this->destinationsOf($this->generate($this->alwaysAccept(), $aircraft)));
+    }
+
+    public function testIsSuitableAirport()
+    {
+        $this->createAirport('XA01', 600, [3000]);
+        $this->createAirport('XA02', 650, [1999]);
+        $this->createAirport('XA03', 700, [2000, 3001]);
+        $this->createAirport('XA04', 750, []);
+        $this->createAirport('XA05', 800, [2000], self::$SPAIN, 'Some Heliport');
+
+        $expected = [
+            // icao => [small (999 NM), medium (1000 / 2000 NM), large (2001 NM)]
+            'XA01' => [true, true, true],
+            'XA02' => [true, false, false],
+            'XA03' => [false, true, true],
+            'XA04' => [false, false, false],
+            'XA05' => [false, false, false],
+        ];
+        foreach ($expected as $icao => [$small, $medium, $large]) {
+            $this->assertSame($small, AssignmentGenerator::isSuitableAirport($icao, 999), "$icao small");
+            $this->assertSame($medium, AssignmentGenerator::isSuitableAirport($icao, 1000), "$icao medium 1000");
+            $this->assertSame($medium, AssignmentGenerator::isSuitableAirport($icao, 2000), "$icao medium 2000");
+            $this->assertSame($large, AssignmentGenerator::isSuitableAirport($icao, 2001), "$icao large");
+        }
+        $this->assertFalse(AssignmentGenerator::isSuitableAirport('ZZZZ', 1500));
+    }
+
+    // =====================================================================
     // Heliports and military airports
     // =====================================================================
 
@@ -947,6 +1082,32 @@ class AssignmentGeneratorTest extends BaseUnitTest
 
         foreach ($this->generateAllWays() as $result) {
             $this->assertSame(["XM01#{$client->id}"], $this->pairsOf($result));
+        }
+    }
+
+    public function testMilitaryLastResortPrefersTheClientsCountries()
+    {
+        $this->createNamedAirport('XM01', 600, 'Moron Air Base');
+        foreach (['XN01' => 650, 'XN02' => 700, 'XN03' => 750] as $icao => $nm) {
+            $this->createAirport($icao, $nm, [2000], self::$PORTUGAL, "$icao Air Base");
+        }
+        $this->createClient('Spanish HQ Only', 'XORG');
+
+        foreach ($this->generateAllWays() as $result) {
+            $this->assertCount(3, $result);
+            $this->assertContains('XM01', array_column($result, 'destination'));
+        }
+    }
+
+    public function testCivilNamesResemblingMilitaryOnesAreNotAvoided()
+    {
+        $this->createNamedAirport('XF01', 600, 'Rafael Hernández Airport');
+        $this->createNamedAirport('XF02', 700, 'Navalmoral de la Mata Airfield');
+        $this->createNamedAirport('XF03', 800, 'Plain Civil Airport');
+        $this->createClient('HQ Only', 'XORG');
+
+        foreach ($this->generateAllWays() as $result) {
+            $this->assertSame(['XF01', 'XF02', 'XF03'], $this->destinationsOf($result));
         }
     }
 
@@ -1316,8 +1477,6 @@ class AssignmentGeneratorTest extends BaseUnitTest
 
     public function testLargeAircraftWayBackAvoidsShortRunways()
     {
-        // The large aircraft must start at an airport it can operate
-        $this->createRunway('XORG', 3500, '18/36');
         $this->createAirport('XD01', 600, [2000]);
         $this->createAirport('XF01', -600, [3500]);
         $this->createClient('Regional', 'XORG', ['XD01']);
@@ -1433,6 +1592,38 @@ class AssignmentGeneratorTest extends BaseUnitTest
         ]);
 
         $this->assertSame([], AssignmentGenerator::generate($aircraft, $this->alwaysAccept()));
+    }
+
+    public function testAirportsInEveryDirectionAreConsidered()
+    {
+        // At the equator one degree of longitude is as long as one of latitude
+        $deg = 700 / self::NM_PER_DEG;
+        $this->createAirport('XN01', 700);
+        $this->createAirport('XS01', -700);
+        $this->createAirportAt('XE01', 0.0, $deg);
+        $this->createAirportAt('XW01', 0.0, -$deg);
+        $this->createAirportAt('XE02', 0.0, 1300 / self::NM_PER_DEG); // too far east
+        $this->createClient('Compass', 'XORG', ['XN01', 'XS01', 'XE01', 'XW01', 'XE02']);
+
+        $union = $this->unionOfDestinations($this->generateAllWays());
+
+        $this->assertSame(['XE01', 'XN01', 'XS01', 'XW01'], $union);
+    }
+
+    public function testGenerationDoesNotWriteToTheDatabase()
+    {
+        $this->createAirports(['XD01' => 600, 'XF01' => 700]);
+        $this->createClient('Client', 'XORG', ['XD01']);
+        $this->createRoute('R001', 'XORG', 'XF01');
+        $tables = ['airport', 'runway', 'client', 'client_hub', 'route', 'aircraft', 'flight', 'flight_report'];
+        $count = fn() => array_map(fn($t) => (new \yii\db\Query())->from($t)->count(), $tables);
+        $before = $count();
+        $location = $this->aircraft->location;
+
+        $this->generateManyTimes($this->aircraft, 10);
+
+        $this->assertSame($before, $count());
+        $this->assertSame($location, Aircraft::findOne($this->aircraft->id)->location);
     }
 
     public function testResultShapeAndDistance()
