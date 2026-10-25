@@ -26,7 +26,7 @@ class ImageUploadRuleTest extends BaseUnitTest
         $adminRole = $auth->createRole(Roles::ADMIN);
         $auth->add($adminRole);
 
-        foreach ([Permissions::RANK_CRUD, Permissions::TOUR_CRUD, Permissions::COUNTRY_CRUD, Permissions::AIRCRAFT_TYPE_CRUD, Permissions::USER_CRUD] as $perm) {
+        foreach ([Permissions::RANK_CRUD, Permissions::TOUR_CRUD, Permissions::COUNTRY_CRUD, Permissions::AIRCRAFT_TYPE_CRUD, Permissions::USER_CRUD, Permissions::CLIENT_CRUD] as $perm) {
             $p = $auth->createPermission($perm);
             $auth->add($p);
         }
@@ -241,6 +241,27 @@ class ImageUploadRuleTest extends BaseUnitTest
         $this->assign(Permissions::AIRCRAFT_TYPE_CRUD, 10);
 
         $img = $this->img(Image::TYPE_AIRCRAFT_TYPE_IMAGE, 99);
+
+        $this->assertTrue(Yii::$app->user->can('imageUpload', ['image' => $img]));
+    }
+
+    public function testClientLogoWithoutPermission()
+    {
+        $pilot = $this->createPilot(10);
+        $this->login($pilot);
+
+        $img = $this->img(Image::TYPE_CLIENT_LOGO, 99);
+
+        $this->assertFalse(Yii::$app->user->can('imageUpload', ['image' => $img]));
+    }
+
+    public function testClientLogoWithPermission()
+    {
+        $pilot = $this->createPilot(10);
+        $this->login($pilot);
+        $this->assign(Permissions::CLIENT_CRUD, 10);
+
+        $img = $this->img(Image::TYPE_CLIENT_LOGO, 99);
 
         $this->assertTrue(Yii::$app->user->can('imageUpload', ['image' => $img]));
     }

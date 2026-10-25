@@ -27,6 +27,7 @@ class Image extends \yii\db\ActiveRecord
     public const TYPE_COUNTRY_ICON = 'country_icon';
     public const TYPE_AIRCRAFT_TYPE_IMAGE = 'aircraftType_image';
     public const TYPE_PAGE_IMAGE = 'page_image';
+    public const TYPE_CLIENT_LOGO = 'client_logo';
 
     /**
      * {@inheritdoc}
@@ -102,6 +103,7 @@ class Image extends \yii\db\ActiveRecord
             self::TYPE_COUNTRY_ICON       => ['width' => 44, 'height' => 33, 'relatedModel' => Country::class],
             self::TYPE_AIRCRAFT_TYPE_IMAGE=> ['width' => 1200, 'height' => 400, 'relatedModel' => AircraftType::class],
             self::TYPE_PAGE_IMAGE         => ['width' => null, 'height' => null, 'relatedModel' => Page::class],
+            self::TYPE_CLIENT_LOGO        => ['width' => 300, 'height' => 150, 'relatedModel' => Client::class],
         ];
     }
 
@@ -114,6 +116,7 @@ class Image extends \yii\db\ActiveRecord
             self::TYPE_TOUR_BADGE => '@app/web/images/placeholders/tour_badge.png',
             self::TYPE_COUNTRY_ICON => '@app/web/images/placeholders/country_icon.png',
             self::TYPE_AIRCRAFT_TYPE_IMAGE => '@app/web/images/placeholders/aircraftType_image.png',
+            self::TYPE_CLIENT_LOGO => '@app/web/images/placeholders/client_logo.png',
         ];
 
         return $placeholders[$type] ?? null;

@@ -45,6 +45,9 @@ class ImageUploadRule extends Rule
             case Image::TYPE_AIRCRAFT_TYPE_IMAGE:
                 return Yii::$app->user->can(Permissions::AIRCRAFT_TYPE_CRUD);
 
+            case Image::TYPE_CLIENT_LOGO:
+                return Yii::$app->user->can(Permissions::CLIENT_CRUD);
+
             case Image::TYPE_PAGE_IMAGE:
                 $page = $image->getRelatedModel();
                 if (!$page instanceof Page) {

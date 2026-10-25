@@ -45,6 +45,9 @@ final class Permissions
     public const ACCESS_AIRCRAFT_TYPE_RESOURCES = 'accessAircraftTypeResources';
     public const AIRCRAFT_TYPE_RESOURCE_CRUD    = 'aircraftTypeResourceCrud';
 
+    // Business
+    public const CLIENT_CRUD = 'clientCrud';
+
     // Superadmin
     public const ASSIGN_ADMIN = 'assignAdmin';
 

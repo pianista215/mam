@@ -63,6 +63,7 @@ class ImageViewCest
         $restricted = [
             ['pilot_profile', 2, 0],
             ['tour_image', 2, 0],
+            ['client_logo', 1, 0],
             ['page_image', 7, 0], // TYPE_TOUR page - restricted for guests
         ];
 
@@ -97,7 +98,8 @@ class ImageViewCest
             ['aircraftType_image', 1, 0],
             ['page_image', 7, 0], // TYPE_TOUR page
             ['page_image', 6, 0], // TYPE_COMPONENT page
-            ['aircraftType_image', 2, 0] // must return placeholder
+            ['aircraftType_image', 2, 0], // must return placeholder
+            ['client_logo', 1, 0], // must return placeholder
         ];
 
         foreach ($types as [$type, $related_id, $element]) {
