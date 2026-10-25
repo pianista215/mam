@@ -6,40 +6,71 @@ use app\models\Aircraft;
 use app\models\Airport;
 use app\models\Client;
 use app\models\ClientHub;
+use app\models\Flight;
 use app\models\Route;
 use yii\db\Query;
 
 /**
  * Proposes client assignments ("encargos") departing from the aircraft's current airport.
  *
- * Only eligible airports are ever offered: different from the origin, with at least one runway, within
- * RANGE_FACTOR of the aircraft range and, for small aircraft (range < SMALL_AIRCRAFT_MAX_RANGE_NM), without
- * any runway longer than LARGE_RUNWAY_MIN_LENGTH_M.
+ * Distance window: assignments imitate the usual flights of the aircraft configuration, so their distance must be
+ * between MIN_DISTANCE_FACTOR and MAX_DISTANCE_FACTOR of the average distance of its finished flights (never above
+ * RANGE_FACTOR of the aircraft range). A configuration with fewer than MIN_FLIGHTS finished flights gets no
+ * assignments.
+ *
+ * Only eligible airports are ever offered: different from the origin, not a heliport, inside the distance window, with
+ * at least one runway, and with runways that suit the aircraft:
+ * - range < 1000 NM: no runway longer than 3000 m,
+ * - range 1000-2000 NM: at least one runway of 2000 m or more,
+ * - range > 2000 NM: at least one runway of 3000 m or more.
  *
  * Direct mode (some client has its headquarters or a hub at the origin): each of those clients gets up to
  * CLIENT_SLOTS assignments to its own eligible airports; remaining slots are filled with random eligible
- * airports on behalf of the same client. Reverse mode (no client at the origin): each client offers up to
- * CLIENT_SLOTS of its own eligible airports, without fillers. In both modes COUNT assignments are picked from
- * the pool and, when a regular route within range departs from the origin, each one survives with
+ * airports on behalf of the same client, preferring the countries where the client has its headquarters or hubs
+ * (other countries are only used when there aren't enough). Military airports are only used as fillers when the
+ * client would otherwise offer nothing (they are still offered as a client's own airport). Reverse mode (no client at the origin): each client offers up to CLIENT_SLOTS of its own
+ * eligible airports, without fillers.
+ *
+ * Variety: destinations not yet used by another client are preferred, and COUNT assignments are picked from the
+ * pool with distinct destinations first; a destination only repeats (with another client) to fill the offer,
+ * and never more than MAX_PER_DESTINATION times, even if that means offering fewer than COUNT.
+ * When a regular route no longer than the window maximum departs from the origin, each assignment survives with
  * ACCEPT_PERCENT probability.
  *
- * Dead-end safety, assuming the aircraft is only ever at an airport it can operate (with runways and, for small
- * aircraft, no runway longer than the limit), so the previous airport P is always eligible from the destination D:
- * - D reached as a client airport: D has clients, so direct mode fills every slot and P is a valid filler.
+ * Dead-end safety, assuming the aircraft is only ever at an airport it can operate (runways suiting the aircraft).
+ * Eligibility is symmetric (same distance and same aircraft both ways), so the previous airport P is always eligible
+ * from the destination D:
+ * - D reached as a client airport: D has clients, so direct mode fills every slot and P is a valid filler
+ *   (the country preference never leaves a slot empty while any eligible airport remains, and military airports
+ *   are used when nothing else is available).
  * - D reached as a filler: fillers only come from direct mode, so P is a client airport; if D has no clients,
  *   reverse mode offers P.
  * - Reverse mode only lands on client airports, so two client-less airports are never chained.
  * - Without flyable routes at D the lottery is skipped, so the pilot always gets at least one assignment.
- * Not covered: clients or hubs removed afterwards, or switching to another aircraft; charter remains the fallback.
+ * Not covered: clients or hubs removed afterwards, switching to another aircraft, or the average distance changing
+ * after new flights; charter remains the fallback.
  */
 class AssignmentGenerator
 {
     const COUNT = 5;
     const CLIENT_SLOTS = 3;
-    const RANGE_FACTOR = 0.8;
+    const MAX_PER_DESTINATION = 2;
     const ACCEPT_PERCENT = 70;
-    const SMALL_AIRCRAFT_MAX_RANGE_NM = 1000;
-    const LARGE_RUNWAY_MIN_LENGTH_M = 3000;
+
+    const MIN_FLIGHTS = 3;
+    const MIN_DISTANCE_FACTOR = 0.5;
+    const MAX_DISTANCE_FACTOR = 1.2;
+    const RANGE_FACTOR = 0.8;
+
+    const SMALL_AIRCRAFT_MAX_RANGE_NM = 1000;  // below: small aircraft
+    const MEDIUM_AIRCRAFT_MAX_RANGE_NM = 2000; // up to (included): medium aircraft, above: large aircraft
+    const SMALL_AIRCRAFT_MAX_RUNWAY_M = 3000;
+    const MEDIUM_AIRCRAFT_MIN_RUNWAY_M = 2000;
+    const LARGE_AIRCRAFT_MIN_RUNWAY_M = 3000;
+
+    // Airport names matching these are excluded (heliports) or avoided as fillers (military airports)
+    const HELIPORT_NAME_PATTERNS = ['%Heliport%', '%Helipuerto%', '%Heliporto%'];
+    const MILITARY_NAME_REGEX = '/\b(Air Base|Air Force|Naval|Army|RAF|AFB|Base A[ée]rea)\b|\(BA \d+\)/iu';
 
     /**
      * @param Aircraft $aircraft Last aircraft flown by the pilot; its location is the origin
@@ -51,14 +82,14 @@ class AssignmentGenerator
         $rand = $rand ?? 'mt_rand';
 
         $origin = $aircraft->location0;
-        $range = $aircraft->aircraftConfiguration->aircraftType->max_nm_range ?? null;
-        if ($origin === null || empty($range)) {
+        $window = self::distanceWindow($aircraft);
+        if ($origin === null || $window === null) {
             return [];
         }
-        $maxNm = $range * self::RANGE_FACTOR;
-        $isSmallAircraft = $range < self::SMALL_AIRCRAFT_MAX_RANGE_NM;
+        [$minNm, $maxNm] = $window;
+        $range = $aircraft->aircraftConfiguration->aircraftType->max_nm_range;
 
-        $eligible = self::findEligibleAirports($origin, $maxNm, $isSmallAircraft);
+        $eligible = self::findEligibleAirports($origin, $minNm, $maxNm, $range);
         if (empty($eligible)) {
             return [];
         }
@@ -71,8 +102,8 @@ class AssignmentGenerator
         $picked = array_map(fn($pair) => [
             'destination' => $pair[0],
             'client_id' => $pair[1],
-            'distance_nm' => (int) round($eligible[$pair[0]]),
-        ], self::pickRandom($pool, self::COUNT, $rand));
+            'distance_nm' => (int) round($eligible[$pair[0]]['distance']),
+        ], self::pickDistinctDestinations($pool, self::COUNT, $rand));
 
         if (!self::hasFlyableRoutes($origin->icao_code, $maxNm)) {
             return $picked;
@@ -82,6 +113,52 @@ class AssignmentGenerator
             $picked,
             fn() => $rand(1, 100) <= self::ACCEPT_PERCENT
         ));
+    }
+
+    /**
+     * Distance window for the aircraft's assignments, based on the usual flights of its configuration.
+     * @return array{0: float, 1: float}|null [min NM, max NM], or null if there is no range or not enough flight history
+     */
+    public static function distanceWindow(Aircraft $aircraft): ?array
+    {
+        $range = $aircraft->aircraftConfiguration->aircraftType->max_nm_range ?? null;
+        if (empty($range)) {
+            return null;
+        }
+
+        $average = self::averageFlownDistance($aircraft->aircraft_configuration_id);
+        if ($average === null) {
+            return null;
+        }
+
+        return [
+            $average * self::MIN_DISTANCE_FACTOR,
+            min($average * self::MAX_DISTANCE_FACTOR, $range * self::RANGE_FACTOR),
+        ];
+    }
+
+    /**
+     * Average distance of the finished flights of an aircraft configuration.
+     * @return float|null Null when the configuration has fewer than MIN_FLIGHTS finished flights with distance
+     */
+    public static function averageFlownDistance(int $aircraftConfigurationId): ?float
+    {
+        $stats = (new Query())
+            ->select(['flights' => 'COUNT(*)', 'average' => 'AVG(fr.distance_nm)'])
+            ->from(['fr' => 'flight_report'])
+            ->innerJoin(['f' => 'flight'], 'fr.flight_id = f.id')
+            ->innerJoin(['a' => 'aircraft'], 'f.aircraft_id = a.id')
+            ->where([
+                'a.aircraft_configuration_id' => $aircraftConfigurationId,
+                'f.status' => Flight::STATUS_FINISHED,
+            ])
+            ->andWhere(['not', ['fr.distance_nm' => null]])
+            ->one();
+
+        if ((int) $stats['flights'] < self::MIN_FLIGHTS) {
+            return null;
+        }
+        return (float) $stats['average'];
     }
 
     /**
@@ -96,25 +173,33 @@ class AssignmentGenerator
     }
 
     /**
-     * Airports that can be offered as destination, with their distance from the origin.
-     * @return array<string, float> icao => distance in NM, sorted by icao
+     * Airports that can be offered as destination, with their distance from the origin, country and military flag.
+     * @return array<string, array{distance: float, country_id: int, military: bool}> keyed by icao, sorted by icao
      */
-    private static function findEligibleAirports(Airport $origin, float $maxNm, bool $isSmallAircraft): array
+    private static function findEligibleAirports(Airport $origin, float $minNm, float $maxNm, int $range): array
     {
         // One degree of latitude is slightly more than 60 NM, so this box never cuts valid airports
         $latDelta = $maxNm / 60;
         $runways = (new Query())->from('runway')->where('runway.airport_icao = airport.icao_code');
 
         $query = (new Query())
-            ->select(['icao_code', 'latitude', 'longitude'])
+            ->select(['icao_code', 'name', 'latitude', 'longitude', 'country_id'])
             ->from('airport')
             ->where(['<>', 'icao_code', $origin->icao_code])
             ->andWhere(['between', 'latitude', $origin->latitude - $latDelta, $origin->latitude + $latDelta])
             ->andWhere(['exists', $runways])
             ->orderBy(['icao_code' => SORT_ASC]);
 
-        if ($isSmallAircraft) {
-            $query->andWhere(['not exists', (clone $runways)->andWhere(['>', 'length_m', self::LARGE_RUNWAY_MIN_LENGTH_M])]);
+        foreach (self::HELIPORT_NAME_PATTERNS as $pattern) {
+            $query->andWhere(['not like', 'name', $pattern, false]);
+        }
+
+        if ($range < self::SMALL_AIRCRAFT_MAX_RANGE_NM) {
+            $query->andWhere(['not exists', (clone $runways)->andWhere(['>', 'length_m', self::SMALL_AIRCRAFT_MAX_RUNWAY_M])]);
+        } elseif ($range <= self::MEDIUM_AIRCRAFT_MAX_RANGE_NM) {
+            $query->andWhere(['exists', (clone $runways)->andWhere(['>=', 'length_m', self::MEDIUM_AIRCRAFT_MIN_RUNWAY_M])]);
+        } else {
+            $query->andWhere(['exists', (clone $runways)->andWhere(['>=', 'length_m', self::LARGE_AIRCRAFT_MIN_RUNWAY_M])]);
         }
 
         $eligible = [];
@@ -124,8 +209,12 @@ class AssignmentGenerator
                 (float) $row['latitude'], (float) $row['longitude'],
                 'nm'
             );
-            if ($distance <= $maxNm) {
-                $eligible[$row['icao_code']] = $distance;
+            if ($distance >= $minNm && $distance <= $maxNm) {
+                $eligible[$row['icao_code']] = [
+                    'distance' => $distance,
+                    'country_id' => (int) $row['country_id'],
+                    'military' => (bool) preg_match(self::MILITARY_NAME_REGEX, $row['name']),
+                ];
             }
         }
         return $eligible;
@@ -149,16 +238,38 @@ class AssignmentGenerator
      */
     private static function directCandidates(array $clientIds, array $eligible, callable $rand): array
     {
-        $eligibleIcaos = array_keys($eligible);
+        $clients = self::loadClients($clientIds);
+        $used = [];
+
+        $own = [];
+        foreach ($clients as $client) {
+            $own[$client->id] = self::pickPreferringUnused(self::ownEligibleAirports($client, $eligible), $used, self::CLIENT_SLOTS, $rand);
+        }
+
         $pairs = [];
-        foreach (self::loadClients($clientIds) as $client) {
-            $own = self::pickRandom(self::ownEligibleAirports($client, $eligible), self::CLIENT_SLOTS, $rand);
-            $fillers = self::pickRandom(
-                array_values(array_diff($eligibleIcaos, $own)),
-                self::CLIENT_SLOTS - count($own),
-                $rand
-            );
-            foreach (array_merge($own, $fillers) as $icao) {
+        foreach ($clients as $client) {
+            $candidates = array_values(array_diff(array_keys($eligible), $own[$client->id]));
+            $countries = self::clientCountries($client);
+            $inClientCountries = fn($icao) => in_array($eligible[$icao]['country_id'], $countries, true);
+            $civil = array_values(array_filter($candidates, fn($icao) => !$eligible[$icao]['military']));
+            $military = array_values(array_diff($candidates, $civil));
+
+            // Civil airports, preferring the client's countries
+            $slots = self::CLIENT_SLOTS - count($own[$client->id]);
+            $fillers = self::pickPreferringUnused(array_values(array_filter($civil, $inClientCountries)), $used, $slots, $rand);
+            $fillers = array_merge($fillers, self::pickPreferringUnused(
+                array_values(array_filter($civil, fn($icao) => !$inClientCountries($icao))), $used, $slots - count($fillers), $rand
+            ));
+
+            // Military airports only when the client would otherwise offer nothing
+            if (empty($own[$client->id]) && empty($fillers)) {
+                $fillers = self::pickPreferringUnused(array_values(array_filter($military, $inClientCountries)), $used, $slots, $rand);
+                $fillers = array_merge($fillers, self::pickPreferringUnused(
+                    array_values(array_filter($military, fn($icao) => !$inClientCountries($icao))), $used, $slots - count($fillers), $rand
+                ));
+            }
+
+            foreach (array_merge($own[$client->id], $fillers) as $icao) {
                 $pairs[] = [$icao, (int) $client->id];
             }
         }
@@ -171,9 +282,10 @@ class AssignmentGenerator
      */
     private static function reverseCandidates(array $eligible, callable $rand): array
     {
+        $used = [];
         $pairs = [];
         foreach (self::loadClients() as $client) {
-            foreach (self::pickRandom(self::ownEligibleAirports($client, $eligible), self::CLIENT_SLOTS, $rand) as $icao) {
+            foreach (self::pickPreferringUnused(self::ownEligibleAirports($client, $eligible), $used, self::CLIENT_SLOTS, $rand) as $icao) {
                 $pairs[] = [$icao, (int) $client->id];
             }
         }
@@ -188,7 +300,7 @@ class AssignmentGenerator
     {
         return Client::find()
             ->andFilterWhere(['id' => $ids])
-            ->with('clientHubs')
+            ->with(['headquarters', 'hubs'])
             ->orderBy(['id' => SORT_ASC])
             ->all();
     }
@@ -201,10 +313,68 @@ class AssignmentGenerator
     {
         $icaos = array_merge(
             [$client->headquarters_icao],
-            array_map(fn($hub) => $hub->airport_icao, $client->clientHubs)
+            array_map(fn($hub) => $hub->icao_code, $client->hubs)
         );
         sort($icaos);
         return array_values(array_filter($icaos, fn($icao) => isset($eligible[$icao])));
+    }
+
+    /**
+     * Countries of all the client's airports (headquarters and hubs, eligible or not).
+     * @return int[]
+     */
+    private static function clientCountries(Client $client): array
+    {
+        $airports = array_filter(array_merge([$client->headquarters], $client->hubs));
+        return array_values(array_unique(array_map(fn($airport) => (int) $airport->country_id, $airports)));
+    }
+
+    /**
+     * Picks up to $count random airports, preferring those not used yet, and marks them as used.
+     * @param array<string, bool> $used Destinations already taken by other candidates (updated)
+     * @return string[]
+     */
+    private static function pickPreferringUnused(array $icaos, array &$used, int $count, callable $rand): array
+    {
+        $unused = array_values(array_filter($icaos, fn($icao) => !isset($used[$icao])));
+        $picked = self::pickRandom($unused, $count, $rand);
+        $picked = array_merge($picked, self::pickRandom(array_values(array_diff($icaos, $unused)), $count - count($picked), $rand));
+        foreach ($picked as $icao) {
+            $used[$icao] = true;
+        }
+        return $picked;
+    }
+
+    /**
+     * Picks up to $count random pairs, with distinct destinations first; repeated destinations only fill the gaps,
+     * up to MAX_PER_DESTINATION times each.
+     * @param array<int, array{0: string, 1: int}> $pool
+     * @return array<int, array{0: string, 1: int}>
+     */
+    private static function pickDistinctDestinations(array $pool, int $count, callable $rand): array
+    {
+        $distinct = [];
+        $repeated = [];
+        foreach (self::pickRandom($pool, count($pool), $rand) as $pair) {
+            if (count($distinct) < $count && !isset($distinct[$pair[0]])) {
+                $distinct[$pair[0]] = $pair;
+            } else {
+                $repeated[] = $pair;
+            }
+        }
+
+        $picked = array_values($distinct);
+        $timesPicked = array_fill_keys(array_keys($distinct), 1);
+        foreach ($repeated as $pair) {
+            if (count($picked) >= $count) {
+                break;
+            }
+            if (($timesPicked[$pair[0]] ?? 0) < self::MAX_PER_DESTINATION) {
+                $timesPicked[$pair[0]] = ($timesPicked[$pair[0]] ?? 0) + 1;
+                $picked[] = $pair;
+            }
+        }
+        return $picked;
     }
 
     /**
