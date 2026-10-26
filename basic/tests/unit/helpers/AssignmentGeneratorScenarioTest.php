@@ -13,9 +13,9 @@ use tests\unit\BaseUnitTest;
  * showing that every kind of client produces sensible assignments for every kind of aircraft.
  *
  * Aircraft (range, average flown distance → window, minimum runway learnt from takeoffs):
- * - Saab 340 commuter: 935 NM, 34 seats, 175 NM → [87.5, 210], 1300 m
- * - Short-hop commuter: 500 NM, 34 seats, 100 NM → [50, 120], 1300 m
- * - King Air 350: 1750 NM, 334 NM → [167, 400.8], 1484 m (the real second shortest King Air takeoff)
+ * - Saab 340 commuter: 935 NM, 34 seats, 250 NM → [180, 300], 1300 m
+ * - Short-hop commuter: 500 NM, 34 seats, 100 NM → no window (its maximum, 120 NM, is below the 180 NM minimum)
+ * - King Air 350: 1750 NM, 334 NM → [180, 400.8], 1484 m (the real second shortest King Air takeoff)
  * - A320: 3300 NM, 400 NM → [200, 660] (the maximum is raised to 20% of its range), 2700 m
  * General aviation (C172, C182, Maule: below 1000 NM and fewer than 20 seats) never gets assignments.
  */
@@ -65,7 +65,7 @@ class AssignmentGeneratorScenarioTest extends BaseUnitTest
 
     private function commuter(string $location): Aircraft
     {
-        return $this->createAircraft(935, $location, 175, 1300, 34);
+        return $this->createAircraft(935, $location, 250, 1300, 34);
     }
 
     private function shortHopCommuter(string $location): Aircraft
@@ -142,8 +142,8 @@ class AssignmentGeneratorScenarioTest extends BaseUnitTest
 
     public function testKingAirAtRegionalHeadquartersSkipsTheTooCloseHub()
     {
-        // LEAS (137 NM) is too close for the King Air's usual 334 NM. Cuatro Vientos (1500 m) is fine for its 1484 m.
-        // Lisbon (391 NM) would fit, but Regional Norte is a Spanish-only client and Spain has enough options.
+        // LEAS (137 NM) and LEMD (172 NM) are below the 180 NM minimum. Cuatro Vientos (1500 m) is fine for its
+        // 1484 m. Lisbon (391 NM) would fit, but Regional Norte is a Spanish-only client and Spain has enough options.
         $results = $this->runs($this->kingAir('LEBB'), 100);
         foreach ($results as $result) {
             $this->assertCount(3, $result);
@@ -151,7 +151,7 @@ class AssignmentGeneratorScenarioTest extends BaseUnitTest
         }
 
         $this->assertSame(
-            ['LEBL', 'LECU', 'LEGR', 'LEMD', 'LESA', 'LEVC', 'LEZL'],
+            ['LEBL', 'LECU', 'LEGR', 'LESA', 'LEVC', 'LEZL'],
             $this->unionOfDestinations($results)
         );
     }
@@ -164,7 +164,7 @@ class AssignmentGeneratorScenarioTest extends BaseUnitTest
 
         $union = $this->unionOfDestinations($this->runs($this->kingAir('LEBB'), 100));
 
-        $this->assertSame(['LEBL', 'LECU', 'LEGR', 'LEMD', 'LESA', 'LEVC', 'LEZL'], $union);
+        $this->assertSame(['LEBL', 'LECU', 'LEGR', 'LESA', 'LEVC', 'LEZL'], $union);
     }
 
     // --- Country preference (King Air around Vigo and Porto) ---
@@ -225,11 +225,9 @@ class AssignmentGeneratorScenarioTest extends BaseUnitTest
         $this->createClient('Bilbao Energy', 'LEBB');
 
         foreach ($this->runs($this->commuter('LESA')) as $result) {
-            // Reverse mode from Salamanca: LEMD, LEBB, LEAS and LELO are the client airports in the window.
-            // Bilbao is shared by four clients but offered at most twice
-            $this->assertSame(['LEAS', 'LEBB', 'LEBB', 'LELO', 'LEMD'], $this->destinationsOf($result));
-            // The four distinct destinations come first
-            $this->assertCount(4, array_unique(array_column(array_slice($result, 0, 4), 'destination')));
+            // Reverse mode from Salamanca: five client airports in the window, so Bilbao, shared by four clients,
+            // is offered only once
+            $this->assertSame(['LEBB', 'LEHC', 'LEMG', 'LESO', 'LEZL'], $this->destinationsOf($result));
         }
     }
 
@@ -248,55 +246,43 @@ class AssignmentGeneratorScenarioTest extends BaseUnitTest
     {
         $union = $this->unionOfDestinations($this->runs($this->commuter('LECU'), 100));
 
-        // Every Spanish airport between 87.5 and 210 NM from Cuatro Vientos, big ones included.
-        // Barajas (12 NM) and LESA (86 NM) are too close, LEAS (216 NM) and LEMG (224 NM) too far
-        $this->assertSame(['LEBB', 'LEBG', 'LEGR', 'LEHC', 'LELN', 'LELO', 'LESO', 'LEVC', 'LEZL'], $union);
+        // Every Spanish airport between 180 and 300 NM from Cuatro Vientos, big ones included. Barajas (12 NM) and
+        // Valencia (161 NM) are too close; Lisbon (265 NM) would fit, but the Aeroclub is Spanish-only
+        $this->assertSame(['LEAS', 'LEBB', 'LEBL', 'LEGR', 'LEHC', 'LEMG', 'LESO', 'LEZL'], $union);
     }
 
-    // --- Client with a single hub ---
+    // --- Hubs closer than the 180 NM minimum ---
 
-    public function testCommuterAtRegionalHeadquartersGetsItsHubPlusTwoInventedOnes()
+    public function testCommuterAtRegionalHeadquartersReplacesTheTooCloseHub()
     {
-        $fillers = [];
-        foreach ($this->runs($this->commuter('LEBB')) as $result) {
-            $destinations = $this->destinationsOf($result);
+        // LEAS is only 137 NM from Bilbao: the three assignments are invented
+        $results = $this->runs($this->commuter('LEBB'), 100);
+        foreach ($results as $result) {
             $this->assertCount(3, $result);
             $this->assertSame([$this->regional->id => 3], $this->countByClient($result));
-            $this->assertContains('LEAS', $destinations);
-            $fillers = array_merge($fillers, array_diff($destinations, ['LEAS']));
         }
 
-        $fillers = array_values(array_unique($fillers));
-        sort($fillers);
-        $this->assertSame(['LECU', 'LEHC', 'LELN', 'LEMD', 'LESA'], $fillers);
+        $this->assertSame(['LEBL', 'LECU', 'LESA', 'LEVC'], $this->unionOfDestinations($results));
     }
 
-    public function testCommuterAtRegionalHubAlwaysGetsTheWayBackToHeadquarters()
+    public function testCommuterAtCargoHeadquartersReplacesBothTooCloseHubs()
     {
-        foreach ($this->runs($this->commuter('LEAS')) as $result) {
-            $this->assertContains('LEBB', $this->destinationsOf($result));
-        }
-    }
-
-    // --- Client with headquarters and two hubs ---
-
-    public function testCommuterAtCargoHeadquartersGetsBothHubsPlusOneInvented()
-    {
-        foreach ($this->runs($this->commuter('LEHC')) as $result) {
-            $destinations = $this->destinationsOf($result);
+        // LELO (92 NM) and LESO (101 NM) are too close to Huesca
+        $results = $this->runs($this->commuter('LEHC'), 100);
+        foreach ($results as $result) {
             $this->assertCount(3, $result);
-            $this->assertContains('LELO', $destinations);
-            $this->assertContains('LESO', $destinations);
-            $this->assertCount(1, array_intersect($destinations, ['LEBB', 'LEBG', 'LEBL', 'LECU', 'LEMD', 'LEVC']));
+            $this->assertNotContains('LELO', $this->destinationsOf($result));
+            $this->assertNotContains('LESO', $this->destinationsOf($result));
         }
+
+        $this->assertSame(['LEAS', 'LECU', 'LELN', 'LESA'], $this->unionOfDestinations($results));
     }
 
-    public function testShortHopCommuterAtCargoHeadquartersStaysLocal()
+    public function testShortHopCommuterGetsNothing()
     {
-        // Window [50, 120]: the two hubs plus Barcelona (117 NM) as the only invented option
-        foreach ($this->runs($this->shortHopCommuter('LEHC')) as $result) {
-            $this->assertSame(['LEBL', 'LELO', 'LESO'], $this->destinationsOf($result));
-        }
+        // Usually flown 100 NM: its maximum (120 NM) is below the 180 NM minimum
+        $this->assertNull(AssignmentGenerator::distanceWindow($this->shortHopCommuter('LEHC')));
+        $this->assertSame([], AssignmentGenerator::generate($this->shortHopCommuter('LEHC')));
     }
 
     // --- Airport without clients (reverse mode) ---
@@ -305,7 +291,13 @@ class AssignmentGeneratorScenarioTest extends BaseUnitTest
     {
         foreach ($this->runs($this->commuter('LESA')) as $result) {
             $this->assertSame(
-                ["LEAS#{$this->regional->id}", "LEBB#{$this->regional->id}", "LELO#{$this->cargo->id}", "LEMD#{$this->carrier->id}"],
+                [
+                    "LEBB#{$this->regional->id}",
+                    "LEHC#{$this->cargo->id}",
+                    "LEMG#{$this->carrier->id}",
+                    "LESO#{$this->cargo->id}",
+                    "LEZL#{$this->carrier->id}",
+                ],
                 $this->pairsOf($result)
             );
         }
@@ -386,11 +378,12 @@ class AssignmentGeneratorScenarioTest extends BaseUnitTest
         $this->assertContains('LECU', $this->unionOfDestinations($this->runs($kingAir, 100)));
     }
 
-    public function testShortHopCommuterAtGranadaGetsSeville()
+    public function testCommuterAtGranadaGetsTheClientAirportsInItsWindow()
     {
-        // Window [50, 120]: Seville (102 NM) is the only client airport around Granada; Malaga (46 NM) is too close
-        foreach ($this->runs($this->shortHopCommuter('LEGR')) as $result) {
-            $this->assertSame(["LEZL#{$this->carrier->id}"], $this->pairsOf($result));
+        // Reverse mode: Malaga (46 NM) and Seville (102 NM) are too close; Barajas (197 NM) and Cuatro Vientos
+        // (191 NM) fit
+        foreach ($this->runs($this->commuter('LEGR')) as $result) {
+            $this->assertSame(["LECU#{$this->aeroclub->id}", "LEMD#{$this->carrier->id}"], $this->pairsOf($result));
         }
     }
 
@@ -401,11 +394,11 @@ class AssignmentGeneratorScenarioTest extends BaseUnitTest
         $saab = $this->createAircraftWithoutHistory(935, 'LECU', 34);
         $this->assertSame([], AssignmentGenerator::generate($saab));
 
-        $this->recordFlight($saab, 150, Flight::STATUS_FINISHED, 1300);
-        $this->recordFlight($saab, 200, Flight::STATUS_FINISHED, 1300);
+        $this->recordFlight($saab, 230, Flight::STATUS_FINISHED, 1300);
+        $this->recordFlight($saab, 270, Flight::STATUS_FINISHED, 1300);
         $this->assertSame([], AssignmentGenerator::generate($saab));
 
-        $this->recordFlight($saab, 175, Flight::STATUS_FINISHED, 1300);
+        $this->recordFlight($saab, 250, Flight::STATUS_FINISHED, 1300);
 
         $this->assertCount(3, AssignmentGenerator::generate($saab));
     }

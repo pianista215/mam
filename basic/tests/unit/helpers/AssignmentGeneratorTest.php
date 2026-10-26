@@ -1329,7 +1329,9 @@ class AssignmentGeneratorTest extends BaseUnitTest
         $this->createClient('Network', 'XORG', ['XD01', 'XD02', 'XD03', 'XD04']);
         $underused = $this->createAircraft(5000, 'XORG', 300);
 
-        $this->assertSame([150.0, 1000.0], AssignmentGenerator::distanceWindow($underused));
+        [$minNm, $maxNm] = AssignmentGenerator::distanceWindow($underused);
+        $this->assertEqualsWithDelta(180.0, $minNm, 0.001);
+        $this->assertEqualsWithDelta(1000.0, $maxNm, 0.001);
         foreach ($this->generateAllWays($underused) as $result) {
             $this->assertSame(['XD02', 'XD03'], $this->destinationsOf($result));
         }
@@ -1346,7 +1348,7 @@ class AssignmentGeneratorTest extends BaseUnitTest
         $this->createAirports(['XD01' => 300, 'XF01' => 900]);
         $this->createClient('Client', 'XORG', ['XD01']);
         $this->createRoute('R001', 'XORG', 'XF01');
-        $underused = $this->createAircraft(5000, 'XORG', 300); // window [150, 1000]
+        $underused = $this->createAircraft(5000, 'XORG', 300); // window [180, 1000]
 
         // The 900 NM route is beyond 120% of the average but within the raised maximum, so it counts
         $this->assertTrue(AssignmentGenerator::hasFlyableRoutes('XORG', AssignmentGenerator::distanceWindow($underused)[1]));
@@ -1366,16 +1368,30 @@ class AssignmentGeneratorTest extends BaseUnitTest
         }
     }
 
-    public function testShortAverageMeansShortAssignments()
+    public function testMinimumDistanceIsNeverBelow180Nm()
     {
-        $this->createAirports(['XD01' => 70, 'XD02' => 100, 'XD03' => 130, 'XD04' => 600]);
+        // 300 NM average: 50% would be 150 NM, raised to 180 NM
+        $this->createAirports(['XD01' => 170, 'XD02' => 185, 'XD03' => 350, 'XD04' => 370]);
         $this->createClient('Local', 'XORG', ['XD01', 'XD02', 'XD03', 'XD04']);
-        // 700 NM and 34 seats: a commuter whose range floor (140 NM) stays below 120% of its average
-        $shortHop = $this->createAircraft(700, 'XORG', 120, self::SHORT_FIELD_MIN_RUNWAY, 34); // window [60, 144]
+        $shortHaul = $this->createAircraft(self::MEDIUM_RANGE, 'XORG', 300); // window [180, 360]
 
-        foreach ($this->generateAllWays($shortHop) as $result) {
-            $this->assertSame(['XD01', 'XD02', 'XD03'], $this->destinationsOf($result));
+        [$minNm, $maxNm] = AssignmentGenerator::distanceWindow($shortHaul);
+        $this->assertEqualsWithDelta(180.0, $minNm, 0.001);
+        $this->assertEqualsWithDelta(360.0, $maxNm, 0.001);
+        foreach ($this->generateAllWays($shortHaul) as $result) {
+            $this->assertSame(['XD02', 'XD03'], $this->destinationsOf($result));
         }
+    }
+
+    public function testAircraftWhoseUsualFlightsAreTooShortGetsNothing()
+    {
+        // 700 NM, 34 seats, 120 NM average: the maximum (144 NM, the range floor is 140) stays below 180 NM
+        $this->createAirports(['XD01' => 100, 'XD02' => 150, 'XD03' => 200]);
+        $this->createClient('Local', 'XORG', ['XD01', 'XD02', 'XD03']);
+        $shortHop = $this->createAircraft(700, 'XORG', 120, self::SHORT_FIELD_MIN_RUNWAY, 34);
+
+        $this->assertNull(AssignmentGenerator::distanceWindow($shortHop));
+        $this->assertSame([], AssignmentGenerator::generate($shortHop, $this->alwaysAccept()));
     }
 
     public function testDistanceWindowUsesTheAverageOfAllFinishedFlightsOfTheConfiguration()
@@ -1696,8 +1712,9 @@ class AssignmentGeneratorTest extends BaseUnitTest
         }
         $this->createClient('Grid HQ Only', 'G00X');
         $this->createClient('Grid One Hub', 'G23X', ['G30X']);
-        $this->createClient('Grid Network', 'G11X', ['G15X', 'G44X', 'G52X', 'G03X']);
-        $this->createClient('Grid Big', 'G01X', ['G51X', 'G35X']);
+        // Square about 240 NM a side (340 NM diagonals), every corner with a runway of 2600 m or more
+        $this->createClient('Grid Network', 'G01X', ['G05X', 'G41X', 'G45X']);
+        $this->createClient('Grid Mixed', 'G12X', ['G51X', 'G35X']);
         $this->createClient('Grid Remote', 'G55X');
     }
 
@@ -1723,7 +1740,7 @@ class AssignmentGeneratorTest extends BaseUnitTest
     public function testRandomWalkWithShortFieldAircraftNeverGetsStuck()
     {
         $this->createMixedGrid();
-        $shortField = $this->createAircraft(1200, 'G00X', 210, self::SHORT_FIELD_MIN_RUNWAY); // window [105, 252]
+        $shortField = $this->createAircraft(1200, 'G00X', 210, self::SHORT_FIELD_MIN_RUNWAY); // window [180, 252]
 
         $visited = $this->randomWalk($shortField, 200, 42);
 
@@ -1733,7 +1750,7 @@ class AssignmentGeneratorTest extends BaseUnitTest
     public function testRandomWalkWithMediumAircraftNeverGetsStuck()
     {
         $this->createMixedGrid();
-        $medium = $this->createAircraft(1500, 'G00X', 260); // window [130, 312], needs 2000 m runways
+        $medium = $this->createAircraft(1500, 'G00X', 290); // window [180, 348], needs 2000 m runways
 
         $visited = $this->randomWalk($medium, 200, 7);
 
@@ -1743,13 +1760,13 @@ class AssignmentGeneratorTest extends BaseUnitTest
     public function testMediumAircraftInsideAClientNetworkWithEnoughAirportsStaysInIt()
     {
         $this->createMixedGrid();
-        $medium = $this->createAircraft(1500, 'G11X', 260);
+        $medium = $this->createAircraft(1500, 'G01X', 290); // window [180, 348]
 
-        // G03X has a 1200 m runway, so it is out for a medium aircraft. Every other Grid Network airport has
-        // the other three within the window, so no slot is ever filled with an invented destination
+        // Every corner of the Grid Network square has the other three within the window, so no slot is ever
+        // filled with an invented destination
         $visited = $this->randomWalk($medium, 200, 7);
 
-        $this->assertSame(['G11X', 'G15X', 'G44X', 'G52X'], $visited);
+        $this->assertSame(['G01X', 'G05X', 'G41X', 'G45X'], $visited);
     }
 
     // =====================================================================

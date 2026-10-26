@@ -21,8 +21,9 @@ use yii\db\Query;
  *
  * Learnt from the configuration's finished flights
  * - Distance window: from MIN_DISTANCE_FACTOR to MAX_DISTANCE_FACTOR of the average flown distance, so assignments
- *   look like its usual flights. The maximum is never below RANGE_FLOOR_FACTOR of the range (so an aircraft only
- *   flown on short legs can still go somewhat further) nor above RANGE_CAP_FACTOR of the range.
+ *   look like its usual flights. The minimum is never below MIN_DISTANCE_NM (no hops that short). The maximum is
+ *   never below RANGE_FLOOR_FACTOR of the range (so an aircraft only flown on short legs can still go somewhat
+ *   further) nor above RANGE_CAP_FACTOR of it. If the maximum ends up below the minimum, there are no assignments.
  * - Minimum runway: the second shortest runway it has taken off from (the shortest is ignored in case of a one-off
  *   feat). Takeoffs rather than landings, so the aircraft is never sent somewhere it couldn't leave.
  *
@@ -64,6 +65,7 @@ class AssignmentGenerator
     const MIN_FLIGHTS = 3;
     const MIN_TAKEOFFS = 2; // the minimum runway is the second shortest takeoff runway
 
+    const MIN_DISTANCE_NM = 180;
     const MIN_DISTANCE_FACTOR = 0.5; // of the average flown distance
     const MAX_DISTANCE_FACTOR = 1.2; // of the average flown distance
     const RANGE_FLOOR_FACTOR = 0.2;  // the window maximum is at least this share of the range...
@@ -127,7 +129,8 @@ class AssignmentGenerator
 
     /**
      * Distance window for the aircraft's assignments, based on the usual flights of its configuration.
-     * @return array{0: float, 1: float}|null [min NM, max NM], or null if there is no range or not enough flight history
+     * @return array{0: float, 1: float}|null [min NM, max NM], or null if there is no range, not enough flight history
+     *                                        or the window is empty (maximum below MIN_DISTANCE_NM)
      */
     public static function distanceWindow(Aircraft $aircraft): ?array
     {
@@ -141,11 +144,12 @@ class AssignmentGenerator
             return null;
         }
 
-        $maxNm = max($average * self::MAX_DISTANCE_FACTOR, $range * self::RANGE_FLOOR_FACTOR);
-        return [
-            $average * self::MIN_DISTANCE_FACTOR,
-            min($maxNm, $range * self::RANGE_CAP_FACTOR),
-        ];
+        $minNm = max($average * self::MIN_DISTANCE_FACTOR, self::MIN_DISTANCE_NM);
+        $maxNm = min(
+            max($average * self::MAX_DISTANCE_FACTOR, $range * self::RANGE_FLOOR_FACTOR),
+            $range * self::RANGE_CAP_FACTOR
+        );
+        return $maxNm < $minNm ? null : [$minNm, $maxNm];
     }
 
     /**

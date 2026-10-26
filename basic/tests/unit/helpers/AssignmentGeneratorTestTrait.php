@@ -454,7 +454,7 @@ trait AssignmentGeneratorTestTrait
         $this->assertGreaterThanOrEqual(2, count($takeoffLengths), 'Assignments offered without 2 known takeoff runways');
 
         // Learnt limits
-        $minNm = $average * 0.5;
+        $minNm = max($average * 0.5, 180);
         $maxNm = min(max($average * 1.2, $range * 0.2), $range * 0.8);
         $minRunwayM = $takeoffLengths[1];
 
