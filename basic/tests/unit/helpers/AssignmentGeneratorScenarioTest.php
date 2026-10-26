@@ -13,17 +13,15 @@ use tests\unit\BaseUnitTest;
  * showing that every kind of client produces sensible assignments for every kind of aircraft.
  *
  * Aircraft (range, average flown distance → window, minimum runway learnt from takeoffs):
- * - C182: 915 NM, 175 NM → [87.5, 210], 500 m; small: no runway above 3000 m
- * - C172: 730 NM, 100 NM → [50, 120], 500 m; small
+ * - Saab 340 commuter: 935 NM, 34 seats, 175 NM → [87.5, 210], 1300 m
+ * - Saab 340 on short hops: same, 100 NM → [50, 120]
  * - King Air 350: 1750 NM, 334 NM → [167, 400.8], 1484 m (the real second shortest King Air takeoff)
  * - A320: 3300 NM, 400 NM → [200, 480], 2700 m
+ * General aviation (C172, C182, Maule: below 1000 NM and fewer than 20 seats) never gets assignments.
  */
 class AssignmentGeneratorScenarioTest extends BaseUnitTest
 {
     use AssignmentGeneratorTestTrait;
-
-    // Airports with a runway longer than 3000 m
-    private const BIG_AIRPORTS = ['LEMD', 'LEBL', 'LEZL', 'LEMG', 'LEVC', 'LPPT'];
 
     private Client $carrier;
     private Client $aeroclub;
@@ -65,14 +63,9 @@ class AssignmentGeneratorScenarioTest extends BaseUnitTest
         $this->cargo = $this->createClient('Pyrenees Cargo', 'LEHC', ['LELO', 'LESO']);
     }
 
-    private function c182(string $location): Aircraft
+    private function commuter(string $location, float $averageNm = 175): Aircraft
     {
-        return $this->createAircraft(915, $location, 175, 500);
-    }
-
-    private function c172(string $location): Aircraft
-    {
-        return $this->createAircraft(730, $location, 100, 500);
+        return $this->createAircraft(935, $location, $averageNm, 1300, 34);
     }
 
     private function kingAir(string $location): Aircraft
@@ -93,11 +86,6 @@ class AssignmentGeneratorScenarioTest extends BaseUnitTest
             $this->assertValidAssignments($result, $aircraft);
         }
         return $results;
-    }
-
-    private function assertNoBigAirports(array $icaos): void
-    {
-        $this->assertSame([], array_values(array_intersect($icaos, self::BIG_AIRPORTS)), 'Small aircraft sent to a big airport');
     }
 
     // --- Big carrier network (A320, King Air) ---
@@ -231,91 +219,88 @@ class AssignmentGeneratorScenarioTest extends BaseUnitTest
         $this->createClient('Bilbao Banking', 'LEBB');
         $this->createClient('Bilbao Energy', 'LEBB');
 
-        foreach ($this->runs($this->c182('LESA')) as $result) {
-            // Reverse mode from Salamanca: LEBB, LEAS and LELO are the only client airports in the window.
-            // Bilbao is shared by four clients but offered at most twice, so the offer stays at 4
-            $this->assertSame(['LEAS', 'LEBB', 'LEBB', 'LELO'], $this->destinationsOf($result));
-            // The three distinct destinations come first
-            $this->assertCount(3, array_unique(array_column(array_slice($result, 0, 3), 'destination')));
+        foreach ($this->runs($this->commuter('LESA')) as $result) {
+            // Reverse mode from Salamanca: LEMD, LEBB, LEAS and LELO are the client airports in the window.
+            // Bilbao is shared by four clients but offered at most twice
+            $this->assertSame(['LEAS', 'LEBB', 'LEBB', 'LELO', 'LEMD'], $this->destinationsOf($result));
+            // The four distinct destinations come first
+            $this->assertCount(4, array_unique(array_column(array_slice($result, 0, 4), 'destination')));
         }
     }
 
-    // --- Headquarters-only client (C182) ---
+    // --- Headquarters-only client ---
 
-    public function testC182AtAeroclubGetsThreeInventedSmallAirportAssignments()
+    public function testCommuterAtAeroclubGetsThreeInventedAssignments()
     {
-        foreach ($this->runs($this->c182('LECU')) as $result) {
+        foreach ($this->runs($this->commuter('LECU')) as $result) {
             $this->assertCount(3, $result);
             $this->assertSame([$this->aeroclub->id => 3], $this->countByClient($result));
-            $this->assertNoBigAirports($this->destinationsOf($result));
             $this->assertNotContains('LEHX', $this->destinationsOf($result));
         }
     }
 
-    public function testC182AtAeroclubNeverGoesToBarajasEvenThoughItIsNextDoor()
+    public function testCommuterAtAeroclubCoversEveryAirportInItsWindow()
     {
-        $union = $this->unionOfDestinations($this->runs($this->c182('LECU'), 100));
+        $union = $this->unionOfDestinations($this->runs($this->commuter('LECU'), 100));
 
-        // Every small airport between 87.5 and 210 NM from Cuatro Vientos, and nothing else.
-        // LELN (exactly 3000 m) is allowed; LESA (86 NM) is too close and LEAS (216 NM) too far.
-        $this->assertSame(['LEBB', 'LEBG', 'LEGR', 'LEHC', 'LELN', 'LELO', 'LESO'], $union);
+        // Every Spanish airport between 87.5 and 210 NM from Cuatro Vientos, big ones included.
+        // Barajas (12 NM) and LESA (86 NM) are too close, LEAS (216 NM) and LEMG (224 NM) too far
+        $this->assertSame(['LEBB', 'LEBG', 'LEGR', 'LEHC', 'LELN', 'LELO', 'LESO', 'LEVC', 'LEZL'], $union);
     }
 
-    // --- Client with a single hub (C182) ---
+    // --- Client with a single hub ---
 
-    public function testC182AtRegionalHeadquartersGetsItsHubPlusTwoInventedOnes()
+    public function testCommuterAtRegionalHeadquartersGetsItsHubPlusTwoInventedOnes()
     {
         $fillers = [];
-        foreach ($this->runs($this->c182('LEBB')) as $result) {
+        foreach ($this->runs($this->commuter('LEBB')) as $result) {
             $destinations = $this->destinationsOf($result);
             $this->assertCount(3, $result);
             $this->assertSame([$this->regional->id => 3], $this->countByClient($result));
             $this->assertContains('LEAS', $destinations);
-            $this->assertNoBigAirports($destinations);
             $fillers = array_merge($fillers, array_diff($destinations, ['LEAS']));
         }
 
         $fillers = array_values(array_unique($fillers));
         sort($fillers);
-        $this->assertSame(['LECU', 'LEHC', 'LELN', 'LESA'], $fillers);
+        $this->assertSame(['LECU', 'LEHC', 'LELN', 'LEMD', 'LESA'], $fillers);
     }
 
-    public function testC182AtRegionalHubAlwaysGetsTheWayBackToHeadquarters()
+    public function testCommuterAtRegionalHubAlwaysGetsTheWayBackToHeadquarters()
     {
-        foreach ($this->runs($this->c182('LEAS')) as $result) {
+        foreach ($this->runs($this->commuter('LEAS')) as $result) {
             $this->assertContains('LEBB', $this->destinationsOf($result));
-            $this->assertNoBigAirports($this->destinationsOf($result));
         }
     }
 
-    // --- Client with headquarters and two hubs (C182, C172) ---
+    // --- Client with headquarters and two hubs ---
 
-    public function testC182AtCargoHeadquartersGetsBothHubsPlusOneInvented()
+    public function testCommuterAtCargoHeadquartersGetsBothHubsPlusOneInvented()
     {
-        foreach ($this->runs($this->c182('LEHC')) as $result) {
+        foreach ($this->runs($this->commuter('LEHC')) as $result) {
             $destinations = $this->destinationsOf($result);
             $this->assertCount(3, $result);
             $this->assertContains('LELO', $destinations);
             $this->assertContains('LESO', $destinations);
-            $this->assertCount(1, array_intersect($destinations, ['LEBB', 'LEBG', 'LECU']));
+            $this->assertCount(1, array_intersect($destinations, ['LEBB', 'LEBG', 'LEBL', 'LECU', 'LEMD', 'LEVC']));
         }
     }
 
-    public function testC172AtCargoHeadquartersStaysLocal()
+    public function testShortHopCommuterAtCargoHeadquartersStaysLocal()
     {
-        // Window [50, 120]: only the two hubs; LEBL (117 NM) is in reach but too big for a C172
-        foreach ($this->runs($this->c172('LEHC')) as $result) {
-            $this->assertSame(['LELO', 'LESO'], $this->destinationsOf($result));
+        // Window [50, 120]: the two hubs plus Barcelona (117 NM) as the only invented option
+        foreach ($this->runs($this->commuter('LEHC', 100)) as $result) {
+            $this->assertSame(['LEBL', 'LELO', 'LESO'], $this->destinationsOf($result));
         }
     }
 
     // --- Airport without clients (reverse mode) ---
 
-    public function testC182AtAirportWithoutClientsOnlyGetsSmallClientAirports()
+    public function testCommuterAtAirportWithoutClientsOnlyGetsClientAirports()
     {
-        foreach ($this->runs($this->c182('LESA')) as $result) {
+        foreach ($this->runs($this->commuter('LESA')) as $result) {
             $this->assertSame(
-                ["LEAS#{$this->regional->id}", "LEBB#{$this->regional->id}", "LELO#{$this->cargo->id}"],
+                ["LEAS#{$this->regional->id}", "LEBB#{$this->regional->id}", "LELO#{$this->cargo->id}", "LEMD#{$this->carrier->id}"],
                 $this->pairsOf($result)
             );
         }
@@ -332,18 +317,26 @@ class AssignmentGeneratorScenarioTest extends BaseUnitTest
         }
     }
 
-    // --- Origin must suit the aircraft ---
+    // --- General aviation ---
 
-    public function testAircraftAtAnAirportItShouldNotUseGetsNothing()
+    public function testGeneralAviationNeverGetsAssignments()
     {
-        // C182 at Barajas (4350 m, too big), A320 at Salamanca (2513 m, below its 2700 m)
-        $this->assertSame([], AssignmentGenerator::generate($this->c182('LEMD')));
-        $this->assertSame([], AssignmentGenerator::generate($this->a320('LESA')));
+        $generalAviation = [
+            'C172' => [730, 100, 4],
+            'C182' => [915, 175, 4],
+            'Maule M7' => [450, 139, 3],
+        ];
+        foreach ($generalAviation as $name => [$range, $average, $seats]) {
+            foreach (['LECU', 'LEBB', 'LEHC', 'LESA'] as $origin) {
+                $aircraft = $this->createAircraft($range, $origin, $average, 500, $seats);
+                $this->assertSame([], AssignmentGenerator::generate($aircraft), "$name at $origin");
+            }
+        }
     }
 
-    public function testSaabCanFlyFromBarajasButTheMauleCannot()
+    public function testSaabFliesFromBarajasButTheMauleDoesNot()
     {
-        // Saab 340: 935 NM but 34 seats, so not a light aircraft. Maule M7: 450 NM, 3 seats
+        // Saab 340: 935 NM but 34 seats, so not general aviation. Maule M7: 450 NM, 3 seats
         $saab = $this->createAircraft(935, 'LEMD', 312, 1306, 34);
         $maule = $this->createAircraft(450, 'LEMD', 139, 1047, 3);
 
@@ -351,19 +344,12 @@ class AssignmentGeneratorScenarioTest extends BaseUnitTest
         $this->assertSame([], AssignmentGenerator::generate($maule));
     }
 
-    public function testMauleIsSentToSmallAerodromes()
+    // --- Origin must suit the aircraft ---
+
+    public function testAircraftAtAnAirportWithShorterRunwaysThanUsualGetsNothing()
     {
-        // Valladolid's longest runway is 3005 m: too big for a Maule, which gets small fields from Cuatro Vientos
-        $this->createAirportAt('LEVD', 41.7061, -4.8519, [3005.2, 909.2]);
-        $this->createClient('Valladolid Client', 'LEVD');
-        $maule = $this->createAircraft(450, 'LECU', 139, 1047, 3);
-
-        $union = $this->unionOfDestinations($this->runs($maule, 100));
-
-        $this->assertNotEmpty($union);
-        $this->assertNotContains('LEVD', $union);
-        $this->assertNoBigAirports($union);
-        $this->assertSame([], AssignmentGenerator::generate($this->moveAircraft($maule, 'LEVD')));
+        // A320 at Salamanca (2513 m, below its 2700 m)
+        $this->assertSame([], AssignmentGenerator::generate($this->a320('LESA')));
     }
 
     public function testKingAirCanStartFromTheShortRunwaysItHasUsedBefore()
@@ -395,54 +381,46 @@ class AssignmentGeneratorScenarioTest extends BaseUnitTest
         $this->assertContains('LECU', $this->unionOfDestinations($this->runs($kingAir, 100)));
     }
 
-    public function testC182AtAnAirportWithExactly3000mGetsAssignments()
+    public function testShortHopCommuterAtGranadaGetsSeville()
     {
-        // León has exactly 3000 m, so it is still a small airport; no client there, reverse mode
-        foreach ($this->runs($this->c182('LELN')) as $result) {
-            $this->assertNotEmpty($result);
-            $this->assertNoBigAirports($this->destinationsOf($result));
+        // Window [50, 120]: Seville (102 NM) is the only client airport around Granada; Malaga (46 NM) is too close
+        foreach ($this->runs($this->commuter('LEGR', 100)) as $result) {
+            $this->assertSame(["LEZL#{$this->carrier->id}"], $this->pairsOf($result));
         }
-    }
-
-    public function testSmallAircraftAtPlainAirportWithOnlyBigClientAirportsAroundGetsNothing()
-    {
-        // Window [50, 120]: around Granada only Seville (102 NM) is a client airport, and it is big
-        $this->assertSame([], AssignmentGenerator::generate($this->c172('LEGR')));
     }
 
     // --- Flight history ---
 
     public function testBarelyFlownAircraftGetsNothingUntilItsThirdFlight()
     {
-        $c182 = $this->createAircraftWithoutHistory(915, 'LECU');
-        $this->assertSame([], AssignmentGenerator::generate($c182));
+        $saab = $this->createAircraftWithoutHistory(935, 'LECU', 34);
+        $this->assertSame([], AssignmentGenerator::generate($saab));
 
-        $this->recordFlight($c182, 150, Flight::STATUS_FINISHED, 500);
-        $this->recordFlight($c182, 200, Flight::STATUS_FINISHED, 500);
-        $this->assertSame([], AssignmentGenerator::generate($c182));
+        $this->recordFlight($saab, 150, Flight::STATUS_FINISHED, 1300);
+        $this->recordFlight($saab, 200, Flight::STATUS_FINISHED, 1300);
+        $this->assertSame([], AssignmentGenerator::generate($saab));
 
-        $this->recordFlight($c182, 175, Flight::STATUS_FINISHED, 500);
+        $this->recordFlight($saab, 175, Flight::STATUS_FINISHED, 1300);
 
-        $this->assertCount(3, AssignmentGenerator::generate($c182));
+        $this->assertCount(3, AssignmentGenerator::generate($saab));
     }
 
     // --- Long journeys ---
 
-    public function testC182JourneyAcrossSpainNeverGetsStuckNorVisitsBigAirports()
+    public function testCommuterJourneyAcrossSpainNeverGetsStuck()
     {
-        $c182 = $this->c182('LECU');
+        $saab = $this->commuter('LECU');
 
         mt_srand(99);
         $visited = [];
         for ($hop = 0; $hop < 100; $hop++) {
-            $result = AssignmentGenerator::generate($c182);
-            $this->assertValidAssignments($result, $c182);
-            $this->assertNotEmpty($result, "C182 stuck at {$c182->location}");
+            $result = AssignmentGenerator::generate($saab);
+            $this->assertValidAssignments($result, $saab);
+            $this->assertNotEmpty($result, "Saab stuck at {$saab->location}");
 
             $next = $result[mt_rand(0, count($result) - 1)]['destination'];
-            $this->assertNotContains($next, self::BIG_AIRPORTS);
             $visited[$next] = true;
-            $c182 = $this->moveAircraft($c182, $next);
+            $saab = $this->moveAircraft($saab, $next);
         }
         mt_srand();
 

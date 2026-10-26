@@ -14,6 +14,9 @@ use yii\db\Query;
 /**
  * Proposes client assignments ("encargos") departing from the aircraft's current airport.
  *
+ * General aviation is left out: light aircraft (range below LIGHT_AIRCRAFT_MAX_RANGE_NM and fewer than
+ * LIGHT_AIRCRAFT_MAX_PAX seats, e.g. a Maule or a C172) never get assignments.
+ *
  * Distance window: assignments imitate the usual flights of the aircraft configuration, so their distance must be
  * between MIN_DISTANCE_FACTOR and MAX_DISTANCE_FACTOR of the average distance of its finished flights (never above
  * RANGE_FACTOR of the aircraft range). A configuration with fewer than MIN_FLIGHTS finished flights gets no
@@ -25,15 +28,14 @@ use yii\db\Query;
  * takeoff runways means no assignments.
  *
  * Only eligible airports are ever offered: different from the origin, not a heliport, inside the distance window,
- * with at least one runway as long as the configuration's minimum runway and, for light aircraft
- * (range < 1000 NM and fewer than 20 seats, e.g. a Maule or a C172), without any runway longer than 3000 m.
+ * and with at least one runway as long as the configuration's minimum runway.
  *
  * Direct mode (some client has its headquarters or a hub at the origin): each of those clients gets up to
  * CLIENT_SLOTS assignments to its own eligible airports; remaining slots are filled with random eligible
  * airports on behalf of the same client, preferring the countries where the client has its headquarters or hubs
  * (other countries are only used when there aren't enough). Military airports are only used as fillers when the
- * client would otherwise offer nothing (they are still offered as a client's own airport). Reverse mode (no client at the origin): each client offers up to CLIENT_SLOTS of its own
- * eligible airports, without fillers.
+ * client would otherwise offer nothing (they are still offered as a client's own airport). Reverse mode (no client
+ * at the origin): each client offers up to CLIENT_SLOTS of its own eligible airports, without fillers.
  *
  * Variety: destinations not yet used by another client are preferred, and COUNT assignments are picked from the
  * pool with distinct destinations first; a destination only repeats (with another client) to fill the offer,
@@ -41,8 +43,8 @@ use yii\db\Query;
  * When a regular route no longer than the window maximum departs from the origin, each assignment survives with
  * ACCEPT_PERCENT probability.
  *
- * The origin must meet the same airport rules; otherwise there are no assignments, e.g. a light aircraft parked at
- * a big airport.
+ * The origin must meet the same airport rules; otherwise there are no assignments, e.g. an aircraft parked at an
+ * airport whose runways are shorter than it usually needs.
  *
  * Dead-end safety: since the origin always meets the airport rules and eligibility is symmetric (same distance and
  * same aircraft both ways), the previous airport P is always eligible from the destination D:
@@ -69,10 +71,9 @@ class AssignmentGenerator
     const MAX_DISTANCE_FACTOR = 1.2;
     const RANGE_FACTOR = 0.8;
 
-    // Light aircraft (below both limits) are never sent to big airports
+    // Light aircraft (below both limits) are general aviation and get no assignments
     const LIGHT_AIRCRAFT_MAX_RANGE_NM = 1000;
     const LIGHT_AIRCRAFT_MAX_PAX = 20;
-    const LIGHT_AIRCRAFT_MAX_RUNWAY_M = 3000;
 
     // Airport names matching these are excluded (heliports) or avoided as fillers (military airports)
     const HELIPORT_NAME_PATTERNS = ['%Heliport%', '%Helipuerto%', '%Heliporto%'];
@@ -89,11 +90,10 @@ class AssignmentGenerator
 
         $origin = $aircraft->location0;
         $window = self::distanceWindow($aircraft);
-        if ($origin === null || $window === null) {
+        if ($origin === null || $window === null || self::isLightAircraft($aircraft->aircraftConfiguration)) {
             return [];
         }
         [$minNm, $maxNm] = $window;
-        $isLight = self::isLightAircraft($aircraft->aircraftConfiguration);
 
         $minRunwayM = self::minTakeoffRunway($aircraft->aircraft_configuration_id);
         if ($minRunwayM === null) {
@@ -101,11 +101,11 @@ class AssignmentGenerator
         }
 
         // The origin must meet the same airport rules as any destination
-        if (!self::isSuitableAirport($origin->icao_code, $isLight, $minRunwayM)) {
+        if (!self::isSuitableAirport($origin->icao_code, $minRunwayM)) {
             return [];
         }
 
-        $eligible = self::findEligibleAirports($origin, $minNm, $maxNm, $isLight, $minRunwayM);
+        $eligible = self::findEligibleAirports($origin, $minNm, $maxNm, $minRunwayM);
         if (empty($eligible)) {
             return [];
         }
@@ -221,7 +221,7 @@ class AssignmentGenerator
      * Airports that can be offered as destination, with their distance from the origin, country and military flag.
      * @return array<string, array{distance: float, country_id: int, military: bool}> keyed by icao, sorted by icao
      */
-    private static function findEligibleAirports(Airport $origin, float $minNm, float $maxNm, bool $isLight, float $minRunwayM): array
+    private static function findEligibleAirports(Airport $origin, float $minNm, float $maxNm, float $minRunwayM): array
     {
         // One degree of latitude is slightly more than 60 NM, so this box never cuts valid airports
         $latDelta = $maxNm / 60;
@@ -232,7 +232,7 @@ class AssignmentGenerator
             ->where(['<>', 'icao_code', $origin->icao_code])
             ->andWhere(['between', 'latitude', $origin->latitude - $latDelta, $origin->latitude + $latDelta])
             ->orderBy(['icao_code' => SORT_ASC]);
-        self::applyAirportRules($query, $isLight, $minRunwayM);
+        self::applyAirportRules($query, $minRunwayM);
 
         $eligible = [];
         foreach ($query->all() as $row) {
@@ -253,18 +253,18 @@ class AssignmentGenerator
     }
 
     /**
-     * Whether the aircraft can operate at the airport: not a heliport, with a runway at least $minRunwayM long
-     * and, for light aircraft, no runway longer than LIGHT_AIRCRAFT_MAX_RUNWAY_M.
+     * Whether the aircraft can operate at the airport: not a heliport, with a runway at least $minRunwayM long.
      */
-    public static function isSuitableAirport(string $icao, bool $isLight, float $minRunwayM): bool
+    public static function isSuitableAirport(string $icao, float $minRunwayM): bool
     {
         $query = (new Query())->from('airport')->where(['icao_code' => $icao]);
-        self::applyAirportRules($query, $isLight, $minRunwayM);
+        self::applyAirportRules($query, $minRunwayM);
         return $query->exists();
     }
 
     /**
-     * Light aircraft: range below LIGHT_AIRCRAFT_MAX_RANGE_NM and fewer than LIGHT_AIRCRAFT_MAX_PAX seats.
+     * Light (general aviation) aircraft: range below LIGHT_AIRCRAFT_MAX_RANGE_NM and fewer than LIGHT_AIRCRAFT_MAX_PAX
+     * seats. They get no assignments.
      */
     public static function isLightAircraft(AircraftConfiguration $config): bool
     {
@@ -275,17 +275,15 @@ class AssignmentGenerator
     /**
      * Restricts an airport query to airports the aircraft can operate at (see isSuitableAirport()).
      */
-    private static function applyAirportRules(Query $query, bool $isLight, float $minRunwayM): void
+    private static function applyAirportRules(Query $query, float $minRunwayM): void
     {
-        $runways = (new Query())->from('runway')->where('runway.airport_icao = airport.icao_code');
-        $query->andWhere(['exists', (clone $runways)->andWhere(['>=', 'length_m', $minRunwayM])]);
+        $query->andWhere(['exists', (new Query())
+            ->from('runway')
+            ->where('runway.airport_icao = airport.icao_code')
+            ->andWhere(['>=', 'length_m', $minRunwayM])]);
 
         foreach (self::HELIPORT_NAME_PATTERNS as $pattern) {
             $query->andWhere(['not like', 'airport.name', $pattern, false]);
-        }
-
-        if ($isLight) {
-            $query->andWhere(['not exists', (clone $runways)->andWhere(['>', 'length_m', self::LIGHT_AIRCRAFT_MAX_RUNWAY_M])]);
         }
     }
 

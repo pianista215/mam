@@ -390,8 +390,10 @@ trait AssignmentGeneratorTestTrait
         $aircraft = Aircraft::findOne($aircraft->id);
         $origin = $aircraft->location0;
         $range = $aircraft->aircraftConfiguration->aircraftType->max_nm_range;
-        // Light aircraft recomputed independently: below 1000 NM and fewer than 20 seats
-        $isLight = $range < 1000 && $aircraft->aircraftConfiguration->pax_capacity < 20;
+        // General aviation (below 1000 NM and fewer than 20 seats) never gets assignments
+        if ($range < 1000 && $aircraft->aircraftConfiguration->pax_capacity < 20) {
+            $this->assertSame([], $assignments, 'Assignments offered to a light aircraft');
+        }
 
         // Window recomputed here independently of the generator
         $average = (float) (new \yii\db\Query())
@@ -435,9 +437,6 @@ trait AssignmentGeneratorTestTrait
             $originRunways = array_map(fn($r) => (float) $r->length_m, Runway::find()->where(['airport_icao' => $origin->icao_code])->all());
             $this->assertNotEmpty($originRunways, "Assignments offered from {$origin->icao_code}, which has no runways");
             $this->assertGreaterThanOrEqual($minRunwayM, max($originRunways), "Origin {$origin->icao_code} runways too short");
-            if ($isLight) {
-                $this->assertLessThanOrEqual(3000, max($originRunways), "Light aircraft at big origin {$origin->icao_code}");
-            }
         }
 
         $this->assertLessThanOrEqual(AssignmentGenerator::COUNT, count($assignments));
@@ -479,9 +478,6 @@ trait AssignmentGeneratorTestTrait
             $this->assertNotEmpty($runways, "$icao has no runways");
             $longest = max(array_map(fn($r) => (float) $r->length_m, $runways));
             $this->assertGreaterThanOrEqual($minRunwayM, $longest, "$icao only has $longest m of runway, minimum is $minRunwayM m");
-            if ($isLight) {
-                $this->assertLessThanOrEqual(3000, $longest, "Light aircraft sent to $icao with a $longest m runway");
-            }
 
             $dest = Airport::findOne(['icao_code' => $icao]);
             $this->assertDoesNotMatchRegularExpression('/Heliport|Helipuerto|Heliporto/i', $dest->name, "Heliport $icao offered");
