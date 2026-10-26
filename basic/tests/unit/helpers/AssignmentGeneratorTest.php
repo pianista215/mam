@@ -26,7 +26,7 @@ class AssignmentGeneratorTest extends BaseUnitTest
     // Nautical miles per degree of latitude, matching GeoUtils::haversine
     private const NM_PER_DEG = 6371.0 * M_PI / 180 * 0.539957;
 
-    private const AVERAGE = 1000;     // window [500, 1200] unless capped by 80% of the range
+    private const AVERAGE = 1000;     // window [500, 1200] unless the range floor or cap applies
     private const MEDIUM_RANGE = 1500;
     private const LARGE_RANGE = 2500;
     private const SHORT_FIELD_MIN_RUNWAY = 600;
@@ -1322,6 +1322,37 @@ class AssignmentGeneratorTest extends BaseUnitTest
         }
     }
 
+    public function testWindowMaximumIsNeverBelowTwentyPercentOfTheRange()
+    {
+        // 5000 NM aircraft only flown on 300 NM legs: 120% of the average is 360, but the floor raises it to 1000
+        $this->createAirports(['XD01' => 140, 'XD02' => 300, 'XD03' => 900, 'XD04' => 1100]);
+        $this->createClient('Network', 'XORG', ['XD01', 'XD02', 'XD03', 'XD04']);
+        $underused = $this->createAircraft(5000, 'XORG', 300);
+
+        $this->assertSame([150.0, 1000.0], AssignmentGenerator::distanceWindow($underused));
+        foreach ($this->generateAllWays($underused) as $result) {
+            $this->assertSame(['XD02', 'XD03'], $this->destinationsOf($result));
+        }
+    }
+
+    public function testRangeFloorDoesNotApplyWhenTheAverageIsHigher()
+    {
+        // 1500 NM range: the floor (300 NM) is below 120% of the 1000 NM average
+        $this->assertSame([500.0, 1200.0], AssignmentGenerator::distanceWindow($this->aircraft));
+    }
+
+    public function testRangeFloorAlsoDecidesWhichRoutesTriggerTheLottery()
+    {
+        $this->createAirports(['XD01' => 300, 'XF01' => 900]);
+        $this->createClient('Client', 'XORG', ['XD01']);
+        $this->createRoute('R001', 'XORG', 'XF01');
+        $underused = $this->createAircraft(5000, 'XORG', 300); // window [150, 1000]
+
+        // The 900 NM route is beyond 120% of the average but within the raised maximum, so it counts
+        $this->assertTrue(AssignmentGenerator::hasFlyableRoutes('XORG', AssignmentGenerator::distanceWindow($underused)[1]));
+        $this->assertSame([], $this->generate($this->alwaysReject(), $underused));
+    }
+
     public function testDistanceWindowIsCappedAtEightyPercentOfRange()
     {
         // 1100 NM range: 1.2 * 1000 = 1200 is capped at 0.8 * 1100 = 880
@@ -1339,7 +1370,8 @@ class AssignmentGeneratorTest extends BaseUnitTest
     {
         $this->createAirports(['XD01' => 70, 'XD02' => 100, 'XD03' => 130, 'XD04' => 600]);
         $this->createClient('Local', 'XORG', ['XD01', 'XD02', 'XD03', 'XD04']);
-        $shortHop = $this->createAircraft(self::MEDIUM_RANGE, 'XORG', 120, self::SHORT_FIELD_MIN_RUNWAY); // window [60, 144]
+        // 700 NM and 34 seats: a commuter whose range floor (140 NM) stays below 120% of its average
+        $shortHop = $this->createAircraft(700, 'XORG', 120, self::SHORT_FIELD_MIN_RUNWAY, 34); // window [60, 144]
 
         foreach ($this->generateAllWays($shortHop) as $result) {
             $this->assertSame(['XD01', 'XD02', 'XD03'], $this->destinationsOf($result));

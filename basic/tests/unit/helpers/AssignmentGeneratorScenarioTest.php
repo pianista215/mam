@@ -14,9 +14,9 @@ use tests\unit\BaseUnitTest;
  *
  * Aircraft (range, average flown distance → window, minimum runway learnt from takeoffs):
  * - Saab 340 commuter: 935 NM, 34 seats, 175 NM → [87.5, 210], 1300 m
- * - Saab 340 on short hops: same, 100 NM → [50, 120]
+ * - Short-hop commuter: 500 NM, 34 seats, 100 NM → [50, 120], 1300 m
  * - King Air 350: 1750 NM, 334 NM → [167, 400.8], 1484 m (the real second shortest King Air takeoff)
- * - A320: 3300 NM, 400 NM → [200, 480], 2700 m
+ * - A320: 3300 NM, 400 NM → [200, 660] (the maximum is raised to 20% of its range), 2700 m
  * General aviation (C172, C182, Maule: below 1000 NM and fewer than 20 seats) never gets assignments.
  */
 class AssignmentGeneratorScenarioTest extends BaseUnitTest
@@ -63,9 +63,14 @@ class AssignmentGeneratorScenarioTest extends BaseUnitTest
         $this->cargo = $this->createClient('Pyrenees Cargo', 'LEHC', ['LELO', 'LESO']);
     }
 
-    private function commuter(string $location, float $averageNm = 175): Aircraft
+    private function commuter(string $location): Aircraft
     {
-        return $this->createAircraft(935, $location, $averageNm, 1300, 34);
+        return $this->createAircraft(935, $location, 175, 1300, 34);
+    }
+
+    private function shortHopCommuter(string $location): Aircraft
+    {
+        return $this->createAircraft(500, $location, 100, 1300, 34);
     }
 
     private function kingAir(string $location): Aircraft
@@ -289,7 +294,7 @@ class AssignmentGeneratorScenarioTest extends BaseUnitTest
     public function testShortHopCommuterAtCargoHeadquartersStaysLocal()
     {
         // Window [50, 120]: the two hubs plus Barcelona (117 NM) as the only invented option
-        foreach ($this->runs($this->commuter('LEHC', 100)) as $result) {
+        foreach ($this->runs($this->shortHopCommuter('LEHC')) as $result) {
             $this->assertSame(['LEBL', 'LELO', 'LESO'], $this->destinationsOf($result));
         }
     }
@@ -308,7 +313,7 @@ class AssignmentGeneratorScenarioTest extends BaseUnitTest
 
     public function testA320AtAirportWithoutClientsOnlyGetsCarrierAirports()
     {
-        // From Valencia: LEMD (154 NM) and LEBL (160 NM) are too close; the other client airports have no 3000 m runway
+        // From Valencia: LEMD (154 NM) and LEBL (160 NM) are too close; the other client airports have no runway of 2700 m
         foreach ($this->runs($this->a320('LEVC')) as $result) {
             $this->assertSame(
                 ["LEMG#{$this->carrier->id}", "LEZL#{$this->carrier->id}"],
@@ -384,7 +389,7 @@ class AssignmentGeneratorScenarioTest extends BaseUnitTest
     public function testShortHopCommuterAtGranadaGetsSeville()
     {
         // Window [50, 120]: Seville (102 NM) is the only client airport around Granada; Malaga (46 NM) is too close
-        foreach ($this->runs($this->commuter('LEGR', 100)) as $result) {
+        foreach ($this->runs($this->shortHopCommuter('LEGR')) as $result) {
             $this->assertSame(["LEZL#{$this->carrier->id}"], $this->pairsOf($result));
         }
     }

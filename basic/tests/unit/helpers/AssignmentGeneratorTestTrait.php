@@ -16,6 +16,8 @@ use app\models\FlightReport;
 use app\models\Pilot;
 use app\models\Route;
 use app\models\Runway;
+use Yii;
+use yii\db\Query;
 
 /**
  * Shared fixtures, random stubs and invariant checks for the AssignmentGenerator tests.
@@ -32,6 +34,7 @@ trait AssignmentGeneratorTestTrait
     /** @var array<string, int> metric code => phase type id */
     private array $phaseTypeIds = [];
 
+    // Country ids (static properties because trait constants need PHP 8.2)
     private static int $SPAIN = 1;
     private static int $PORTUGAL = 2;
     private static int $FRANCE = 3;
@@ -71,7 +74,7 @@ trait AssignmentGeneratorTestTrait
         $this->assertTrue($runway->save(), json_encode($runway->errors));
 
         foreach (explode('/', $designators) as $designator) {
-            \Yii::$app->db->createCommand()->insert('runway_end', [
+            Yii::$app->db->createCommand()->insert('runway_end', [
                 'runway_id' => $runway->id,
                 'designator' => $designator,
                 'latitude' => 0,
@@ -247,7 +250,7 @@ trait AssignmentGeneratorTestTrait
 
     private function recordPhaseMetric(int $reportId, string $phaseCode, string $metricCode, string $value): void
     {
-        $db = \Yii::$app->db;
+        $db = Yii::$app->db;
         if (!isset($this->metricTypeIds[$metricCode])) {
             $phaseTypeId = $db->createCommand('SELECT id FROM flight_phase_type WHERE code = :code', [':code' => $phaseCode])->queryScalar();
             if ($phaseTypeId === false) {
@@ -383,41 +386,30 @@ trait AssignmentGeneratorTestTrait
     }
 
     /**
-     * Checks every rule an assignment list must satisfy for the given aircraft.
+     * Finished flights with distance of the aircraft's configuration, recomputed here independently of the generator.
+     * @return array{0: int, 1: float} [number of flights, average distance]
      */
-    private function assertValidAssignments(array $assignments, Aircraft $aircraft): void
+    private function flownDistanceStats(Aircraft $aircraft): array
     {
-        $aircraft = Aircraft::findOne($aircraft->id);
-        $origin = $aircraft->location0;
-        $range = $aircraft->aircraftConfiguration->aircraftType->max_nm_range;
-        // General aviation (below 1000 NM and fewer than 20 seats) never gets assignments
-        if ($range < 1000 && $aircraft->aircraftConfiguration->pax_capacity < 20) {
-            $this->assertSame([], $assignments, 'Assignments offered to a light aircraft');
-        }
-
-        // Window recomputed here independently of the generator
-        $average = (float) (new \yii\db\Query())
+        $stats = (new Query())
+            ->select(['flights' => 'COUNT(*)', 'average' => 'AVG(fr.distance_nm)'])
             ->from(['fr' => 'flight_report'])
             ->innerJoin(['f' => 'flight'], 'fr.flight_id = f.id')
             ->innerJoin(['a' => 'aircraft'], 'f.aircraft_id = a.id')
             ->where(['a.aircraft_configuration_id' => $aircraft->aircraft_configuration_id, 'f.status' => 'F'])
             ->andWhere(['not', ['fr.distance_nm' => null]])
-            ->average('fr.distance_nm');
-        if (!empty($assignments)) {
-            $flights = (int) (new \yii\db\Query())
-                ->from(['fr' => 'flight_report'])
-                ->innerJoin(['f' => 'flight'], 'fr.flight_id = f.id')
-                ->innerJoin(['a' => 'aircraft'], 'f.aircraft_id = a.id')
-                ->where(['a.aircraft_configuration_id' => $aircraft->aircraft_configuration_id, 'f.status' => 'F'])
-                ->andWhere(['not', ['fr.distance_nm' => null]])
-                ->count();
-            $this->assertGreaterThanOrEqual(3, $flights, 'Assignments offered to an aircraft flown fewer than 3 times');
-        }
-        $minNm = $average * 0.5;
-        $maxNm = min($average * 1.2, $range * 0.8);
+            ->one();
+        return [(int) $stats['flights'], (float) $stats['average']];
+    }
 
-        // Minimum runway recomputed here independently: second shortest takeoff runway of finished flights
-        $takeoffLengths = \Yii::$app->db->createCommand(
+    /**
+     * Lengths of the runways the aircraft's configuration took off from in finished flights, shortest first,
+     * recomputed here independently of the generator.
+     * @return float[]
+     */
+    private function takeoffRunwayLengths(Aircraft $aircraft): array
+    {
+        $lengths = Yii::$app->db->createCommand(
             "SELECT r.length_m FROM flight_phase_metric m
              JOIN flight_phase_metric_type mt ON mt.id = m.metric_type_id AND mt.code = 'TakeoffRunway'
              JOIN flight_phase fp ON fp.id = m.flight_phase_id
@@ -429,25 +421,55 @@ trait AssignmentGeneratorTestTrait
              ORDER BY r.length_m",
             [':config' => $aircraft->aircraft_configuration_id]
         )->queryColumn();
-        if (!empty($assignments)) {
-            $this->assertGreaterThanOrEqual(2, count($takeoffLengths), 'Assignments offered without 2 known takeoff runways');
-        }
-        $minRunwayM = (float) ($takeoffLengths[1] ?? 0);
-        if (!empty($assignments)) {
-            $originRunways = array_map(fn($r) => (float) $r->length_m, Runway::find()->where(['airport_icao' => $origin->icao_code])->all());
-            $this->assertNotEmpty($originRunways, "Assignments offered from {$origin->icao_code}, which has no runways");
-            $this->assertGreaterThanOrEqual($minRunwayM, max($originRunways), "Origin {$origin->icao_code} runways too short");
-        }
+        return array_map('floatval', $lengths);
+    }
+
+    private function longestRunway(string $icao): ?float
+    {
+        $lengths = array_map(fn($r) => (float) $r->length_m, Runway::find()->where(['airport_icao' => $icao])->all());
+        return empty($lengths) ? null : max($lengths);
+    }
+
+    /**
+     * Checks every rule an assignment list must satisfy for the given aircraft. The rules are recomputed here
+     * (hard-coded factors on purpose) instead of calling the generator, so a bug there can't hide itself.
+     */
+    private function assertValidAssignments(array $assignments, Aircraft $aircraft): void
+    {
+        $aircraft = Aircraft::findOne($aircraft->id);
+        $origin = $aircraft->location0;
+        $config = $aircraft->aircraftConfiguration;
+        $range = $config->aircraftType->max_nm_range;
 
         $this->assertLessThanOrEqual(AssignmentGenerator::COUNT, count($assignments));
+        if (empty($assignments)) {
+            return;
+        }
 
+        // Who gets assignments: not general aviation, 3 flights and 2 known takeoff runways
+        $this->assertFalse($range < 1000 && $config->pax_capacity < 20, 'Assignments offered to a light aircraft');
+        [$flights, $average] = $this->flownDistanceStats($aircraft);
+        $this->assertGreaterThanOrEqual(3, $flights, 'Assignments offered to an aircraft flown fewer than 3 times');
+        $takeoffLengths = $this->takeoffRunwayLengths($aircraft);
+        $this->assertGreaterThanOrEqual(2, count($takeoffLengths), 'Assignments offered without 2 known takeoff runways');
+
+        // Learnt limits
+        $minNm = $average * 0.5;
+        $maxNm = min(max($average * 1.2, $range * 0.2), $range * 0.8);
+        $minRunwayM = $takeoffLengths[1];
+
+        $originRunway = $this->longestRunway($origin->icao_code);
+        $this->assertNotNull($originRunway, "Assignments offered from {$origin->icao_code}, which has no runways");
+        $this->assertGreaterThanOrEqual($minRunwayM, $originRunway, "Origin {$origin->icao_code} runways too short");
+
+        // Selection
         $pairs = $this->pairsOf($assignments);
         $this->assertSame($pairs, array_values(array_unique($pairs)), 'Duplicated (destination, client) pair');
 
-        // Distinct destinations come first: once a destination repeats, no new destination may follow
         $seen = [];
         $repeating = false;
         foreach (array_column($assignments, 'destination') as $icao) {
+            // Distinct destinations come first: once a destination repeats, no new destination may follow
             if (isset($seen[$icao])) {
                 $repeating = true;
             } else {
@@ -455,32 +477,30 @@ trait AssignmentGeneratorTestTrait
                 $seen[$icao] = true;
             }
         }
-
         foreach (array_count_values(array_column($assignments, 'destination')) as $icao => $count) {
             $this->assertLessThanOrEqual(AssignmentGenerator::MAX_PER_DESTINATION, $count, "$icao offered $count times");
         }
-
         foreach ($this->countByClient($assignments) as $clientId => $count) {
             $this->assertLessThanOrEqual(AssignmentGenerator::CLIENT_SLOTS, $count, "Client $clientId exceeds its slots");
         }
 
+        // Each destination
         $relatedClientIds = array_map('intval', array_unique(array_merge(
             Client::find()->select('id')->where(['headquarters_icao' => $origin->icao_code])->column(),
             ClientHub::find()->select('client_id')->where(['airport_icao' => $origin->icao_code])->column()
         )));
-
         foreach ($assignments as $assignment) {
             $icao = $assignment['destination'];
             $this->assertSame(['destination', 'client_id', 'distance_nm'], array_keys($assignment));
             $this->assertNotSame($origin->icao_code, $icao, 'Origin offered as destination');
 
-            $runways = Runway::find()->where(['airport_icao' => $icao])->all();
-            $this->assertNotEmpty($runways, "$icao has no runways");
-            $longest = max(array_map(fn($r) => (float) $r->length_m, $runways));
+            $longest = $this->longestRunway($icao);
+            $this->assertNotNull($longest, "$icao has no runways");
             $this->assertGreaterThanOrEqual($minRunwayM, $longest, "$icao only has $longest m of runway, minimum is $minRunwayM m");
 
             $dest = Airport::findOne(['icao_code' => $icao]);
             $this->assertDoesNotMatchRegularExpression('/Heliport|Helipuerto|Heliporto/i', $dest->name, "Heliport $icao offered");
+
             $distance = GeoUtils::haversine($origin->latitude, $origin->longitude, $dest->latitude, $dest->longitude, 'nm');
             $this->assertGreaterThanOrEqual($minNm, $distance, "$icao is closer than the distance window");
             $this->assertLessThanOrEqual($maxNm, $distance, "$icao is beyond the distance window");
@@ -488,7 +508,7 @@ trait AssignmentGeneratorTestTrait
 
             if (!empty($relatedClientIds)) {
                 // Direct mode: only clients related to the origin
-                $this->assertContains($assignment['client_id'], $relatedClientIds, "Client unrelated to the origin");
+                $this->assertContains($assignment['client_id'], $relatedClientIds, 'Client unrelated to the origin');
             } else {
                 // Reverse mode: only the client's own airports
                 $this->assertContains($icao, $this->clientAirports($assignment['client_id']), "$icao is not an airport of its client");
