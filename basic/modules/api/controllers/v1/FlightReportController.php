@@ -2,6 +2,7 @@
 
 namespace app\modules\api\controllers\v1;
 
+use app\helpers\AssignmentGenerator;
 use app\helpers\GeoUtils;
 use app\helpers\LoggerTrait;
 use app\models\AcarsFile;
@@ -145,6 +146,9 @@ class FlightReportController extends Controller
 
                 $transaction->commit();
 
+                // Best effort, after the commit: the flight is already saved whatever happens here
+                $this->generateAssignments($submittedFlightPlan->pilot_id, $submittedFlightPlan->aircraft_id);
+
                 return $response;
 
             } catch (\Throwable $e) {
@@ -161,6 +165,54 @@ class FlightReportController extends Controller
                 $this->logError('Invalid data.', ['messages' => $errorMessages, 'request' => Yii::$app->request]);
                 throw new BadRequestHttpException('Invalid data: ' . implode(', ', $errorMessages));
             }
+        }
+    }
+
+    /**
+     * Generates the pilot's new assignments from the airport where the aircraft just arrived.
+     * Never throws: any failure is logged and the pilot is simply left without assignments.
+     */
+    private function generateAssignments(int $pilotId, int $aircraftId): void
+    {
+        $start = microtime(true);
+        $transaction = null;
+        try {
+            $transaction = Yii::$app->db->beginTransaction();
+
+            $aircraft = Aircraft::findOne($aircraftId);
+            if ($aircraft === null) {
+                throw new \RuntimeException("Aircraft $aircraftId not found");
+            }
+
+            // Resolved through the DI container so tests can replace it
+            $generator = Yii::createObject(AssignmentGenerator::class);
+            $proposals = $generator::generate($aircraft);
+            $assignments = Assignment::createFromProposals($pilotId, $aircraft, $proposals);
+
+            $transaction->commit();
+
+            $this->logInfo('Assignments generated', [
+                'pilot' => $pilotId,
+                'aircraft' => $aircraftId,
+                'origin' => $aircraft->location,
+                'count' => count($assignments),
+                'ms' => (int) round((microtime(true) - $start) * 1000),
+            ]);
+        } catch (\Throwable $e) {
+            try {
+                if ($transaction !== null && $transaction->getIsActive()) {
+                    $transaction->rollBack();
+                }
+            } catch (\Throwable $rollbackError) {
+                $this->logError('Error rolling back assignment generation', ['error' => $rollbackError->getMessage()]);
+            }
+            $this->logError('Error generating assignments', [
+                'pilot' => $pilotId,
+                'aircraft' => $aircraftId,
+                'error' => get_class($e) . ': ' . $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'ms' => (int) round((microtime(true) - $start) * 1000),
+            ]);
         }
     }
 

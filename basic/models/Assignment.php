@@ -106,6 +106,33 @@ class Assignment extends \yii\db\ActiveRecord
     }
 
     /**
+     * Saves the proposals of AssignmentGenerator::generate() as assignments of the pilot, departing from the aircraft's
+     * current location. The caller wraps it in a transaction so either every proposal is saved or none.
+     * @param array<int, array{destination: string, client_id: int, distance_nm: int}> $proposals
+     * @return Assignment[]
+     * @throws \RuntimeException if a proposal fails validation
+     */
+    public static function createFromProposals(int $pilotId, Aircraft $aircraft, array $proposals): array
+    {
+        $assignments = [];
+        foreach ($proposals as $proposal) {
+            $assignment = new self([
+                'pilot_id' => $pilotId,
+                'aircraft_id' => $aircraft->id,
+                'client_id' => $proposal['client_id'],
+                'departure' => $aircraft->location,
+                'arrival' => $proposal['destination'],
+                'distance_nm' => $proposal['distance_nm'],
+            ]);
+            if (!$assignment->save()) {
+                throw new \RuntimeException('Invalid assignment proposal: ' . json_encode($assignment->getErrors()));
+            }
+            $assignments[] = $assignment;
+        }
+        return $assignments;
+    }
+
+    /**
      * Gets query for [[Aircraft]].
      *
      * @return \yii\db\ActiveQuery

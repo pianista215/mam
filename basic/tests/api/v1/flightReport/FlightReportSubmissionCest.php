@@ -16,6 +16,17 @@ class FlightReportSubmissionCest
         ];
     }
 
+    public function _after(ApiTester $I)
+    {
+        \Yii::$container->clear(\app\helpers\AssignmentGenerator::class);
+        AssignmentGeneratorStub::reset();
+    }
+
+    private function useAssignmentGeneratorStub(): void
+    {
+        \Yii::$container->set(\app\helpers\AssignmentGenerator::class, AssignmentGeneratorStub::class);
+    }
+
     private function loginAsUser($id, ApiTester $I)
     {
         $access_token = \app\models\Pilot::find()->where(['id' => $id])->one()->access_token;
@@ -860,6 +871,124 @@ class FlightReportSubmissionCest
         $I->assertNull(\app\models\Assignment::findOne(8));
         $I->assertEquals(0, \app\models\Assignment::find()->where(['pilot_id' => 10])->count());
         $I->assertGreaterThan(0, \app\models\Assignment::find()->where(['pilot_id' => 1])->count());
+    }
+
+    public function testReportGeneratesAssignmentsAtArrival(ApiTester $I)
+    {
+        $this->useAssignmentGeneratorStub();
+        AssignmentGeneratorStub::$proposals = [
+            ['destination' => 'LEBL', 'client_id' => 1, 'distance_nm' => 261],
+            ['destination' => 'LEVC', 'client_id' => 2, 'distance_nm' => 155],
+        ];
+        $fpl = $this->createAssignmentFpl($I);
+
+        $this->loginAsUser(1, $I);
+        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=' . $fpl->id, $this->assignmentReportRequest());
+        $I->seeResponseCodeIs(200);
+
+        // Generated from the arrival airport, after the aircraft was moved there
+        $I->assertSame(['LEMD'], AssignmentGeneratorStub::$origins);
+
+        $assignments = \app\models\Assignment::find()->where(['pilot_id' => 1])->orderBy(['arrival' => SORT_ASC])->all();
+        $I->assertCount(2, $assignments);
+        $I->assertEquals(['LEBL', 'LEVC'], array_map(fn($a) => $a->arrival, $assignments));
+        foreach ($assignments as $assignment) {
+            $I->assertEquals('LEMD', $assignment->departure);
+            $I->assertEquals(2, $assignment->aircraft_id);
+        }
+        $I->assertEquals(1, $assignments[0]->client_id);
+        $I->assertEquals(261, $assignments[0]->distance_nm);
+        $I->assertEquals(2, $assignments[1]->client_id);
+        $I->assertEquals(155, $assignments[1]->distance_nm);
+
+        // Ready to be booked as the next flight
+        $I->assertCount(2, \app\models\Assignment::findAvailableForPilot(\app\models\Pilot::findOne(1)));
+    }
+
+    public function testReportIsSavedWhenAssignmentGenerationThrowsException(ApiTester $I)
+    {
+        $this->useAssignmentGeneratorStub();
+        AssignmentGeneratorStub::$exception = new \RuntimeException('Generator exploded');
+        $this->checkReportSavedWithoutAssignments($I);
+    }
+
+    public function testReportIsSavedWhenAssignmentGenerationThrowsError(ApiTester $I)
+    {
+        $this->useAssignmentGeneratorStub();
+        AssignmentGeneratorStub::$exception = new \TypeError('Generator broken');
+        $this->checkReportSavedWithoutAssignments($I);
+    }
+
+    public function testReportIsSavedWhenAProposalIsInvalid(ApiTester $I)
+    {
+        $this->useAssignmentGeneratorStub();
+        AssignmentGeneratorStub::$proposals = [
+            ['destination' => 'LEBL', 'client_id' => 1, 'distance_nm' => 261],
+            ['destination' => 'LEVC', 'client_id' => 9999, 'distance_nm' => 155],
+        ];
+        // The valid proposal is rolled back too: all or nothing
+        $this->checkReportSavedWithoutAssignments($I);
+    }
+
+    public function testResentReportDoesNotGenerateAssignmentsAgain(ApiTester $I)
+    {
+        $this->useAssignmentGeneratorStub();
+        AssignmentGeneratorStub::$proposals = [
+            ['destination' => 'LEBL', 'client_id' => 1, 'distance_nm' => 261],
+        ];
+        $fpl = $this->createAssignmentFpl($I);
+
+        $this->loginAsUser(1, $I);
+        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=' . $fpl->id, $this->assignmentReportRequest());
+        $I->seeResponseCodeIs(200);
+        $first = json_decode($I->grabResponse(), true)['flight_report_id'];
+
+        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=' . $fpl->id, $this->assignmentReportRequest());
+        $I->seeResponseCodeIs(200);
+        $I->assertSame($first, json_decode($I->grabResponse(), true)['flight_report_id']);
+
+        $I->assertCount(1, AssignmentGeneratorStub::$origins);
+        $I->assertEquals(1, \app\models\Assignment::find()->where(['pilot_id' => 1])->count());
+    }
+
+    public function testRealGeneratorWithoutHistoryGeneratesNothing(ApiTester $I)
+    {
+        // The fixtures have no finished flights with takeoff runways, so the real generator proposes nothing
+        $fpl = $this->createAssignmentFpl($I);
+
+        $this->loginAsUser(1, $I);
+        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=' . $fpl->id, $this->assignmentReportRequest());
+        $I->seeResponseCodeIs(200);
+
+        $I->assertEquals(0, \app\models\Assignment::find()->where(['pilot_id' => 1])->count());
+    }
+
+    /**
+     * Flies the assignment FPL of pilot 1 and checks that the flight is fully saved although no assignment was
+     * generated.
+     */
+    private function checkReportSavedWithoutAssignments(ApiTester $I): void
+    {
+        $fpl = $this->createAssignmentFpl($I);
+        $flightsBefore = \app\models\Flight::find()->count();
+
+        $this->loginAsUser(1, $I);
+        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=' . $fpl->id, $this->assignmentReportRequest());
+        $I->seeResponseCodeIs(200);
+
+        $data = json_decode($I->grabResponse(), true);
+        $I->assertArrayHasKey('flight_report_id', $data);
+        $report = \app\models\FlightReport::findOne($data['flight_report_id']);
+        $I->assertNotNull($report);
+        $I->assertCount(1, $report->acarsFiles);
+        $I->assertEquals($flightsBefore + 1, \app\models\Flight::find()->count());
+        $I->assertEquals(\app\models\Flight::TYPE_ASSIGNMENT, $report->flight->flight_type);
+
+        $I->assertNull(\app\models\SubmittedFlightPlan::findOne($fpl->id));
+        $I->assertEquals('LEMD', \app\models\Pilot::findOne(1)->location);
+        $I->assertEquals('LEMD', \app\models\Aircraft::findOne(2)->location);
+        $I->assertSame(['LEMD'], AssignmentGeneratorStub::$origins);
+        $I->assertEquals(0, \app\models\Assignment::find()->where(['pilot_id' => 1])->count());
     }
 
 }

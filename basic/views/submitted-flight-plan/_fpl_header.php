@@ -14,7 +14,11 @@ use yii\helpers\Html;
         <div class="row">
             <div class="col-md-12">
                 <?php if ($entity instanceof Assignment): ?>
-                <div class="p-3 border rounded bg-light-subtle d-flex justify-content-between align-items-center">
+                <div class="p-3 border rounded bg-light-subtle d-flex align-items-center gap-3">
+                    <?= ImageMam::render(Image::TYPE_CLIENT_LOGO, $entity->client_id, 0, [
+                        'alt' => $entity->client->name,
+                        'style' => 'width:150px; height:75px;',
+                    ]) ?>
                     <div>
                         <div class="fw-semibold fs-5 text-dark"><?= Yii::t('app', 'Assignment') ?></div>
                         <div class="text-muted">
@@ -22,10 +26,6 @@ use yii\helpers\Html;
                             (<?= Html::encode($entity->departure) ?>-<?= Html::encode($entity->arrival) ?>)
                         </div>
                     </div>
-                    <?= ImageMam::render(Image::TYPE_CLIENT_LOGO, $entity->client_id, 0, [
-                        'alt' => $entity->client->name,
-                        'style' => 'width:150px; height:75px;',
-                    ]) ?>
                 </div>
                 <?php else: ?>
                 <div class="p-3 border rounded bg-light-subtle">

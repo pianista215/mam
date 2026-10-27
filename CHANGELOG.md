@@ -12,8 +12,9 @@
 - Assignments can be booked: Select flight shows a new "Assignments" section (after tour stages, before charter and routes) with the client logo and name, departure, arrival, distance and the aircraft. Assignments are flown with the aircraft stored in them (the last one the pilot flew), so there is no aircraft selection; the usual checks still apply (pilot and aircraft at the departure, aircraft not reserved, range, aircraft type and airport credentials). Only the pilot's own assignments departing from their current airport with the aircraft parked there are listed
 - Assignment flight plans and flights show an "Assignment" header with the client name, route and logo
 - ACARS: assignment flight plans are reported like any other flight; the flight keeps the client (`flight.client_id`, type `A`, code `ASSIGNMENT`). After any report, every assignment of the pilot is deleted, since new ones belong to the new airport
+- ACARS: after any report, new assignments are generated for the pilot from the airport where the aircraft arrived. Generation runs after the flight is saved and in its own transaction (all assignments or none): if it fails, the error is logged, the pilot just gets no assignments and the report is still accepted. The time it takes is logged
 - Assignment flights count as regular flights for the charter ratio, and a high charter ratio doesn't block booking assignments
-- New `assignment` table (pilot, aircraft, client, departure, arrival, distance) and `assignment_id` in submitted flight plans; deleting a flight plan keeps its assignment available. Populating the table is left for an upcoming step
+- New `assignment` table (pilot, aircraft, client, departure, arrival, distance) and `assignment_id` in submitted flight plans; deleting a flight plan keeps its assignment available
 
 ### Changed
 - Clients with flown or booked assignments can't be deleted; an error message explains why

@@ -404,4 +404,57 @@ class AssignmentTest extends BaseUnitTest
         $this->expectException(\yii\db\IntegrityException::class);
         $assignment->delete();
     }
+
+    public function testCreateFromProposals()
+    {
+        $assignments = Assignment::createFromProposals($this->pilot->id, $this->aircraft, [
+            ['destination' => 'LEBL', 'client_id' => $this->client->id, 'distance_nm' => 261],
+            ['destination' => 'LEVC', 'client_id' => $this->otherClient->id, 'distance_nm' => 155],
+        ]);
+
+        $this->assertCount(2, $assignments);
+        $saved = Assignment::find()->where(['pilot_id' => $this->pilot->id])->orderBy(['arrival' => SORT_ASC])->all();
+        $this->assertCount(2, $saved);
+        foreach ($saved as $assignment) {
+            $this->assertEquals($this->aircraft->id, $assignment->aircraft_id);
+            $this->assertEquals('LEMD', $assignment->departure);
+        }
+        $this->assertEquals('LEBL', $saved[0]->arrival);
+        $this->assertEquals($this->client->id, $saved[0]->client_id);
+        $this->assertEquals(261, $saved[0]->distance_nm);
+        $this->assertEquals('LEVC', $saved[1]->arrival);
+        $this->assertEquals($this->otherClient->id, $saved[1]->client_id);
+        $this->assertEquals(155, $saved[1]->distance_nm);
+    }
+
+    public function testCreateFromProposalsDepartsFromAircraftLocation()
+    {
+        $assignments = Assignment::createFromProposals($this->pilot->id, $this->farAircraft, [
+            ['destination' => 'LEMD', 'client_id' => $this->client->id, 'distance_nm' => 261],
+        ]);
+
+        $this->assertEquals('LEBL', $assignments[0]->departure);
+    }
+
+    public function testCreateFromProposalsWithoutProposals()
+    {
+        $this->assertSame([], Assignment::createFromProposals($this->pilot->id, $this->aircraft, []));
+        $this->assertEquals(0, Assignment::find()->count());
+    }
+
+    public function testCreateFromProposalsThrowsOnInvalidProposal()
+    {
+        $this->expectException(\RuntimeException::class);
+        Assignment::createFromProposals($this->pilot->id, $this->aircraft, [
+            ['destination' => 'LEMD', 'client_id' => $this->client->id, 'distance_nm' => 0],
+        ]);
+    }
+
+    public function testCreateFromProposalsThrowsOnUnknownClient()
+    {
+        $this->expectException(\RuntimeException::class);
+        Assignment::createFromProposals($this->pilot->id, $this->aircraft, [
+            ['destination' => 'LEBL', 'client_id' => 9999, 'distance_nm' => 261],
+        ]);
+    }
 }
