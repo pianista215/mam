@@ -99,7 +99,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php if (!empty($assignments)): ?>
         <h3><?= Yii::t('app', 'Assignments') ?></h3>
-        <p class="text-muted"><?= Yii::t('app', 'Assignments are flown with the last aircraft you flew.') ?></p>
         <table class="table table-striped table-bordered align-middle assignments-table">
             <thead>
                 <tr>

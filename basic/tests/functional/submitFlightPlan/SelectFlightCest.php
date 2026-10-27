@@ -119,7 +119,6 @@ class SelectFlightCest
         $I->amOnRoute('submitted-flight-plan/select-flight');
 
         $I->see('Assignments', 'h3');
-        $I->see('Assignments are flown with the last aircraft you flew.');
         $I->see('Iberian Logistics', '.assignments-table');
         $I->see('Canary Fresh Fish', '.assignments-table');
         $I->see('EC-BBB', '.assignments-table');

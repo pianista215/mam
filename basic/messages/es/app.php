@@ -518,7 +518,6 @@ return [
     'Areas of the frame outside the image will be transparent.' => 'Las zonas del marco que queden fuera de la imagen serán transparentes.',
     'Assignment' => 'Encargo',
     'Assignments' => 'Encargos',
-    'Assignments are flown with the last aircraft you flew.' => 'Los encargos se vuelan con la última aeronave que has volado.',
     'Only one of route, tour stage, charter route or assignment can be associated.' => 'Solo una ruta, etapa, chárter o encargo puede estar asociado a la vez.',
     'The assignment does not belong to this pilot and aircraft.' => 'El encargo no corresponde a este piloto y aeronave.',
     'There are no route, tour stage, charter or assignment associated.' => 'No hay ruta, etapa, chárter o encargo asociado.',
