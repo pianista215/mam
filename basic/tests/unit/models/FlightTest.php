@@ -7,6 +7,7 @@ use app\models\Aircraft;
 use app\models\AircraftConfiguration;
 use app\models\AircraftType;
 use app\models\Airport;
+use app\models\Client;
 use app\models\Country;
 use app\models\Flight;
 use app\models\Pilot;
@@ -328,4 +329,86 @@ class FlightTest extends BaseUnitTest
         $this->assertArrayHasKey('status', $flight->getErrors(), 'Missing error for invalid status');
     }
 
+    // Assignment flights
+
+    private function createFlight(string $type, ?int $clientId = null): Flight
+    {
+        $flight = new Flight([
+            'pilot_id' => $this->pilot->id,
+            'aircraft_id' => $this->aircraft->id,
+            'departure' => 'LEMD',
+            'arrival' => 'LEBL',
+            'alternative1_icao' => 'LEVC',
+            'flight_rules' => 'I',
+            'code' => 'ASSIGNMENT',
+            'cruise_speed_value' => '450',
+            'cruise_speed_unit' => 'N',
+            'flight_level_value' => '360',
+            'flight_level_unit' => 'F',
+            'route' => 'ROUTE',
+            'estimated_time' => '0200',
+            'other_information' => 'Other flight details',
+            'endurance_time' => '0500',
+            'report_tool' => 'ToolName',
+            'flight_type' => $type,
+            'client_id' => $clientId,
+        ]);
+        $this->assertTrue($flight->save(), json_encode($flight->errors));
+        return $flight;
+    }
+
+    public function testFlightTypeValidation()
+    {
+        $flight = new Flight();
+        foreach ([Flight::TYPE_ROUTE, Flight::TYPE_TOUR, Flight::TYPE_CHARTER, Flight::TYPE_ASSIGNMENT] as $type) {
+            $flight->flight_type = $type;
+            $this->assertTrue($flight->validate(['flight_type']), "Flight type $type should be valid");
+        }
+
+        $flight->flight_type = 'X';
+        $this->assertFalse($flight->validate(['flight_type']));
+    }
+
+    public function testAssignmentFlightWithClient()
+    {
+        $client = new Client(['name' => 'Iberian Logistics', 'headquarters_icao' => 'LEMD']);
+        $this->assertTrue($client->save());
+
+        $flight = $this->createFlight(Flight::TYPE_ASSIGNMENT, $client->id);
+
+        $this->assertEquals($client->id, $flight->client->id);
+        $this->assertEquals('Iberian Logistics', $flight->client->name);
+    }
+
+    public function testInvalidClient()
+    {
+        $flight = new Flight(['client_id' => 999999]);
+
+        $this->assertFalse($flight->validate(['client_id']));
+        $this->assertArrayHasKey('client_id', $flight->errors);
+    }
+
+    public function testFlightWithoutClient()
+    {
+        $flight = $this->createFlight(Flight::TYPE_ROUTE);
+
+        $this->assertNull($flight->client_id);
+        $this->assertNull($flight->client);
+    }
+
+    public function testAssignmentFlightsCountAsRegularForCharterRatio()
+    {
+        $this->createFlight(Flight::TYPE_ASSIGNMENT);
+        $this->createFlight(Flight::TYPE_ASSIGNMENT);
+        $this->createFlight(Flight::TYPE_CHARTER);
+        $this->createFlight(Flight::TYPE_ROUTE);
+
+        $stats = $this->pilot->getFlightStats();
+
+        $this->assertEquals(4, $stats['total_flights']);
+        $this->assertEquals(1, $stats['charter_flights']);
+        $this->assertEquals(3, $stats['regular_flights']);
+        $this->assertEquals(25, $stats['charter_ratio']);
+        $this->assertEquals(0.25, $this->pilot->getCharterRatio());
+    }
 }

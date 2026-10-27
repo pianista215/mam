@@ -7,6 +7,7 @@ use app\helpers\LoggerTrait;
 use app\models\AcarsFile;
 use app\models\Aircraft;
 use app\models\Airport;
+use app\models\Assignment;
 use app\models\AirportSearch;
 use app\models\Flight;
 use app\models\FlightReport;
@@ -136,6 +137,9 @@ class FlightReportController extends Controller
 
                 $submittedFlightPlan->delete();
 
+                // The pilot is now somewhere else, so every pending assignment (booked or not) is obsolete
+                Assignment::deleteAll(['pilot_id' => $submittedFlightPlan->pilot_id]);
+
                 $response = new ReportSavedDTO();
                 $response->flight_report_id = $report->id;
 
@@ -190,6 +194,12 @@ class FlightReportController extends Controller
             $flight->departure = $submittedFpl->route0->departure;
             $flight->arrival = $submittedFpl->route0->arrival;
             $flight->flight_type = Flight::TYPE_ROUTE;
+        } else if(!empty($submittedFpl->assignment_id)){
+            $flight->client_id = $submittedFpl->assignment->client_id;
+            $flight->departure = $submittedFpl->assignment->departure;
+            $flight->arrival = $submittedFpl->assignment->arrival;
+            $flight->code = 'ASSIGNMENT';
+            $flight->flight_type = Flight::TYPE_ASSIGNMENT;
         } else {
             $flight->departure = $submittedFpl->charterRoute->departure;
             $flight->arrival = $submittedFpl->charterRoute->arrival;

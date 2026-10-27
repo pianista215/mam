@@ -151,7 +151,13 @@ class ClientController extends Controller
             throw new ForbiddenHttpException();
         }
 
-        $this->findModel($id)->delete();
+        $model = $this->findModel($id);
+        if (!$model->isDeletable()) {
+            Yii::$app->session->setFlash('error', Yii::t('app', 'This client can\'t be deleted because it has flown or booked assignments.'));
+            return $this->redirect(['view', 'id' => $model->id]);
+        }
+
+        $model->delete();
 
         return $this->redirect(['index']);
     }

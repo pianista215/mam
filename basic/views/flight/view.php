@@ -1,5 +1,8 @@
 <?php
 
+use app\helpers\ImageMam;
+use app\models\Flight;
+use app\models\Image;
 use app\rbac\constants\Permissions;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
@@ -20,15 +23,31 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="row">
             <div class="col-md-12">
                 <div class="p-3 border rounded bg-light-subtle d-flex justify-content-between align-items-center">
+                    <?php if ($model->flight_type === Flight::TYPE_ASSIGNMENT && $model->client !== null): ?>
+                    <div class="d-flex align-items-center gap-3">
+                        <?= ImageMam::render(Image::TYPE_CLIENT_LOGO, $model->client_id, 0, [
+                            'alt' => $model->client->name,
+                            'style' => 'width:150px; height:75px;',
+                        ]) ?>
+                        <div>
+                            <div class="fw-semibold fs-5 text-dark"><?= Yii::t('app', 'Assignment') ?></div>
+                            <div class="text-muted">
+                                <?= Html::encode($model->client->name) ?>
+                                (<?= Html::encode($model->departure) ?>-<?= Html::encode($model->arrival) ?>)
+                            </div>
+                        </div>
+                    </div>
+                    <?php else: ?>
                     <div class="fw-semibold fs-5 text-dark">
                         <?php if (!empty($model->tourStage)): ?>
                         <?= Html::encode($model->tourStage->fplDescription) ?>
-                        <?php elseif($model->flight_type === 'C'): ?>
+                        <?php elseif($model->flight_type === Flight::TYPE_CHARTER): ?>
                         <?= Yii::t('app', 'Charter flight') . ' '.' ('.$model->departure.'-'.$model->arrival.')' ?>
                         <?php else: ?>
                         <?= Html::encode(Yii::t('app', 'Route').' '.$model->code) ?>
                         <?php endif; ?>
                     </div>
+                    <?php endif; ?>
                     <?php if (Yii::$app->user->can(Permissions::DELETE_OWN_FLIGHT, ['flight' => $model])): ?>
                     <?= Html::a(Yii::t('app', 'Delete flight'), ['delete', 'id' => $model->id], [
                         'class' => 'btn btn-danger',

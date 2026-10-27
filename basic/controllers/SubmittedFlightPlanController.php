@@ -8,6 +8,7 @@ use app\helpers\GeoUtils;
 use app\helpers\LoggerTrait;
 use app\helpers\PayloadEstimator;
 use app\models\Aircraft;
+use app\models\Assignment;
 use app\models\AircraftSearch;
 use app\models\CredentialTypeAircraftType;
 use app\models\CredentialTypeAirportAircraft;
@@ -55,6 +56,7 @@ class SubmittedFlightPlanController extends Controller
                         'prepare-fpl-route',
                         'prepare-fpl-tour',
                         'prepare-fpl-charter',
+                        'prepare-fpl-assignment',
                         'my-fpl',
                         'index',
                         'view',
@@ -129,10 +131,13 @@ class SubmittedFlightPlanController extends Controller
                 $routeSearch = new RouteSearch();
                 $routeDataProvider = $routeSearch->searchWithFixedDeparture($location, $this->request->queryParams);
 
+                $assignments = Assignment::findAvailableForPilot(Yii::$app->user->identity);
+
                 $this->logInfo('User selecting flight', ['location' => Yii::$app->user->identity->location, 'user' => Yii::$app->user->identity->license]);
                 return $this->render('select_flight', [
                     'routeDataProvider' => $routeDataProvider,
                     'tourStages' => $tourStages,
+                    'assignments' => $assignments,
                 ]);
             }
         } else {
@@ -320,8 +325,46 @@ class SubmittedFlightPlanController extends Controller
         }
     }
 
+    /**
+     * Assignments skip the aircraft selection: they are flown with the aircraft stored in the assignment (the last one
+     * the pilot flew).
+     */
+    public function actionPrepareFplAssignment($assignment_id)
+    {
+        if (!Yii::$app->user->can(Permissions::SUBMIT_FPL)) {
+            throw new ForbiddenHttpException();
+        }
+
+        $model = $this->getCurrentFpl();
+        if ($model !== null) {
+            $this->logInfo('Returning user current fpl (prepare assignment)', [
+                'model' => $model,
+                'user' => Yii::$app->user->identity->license
+            ]);
+            return $this->redirect(['view', 'id' => $model->id]);
+        }
+
+        $assignment = Assignment::findOne(['id' => $assignment_id]);
+        if ($assignment === null) {
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
+        if ((int) $assignment->pilot_id !== (int) Yii::$app->user->id) {
+            $this->logInfo('Assignment of another pilot', [
+                'assignment' => $assignment->id,
+                'user' => Yii::$app->user->identity->license
+            ]);
+            throw new ForbiddenHttpException();
+        }
+
+        return $this->prepareFplGeneric($assignment, $assignment->aircraft, 'assignment');
+    }
+
     protected function prepareFplGeneric($entity, $aircraft, $entityType)
     {
+        if ($entity === null || $aircraft === null) {
+            throw new ForbiddenHttpException();
+        }
+
         $aircraftTypeId = $aircraft->aircraftConfiguration->aircraft_type_id;
 
         if (!$this->checkEntityIsUserLocation($entity)
@@ -346,11 +389,18 @@ class SubmittedFlightPlanController extends Controller
                 throw new ForbiddenHttpException('Tour is not active.');
             }
             $model->tour_stage_id = $entity->id;
+        } elseif ($entityType === 'assignment') {
+            $model->assignment_id = $entity->id;
         }
 
         if ($this->request->isPost) {
 
-            if ($model->load($this->request->post())) {
+            // Only the flight plan fields come from the form; the entity, pilot and aircraft are set above
+            $model->scenario = SubmittedFlightPlan::SCENARIO_FPL_FORM;
+            $loaded = $model->load($this->request->post());
+            $model->scenario = SubmittedFlightPlan::SCENARIO_DEFAULT;
+
+            if ($loaded) {
 
                 $transaction = Yii::$app->db->beginTransaction();
 
@@ -460,14 +510,7 @@ class SubmittedFlightPlanController extends Controller
             Yii::$app->user->can(Permissions::VALIDATE_VFR_FLIGHT) && $model->isVfrFlight() ||
             Yii::$app->user->can(Permissions::VALIDATE_IFR_FLIGHT) && $model->isIfrFlight()
         ) {
-            $entity = null;
-            if ($model->route_id) {
-                $entity = $model->route0;
-            } elseif ($model->tour_stage_id) {
-                $entity = $model->tourStage;
-            } else {
-                $entity = $model->charterRoute;
-            }
+            $entity = $model->getEntity();
 
             $loadSheet = null;
             if ($model->pax_adults !== null) {
@@ -507,14 +550,7 @@ class SubmittedFlightPlanController extends Controller
 
         if (Yii::$app->user->can(Permissions::CRUD_OWN_FPL, ['submittedFlightPlan' => $model])) {
 
-            $entity = null;
-            if ($model->route_id) {
-                $entity = $model->route0;
-            } elseif ($model->tour_stage_id) {
-                $entity = $model->tourStage;
-            } else {
-                $entity = $model->charterRoute;
-            }
+            $entity = $model->getEntity();
 
             if ($this->request->isPost) {
                 $oldAlternative  = $model->alternative1_icao;

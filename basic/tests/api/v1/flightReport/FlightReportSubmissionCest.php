@@ -723,5 +723,143 @@ class FlightReportSubmissionCest
         $I->assertEmpty($fpl);
     }
 
+    /**
+     * Books assignment 1 (pilot 1, aircraft 2, client 1, LEBL-LEMD) as pilot 1's FPL.
+     */
+    private function createAssignmentFpl(ApiTester $I): \app\models\SubmittedFlightPlan
+    {
+        $fpl = new \app\models\SubmittedFlightPlan([
+            'aircraft_id' => 2,
+            'pilot_id' => 1,
+            'assignment_id' => 1,
+            'flight_rules' => 'I',
+            'alternative1_icao' => 'LEVC',
+            'cruise_speed_value' => '350',
+            'cruise_speed_unit' => 'N',
+            'flight_level_value' => '340',
+            'flight_level_unit' => 'F',
+            'route' => 'DCT CASPE UN975 TOBEK',
+            'estimated_time' => '0105',
+            'other_information' => 'DOF/20261027 REG/ECBBB',
+            'endurance_time' => '0300',
+            'crew' => 3,
+            'pax_adults' => 0,
+            'pax_children' => 0,
+            'cargo_bags' => 0,
+            'cargo_paid_kg' => 12000,
+        ]);
+        $I->assertTrue($fpl->save(), json_encode($fpl->errors));
+        return $fpl;
+    }
+
+    private function assignmentReportRequest(): array
+    {
+        // Lands at LEMD
+        return [
+            'pilot_comments'    => 'Assignment done',
+            'last_position_lat' => 40.471926,
+            'last_position_lon' => -3.56264,
+            'network'           => 'VATSIM',
+            'sim_aircraft_name' => 'PMDG 737',
+            'report_tool'       => 'Mam Acars 1.0',
+            'start_time'        => '2025-03-01 09:00:00',
+            'end_time'          => '2025-03-01 10:05:00',
+            'chunks'            => [
+                ['id' => 1, 'sha256sum' => str_repeat('E', 44)],
+            ],
+        ];
+    }
+
+    public function testValidFlightReportSubmissionAssignment(ApiTester $I)
+    {
+        $fpl = $this->createAssignmentFpl($I);
+        $otherPilotAssignments = \app\models\Assignment::find()->where(['<>', 'pilot_id', 1])->count();
+        $I->assertGreaterThan(0, $otherPilotAssignments);
+
+        $this->loginAsUser(1, $I);
+        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=' . $fpl->id, $this->assignmentReportRequest());
+        $I->seeResponseCodeIs(200);
+
+        $data = json_decode($I->grabResponse(), true);
+        $I->assertArrayHasKey('flight_report_id', $data);
+
+        $flight_report = \app\models\FlightReport::find()->where(['id' => $data['flight_report_id']])->one();
+        $I->assertEquals('Assignment done', $flight_report->pilot_comments);
+        $I->assertEquals('LEMD', $flight_report->landing_airport);
+
+        $flight = \app\models\Flight::find()->where(['id' => $flight_report->flight_id])->one();
+        $I->assertEquals(1, $flight->pilot_id);
+        $I->assertEquals(2, $flight->aircraft_id);
+        $I->assertEquals(\app\models\Flight::TYPE_ASSIGNMENT, $flight->flight_type);
+        $I->assertEquals(1, $flight->client_id);
+        $I->assertEquals('Iberian Logistics', $flight->client->name);
+        $I->assertEquals('ASSIGNMENT', $flight->code);
+        $I->assertEquals('LEBL', $flight->departure);
+        $I->assertEquals('LEMD', $flight->arrival);
+        $I->assertNull($flight->tour_stage_id);
+        $I->assertEquals('C', $flight->status);
+        $I->assertEquals('DCT CASPE UN975 TOBEK', $flight->route);
+        $I->assertEquals(3, $flight->crew);
+        $I->assertEquals(12000, $flight->cargo_paid_kg);
+
+        // Pilot and aircraft moved to the destination
+        $I->assertEquals('LEMD', \app\models\Pilot::findOne(1)->location);
+        $I->assertEquals('LEMD', \app\models\Aircraft::findOne(2)->location);
+
+        // FPL and every assignment of the pilot are gone; other pilots keep theirs
+        $I->assertNull(\app\models\SubmittedFlightPlan::findOne($fpl->id));
+        $I->assertEquals(0, \app\models\Assignment::find()->where(['pilot_id' => 1])->count());
+        $I->assertEquals($otherPilotAssignments, \app\models\Assignment::find()->count());
+    }
+
+    public function testValidFlightReportSubmissionAssignmentTwice(ApiTester $I)
+    {
+        $fpl = $this->createAssignmentFpl($I);
+
+        $this->loginAsUser(1, $I);
+        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=' . $fpl->id, $this->assignmentReportRequest());
+        $I->seeResponseCodeIs(200);
+        $first = json_decode($I->grabResponse(), true)['flight_report_id'];
+
+        // Resent by ACARS (bad network): same report, nothing else created
+        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=' . $fpl->id, $this->assignmentReportRequest());
+        $I->seeResponseCodeIs(200);
+        $second = json_decode($I->grabResponse(), true)['flight_report_id'];
+
+        $I->assertSame($first, $second);
+        $I->assertEquals(1, \app\models\Flight::find()->where(['pilot_id' => 1, 'flight_type' => \app\models\Flight::TYPE_ASSIGNMENT])->count());
+    }
+
+    public function testCharterFlightReportSubmissionDeletesPilotAssignments(ApiTester $I)
+    {
+        // Pilot 10 has assignment 8 (not booked) and flies something else: the assignments are obsolete on arrival
+        $I->assertNotNull(\app\models\Assignment::findOne(8));
+        $charter = new \app\models\CharterRoute(['pilot_id' => 10, 'departure' => 'LEAL', 'arrival' => 'LEMD']);
+        $I->assertTrue($charter->save(), json_encode($charter->errors));
+        $fpl = new \app\models\SubmittedFlightPlan([
+            'aircraft_id' => 10,
+            'pilot_id' => 10,
+            'charter_route_id' => $charter->id,
+            'flight_rules' => 'I',
+            'alternative1_icao' => 'LEVC',
+            'cruise_speed_value' => '350',
+            'cruise_speed_unit' => 'N',
+            'flight_level_value' => '340',
+            'flight_level_unit' => 'F',
+            'route' => 'DCT',
+            'estimated_time' => '0100',
+            'other_information' => 'DOF/20261027',
+            'endurance_time' => '0300',
+        ]);
+        $I->assertTrue($fpl->save(), json_encode($fpl->errors));
+
+        $this->loginAsUser(10, $I);
+        $I->sendPOST('/flight-report/submit-report/?flight_plan_id=' . $fpl->id, $this->assignmentReportRequest());
+        $I->seeResponseCodeIs(200);
+
+        $I->assertNull(\app\models\Assignment::findOne(8));
+        $I->assertEquals(0, \app\models\Assignment::find()->where(['pilot_id' => 10])->count());
+        $I->assertGreaterThan(0, \app\models\Assignment::find()->where(['pilot_id' => 1])->count());
+    }
 
 }
