@@ -10,7 +10,9 @@ use yii\grid\GridView;
 
 /** @var yii\web\View $this */
 /** @var app\models\SubmittedFlightPlanSearch $searchModel */
-/** @var yii\data\ActiveDataProvider $dataProvider */
+/** @var yii\data\ActiveDataProvider $routeDataProvider */
+/** @var app\models\TourStage[] $tourStages */
+/** @var app\models\Assignment[] $assignments */
 
 $this->title = Yii::t('app', 'Select flight');
 $this->params['breadcrumbs'][] = $this->title;
@@ -94,6 +96,73 @@ $this->params['breadcrumbs'][] = $this->title;
             </tbody>
         </table>
     <?php endif; ?>
+
+    <?php if (!empty($assignments)): ?>
+        <h3><?= Yii::t('app', 'Assignments') ?></h3>
+        <table class="table table-striped table-bordered align-middle assignments-table">
+            <thead>
+                <tr>
+                    <th><?= Yii::t('app', 'Client') ?></th>
+                    <th><?= Yii::t('app', 'Departure') ?></th>
+                    <th><?= Yii::t('app', 'Arrival') ?></th>
+                    <th><?= Yii::t('app', 'Distance NM') ?></th>
+                    <th><?= Yii::t('app', 'Aircraft') ?></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($assignments as $assignment): ?>
+                    <tr>
+                        <td>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <?= ImageMam::render(Image::TYPE_CLIENT_LOGO, $assignment->client_id, 0, [
+                                    'alt' => $assignment->client->name,
+                                    'style' => 'width:80px; height:40px;',
+                                ]) ?>
+                                <span><?= Html::encode($assignment->client->name) ?></span>
+                            </div>
+                        </td>
+                        <?php foreach ([$assignment->departure0, $assignment->arrival0] as $airport): ?>
+                        <td>
+                            <div>
+                                <div style="display:flex; align-items:center; white-space:nowrap; margin-bottom:3px;">
+                                    <span style="display:inline-block; width:44px;">
+                                        <?= Html::encode($airport->icao_code) ?>
+                                    </span>
+                                    <span style="margin-left:5px; display:flex; align-items:center;">
+                                        <?= ImageMam::render(Image::TYPE_COUNTRY_ICON, $airport->country_id) ?>
+                                    </span>
+                                </div>
+                                <div style="
+                                    font-size:0.75em;
+                                    color:#777;
+                                    max-width:160px;
+                                    white-space:nowrap;
+                                    overflow:hidden;
+                                    text-overflow:ellipsis;
+                                " title="<?= Html::encode($airport->name) ?>">
+                                    <?= Html::encode($airport->name) ?>
+                                </div>
+                            </div>
+                        </td>
+                        <?php endforeach; ?>
+                        <td><?= Html::encode($assignment->distance_nm) ?></td>
+                        <td>
+                            <?= Html::encode($assignment->aircraft->registration) ?>
+                            <span class="text-muted">(<?= Html::encode($assignment->aircraft->aircraftConfiguration->aircraftType->icao_type_code) ?>)</span>
+                        </td>
+                        <td>
+                            <?= Html::a('<span class="glyphicon glyphicon-euro" aria-hidden="true">✈︎</span>', [
+                                'prepare-fpl-assignment',
+                                'assignment_id' => $assignment->id
+                            ]) ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    <?php endif; ?>
+
     <h3><?= Yii::t('app', 'Charter flight') ?></h3>
 
     <div class="card mb-3">

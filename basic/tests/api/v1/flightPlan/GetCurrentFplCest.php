@@ -107,5 +107,43 @@ class GetCurrentFplCest
         }
     }
 
+    public function testSubmittedAssignmentFpl(ApiTester $I)
+    {
+        // Assignment 1: pilot 1, aircraft 2 (EC-BBB, B738), LEBL-LEMD
+        $fpl = new \app\models\SubmittedFlightPlan([
+            'aircraft_id' => 2,
+            'pilot_id' => 1,
+            'assignment_id' => 1,
+            'flight_rules' => 'I',
+            'alternative1_icao' => 'LEVC',
+            'alternative2_icao' => 'LEAL',
+            'cruise_speed_value' => '350',
+            'cruise_speed_unit' => 'N',
+            'flight_level_value' => '340',
+            'flight_level_unit' => 'F',
+            'route' => 'DCT',
+            'estimated_time' => '0105',
+            'other_information' => 'DOF/20261027',
+            'endurance_time' => '0300',
+        ]);
+        $I->assertTrue($fpl->save(), json_encode($fpl->errors));
+
+        $this->loginAsUser(1, $I);
+        $I->sendGET('/flight-plan/current-fpl');
+        $I->seeResponseCodeIs(200);
+        $I->seeResponseContainsJson([
+            'id' => $fpl->id,
+            'departure_icao' => 'LEBL',
+            'arrival_icao' => 'LEMD',
+            'alt1_icao' => 'LEVC',
+            'alt2_icao' => 'LEAL',
+            'aircraft_type_icao' => 'B738',
+            'aircraft_reg' => 'EC-BBB',
+        ]);
+
+        $data = json_decode($I->grabResponse(), true);
+        $I->assertEqualsWithDelta(41.2971, (float) $data['departure_latitude'], 0.0001);
+        $I->assertEqualsWithDelta(2.0833, (float) $data['departure_longitude'], 0.0001);
+    }
 
 }

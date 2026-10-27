@@ -1,5 +1,8 @@
 <?php
 
+use app\helpers\ImageMam;
+use app\models\Assignment;
+use app\models\Image;
 use yii\helpers\Html;
 
 /** @var yii\web\View $this */
@@ -10,11 +13,27 @@ use yii\helpers\Html;
     <div class="container mb-3">
         <div class="row">
             <div class="col-md-12">
+                <?php if ($entity instanceof Assignment): ?>
+                <div class="p-3 border rounded bg-light-subtle d-flex align-items-center gap-3">
+                    <?= ImageMam::render(Image::TYPE_CLIENT_LOGO, $entity->client_id, 0, [
+                        'alt' => $entity->client->name,
+                        'style' => 'width:150px; height:75px;',
+                    ]) ?>
+                    <div>
+                        <div class="fw-semibold fs-5 text-dark"><?= Yii::t('app', 'Assignment') ?></div>
+                        <div class="text-muted">
+                            <?= Html::encode($entity->client->name) ?>
+                            (<?= Html::encode($entity->departure) ?>-<?= Html::encode($entity->arrival) ?>)
+                        </div>
+                    </div>
+                </div>
+                <?php else: ?>
                 <div class="p-3 border rounded bg-light-subtle">
                     <div class="fw-semibold fs-5 text-dark">
                         <?= Html::encode($entity->fplDescription) ?>
                     </div>
                 </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>

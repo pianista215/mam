@@ -39,11 +39,13 @@ use Yii;
  * @property int|null $pax_children
  * @property int|null $cargo_bags
  * @property int|null $cargo_paid_kg
+ * @property int|null $client_id
  *
  * @property Aircraft $aircraft
  * @property Airport $alternative1Icao
  * @property Airport $alternative2Icao
  * @property Airport $arrival0
+ * @property Client $client
  * @property Airport $departure0
  * @property FlightReport $flightReport
  * @property Pilot $pilot
@@ -81,6 +83,7 @@ class Flight extends \yii\db\ActiveRecord
     const TYPE_ROUTE   = 'R';
     const TYPE_TOUR    = 'T';
     const TYPE_CHARTER = 'C';
+    const TYPE_ASSIGNMENT = 'A';
 
     /**
      * {@inheritdoc}
@@ -89,7 +92,7 @@ class Flight extends \yii\db\ActiveRecord
     {
         return [
             [['pilot_id', 'aircraft_id', 'code', 'departure', 'arrival', 'alternative1_icao', 'flight_rules', 'cruise_speed_value', 'cruise_speed_unit', 'flight_level_unit', 'route', 'estimated_time', 'other_information', 'endurance_time', 'report_tool'], 'required'],
-            [['pilot_id', 'aircraft_id', 'validator_id', 'tour_stage_id'], 'integer'],
+            [['pilot_id', 'aircraft_id', 'validator_id', 'tour_stage_id', 'client_id'], 'integer'],
             [['creation_date', 'validation_date'], 'safe'],
             [['code'], 'string', 'max' => 10],
             [['departure', 'arrival', 'alternative1_icao', 'alternative2_icao', 'cruise_speed_value', 'flight_level_value', 'estimated_time', 'endurance_time'], 'string', 'max' => 4],
@@ -109,6 +112,7 @@ class Flight extends \yii\db\ActiveRecord
                 self::TYPE_ROUTE,
                 self::TYPE_TOUR,
                 self::TYPE_CHARTER,
+                self::TYPE_ASSIGNMENT,
             ]],
             [['aircraft_id'], 'exist', 'skipOnError' => true, 'targetClass' => Aircraft::class, 'targetAttribute' => ['aircraft_id' => 'id']],
             [['alternative1_icao'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['alternative1_icao' => 'icao_code']],
@@ -118,6 +122,7 @@ class Flight extends \yii\db\ActiveRecord
             [['pilot_id'], 'exist', 'skipOnError' => true, 'targetClass' => Pilot::class, 'targetAttribute' => ['pilot_id' => 'id']],
             [['validator_id'], 'exist', 'skipOnError' => true, 'targetClass' => Pilot::class, 'targetAttribute' => ['validator_id' => 'id']],
             [['tour_stage_id'], 'exist', 'skipOnError' => true, 'targetClass' => TourStage::class, 'targetAttribute' => ['tour_stage_id' => 'id']],
+            [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['client_id' => 'id']],
             [['crew', 'pax_adults', 'pax_children', 'cargo_bags', 'cargo_paid_kg'], 'integer', 'min' => 0],
             [['crew', 'pax_adults', 'pax_children', 'cargo_bags', 'cargo_paid_kg'], 'default', 'value' => null],
         ];
@@ -157,6 +162,7 @@ class Flight extends \yii\db\ActiveRecord
             'validation_date' => 'Validation Date',
             'tour_stage_id' => 'Tour Stage ID',
             'flight_type' => 'Flight Type',
+            'client_id' => Yii::t('app', 'Client'),
         ];
     }
 
@@ -278,6 +284,16 @@ class Flight extends \yii\db\ActiveRecord
        return $this->hasOne(Pilot::class, ['id' => 'validator_id']);
    }
    
+   /**
+    * Gets query for [[Client]].
+    *
+    * @return \yii\db\ActiveQuery
+    */
+   public function getClient()
+   {
+       return $this->hasOne(Client::class, ['id' => 'client_id']);
+   }
+
    /**
     * Gets query for [[TourStage]].
     *

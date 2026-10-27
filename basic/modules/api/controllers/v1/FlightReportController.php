@@ -2,11 +2,13 @@
 
 namespace app\modules\api\controllers\v1;
 
+use app\helpers\AssignmentGenerator;
 use app\helpers\GeoUtils;
 use app\helpers\LoggerTrait;
 use app\models\AcarsFile;
 use app\models\Aircraft;
 use app\models\Airport;
+use app\models\Assignment;
 use app\models\AirportSearch;
 use app\models\Flight;
 use app\models\FlightReport;
@@ -136,10 +138,16 @@ class FlightReportController extends Controller
 
                 $submittedFlightPlan->delete();
 
+                // The pilot is now somewhere else, so every pending assignment (booked or not) is obsolete
+                Assignment::deleteAll(['pilot_id' => $submittedFlightPlan->pilot_id]);
+
                 $response = new ReportSavedDTO();
                 $response->flight_report_id = $report->id;
 
                 $transaction->commit();
+
+                // Best effort, after the commit: the flight is already saved whatever happens here
+                $this->generateAssignments($submittedFlightPlan->pilot_id, $submittedFlightPlan->aircraft_id);
 
                 return $response;
 
@@ -157,6 +165,54 @@ class FlightReportController extends Controller
                 $this->logError('Invalid data.', ['messages' => $errorMessages, 'request' => Yii::$app->request]);
                 throw new BadRequestHttpException('Invalid data: ' . implode(', ', $errorMessages));
             }
+        }
+    }
+
+    /**
+     * Generates the pilot's new assignments from the airport where the aircraft just arrived.
+     * Never throws: any failure is logged and the pilot is simply left without assignments.
+     */
+    private function generateAssignments(int $pilotId, int $aircraftId): void
+    {
+        $start = microtime(true);
+        $transaction = null;
+        try {
+            $transaction = Yii::$app->db->beginTransaction();
+
+            $aircraft = Aircraft::findOne($aircraftId);
+            if ($aircraft === null) {
+                throw new \RuntimeException("Aircraft $aircraftId not found");
+            }
+
+            // Resolved through the DI container so tests can replace it
+            $generator = Yii::createObject(AssignmentGenerator::class);
+            $proposals = $generator::generate($aircraft);
+            $assignments = Assignment::createFromProposals($pilotId, $aircraft, $proposals);
+
+            $transaction->commit();
+
+            $this->logInfo('Assignments generated', [
+                'pilot' => $pilotId,
+                'aircraft' => $aircraftId,
+                'origin' => $aircraft->location,
+                'count' => count($assignments),
+                'ms' => (int) round((microtime(true) - $start) * 1000),
+            ]);
+        } catch (\Throwable $e) {
+            try {
+                if ($transaction !== null && $transaction->getIsActive()) {
+                    $transaction->rollBack();
+                }
+            } catch (\Throwable $rollbackError) {
+                $this->logError('Error rolling back assignment generation', ['error' => $rollbackError->getMessage()]);
+            }
+            $this->logError('Error generating assignments', [
+                'pilot' => $pilotId,
+                'aircraft' => $aircraftId,
+                'error' => get_class($e) . ': ' . $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'ms' => (int) round((microtime(true) - $start) * 1000),
+            ]);
         }
     }
 
@@ -190,6 +246,12 @@ class FlightReportController extends Controller
             $flight->departure = $submittedFpl->route0->departure;
             $flight->arrival = $submittedFpl->route0->arrival;
             $flight->flight_type = Flight::TYPE_ROUTE;
+        } else if(!empty($submittedFpl->assignment_id)){
+            $flight->client_id = $submittedFpl->assignment->client_id;
+            $flight->departure = $submittedFpl->assignment->departure;
+            $flight->arrival = $submittedFpl->assignment->arrival;
+            $flight->code = 'ASSIGNMENT';
+            $flight->flight_type = Flight::TYPE_ASSIGNMENT;
         } else {
             $flight->departure = $submittedFpl->charterRoute->departure;
             $flight->arrival = $submittedFpl->charterRoute->arrival;

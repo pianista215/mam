@@ -18,6 +18,8 @@ use Yii;
  * @property Airport $headquarters
  * @property ClientHub[] $clientHubs
  * @property Airport[] $hubs
+ * @property Assignment[] $assignments
+ * @property Flight[] $flights
  */
 class Client extends \yii\db\ActiveRecord
 {
@@ -200,5 +202,34 @@ class Client extends \yii\db\ActiveRecord
         return $this->hasMany(Airport::class, ['icao_code' => 'airport_icao'])
             ->viaTable('client_hub', ['client_id' => 'id'])
             ->orderBy(['icao_code' => SORT_ASC]);
+    }
+
+    /**
+     * Gets query for [[Assignments]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAssignments()
+    {
+        return $this->hasMany(Assignment::class, ['client_id' => 'id']);
+    }
+
+    /**
+     * Gets query for [[Flights]] flown as assignments for this client.
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getFlights()
+    {
+        return $this->hasMany(Flight::class, ['client_id' => 'id']);
+    }
+
+    /**
+     * Whether the client can be deleted: flown flights keep a reference to it and booked assignments can't be removed.
+     */
+    public function isDeletable(): bool
+    {
+        return !$this->getFlights()->exists()
+            && !$this->getAssignments()->innerJoinWith('submittedFlightPlan', false)->exists();
     }
 }

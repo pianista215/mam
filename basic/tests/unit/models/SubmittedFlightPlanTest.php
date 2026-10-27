@@ -8,7 +8,9 @@ use app\models\Aircraft;
 use app\models\AircraftConfiguration;
 use app\models\AircraftType;
 use app\models\Airport;
+use app\models\Assignment;
 use app\models\CharterRoute;
+use app\models\Client;
 use app\models\Country;
 use app\models\Pilot;
 use app\models\Route;
@@ -644,4 +646,208 @@ class SubmittedFlightPlanTest extends BaseUnitTest
         $this->assertTrue($flightPlan->isAcarsActive(5));
     }
 
+    // Assignment tests
+
+    private function createAssignment(array $attributes = []): Assignment
+    {
+        $client = Client::findOne(['name' => 'Iberian Logistics']);
+        if ($client === null) {
+            $client = new Client(['name' => 'Iberian Logistics', 'headquarters_icao' => 'LEMD']);
+            $this->assertTrue($client->save(), json_encode($client->errors));
+        }
+
+        $assignment = new Assignment(array_merge([
+            'pilot_id' => $this->pilotMad->id,
+            'aircraft_id' => $this->lemdAircraft->id,
+            'client_id' => $client->id,
+            'departure' => 'LEMD',
+            'arrival' => 'LEBL',
+            'distance_nm' => 261,
+        ], $attributes));
+        $this->assertTrue($assignment->save(), json_encode($assignment->errors));
+        return $assignment;
+    }
+
+    private function createAssignmentFlightPlanData(Assignment $assignment): array
+    {
+        $data = $this->createBaseFlightPlanData();
+        unset($data['route_id']);
+        $data['assignment_id'] = $assignment->id;
+        $data['aircraft_id'] = $assignment->aircraft_id;
+        $data['pilot_id'] = $assignment->pilot_id;
+        return $data;
+    }
+
+    public function testValidSubmittedFlightPlanWithAssignment()
+    {
+        $assignment = $this->createAssignment();
+        $flightPlan = new SubmittedFlightPlan($this->createAssignmentFlightPlanData($assignment));
+
+        $this->assertTrue($flightPlan->save(), json_encode($flightPlan->errors));
+        $this->assertSame((int) $assignment->id, (int) $flightPlan->assignment->id);
+    }
+
+    public function testGetEntityReturnsAssignment()
+    {
+        $assignment = $this->createAssignment();
+        $flightPlan = new SubmittedFlightPlan($this->createAssignmentFlightPlanData($assignment));
+        $this->assertTrue($flightPlan->save());
+
+        $entity = $flightPlan->getEntity();
+        $this->assertInstanceOf(Assignment::class, $entity);
+        $this->assertEquals($assignment->id, $entity->id);
+        $this->assertEquals('LEMD', $entity->departure0->icao_code);
+        $this->assertEquals('LEBL', $entity->arrival0->icao_code);
+    }
+
+    public function testInvalidAssignmentWithAnotherEntity()
+    {
+        $assignment = $this->createAssignment();
+        $others = [
+            'route_id' => $this->routeMadBcn->id,
+            'tour_stage_id' => $this->stageMadBcn->id,
+            'charter_route_id' => $this->charterRoute->id,
+        ];
+
+        foreach ($others as $attribute => $value) {
+            $data = $this->createAssignmentFlightPlanData($assignment);
+            $data[$attribute] = $value;
+            $flightPlan = new SubmittedFlightPlan($data);
+
+            $this->assertFalse($flightPlan->save(), "Assignment + $attribute should be invalid");
+            $this->assertArrayHasKey('assignment_id', $flightPlan->errors);
+            $this->assertArrayHasKey($attribute, $flightPlan->errors);
+            $this->assertContains(
+                'Only one of route, tour stage, charter route or assignment can be associated.',
+                $flightPlan->getErrors('assignment_id')
+            );
+        }
+    }
+
+    public function testInvalidWithoutAnyEntity()
+    {
+        $data = $this->createBaseFlightPlanData();
+        unset($data['route_id']);
+        $flightPlan = new SubmittedFlightPlan($data);
+
+        $this->assertFalse($flightPlan->save());
+        foreach (['route_id', 'tour_stage_id', 'charter_route_id', 'assignment_id'] as $attribute) {
+            $this->assertSame(
+                ['There are no route, tour stage, charter or assignment associated.'],
+                $flightPlan->getErrors($attribute),
+                "Single error expected on $attribute"
+            );
+        }
+    }
+
+    public function testInvalidAssignmentOfAnotherPilot()
+    {
+        $assignment = $this->createAssignment(['pilot_id' => $this->pilot2Mad->id]);
+        $data = $this->createAssignmentFlightPlanData($assignment);
+        $data['pilot_id'] = $this->pilotMad->id;
+        $flightPlan = new SubmittedFlightPlan($data);
+
+        $this->assertFalse($flightPlan->save());
+        $this->assertContains('The assignment does not belong to this pilot and aircraft.', $flightPlan->getErrors('assignment_id'));
+    }
+
+    public function testInvalidAssignmentWithAnotherAircraft()
+    {
+        $assignment = $this->createAssignment();
+        $data = $this->createAssignmentFlightPlanData($assignment);
+        $data['aircraft_id'] = $this->lemd2Aircraft->id;
+        $flightPlan = new SubmittedFlightPlan($data);
+
+        $this->assertFalse($flightPlan->save());
+        $this->assertContains('The assignment does not belong to this pilot and aircraft.', $flightPlan->getErrors('assignment_id'));
+    }
+
+    public function testInvalidAssignmentPilotInOtherLocation()
+    {
+        $assignment = $this->createAssignment(['pilot_id' => $this->pilotBcn->id]);
+        $flightPlan = new SubmittedFlightPlan($this->createAssignmentFlightPlanData($assignment));
+
+        $this->assertFalse($flightPlan->save());
+        $this->assertArrayHasKey('pilot_id', $flightPlan->errors);
+        $this->assertArrayNotHasKey('aircraft_id', $flightPlan->errors);
+    }
+
+    public function testInvalidAssignmentAircraftInOtherLocation()
+    {
+        $assignment = $this->createAssignment(['aircraft_id' => $this->leblAircraft->id]);
+        $flightPlan = new SubmittedFlightPlan($this->createAssignmentFlightPlanData($assignment));
+
+        $this->assertFalse($flightPlan->save());
+        $this->assertArrayHasKey('aircraft_id', $flightPlan->errors);
+        $this->assertArrayNotHasKey('pilot_id', $flightPlan->errors);
+    }
+
+    public function testInvalidNonExistingAssignment()
+    {
+        $assignment = $this->createAssignment();
+        $data = $this->createAssignmentFlightPlanData($assignment);
+        $data['assignment_id'] = $assignment->id + 1000;
+        $flightPlan = new SubmittedFlightPlan($data);
+
+        $this->assertFalse($flightPlan->save());
+        $this->assertArrayHasKey('assignment_id', $flightPlan->errors);
+    }
+
+    public function testAssignmentCanOnlyBeBookedOnce()
+    {
+        $assignment = $this->createAssignment();
+        $flightPlan = new SubmittedFlightPlan($this->createAssignmentFlightPlanData($assignment));
+        $this->assertTrue($flightPlan->save());
+
+        $data = $this->createAssignmentFlightPlanData($assignment);
+        $data['pilot_id'] = $this->pilot2Mad->id;
+        $data['aircraft_id'] = $this->lemd2Aircraft->id;
+        $flightPlan2 = new SubmittedFlightPlan($data);
+
+        $this->assertFalse($flightPlan2->save());
+        $this->assertArrayHasKey('assignment_id', $flightPlan2->errors);
+    }
+
+    public function testDeletingFlightPlanKeepsAssignment()
+    {
+        $assignment = $this->createAssignment();
+        $flightPlan = new SubmittedFlightPlan($this->createAssignmentFlightPlanData($assignment));
+        $this->assertTrue($flightPlan->save());
+
+        $this->assertEquals(1, $flightPlan->delete());
+        $this->assertNotNull(Assignment::findOne($assignment->id));
+    }
+
+    public function testBookedAssignmentCannotBeDeleted()
+    {
+        $assignment = $this->createAssignment();
+        $flightPlan = new SubmittedFlightPlan($this->createAssignmentFlightPlanData($assignment));
+        $this->assertTrue($flightPlan->save());
+
+        $this->expectException(\yii\db\IntegrityException::class);
+        $assignment->delete();
+    }
+
+    public function testFplFormScenarioDoesNotLoadEntityFields()
+    {
+        $assignment = $this->createAssignment();
+        $flightPlan = new SubmittedFlightPlan(['scenario' => SubmittedFlightPlan::SCENARIO_FPL_FORM]);
+        $flightPlan->load(['SubmittedFlightPlan' => [
+            'assignment_id' => $assignment->id,
+            'route_id' => $this->routeMadBcn->id,
+            'tour_stage_id' => $this->stageMadBcn->id,
+            'charter_route_id' => $this->charterRoute->id,
+            'pilot_id' => $this->pilotMad->id,
+            'aircraft_id' => $this->lemdAircraft->id,
+            'route' => 'DCT',
+        ]]);
+
+        $this->assertNull($flightPlan->assignment_id);
+        $this->assertNull($flightPlan->route_id);
+        $this->assertNull($flightPlan->tour_stage_id);
+        $this->assertNull($flightPlan->charter_route_id);
+        $this->assertNull($flightPlan->pilot_id);
+        $this->assertNull($flightPlan->aircraft_id);
+        $this->assertEquals('DCT', $flightPlan->route);
+    }
 }

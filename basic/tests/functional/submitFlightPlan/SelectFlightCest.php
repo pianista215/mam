@@ -4,6 +4,7 @@ namespace tests\functional\submitFlightPlan;
 
 use tests\fixtures\AuthAssignmentFixture;
 use tests\fixtures\AircraftFixture;
+use tests\fixtures\SubmittedFlightPlanFixture;
 use tests\fixtures\RouteFixture;
 use tests\fixtures\TourStageFixture;
 use Yii;
@@ -16,6 +17,8 @@ class SelectFlightCest
             'aircraft' => AircraftFixture::class,
             'route' => RouteFixture::class,
             'tour_stage' => TourStageFixture::class,
+            // Loads the assignments too (see tests/fixtures/data/assignment.php)
+            'submittedFlightPlan' => SubmittedFlightPlanFixture::class,
         ];
     }
 
@@ -109,6 +112,79 @@ class SelectFlightCest
         // Check redirect
         $I->seeCurrentUrlMatches('~login~');
         $I->see('Login');
+    }
+
+    public function openSelectFlightShowsAvailableAssignments(\FunctionalTester $I){
+        $I->amLoggedInAs(1);
+        $I->amOnRoute('submitted-flight-plan/select-flight');
+
+        $I->see('Assignments', 'h3');
+        $I->see('Iberian Logistics', '.assignments-table');
+        $I->see('Canary Fresh Fish', '.assignments-table');
+        $I->see('EC-BBB', '.assignments-table');
+        $I->see('B738', '.assignments-table');
+        $I->see('261', '.assignments-table');
+        $I->seeElement('.assignments-table img[alt="Iberian Logistics"]');
+
+        // Bookable (range and credentials are checked when booking)
+        foreach ([1, 2, 6] as $id) {
+            $I->seeElement('a[href*="/submitted-flight-plan/prepare-fpl-assignment?assignment_id=' . $id . '"]');
+        }
+        // Aircraft elsewhere, aircraft reserved, another pilot's, departing from another airport, pilot 10's
+        foreach ([3, 4, 5, 7, 8] as $id) {
+            $I->dontSeeElement('a[href*="/submitted-flight-plan/prepare-fpl-assignment?assignment_id=' . $id . '"]');
+        }
+        $I->dontSee('EC-HHH', '.assignments-table');
+        $I->dontSee('EC-DDD', '.assignments-table');
+        $I->dontSee('EC-AAA', '.assignments-table');
+
+        // No aircraft selection for assignments
+        $I->dontSeeElement('.assignments-table a[href*="select-aircraft"]');
+    }
+
+    public function openSelectFlightAssignmentsSortedByDistance(\FunctionalTester $I){
+        $I->amLoggedInAs(1);
+        $I->amOnRoute('submitted-flight-plan/select-flight');
+
+        $html = $I->grabPageSource();
+        $first = strpos($html, 'prepare-fpl-assignment?assignment_id=1"');
+        $second = strpos($html, 'prepare-fpl-assignment?assignment_id=2"');
+        $third = strpos($html, 'prepare-fpl-assignment?assignment_id=6"');
+        $I->assertNotFalse($first);
+        $I->assertTrue($first < $second && $second < $third, 'Assignments sorted by distance, then id');
+    }
+
+    public function openSelectFlightSectionsOrder(\FunctionalTester $I){
+        $I->amLoggedInAs(1);
+        $I->amOnRoute('submitted-flight-plan/select-flight');
+
+        $html = $I->grabPageSource();
+        $positions = array_map(fn($title) => strpos($html, '>' . $title . '</h3>'), ['Tour Stages', 'Assignments', 'Charter flight', 'Routes']);
+        foreach ($positions as $position) {
+            $I->assertNotFalse($position);
+        }
+        $sorted = $positions;
+        sort($sorted);
+        $I->assertSame($sorted, $positions, 'Sections: tour stages, assignments, charter, routes');
+    }
+
+    public function openSelectFlightWithoutAssignments(\FunctionalTester $I){
+        // Pilot 2 is at LEMD, where only pilot 1 has an assignment
+        $I->amLoggedInAs(2);
+        $I->amOnRoute('submitted-flight-plan/select-flight');
+
+        $I->dontSee('Assignments', 'h3');
+        $I->dontSeeElement('.assignments-table');
+        $I->dontSeeElement('a[href*="prepare-fpl-assignment"]');
+    }
+
+    public function openSelectFlightAssignmentsOfPilotInAnotherAirport(\FunctionalTester $I){
+        $I->amLoggedInAs(10);
+        $I->amOnRoute('submitted-flight-plan/select-flight');
+
+        $I->see('Assignments', 'h3');
+        $I->seeElement('a[href*="/submitted-flight-plan/prepare-fpl-assignment?assignment_id=8"]');
+        $I->dontSeeElement('a[href*="/submitted-flight-plan/prepare-fpl-assignment?assignment_id=1"]');
     }
 
 }
