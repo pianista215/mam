@@ -42,14 +42,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
                 'value' => fn($model) => Html::a(Html::encode($model->name), ['view', 'id' => $model->id], ['class' => 'text-decoration-none']),
             ],
+            'headquarters_icao',
             [
-                'attribute' => 'headquarters_icao',
-                'value' => fn($model) => $model->headquarters
-                    ? $model->headquarters_icao . ' - ' . $model->headquarters->name
-                    : $model->headquarters_icao,
-            ],
-            [
-                'label' => Yii::t('app', 'Hubs'),
+                'attribute' => 'hub_icao',
+                'enableSorting' => false,
                 'format' => 'raw',
                 'value' => fn($model) => implode(' ', array_map(
                     fn($hub) => Html::tag('span', Html::encode($hub->airport_icao), ['class' => 'badge bg-secondary']),

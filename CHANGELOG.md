@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.16.0] - Upcoming
+## [1.16.0] - 2026-10-28
 
 ### Added
 - Clients: new catalog (Operations → Clients) with name, mandatory headquarters airport, hub airports and a fixed-ratio logo (300×150 px); the headquarters can't be stored as a hub. First step towards the upcoming assignments system
@@ -18,6 +18,7 @@
 
 ### Changed
 - Clients with flown or booked assignments can't be deleted; an error message explains why
+- Client list can be sorted by name and headquarters (sorted by name by default), like the other lists; the headquarters is shown as its ICAO code only, and both the headquarters and the hubs can be filtered by ICAO code (full or partial)
 
 ### Fixed
 - Preparing a flight plan only loads the flight plan fields from the form: route, tour stage, charter, assignment, pilot and aircraft can no longer be overridden with a crafted POST
