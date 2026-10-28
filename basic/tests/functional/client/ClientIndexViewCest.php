@@ -57,6 +57,62 @@ class ClientIndexViewCest
         $I->dontSeeElement('a[title="Delete"]');
     }
 
+    public function indexIsSortedByNameByDefault(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(1);
+        $I->amOnRoute('client/index');
+
+        $source = $I->grabPageSource();
+        $I->assertLessThan(strpos($source, 'Iberian Logistics'), strpos($source, 'Canary Fresh Fish'));
+        $I->seeElement('a[data-sort="-name"]');
+        $I->seeElement('a[data-sort="headquarters_icao"]');
+    }
+
+    public function indexCanBeSortedByNameDescending(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(1);
+        $I->amOnRoute('client/index', ['sort' => '-name']);
+
+        $source = $I->grabPageSource();
+        $I->assertLessThan(strpos($source, 'Canary Fresh Fish'), strpos($source, 'Iberian Logistics'));
+    }
+
+    public function indexShowsHeadquartersIcaoOnly(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(1);
+        $I->amOnRoute('client/index');
+
+        $I->see('LEMD');
+        $I->dontSee('Madrid-Barajas');
+    }
+
+    public function indexFiltersByHeadquarters(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(1);
+        $I->amOnRoute('client/index', ['ClientSearch' => ['headquarters_icao' => 'GCLP']]);
+
+        $I->see('Canary Fresh Fish');
+        $I->dontSee('Iberian Logistics');
+    }
+
+    public function indexFiltersByHub(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(1);
+        $I->amOnRoute('client/index', ['ClientSearch' => ['hub_icao' => 'LEBL']]);
+
+        $I->see('Iberian Logistics');
+        $I->dontSee('Canary Fresh Fish');
+    }
+
+    public function indexHubFilterIgnoresHeadquarters(\FunctionalTester $I)
+    {
+        $I->amLoggedInAs(1);
+        $I->amOnRoute('client/index', ['ClientSearch' => ['hub_icao' => 'LEMD']]);
+
+        $I->dontSee('Iberian Logistics');
+        $I->dontSee('Canary Fresh Fish');
+    }
+
     public function userSeesViewWithoutCrudButtons(\FunctionalTester $I)
     {
         $I->amLoggedInAs(1);
