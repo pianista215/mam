@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.16.1] - 2026-10-31
+
+### Fixed
+- Client list: logos keep their 2:1 ratio on mobile instead of being stretched
+- Flight map: the "Nav Points" and "Events" filters can be collapsed and start collapsed, so they no longer cover the map on small screens
+
 ## [1.16.0] - 2026-10-28
 
 ### Added
