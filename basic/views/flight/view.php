@@ -12,7 +12,7 @@ use yii\widgets\DetailView;
 /** @var array|null $loadSheet */
 /** @var array $eventMarkers */
 
-$this->title = $model->id;
+$this->title = $model->title;
 $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Flights'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);

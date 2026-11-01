@@ -28,6 +28,7 @@ class FlightViewHeadersCest
         $I->amOnRoute('flight/view', ['id' => 1]);
         $I->seeResponseCodeIs(200);
         $I->see('Stage Tour actual reported #1 (LEBL-LEMD)');
+        $I->seeInTitle('LEBL - LEMD - Stage Tour actual reported #1');
     }
 
     public function openFlightViewRoute(FunctionalTester $I)
@@ -36,6 +37,7 @@ class FlightViewHeadersCest
         $I->amOnRoute('flight/view', ['id' => 2]);
         $I->seeResponseCodeIs(200);
         $I->see('Route F002');
+        $I->seeInTitle(' - Route F002');
     }
 
     public function openFlightViewCharter(FunctionalTester $I)
@@ -44,6 +46,7 @@ class FlightViewHeadersCest
         $I->amOnRoute('flight/view', ['id' => 6]);
         $I->seeResponseCodeIs(200);
         $I->see('Charter Flight (LEMD-LEBL)');
+        $I->seeInTitle('LEMD - LEBL - Charter flight');
     }
 
     private function convertToAssignmentFlight(int $flightId, int $clientId): Flight
@@ -69,6 +72,7 @@ class FlightViewHeadersCest
         $I->see('Assignment', '.fs-5');
         $I->see('Canary Fresh Fish (' . $flight->departure . '-' . $flight->arrival . ')');
         $I->seeElement('img[alt="Canary Fresh Fish"]');
+        $I->seeInTitle($flight->departure . ' - ' . $flight->arrival . ' - Canary Fresh Fish');
         $I->dontSee('Route ASSIGNMENT');
         $I->dontSee('Route F002');
         $I->dontSee('Charter flight');

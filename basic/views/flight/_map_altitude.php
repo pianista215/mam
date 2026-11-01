@@ -363,6 +363,10 @@ $eventMarkerI18n = [
     border-radius: 8px; color: #fff; font-weight: bold; font-size: 10px; padding: 0 4px;
 }
 .event-marker-time { color: #777; font-variant-numeric: tabular-nums; }
+.map-filter-section summary {
+    font-weight: bold; color: var(--text-dark); cursor: pointer; user-select: none;
+}
+.map-filter-section[open] summary { margin-bottom: 2px; }
 </style>
 
 
@@ -378,7 +382,9 @@ $eventMarkerI18n = [
         <div style="position: absolute; top: 8px; left: 8px; z-index: 1000;
                     background: var(--bg-white); border: 1px solid #ccc; border-radius: 4px;
                     padding: 6px 10px; font-size: 11px; line-height: 1.8;">
-            <div style="font-weight: bold; margin-bottom: 2px; color: var(--text-dark);"><?= Yii::t('app', 'Nav Points') ?></div>
+            <?php // Sections start collapsed so they don't cover the map on small screens ?>
+            <details class="map-filter-section">
+            <summary><?= Yii::t('app', 'Nav Points') ?></summary>
             <label style="display:flex; align-items:center; gap:5px; cursor:pointer; color:var(--text-dark);">
                 <input type="checkbox" id="airwayFilterCheck" checked>
                 <span style="display:inline-block; width:10px; height:3px;
@@ -404,9 +410,11 @@ $eventMarkerI18n = [
                 <?= $type ?>
             </label>
             <?php endforeach; ?>
+            </details>
             <?php if (!empty($eventMarkers)): ?>
             <hr style="margin: 3px 0;">
-            <div style="font-weight: bold; margin-bottom: 2px; color: var(--text-dark);"><?= Yii::t('app', 'Events') ?></div>
+            <details class="map-filter-section">
+            <summary><?= Yii::t('app', 'Events') ?></summary>
             <?php foreach ($eventMarkerTypes as $type => $def):
                 $swatch = isset($def['colorOff'])
                     ? "linear-gradient(90deg, {$def['color']} 50%, {$def['colorOff']} 50%)"
@@ -419,6 +427,7 @@ $eventMarkerI18n = [
                 <?= Html::encode($def['label']) ?>
             </label>
             <?php endforeach; ?>
+            </details>
             <?php endif; ?>
         </div>
         <div id="map" style="width: 100%; height: 600px;"></div>

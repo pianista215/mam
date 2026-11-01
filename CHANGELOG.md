@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.16.1] - 2026-11-01
+
+### Changed
+- Flight pages are titled "Departure - Arrival - name" (route, tour stage, client or charter) instead of the flight id; the breadcrumb shows the same
+
+### Fixed
+- Client list: logos keep their 2:1 ratio on mobile instead of being stretched
+- Flight map: the "Nav Points" and "Events" filters can be collapsed and start collapsed, so they no longer cover the map on small screens
+
 ## [1.16.0] - 2026-10-28
 
 ### Added

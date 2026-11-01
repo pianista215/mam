@@ -33,9 +33,10 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => '',
                 'format' => 'raw',
-                // Logos are stored at 300x150; shown at half size to keep the 2:1 ratio
-                'value' => fn($model) => ImageMam::render(Image::TYPE_CLIENT_LOGO, $model->id, 0, ['style' => 'width:150px; height:75px;']),
-                'contentOptions' => ['style' => 'width: 150px;'],
+                // Logos are stored at 300x150; shown at half size to keep the 2:1 ratio.
+                // Height follows the width so the logo scales proportionally on narrow screens
+                'value' => fn($model) => ImageMam::render(Image::TYPE_CLIENT_LOGO, $model->id, 0, ['style' => 'width:150px; max-width:100%; height:auto; aspect-ratio:2/1;']),
+                'contentOptions' => ['style' => 'width: 150px; min-width: 100px;'],
             ],
             [
                 'attribute' => 'name',
