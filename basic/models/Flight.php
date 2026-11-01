@@ -178,6 +178,31 @@ class Flight extends \yii\db\ActiveRecord
         return $list[$this->status];
     }
 
+    /**
+     * Short name of what was flown: the tour stage, client, charter or route.
+     */
+    public function getDisplayName(): string
+    {
+        if ($this->tourStage !== null) {
+            return Yii::t('app', 'Stage') . ' ' . $this->tourStage->tour->name . ' #' . $this->tourStage->sequence;
+        }
+        if ($this->flight_type === self::TYPE_ASSIGNMENT) {
+            return $this->client !== null ? $this->client->name : Yii::t('app', 'Assignment');
+        }
+        if ($this->flight_type === self::TYPE_CHARTER) {
+            return Yii::t('app', 'Charter flight');
+        }
+        return Yii::t('app', 'Route') . ' ' . $this->code;
+    }
+
+    /**
+     * Page title for the flight: "DEPARTURE - ARRIVAL - display name".
+     */
+    public function getTitle(): string
+    {
+        return $this->departure . ' - ' . $this->arrival . ' - ' . $this->getDisplayName();
+    }
+
     public function isProcessed(){
         return $this->status === self::STATUS_PENDING_VALIDATION || $this->status === self::STATUS_FINISHED || $this->status === self::STATUS_REJECTED;
     }
