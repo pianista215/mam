@@ -1,5 +1,11 @@
 # Changelog
 
+## [Upcoming] 1.17.0
+
+### Added
+- Flight page: "Download KML (Google Earth)" button for flights with black box data. The KML shows the 3D track coloured by phase (one connected line per phase, extruded to the ground, so the elevation profile is continuous) and a small coloured dot for every black box event that can be clicked to see all its values (time, phase, position, altitude, speeds, VS, heading, flaps, gear, autopilot, fuel…). Events (flaps, gear, lift-off, touchdown, autopilot) are labelled with the same texts and colours as the flight map, and clicking them shows the same data as any other point plus the event description; lift-off and touchdown have a bigger white dot and label. Heights are written relative to Google's terrain using the simulator AGL, so nothing is hidden under the terrain or floats over it because of terrain differences with the simulator. Detected issues are marked with a caution icon (no text on the map, only the event label if the point has one) at the point where they were raised (or the nearest one in time); clicking them shows the issues and their penalty on top, then the event data. The departure/arrival airports are also shown. Only standard KML is used so it also opens in Google Earth web. While the file is generated the button shows a spinner and is disabled
+- New `downloadFlightKml` permission (with `flightKmlDownloadRule`): only the flight pilot and the validators of its flight rules (VFR validators for VFR flights, IFR validators for IFR flights; admins inherit both) can download the KML; the button is hidden for everyone else. Requires `php yii migrate-custom-rbac`
+
 ## [1.16.1] - 2026-11-01
 
 ### Changed
