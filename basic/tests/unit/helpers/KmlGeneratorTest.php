@@ -447,7 +447,10 @@ class KmlGeneratorTest extends BaseUnitTest
             $this->assertSame(['2026-01-01 10:00:00', '2026-01-01 10:11:00', '2026-01-01 10:12:00'], array_column($events, 'timestamp'));
             $this->assertSame([$taxi, $cruise, $cruise], array_column($events, 'phase_id'));
             $this->assertSame(['taxi', 'cruise', 'cruise'], array_column($events, 'phase'));
-            $this->assertSame(['Latitude' => '40.5', 'Longitude' => '-2.5', 'Altitude' => '30000'], $events[1]['values']);
+            // The order of the values inside an event is not guaranteed by the query
+            $values = $events[1]['values'];
+            ksort($values);
+            $this->assertSame(['Altitude' => '30000', 'Latitude' => '40.5', 'Longitude' => '-2.5'], $values);
         } finally {
             $db->createCommand()->delete('flight_phase', ['flight_report_id' => self::TEST_REPORT_ID])->execute();
             $db->createCommand('SET FOREIGN_KEY_CHECKS = 1')->execute();

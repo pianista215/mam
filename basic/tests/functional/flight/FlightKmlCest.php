@@ -111,8 +111,9 @@ class FlightKmlCest
     private function seeKml(\FunctionalTester $I): void
     {
         $I->seeResponseCodeIs(200);
-        $I->seeHttpHeader('Content-Type', 'application/vnd.google-earth.kml+xml');
-        $I->seeHttpHeader('Content-Disposition', 'attachment; filename="flight-3-LEMD-LEBL.kml"');
+        $headers = Yii::$app->response->headers;
+        $I->assertSame('application/vnd.google-earth.kml+xml', $headers->get('Content-Type'));
+        $I->assertSame('attachment; filename="flight-3-LEMD-LEBL.kml"', $headers->get('Content-Disposition'));
         $body = $I->grabPageSource();
         $I->assertStringContainsString('<kml xmlns="http://www.opengis.net/kml/2.2">', $body);
         $I->assertStringContainsString('<name>LEMD - LEBL - Route F003</name>', $body);
