@@ -4,9 +4,12 @@ namespace app\controllers;
 
 use app\config\ConfigHelper as CK;
 use app\helpers\FlightEventMarkers;
+use app\helpers\KmlGenerator;
 use app\helpers\LoggerTrait;
 use app\helpers\PayloadEstimator;
 use app\models\Flight;
+use app\models\FlightPhaseIssue;
+use app\models\FlightPhaseType;
 use app\models\FlightSearch;
 use app\models\PilotTourCompletion;
 use app\rbac\constants\Permissions;
@@ -35,7 +38,7 @@ class FlightController extends Controller
             [
                 'access' => [
                     'class' => AccessControl::class,
-                    'only' => ['index', 'index-pending', 'view', 'validate', 'delete'],
+                    'only' => ['index', 'index-pending', 'view', 'validate', 'delete', 'kml'],
                     'rules' => [
                         [
                             'allow' => true,
@@ -107,6 +110,63 @@ class FlightController extends Controller
             'model' => $model,
             'loadSheet' => $loadSheet,
             'eventMarkers' => $eventMarkers,
+        ]);
+    }
+
+    /**
+     * Downloads the ACARS black box as a KML file to replay the flight in Google Earth.
+     * @param string $id ID
+     * @return \yii\web\Response
+     * Only the flight pilot and the validators of its flight rules (VFR/IFR) can download it.
+     * @throws NotFoundHttpException if the flight doesn't exist or has no ACARS positions
+     * @throws ForbiddenHttpException if the user can't download it
+     */
+    public function actionKml($id)
+    {
+        $model = $this->findModel($id);
+        if (!Yii::$app->user->can(Permissions::DOWNLOAD_FLIGHT_KML, ['flight' => $model])) {
+            throw new ForbiddenHttpException();
+        }
+        if (!$model->hasAcarsInfo()) {
+            throw new NotFoundHttpException(Yii::t('app', 'This flight has no black box data.'));
+        }
+
+        $start = microtime(true);
+        $events = KmlGenerator::loadEvents($model->flightReport);
+        $markers = FlightEventMarkers::extract($events);
+        $phaseNames = [];
+        foreach (FlightPhaseType::find()->with('lang')->all() as $phaseType) {
+            $phaseNames[$phaseType->code] = $phaseType->lang->name ?? $phaseType->code;
+        }
+        $issues = [];
+        $issueModels = FlightPhaseIssue::find()
+            ->joinWith('phase', false)
+            ->with('issueType.lang')
+            ->where(['flight_phase.flight_report_id' => $model->flightReport->id])
+            ->orderBy(['flight_phase_issue.timestamp' => SORT_ASC])
+            ->all();
+        foreach ($issueModels as $issue) {
+            $issues[] = [
+                'timestamp' => $issue->timestamp,
+                'description' => $issue->description,
+                'penalty' => $issue->issueType->penalty,
+            ];
+        }
+        $kml = KmlGenerator::generate($model, $events, $markers, $phaseNames, $issues);
+        if ($kml === null) {
+            throw new NotFoundHttpException(Yii::t('app', 'This flight has no black box data.'));
+        }
+
+        $this->logInfo('KML generated', [
+            'flight' => $model->id,
+            'events' => count($events),
+            'bytes' => strlen($kml),
+            'seconds' => round(microtime(true) - $start, 3),
+        ]);
+
+        $filename = sprintf('flight-%d-%s-%s.kml', $model->id, $model->departure, $model->arrival);
+        return Yii::$app->response->sendContentAsFile($kml, $filename, [
+            'mimeType' => 'application/vnd.google-earth.kml+xml',
         ]);
     }
 

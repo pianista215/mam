@@ -5,6 +5,8 @@ use app\models\Flight;
 use app\models\Image;
 use app\rbac\constants\Permissions;
 use yii\helpers\Html;
+use yii\helpers\Json;
+use yii\helpers\Url;
 use yii\widgets\DetailView;
 
 /** @var yii\web\View $this */
@@ -91,6 +93,59 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php endif; ?>
 
     <?php if ($model->hasAcarsInfo()): ?>
+        <?php if (Yii::$app->user->can(Permissions::DOWNLOAD_FLIGHT_KML, ['flight' => $model])): ?>
+        <div class="d-flex justify-content-end mt-4 mb-2">
+            <button type="button" id="kml-download" class="btn btn-outline-primary"
+                    data-url="<?= Html::encode(Url::to(['kml', 'id' => $model->id])) ?>">
+                <span class="spinner-border spinner-border-sm me-1 d-none" role="status" aria-hidden="true"></span>
+                <span class="kml-label"><?= Yii::t('app', 'Download KML (Google Earth)') ?></span>
+            </button>
+        </div>
+        <?php
+        $kmlTexts = Json::htmlEncode([
+            'idle' => Yii::t('app', 'Download KML (Google Earth)'),
+            'busy' => Yii::t('app', 'Generating KML...'),
+            'error' => Yii::t('app', 'Could not generate the KML file'),
+        ]);
+        $this->registerJs(<<<JS
+(function () {
+    const btn = document.getElementById('kml-download');
+    if (!btn) return;
+    const texts = $kmlTexts;
+    const spinner = btn.querySelector('.spinner-border');
+    const label = btn.querySelector('.kml-label');
+    const setBusy = function (busy) {
+        btn.disabled = busy;
+        spinner.classList.toggle('d-none', !busy);
+        label.textContent = busy ? texts.busy : texts.idle;
+    };
+    btn.addEventListener('click', async function () {
+        setBusy(true);
+        try {
+            const response = await fetch(btn.dataset.url, {credentials: 'same-origin'});
+            if (!response.ok) throw new Error(response.status);
+            const disposition = response.headers.get('Content-Disposition') || '';
+            const match = disposition.match(/filename="?([^";]+)"?/);
+            const filename = match ? match[1] : 'flight.kml';
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+        } catch (e) {
+            alert(texts.error);
+        } finally {
+            setBusy(false);
+        }
+    });
+})();
+JS);
+        ?>
+        <?php endif; ?>
         <?= $this->render('_map_altitude', [
             'report' => $model->flightReport,
             'eventMarkers' => $eventMarkers ?? [],

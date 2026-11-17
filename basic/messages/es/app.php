@@ -522,4 +522,8 @@ return [
     'The assignment does not belong to this pilot and aircraft.' => 'El encargo no corresponde a este piloto y aeronave.',
     'There are no route, tour stage, charter or assignment associated.' => 'No hay ruta, etapa, chárter o encargo asociado.',
     'This client can\'t be deleted because it has flown or booked assignments.' => 'Este cliente no se puede borrar porque tiene encargos volados o reservados.',
+    'Download KML (Google Earth)' => 'Descargar KML (Google Earth)',
+    'Generating KML...' => 'Generando KML...',
+    'Could not generate the KML file' => 'No se ha podido generar el fichero KML',
+    'This flight has no black box data.' => 'Este vuelo no tiene datos de caja negra.',
 ];

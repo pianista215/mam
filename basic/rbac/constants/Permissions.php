@@ -9,6 +9,7 @@ final class Permissions
     public const CRUD_OWN_FPL = 'crudOwnFpl';
     public const UPLOAD_IMAGE = 'uploadImage';
     public const DELETE_OWN_FLIGHT = 'deleteOwnFlight';
+    public const DOWNLOAD_FLIGHT_KML = 'downloadFlightKml';
 
     // Validators
     public const VALIDATE_FLIGHT = 'validateFlight';
